@@ -1,18 +1,17 @@
 /*
- * cell.cpp
+ * parallel.cpp
  *
  *  Created on: 04 апр. 2014 г.
  *      Author: kisame
  */
 
-#include "cell.h"
+#include "parallel.h"
 
-Cell::Cell() {
+Parallel::Parallel() {
 	// TODO Auto-generated constructor stub
 
 }
 
-Cell::~Cell() {
+Parallel::~Parallel() {
 	// TODO Auto-generated destructor stub
 }
-

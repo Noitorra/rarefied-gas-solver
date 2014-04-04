@@ -1,18 +1,18 @@
 /*
- * cell.cpp
+ * options.cpp
  *
  *  Created on: 04 апр. 2014 г.
  *      Author: kisame
  */
 
-#include "cell.h"
+#include "options.h"
 
-Cell::Cell() {
+Options::Options() {
 	// TODO Auto-generated constructor stub
 
 }
 
-Cell::~Cell() {
+Options::~Options() {
 	// TODO Auto-generated destructor stub
 }
 

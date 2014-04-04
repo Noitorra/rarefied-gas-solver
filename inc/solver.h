@@ -1,7 +1,19 @@
-#pragma once
-#include "main.h"
+/*
+ * solver.h
+ *
+ *  Created on: 04 апр. 2014 г.
+ *      Author: kisame
+ */
 
-// this is actually Dima's class
+#ifndef SOLVER_H_
+#define SOLVER_H_
+
+#include <memory>
+
+class Parallel;
+class SolverInfo;
+class Grid;
+
 class Solver {
 public:
   Solver();

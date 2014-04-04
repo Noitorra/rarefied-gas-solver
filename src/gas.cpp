@@ -1,18 +1,18 @@
 /*
- * cell.cpp
+ * gas.cpp
  *
  *  Created on: 04 апр. 2014 г.
  *      Author: kisame
  */
 
-#include "cell.h"
+#include <gas.h>
 
-Cell::Cell() {
+Gas::Gas() {
 	// TODO Auto-generated constructor stub
 
 }
 
-Cell::~Cell() {
+Gas::~Gas() {
 	// TODO Auto-generated destructor stub
 }
 

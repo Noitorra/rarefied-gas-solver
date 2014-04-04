@@ -1,6 +1,7 @@
 #include "main.h"
 #include "solver.h"
 
+#include <memory>
 // Simple main function to debug some demo functionality
 
 int main(int argc, const char * argv[])

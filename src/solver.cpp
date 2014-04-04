@@ -1,4 +1,14 @@
+/*
+ * solver.cpp
+ *
+ *  Created on: 04 апр. 2014 г.
+ *      Author: kisame
+ */
+
 #include "solver.h"
+
+#include "parallel.h"
+#include "solver_info.h"
 #include "grid.h"
 
 Solver::Solver() :
