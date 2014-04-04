@@ -6,8 +6,9 @@
 int main(int argc, const char * argv[])
 {
   // just testing some reading/writing functions
-  // waiting for boost::shared_ptr
-  std::shared_ptr<Solver> pSolver(new Solver());
-  
+
+  Solver* pSolver = new Solver();
+  pSolver->Init();
+
   return 0;
 }

@@ -5,6 +5,9 @@
 class Solver {
 public:
   Solver();
+  void Init();
+  
 private:
-  std::shared_ptr<class Grid> m_pGrid;
+  class Grid* m_pSolver;
+  class Grid* m_pGrid;
 };
