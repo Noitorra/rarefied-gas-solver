@@ -4,6 +4,7 @@
 // this is actually Dima's class
 class Solver {
 public:
+  Solver();
 private:
-  class Grid* m_pGrid;
+  std::shared_ptr<class Grid> m_pGrid;
 };
