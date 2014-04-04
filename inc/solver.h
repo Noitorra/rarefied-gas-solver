@@ -1,10 +1,3 @@
-/*
- * solver.h
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
@@ -15,11 +8,23 @@ class SolverInfo;
 class Grid;
 
 class Solver {
+private:
+
 public:
   Solver();
+  virtual ~Solver();
   void Init();
   
-private:
+  Parallel* getParallel() { return m_pParallel.get(); }
+	SolverInfo* getSolverInfo() { return m_pSolverInfo.get(); }
+	Grid* getGrid() { return m_pGrid; }
+  
+private:  
+  std::shared_ptr<Parallel> m_pParallel;
+	std::shared_ptr<SolverInfo> m_pSolverInfo;
+  
   class Grid* m_pSolver;
   class Grid* m_pGrid;
 };
+
+#endif /* SOLVER_H_ */

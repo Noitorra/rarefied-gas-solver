@@ -9,7 +9,7 @@ int main(int argc, const char * argv[])
   // just testing some reading/writing functions
 
   Solver* pSolver = new Solver();
-  pSolver->Init();
+  pSolver->Init(); // linking children and initialization
 
   return 0;
 }

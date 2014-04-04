@@ -5,7 +5,7 @@
  *      Author: kisame
  */
 
-#include <gas.h>
+#include "gas.h"
 
 Gas::Gas() {
 	// TODO Auto-generated constructor stub
