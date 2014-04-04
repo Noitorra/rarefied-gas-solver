@@ -43,15 +43,13 @@ macro(harvest_directory in_parent_dir in_child_dir)
 	endforeach()
 endmacro()
 
-harvest_directory("${CMAKE_SOURCE_DIR}" "include")
+harvest_directory("${CMAKE_SOURCE_DIR}" "inc")
 harvest_directory("${CMAKE_SOURCE_DIR}" "src")
 #source_group("${subdir}" FILES ${subdir_source})
 
 add_executable(${TARGET_NAME} ${${TARGET_NAME}_source})
 
-# Require MPI for this project:
-find_package(MPI REQUIRED)
-set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin/") 
+# MPI
+include_directories(${MPI_INCLUDE_PATH})
+MESSAGE(STATUS MPI_LIBRARIES=${MPI_LIBRARIES})
+target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES}) 
