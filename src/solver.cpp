@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * solver.cpp
  *

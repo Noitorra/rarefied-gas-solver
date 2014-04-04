@@ -219,5 +219,26 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
+<<<<<<< HEAD
 #MyConfig
 src/CMakeFiles/
+=======
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# XCode project directory
+RarefiedGasSolver
+>>>>>>> e1934b81214e36cbc6a9fd3a20a371990139654e

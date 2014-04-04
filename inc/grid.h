@@ -5,8 +5,7 @@
 class Grid {
 public:
   Grid() {};
-  bool WriteFile(const std::string& name);
-  bool ReadFile(const std::string& name);
+
   
   const std::vector<int>& GetSize() {
     return m_vSize;
