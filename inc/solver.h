@@ -5,7 +5,9 @@
 
 class Parallel;
 class SolverInfo;
+class Options;
 class Grid;
+class Config;
 
 class Solver {
 public:
@@ -15,12 +17,13 @@ public:
   
   Parallel* getParallel() const { return m_pParallel.get(); }
 	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }
-	Grid* GetGrid() const;
+	Grid* GetGrid() const { return m_pGrid.get(); }
+  Config* GetActiveConfig() const;
   
 private:
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<SolverInfo> m_pSolverInfo;
-
+	std::shared_ptr<Options> m_pOptions;
   std::shared_ptr<Grid> m_pGrid;
 };
 

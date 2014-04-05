@@ -1,5 +1,6 @@
 #include "grid.h"
 #include "grid_manager.h"
+#include "solver.h"
 
 Grid::Grid() :
 m_pGridManager(new GridManager()) {}
@@ -16,10 +17,6 @@ GridManager* Grid::GetGridManager() const {
   return m_pGridManager.get();
 }
 
-void Grid::SaveConfiguration(sep::Configuration config) {
-  m_pGridManager->SaveConfiguration(config);
-}
-
-void Grid::LoadConfiguration(sep::Configuration config) {
-  m_pGridManager->LoadConfiguration(config);
+void Grid::BuildWithActiveConfig() {
+  m_pGridManager->SaveGridConfig(m_pSolver->GetActiveConfig());
 }

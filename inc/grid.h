@@ -23,8 +23,7 @@ public:
   void Init();
   void AddCell(std::shared_ptr<Cell> pCell);
   GridManager* GetGridManager() const;
-  void SaveConfiguration(sep::Configuration config);
-  void LoadConfiguration(sep::Configuration config);
+  void BuildWithActiveConfig();
 
 private:
   // size of this
