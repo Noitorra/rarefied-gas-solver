@@ -8,22 +8,20 @@ class SolverInfo;
 class Grid;
 
 class Solver {
-private:
-
 public:
   Solver();
   virtual ~Solver();
   void Init();
   
-  Parallel* getParallel() { return m_pParallel.get(); }
-	SolverInfo* getSolverInfo() { return m_pSolverInfo.get(); }
-	Grid* getGrid() { return m_pGrid.get(); }
+  Parallel* getParallel() const { return m_pParallel.get(); }
+	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }
+	Grid* GetGrid() const;
   
 private:
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<SolverInfo> m_pSolverInfo;
 
-  std::shared_ptr<class Grid> m_pGrid;
+  std::shared_ptr<Grid> m_pGrid;
 };
 
 #endif /* SOLVER_H_ */

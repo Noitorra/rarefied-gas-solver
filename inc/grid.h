@@ -1,22 +1,30 @@
 #pragma once
 #include "main.h"
 
+class Cell;
+class GridManager;
+
 // this is only this process part of whole grid
 class Grid {
 public:
   Grid();
   
-  const std::vector<int>& GetSize() {
+  const std::vector<int>& GetSize() const {
     return m_vSize;
   }
-  const std::vector<int>& GetStart() {
+  const std::vector<int>& GetStart() const {
     return m_vStart;
   }
-  const std::vector<int>& GetWholeSize() {
+  const std::vector<int>& GetWholeSize() const {
     return m_vWholeSize;
   }
+
   void SetParent(class Solver* pSolver) { m_pSolver = pSolver; }
   void Init();
+  void AddCell(std::shared_ptr<Cell> pCell);
+  GridManager* GetGridManager() const;
+  void SaveConfiguration(sep::Configuration config);
+  void LoadConfiguration(sep::Configuration config);
 
 private:
   // size of this
@@ -27,5 +35,5 @@ private:
   std::shared_ptr<class GridManager> m_pGridManager;
   class Solver* m_pSolver;
   
-  std::vector<std::shared_ptr<class Cell>> m_vCells;
+  std::vector<std::shared_ptr<Cell>> m_vCells;
 };

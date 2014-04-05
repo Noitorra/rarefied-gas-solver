@@ -20,3 +20,5 @@ void Solver::Init() {
 Solver::~Solver() {
 	// TODO Auto-generated destructor stub
 }
+
+Grid* Solver::GetGrid() const { return m_pGrid.get(); }
