@@ -23,6 +23,9 @@ private:
   std::vector<int> m_vSize; // this process grid size
   std::vector<int> m_vStart; // place where this grid starts in whole grid
   std::vector<int> m_vWholeSize; // size of whole grid
-  class GridManager* m_pGridManager;
+
+  std::shared_ptr<class GridManager> m_pGridManager;
   class Solver* m_pSolver;
+  
+  std::vector<std::shared_ptr<class Cell>> m_vCells;
 };

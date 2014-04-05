@@ -17,14 +17,13 @@ public:
   
   Parallel* getParallel() { return m_pParallel.get(); }
 	SolverInfo* getSolverInfo() { return m_pSolverInfo.get(); }
-	Grid* getGrid() { return m_pGrid; }
+	Grid* getGrid() { return m_pGrid.get(); }
   
-private:  
+private:
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<SolverInfo> m_pSolverInfo;
-  
-  class Grid* m_pSolver;
-  class Grid* m_pGrid;
+
+  std::shared_ptr<class Grid> m_pGrid;
 };
 
 #endif /* SOLVER_H_ */
