@@ -9,6 +9,7 @@ class Solver;
 
 // this is only this process part of whole grid
 class Grid {
+  friend GridManager;
 public:
   Grid();
   
