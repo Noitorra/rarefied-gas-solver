@@ -31,12 +31,7 @@ void Options::Init() {
   
   // Debug configuration 1
   std::shared_ptr<Config> pDebugConfig1(new Config("debug_1"));
-  // TODO: make it with osg::Vec
-  // or special our implementatiob of Vec3
-  std::vector<int> vGridSize(3);
-  vGridSize[sep::X] = vGridSize[sep::Y] = 50;
-  vGridSize[sep::Z] = 1;
-  pDebugConfig1->SetGridSize(vGridSize);
+  pDebugConfig1->SetGridSize(Vector3i(50, 50, 1));
   pDebugConfig1->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   AddConfig(pDebugConfig1);
   

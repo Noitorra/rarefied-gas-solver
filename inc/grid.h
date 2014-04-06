@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
 #include <memory>
+#include "types.h"
 
 class Cell;
 class GridManager;
@@ -11,13 +12,13 @@ class Grid {
 public:
   Grid();
   
-  const std::vector<int>& GetSize() const {
+  const Vector3i& GetSize() const {
     return m_vSize;
   }
-  const std::vector<int>& GetStart() const {
+  const Vector3i& GetStart() const {
     return m_vStart;
   }
-  const std::vector<int>& GetWholeSize() const {
+  const Vector3i& GetWholeSize() const {
     return m_vWholeSize;
   }
 
@@ -31,9 +32,9 @@ public:
 
 private:
   // size of this
-  std::vector<int> m_vSize; // this process grid size
-  std::vector<int> m_vStart; // place where this grid starts in whole grid
-  std::vector<int> m_vWholeSize; // size of whole grid
+  Vector3i m_vSize; // this process grid size
+  Vector3i m_vStart; // place where this grid starts in whole grid
+  Vector3i m_vWholeSize; // size of whole grid
 
   std::shared_ptr<class GridManager> m_pGridManager;
   Solver* m_pSolver;

@@ -2,14 +2,14 @@
 
 using namespace std;
 
-void Config::SetGridSize(const std::vector<int>& vGridSize) {
+void Config::SetGridSize(const Vector3i& vGridSize) {
   m_vGridSize = vGridSize;
 }
 
 void Config::PrintMe() {
   cout << "Config " << m_sName << ": " << endl <<
-  "size = " << m_vGridSize[sep::X] << "x" << m_vGridSize[sep::Y] <<
-  "x" << m_vGridSize[sep::Z] << endl <<
+  "size = " << m_vGridSize.x() << "x" << m_vGridSize.y() <<
+  "x" << m_vGridSize.z() << endl <<
   "grid_geom_type = " << m_eGridGeometryType << endl;
 }
 

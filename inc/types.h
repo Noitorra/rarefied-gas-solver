@@ -56,6 +56,8 @@ public:
 
 	T& x() { return this->m_vMass[0]; }
 	T& y() { return this->m_vMass[1]; }
+	const T& x() const { return this->m_vMass[0]; }
+	const T& y() const { return this->m_vMass[1]; }
 };
 
 typedef Vector2<double> 			 Vector2d;
@@ -84,6 +86,9 @@ public:
 	T& x() { return this->m_vMass[0]; }
 	T& y() { return this->m_vMass[1]; }
 	T& z() { return this->m_vMass[2]; }
+	const T& x() const { return this->m_vMass[0]; }
+	const T& y() const { return this->m_vMass[1]; }
+	const T& z() const { return this->m_vMass[2]; }
 };
 
 typedef Vector3<double> 			 Vector3d;
