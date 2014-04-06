@@ -12,10 +12,13 @@
 #include <vector>
 #include <memory>
 
+class Solver;
+
 class Options;
 class Impulse;
 class Gas;
 
+typedef std::vector< std::shared_ptr<Gas> > GasVector;
 
 class SolverInfo {
 	typedef std::vector< std::shared_ptr<Gas> > GasVector;
@@ -26,6 +29,8 @@ private:
 public:
 	SolverInfo();
 	virtual ~SolverInfo();
+
+	void Init();
 
 	Options* getOptions() { return m_pOptions.get(); }
 	Impulse* getImpulse() { return m_pImpulse.get(); }

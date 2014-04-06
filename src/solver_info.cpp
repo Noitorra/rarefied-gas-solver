@@ -23,3 +23,8 @@ SolverInfo::SolverInfo()
 SolverInfo::~SolverInfo() {
 	// TODO Auto-generated destructor stub
 }
+
+void SolverInfo::Init() {
+	m_pImpulse->Init();
+	m_pOptions->Init();
+}

@@ -4,6 +4,7 @@
 
 class Cell;
 class GridManager;
+class Solver;
 
 // this is only this process part of whole grid
 class Grid {
@@ -21,6 +22,8 @@ public:
   }
 
   void SetParent(class Solver* pSolver) { m_pSolver = pSolver; }
+  Solver* getSolver() { return m_pSolver; }
+
   void Init();
   void AddCell(std::shared_ptr<Cell> pCell);
   GridManager* GetGridManager() const;
@@ -33,7 +36,7 @@ private:
   std::vector<int> m_vWholeSize; // size of whole grid
 
   std::shared_ptr<class GridManager> m_pGridManager;
-  class Solver* m_pSolver;
+  Solver* m_pSolver;
   
   std::vector<std::shared_ptr<Cell>> m_vCells;
 };

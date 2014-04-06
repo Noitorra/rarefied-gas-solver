@@ -11,7 +11,7 @@ int main(int argc, const char * argv[])
   // Just testing some reading/writing functions
 
   std::shared_ptr<Solver> pSolver(new Solver());
-  pSolver->Init(); // linking children and initialization
+  pSolver->Init(); // Linking children and initialization
   
   // Building grid configuration
   pSolver->GetGrid()->BuildWithActiveConfig();
