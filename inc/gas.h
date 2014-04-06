@@ -9,9 +9,13 @@
 #define GAS_H_
 
 class Gas {
+private:
+	double m_dMass;
 public:
 	Gas();
 	virtual ~Gas();
+
+	double getMass() const { return m_dMass; }
 };
 
 #endif /* GAS_H_ */

@@ -16,13 +16,15 @@ class Options;
 class Impulse;
 class Gas;
 
+typedef std::vector< std::shared_ptr<Gas> > GasVector;
 
 class SolverInfo {
-	typedef std::vector< std::shared_ptr<Gas> > GasVector;
 private:
 	std::shared_ptr<Impulse> m_pImpulse;
 	std::shared_ptr<Options> m_pOptions;
 	GasVector m_vGas;
+
+	double m_dTimestep;
 public:
 	SolverInfo();
 	virtual ~SolverInfo();
@@ -32,6 +34,8 @@ public:
 	Options* getOptions() { return m_pOptions.get(); }
 	Impulse* getImpulse() { return m_pImpulse.get(); }
 	GasVector& getGasVector() { return m_vGas; }
+
+	double getTimestep() { return m_dTimestep; }
 };
 
 #endif /* SOLVER_INFO_H_ */
