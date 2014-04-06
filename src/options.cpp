@@ -10,11 +10,19 @@
 
 Options::Options() {
 	// TODO Auto-generated constructor stub
-
+	m_cSolverInfo = nullptr;
 }
 
 Options::~Options() {
 	// TODO Auto-generated destructor stub
+}
+
+void Options::setSolverInfo(SolverInfo* _SolverInfo) {
+	m_cSolverInfo = _SolverInfo;
+}
+
+SolverInfo* Options::getSolverInfo() {
+	return m_cSolverInfo;
 }
 
 void Options::Init() {

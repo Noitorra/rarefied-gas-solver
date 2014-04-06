@@ -10,12 +10,17 @@
 
 #include "main.h"
 
+class SolverInfo;
 class Config;
 
 class Options {
+	SolverInfo* m_cSolverInfo;
 public:
 	Options();
 	virtual ~Options();
+
+	void setSolverInfo(SolverInfo* _SolverInfo);
+	SolverInfo* getSolverInfo();
   
   void Init();
   // Throws char const*

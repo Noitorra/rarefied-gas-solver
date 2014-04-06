@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace sep {
   enum GridGeometry {
