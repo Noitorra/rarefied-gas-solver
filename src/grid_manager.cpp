@@ -123,14 +123,25 @@ void GridManager::FillInGrid(Config* pConfig) {
       for (int z = 0; z < vSize.z(); z++) {
         if (m_vCells[x][y][z]->m_eType != sep::FILLED_CELL)
           continue;
-        m_pGrid->AddCell(std::shared_ptr<Cell>(new Cell(m_pGrid)));
+        Cell* pCell = new Cell(m_pGrid);
+        m_pGrid->AddCell(std::shared_ptr<Cell>(pCell));
+        m_vCells[x][y][z]->m_pCell = pCell;
 //        std::cout << "Adding cell("<< x << "," << y << "," << z << ")" << std::endl;
       }
     }
   }
 }
 
-
+void GridManager::LinkCells(Config* pConfig) {
+  const Vector3i& vSize = pConfig->GetGridSize();
+  for (int x = 0; x < vSize.x(); x++) {
+    for (int y = 0; y < vSize.y(); y++) {
+      for (int z = 0; z < vSize.z(); z++) {
+        // TODO: To implement
+      }
+    }
+  }
+}
 
 
 

@@ -11,8 +11,10 @@
 #include "types.h"
 
 class Grid;
+class GridManager;
 
 class Cell {
+  friend GridManager;
 public:
 	enum CellType {
 		CT_UNDEFINED,

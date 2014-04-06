@@ -34,6 +34,7 @@ private:
   void InitEmptyBox(const Vector3i& vSize);
   void SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::CellType eType);
   void FillInGrid(Config* pConfig);
+  void LinkCells(Config* pConfig);
 
 
   class Grid* m_pGrid;
