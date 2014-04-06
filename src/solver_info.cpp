@@ -26,5 +26,5 @@ SolverInfo::~SolverInfo() {
 
 void SolverInfo::Init() {
 	m_pImpulse->Init();
-	// m_pOptions->Init();
+	m_pOptions->Init();
 }

@@ -8,23 +8,23 @@
 Solver::Solver()
 : m_pParallel(new Parallel),
   m_pSolverInfo(new SolverInfo),
-  m_pOptions(new Options),
   m_pGrid(new Grid)
 {
 	// TODO Auto-generated constructor stub
 }
 
-void Solver::Init() {
-  // Init options
-  m_pOptions->Init();
-  
+void Solver::Init() {  
   // Init grid
   m_pGrid->SetParent(this);
   m_pGrid->Init();
+  
+  m_pSolverInfo->Init();
 }
 
 Solver::~Solver() {
 	// TODO Auto-generated destructor stub
 }
 
-Config* Solver::GetActiveConfig() const { return m_pOptions->GetActiveConfig(); }
+Config* Solver::GetActiveConfig() const {
+  return m_pSolverInfo->getOptions()->GetActiveConfig();
+}

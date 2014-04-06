@@ -18,5 +18,10 @@ GridManager* Grid::GetGridManager() const {
 }
 
 void Grid::BuildWithActiveConfig() {
-  m_pGridManager->SaveGridConfig(m_pSolver->GetActiveConfig());
+  try {
+    m_pGridManager->SaveGridConfig(m_pSolver->GetActiveConfig());
+  } catch (char const* sExc) {
+    std::cout << "Exception occurs: " << sExc << std::endl;
+    return;
+  }
 }
