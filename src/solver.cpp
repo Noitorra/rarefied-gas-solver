@@ -13,16 +13,24 @@ Solver::Solver()
 	// TODO Auto-generated constructor stub
 }
 
-void Solver::Init() {  
+Solver::~Solver() {
+	// TODO Auto-generated destructor stub
+}
+
+void Solver::Init() {
+	// We must OBEY order:
+	// first info (impulse, etc)
+	// second grid....
+  m_pSolverInfo->setSolver(this);
+  m_pSolverInfo->Init();
+
   // Init grid
   m_pGrid->SetParent(this);
   m_pGrid->Init();
-  
-  m_pSolverInfo->Init();
 }
 
-Solver::~Solver() {
-	// TODO Auto-generated destructor stub
+void Solver::Run() {
+
 }
 
 Config* Solver::GetActiveConfig() const {

@@ -12,6 +12,8 @@
 #include <vector>
 #include <memory>
 
+class Solver;
+
 class Options;
 class Impulse;
 class Gas;
@@ -25,6 +27,8 @@ private:
 	GasVector m_vGas;
 
 	double m_dTimestep;
+
+	Solver* m_pSolver;
 public:
 	SolverInfo();
 	virtual ~SolverInfo();
@@ -36,6 +40,14 @@ public:
 	GasVector& getGasVector() { return m_vGas; }
 
 	double getTimestep() { return m_dTimestep; }
+
+	Solver* getSolver() {
+		return m_pSolver;
+	}
+
+	void setSolver(Solver* pSolver) {
+		m_pSolver = pSolver;
+	}
 };
 
 #endif /* SOLVER_INFO_H_ */

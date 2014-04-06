@@ -13,7 +13,9 @@ class Solver {
 public:
   Solver();
   virtual ~Solver();
+
   void Init();
+  void Run();
   
   Parallel* getParallel() const { return m_pParallel.get(); }
 	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }

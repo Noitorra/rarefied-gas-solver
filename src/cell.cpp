@@ -26,6 +26,9 @@ Cell::Cell() {
 	// size of a cell
 	m_vAreastep.resize(3, 0.0);
 
+	m_dStartTemperature = 0.0;
+	m_dStartDensity = 0.0;
+
 	// Grid....
 	m_pGrid = nullptr;
 }
