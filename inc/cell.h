@@ -28,13 +28,6 @@ private:
 	double m_dStartDensity;
 	double m_dStartTemperature;
 	std::vector<double> m_vAreastep;
-public:
-	Cell();
-	Cell(Grid* _Grid);
-	virtual ~Cell();
-
-	void setGrid(Grid* _Grid) { m_pGrid = _Grid; }
-	Grid* getGrid() { return m_pGrid; }
 
 	// variables ... ?
 	std::vector< CellVector > m_vNext;
@@ -42,6 +35,17 @@ public:
 
 	std::vector< DoubleVector > m_vValue;
 	std::vector< DoubleVector > m_vHalf;
+
+	std::vector< CellType > m_vType;
+
+	Grid* m_pGrid;
+public:
+	Cell();
+	Cell(Grid* _Grid);
+	virtual ~Cell();
+
+	void setGrid(Grid* _Grid) { m_pGrid = _Grid; }
+	Grid* getGrid() { return m_pGrid; }
 
 	// main methods
 	/* set all necessary parameters */
@@ -54,15 +58,15 @@ public:
 	void computeIntegral(unsigned int dim);
 private:
 	// help methods
-	void computeType(unsigned int dim);
+	void compute_type(unsigned int dim);
 
-	void computeHalf_Left(unsigned int dim);
-	void computeHalf_Normal(unsigned int dim);
-	void computeHalf_PreRight(unsigned int dim);
-	void computeHalf_Right(unsigned int dim);
+	void compute_half_left(unsigned int dim);
+	void compute_half_normal(unsigned int dim);
+	void compute_half_preright(unsigned int dim);
+	void compute_half_right(unsigned int dim);
 
 //	void computeValue_Left(unsigned int dim);
-	void computeValue_Normal(unsigned int dim);
+	void compute_value_normal(unsigned int dim);
 //	void computeValue_PreRight(unsigned int dim);
 //	void computeValue_Right(unsigned int dim);
 
@@ -82,9 +86,6 @@ private:
 		return limiter_superbee(x, y, z);
 	}
 	double limiter_superbee(const double& x, const double& y, const double& z);
-private:
-	std::vector< CellType > m_vType;
-	Grid* m_pGrid;
 
 };
 

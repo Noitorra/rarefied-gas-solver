@@ -79,20 +79,20 @@ void Cell::Init() {
 void Cell::computeHalf(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		computeType(dim);
+		compute_type(dim);
 		computeHalf(dim);
 		break;
 		case CT_LEFT:
-		computeHalf_Left(dim);
+		compute_half_left(dim);
 		break;
 		case CT_NORMAL:
-		computeHalf_Normal(dim);
+		compute_half_normal(dim);
 		break;
 		case CT_PRERIGHT:
-		computeHalf_PreRight(dim);
+		compute_half_preright(dim);
 		break;
 		case CT_RIGHT:
-		computeHalf_Right(dim);
+		compute_half_right(dim);
 		break;
 		default:
 		break;
@@ -101,14 +101,14 @@ void Cell::computeHalf(unsigned int dim) {
 void Cell::computeValue(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		computeType(dim);
+		compute_type(dim);
 		computeValue(dim);
 		break;
 //		case CT_LEFT:
 //		computeValue_Left(dim);
 //		break;
 		case CT_NORMAL:
-		computeValue_Normal(dim);
+		compute_value_normal(dim);
 		break;
 //		case CT_PRERIGHT:
 //		computeValue_PreRight(dim);
@@ -127,7 +127,7 @@ void Cell::computeIntegral(unsigned int dim) {
 /* private */
 
 // help methods
-void Cell::computeType(unsigned int dim) {
+void Cell::compute_type(unsigned int dim) {
 	if( m_vPrev[dim].empty() ) {
 		if ( !m_vNext[dim].empty() ) {
 			m_vType[dim] = CT_LEFT;
@@ -151,7 +151,7 @@ void Cell::computeType(unsigned int dim) {
 	}
 }
 
-void Cell::computeHalf_Left(unsigned int dim) {
+void Cell::compute_half_left(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
@@ -188,7 +188,7 @@ void Cell::computeHalf_Left(unsigned int dim) {
     }
   }
 }
-void Cell::computeHalf_Normal(unsigned int dim) {
+void Cell::compute_half_normal(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
@@ -210,10 +210,10 @@ void Cell::computeHalf_Normal(unsigned int dim) {
 		}
 	}
 }
-void Cell::computeHalf_PreRight(unsigned int dim) {
+void Cell::compute_half_preright(unsigned int dim) {
 
 }
-void Cell::computeHalf_Right(unsigned int dim) {
+void Cell::compute_half_right(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
@@ -262,7 +262,7 @@ void Cell::computeHalf_Right(unsigned int dim) {
 	  }
 }
 
-void Cell::computeValue_Normal(unsigned int dim) {
+void Cell::compute_value_normal(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
