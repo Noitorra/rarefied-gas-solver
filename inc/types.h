@@ -14,15 +14,19 @@ public:
 		m_vMass.clear();
 	}
 
-	T mod() {
+	const T mod() const {
 		return std::sqrt(mod2());
 	}
 
-	T mod2() {
+	const T mod2() const {
 		return calc_mod2();
 	}
+
+	T& operator[](unsigned int i) {
+		return m_vMass[i];
+	}
 private:
-	T calc_mod2() {
+	const T calc_mod2() const {
 		T loc_mod2 = T(0);
 		for( auto& item : m_vMass) {
 			loc_mod2 += item*item;

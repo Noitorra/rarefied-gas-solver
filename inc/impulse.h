@@ -12,6 +12,8 @@
 
 class SolverInfo;
 
+typedef std::vector< Vector3d > ImpulseVector;
+
 class Impulse {
 private:
 	// setting & getting
@@ -21,7 +23,7 @@ private:
 	// getting
 	double m_dDeltaImpulse;
 	double m_dDeltaImpulseQube;
-	std::vector< Vector3d > m_vImpulse;
+	ImpulseVector m_vImpulse;
 
 	SolverInfo* m_cSolverInfo;
 public:
@@ -39,7 +41,7 @@ public:
 
 	double getDeltaImpulse();
 	double getDeltaImpulseQube();
-	std::vector< Vector3d >& getVector();
+	ImpulseVector& getVector();
 };
 
 #endif /* IMPULSE_H_ */
