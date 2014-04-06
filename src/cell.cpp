@@ -41,6 +41,38 @@ Cell::~Cell() {
 /* public */
 
 // main methods
+void Cell::setParameters(const double& _Density, const double& _Temperature, const DoubleVector& _Areastep) {
+	m_dStartDensity = _Density;
+	m_dStartTemperature = _Temperature;
+	m_vAreastep = _Areastep;
+}
+
+void Cell::Init() {
+	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	GasVector& gasv = sinfo->getGasVector();
+	Impulse* impulse = sinfo->getImpulse();
+	ImpulseVector& impulsev = impulse->getVector();
+
+  for(unsigned int gi=0;gi<gasv.size();gi++) {
+    double C = 0.0;
+    for(unsigned int ii=0;ii<impulsev.size();ii++) {
+        C += fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
+    }
+
+    C *= impulse->getDeltaImpulseQube();
+    C = m_dStartDensity/C;
+
+    // Allocating space for values and half's
+    m_vHalf[gi].resize( impulsev.size() );
+    m_vValue[gi].resize( impulsev.size() );
+
+    for(unsigned int ii=0;ii<impulsev.size();ii++) {
+      m_vValue[gi][ii] = C*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
+      //m_half[gasIndex][impulseIndex] = 0.0;
+    }
+  }
+}
+
 void Cell::computeHalf(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
@@ -127,28 +159,28 @@ void Cell::computeHalf_Left(unsigned int dim) {
     double C2_up = 0.0;
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
       if(impulsev[ii][dim] < 0) {
-          double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
+        double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 
-          m_vValue[gi][ii] = 2*compute_anv(m_vNext[dim], dim, gi, ii, 0) - compute_anv(m_vNext[dim], dim, gi, ii, 1);
-          if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
+        m_vValue[gi][ii] = 2*compute_anv(m_vNext[dim], dim, gi, ii, 0) - compute_anv(m_vNext[dim], dim, gi, ii, 1);
+        if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
 
-          m_vHalf[gi][ii] = compute_anv(m_vNext[dim], dim, gi, ii, 0) - (1-y)/2*limiter(
-          		m_vValue[gi][ii],
-          		compute_anv(m_vNext[dim], dim, gi, ii, 0),
-          		compute_anv(m_vNext[dim], dim, gi, ii, 1) );
+        m_vHalf[gi][ii] = compute_anv(m_vNext[dim], dim, gi, ii, 0) - (1-y)/2*limiter(
+         		m_vValue[gi][ii],
+         		compute_anv(m_vNext[dim], dim, gi, ii, 0),
+         		compute_anv(m_vNext[dim], dim, gi, ii, 1) );
 
-          C1_up += abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
-          C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0))/2);
+        C1_up += abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
+        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0))/2);
       } else {
-          C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]));
+        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
       }
     }
 
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
       if(impulsev[ii][dim] > 0) {
-          m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]);
-          m_vValue[gi][ii] = 2*C2_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]) - compute_anv(m_vNext[dim], dim, gi, ii, 0);
-          if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
+        m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
+        m_vValue[gi][ii] = 2*C2_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]) - compute_anv(m_vNext[dim], dim, gi, ii, 0);
+        if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
       }
     }
   }
@@ -189,29 +221,39 @@ void Cell::computeHalf_Right(unsigned int dim) {
 	    double C2_up = 0.0;
 	    for(unsigned int ii=0;ii<impulsev.size();ii++) {
 	      if(impulsev[ii][dim] > 0) {
-	          double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
+	      	double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 
-	          m_vValue[gi][ii] = 2*compute_apv(m_vPrev[dim], dim, gi, ii, 0) - compute_apv(m_vPrev[dim], dim, gi, ii, 1);
-	          if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
+	         m_vValue[gi][ii] = 2*compute_apv(m_vPrev[dim], dim, gi, ii, 0) - compute_apv(m_vPrev[dim], dim, gi, ii, 1);
+	        if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
 
-	          // TODO: Ugly shit here....
-//	          m_vPrev[dim]->m_vHalf[gi][ii] = m_vPrev[dim]->m_vValue[gi][ii] + (1-y)/2*limitter::super_bee(m_vPrev[dim]->m_vPrev[dim]->m_vValue[gi][ii],
+	        // TODO: check
+	        for( auto& item : m_vPrev[dim] ) {
+	        	item->m_vHalf[gi][ii] = item->m_vValue[gi][ii] + (1-y)/2*limiter(
+	        			compute_apv(item->m_vPrev[dim], dim, gi, ii, 0),
+	         			item->m_vValue[gi][ii],
+	         			compute_anv(item->m_vNext[dim], dim, gi, ii, 0) );
+	        }
+	        // old code
+//	      	m_vPrev[dim]->m_vHalf[gi][ii] = m_vPrev[dim]->m_vValue[gi][ii] + (1-y)/2*limitter::super_bee(m_vPrev[dim]->m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vValue[gi][ii]);
 
-	          C1_up += abs(impulsev[ii][dim]*compute_aph(m_vNext[dim], dim, gi, ii, 0));
-	          C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0))/2);
+	        C1_up += abs(impulsev[ii][dim]*compute_aph(m_vNext[dim], dim, gi, ii, 0));
+	        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0))/2);
 	      } else {
-	          C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]));
+	        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
 	      }
 	    }
 
 	    for(unsigned int ii=0;ii<impulsev.size();ii++) {
 	      if(impulsev[ii][dim] < 0) {
-	      	// TODO: Ugly shit here too....
-//	          m_vPrev[dim]->m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]);
-	          m_vValue[gi][ii] = 2*C2_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]) - compute_apv(m_vPrev[dim], dim, gi, ii, 0);
-	          if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
+	      	// TODO: check
+	      	for( auto& item : m_vPrev[dim] ) {
+	      		item->m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
+	      	}
+//	      	m_vPrev[dim]->m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]);
+					m_vValue[gi][ii] = 2*C2_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]) - compute_apv(m_vPrev[dim], dim, gi, ii, 0);
+					if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
 	      }
 	    }
 	  }

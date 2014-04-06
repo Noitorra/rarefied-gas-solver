@@ -23,6 +23,11 @@ public:
 	};
 
 	typedef std::vector< Cell* > CellVector;
+	typedef std::vector<double> DoubleVector;
+private:
+	double m_dStartDensity;
+	double m_dStartTemperature;
+	std::vector<double> m_vAreastep;
 public:
 	Cell();
 	Cell(Grid* _Grid);
@@ -31,19 +36,19 @@ public:
 	void setGrid(Grid* _Grid) { m_pGrid = _Grid; }
 	Grid* getGrid() { return m_pGrid; }
 
-	// starting values ?!?!
-	double T;
-	double D;
-	std::vector<double> m_vAreastep;
-
 	// variables ... ?
 	std::vector< CellVector > m_vNext;
 	std::vector< CellVector > m_vPrev;
 
-	std::vector< std::vector<double> > m_vValue;
-	std::vector< std::vector<double> > m_vHalf;
+	std::vector< DoubleVector > m_vValue;
+	std::vector< DoubleVector > m_vHalf;
 
 	// main methods
+	/* set all necessary parameters */
+	void setParameters(const double& _Density, const double& _Temperature, const DoubleVector& _Areastep);
+	/* creates cells inner values, takes long time */
+	void Init();
+
 	void computeValue(unsigned int dim);
 	void computeHalf(unsigned int dim);
 	void computeIntegral(unsigned int dim);
