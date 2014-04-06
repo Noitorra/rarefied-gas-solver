@@ -1,5 +1,6 @@
 #include "grid.h"
 #include "grid_manager.h"
+#include "solver.h"
 
 Grid::Grid() :
 m_pGridManager(new GridManager()),
