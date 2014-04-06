@@ -16,6 +16,8 @@ SolverInfo::SolverInfo()
   m_pOptions(new Options)
 {
 	// TODO Auto-generated constructor stub
+	m_pImpulse->setSolverInfo( this );
+	m_pOptions->setSolverInfo( this );
 }
 
 SolverInfo::~SolverInfo() {

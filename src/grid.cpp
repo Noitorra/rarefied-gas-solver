@@ -2,7 +2,8 @@
 #include "grid_manager.h"
 
 Grid::Grid() :
-m_pGridManager(new GridManager()) {}
+m_pGridManager(new GridManager()),
+m_pSolver(nullptr) {}
 
 void Grid::Init() {
   m_pGridManager->SetParent(this);

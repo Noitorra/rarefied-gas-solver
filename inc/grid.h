@@ -1,5 +1,6 @@
 #pragma once
 #include "main.h"
+#include <memory>
 
 class Cell;
 class GridManager;

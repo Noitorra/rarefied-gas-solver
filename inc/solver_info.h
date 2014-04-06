@@ -18,17 +18,18 @@ class Gas;
 
 
 class SolverInfo {
+	typedef std::vector< std::shared_ptr<Gas> > GasVector;
 private:
 	std::shared_ptr<Impulse> m_pImpulse;
 	std::shared_ptr<Options> m_pOptions;
-	std::vector< std::shared_ptr<Gas> > m_vGas;
+	GasVector m_vGas;
 public:
 	SolverInfo();
 	virtual ~SolverInfo();
 
 	Options* getOptions() { return m_pOptions.get(); }
 	Impulse* getImpulse() { return m_pImpulse.get(); }
-	std::vector< std::shared_ptr<Gas> >& getGasVector() { return m_vGas; }
+	GasVector& getGasVector() { return m_vGas; }
 };
 
 #endif /* SOLVER_INFO_H_ */
