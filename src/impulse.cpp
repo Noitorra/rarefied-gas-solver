@@ -33,7 +33,7 @@ void Impulse::Init() {
 		std::vector<double> line;
 		for( unsigned int i=0; i<m_uResolution; i++ ) {
 			line.push_back( m_dDeltaImpulse*i - m_dMaxImpulse );
-			std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
+			//std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
 		}
 
 		// creating impulse sphere
