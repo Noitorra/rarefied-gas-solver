@@ -13,6 +13,13 @@ namespace sep {
   
   enum CellType {
     EMPTY_CELL = 0,
-    FILLED_CELL
+    NORMAL_CELL,
+    FAKE_CELL
+  };
+  
+  enum Axis {
+    X = 0,
+    Y,
+    Z
   };
 }
