@@ -20,6 +20,7 @@ int main(int argc, char * argv[])
   pSolver->GetGrid()->GetGridManager()->Print();
 
   // LAST: here we apparently stop all nodes....
+  std::cout << "Done..." << std::endl;
   //pSolver->getParallel()->FinalizeMPI();
   return 0;
 }

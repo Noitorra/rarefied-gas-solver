@@ -4,6 +4,7 @@
 #include "solver_info.h"
 #include "options.h"
 #include "grid.h"
+#include "grid_manager.h"
 #include "cell.h"
 #include "out_results.h"
 #include "config.h"
@@ -33,14 +34,20 @@ void Solver::Init() {
   
   // Building grid configuration
   m_pGrid->BuildWithActiveConfig();
+
+  initCellType(sep::X);
+  initCellType(sep::Y);
+  initCellType(sep::Z);
+
+  m_pGrid->GetGridManager()->Print(sep::X);
+  m_pGrid->GetGridManager()->Print(sep::Y);
+  m_pGrid->GetGridManager()->Print(sep::Z);
 }
 
 void Solver::Run() {
 	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
 
-	initCellType(sep::X);
-	initCellType(sep::Y);
-	initCellType(sep::Z);
+
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
 		makeStep(sep::X);
 //		makeStep(sep::Y);

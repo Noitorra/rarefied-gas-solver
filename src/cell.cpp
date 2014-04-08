@@ -90,7 +90,7 @@ void Cell::computeHalf(unsigned int dim) {
 	//std::cout << "Type: " << m_vType[dim] << std::endl;
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
+		//std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
 		break;
 		case CT_LEFT:
 		compute_half_left(dim);
@@ -111,7 +111,7 @@ void Cell::computeHalf(unsigned int dim) {
 void Cell::computeValue(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
+		//std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
 		break;
 //		case CT_LEFT:
 //		computeValue_Left(dim);
@@ -303,7 +303,7 @@ void Cell::compute_half_right(unsigned int dim) {
 //	                                                                                                               m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vValue[gi][ii]);
 
-	        C1_up += abs(impulsev[ii][dim]*compute_aph(m_vNext[dim], dim, gi, ii, 0));
+	        C1_up += abs(impulsev[ii][dim]*compute_aph(m_vPrev[dim], dim, gi, ii, 0));
 	        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0))/2);
 	      } else {
 	        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
