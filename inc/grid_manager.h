@@ -29,6 +29,7 @@ public:
   void SetParent(Grid* pGrid);
   void SaveGridConfig(Config* pConfig);
   void LoadGridConfig(Config* pConfig);
+  void Print();
   
 private:
   bool Write(const std::string& sName);
@@ -43,8 +44,7 @@ private:
   void FillInGrid(Config* pConfig);
   void LinkCells(Config* pConfig);
   void AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ);
-  Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash) ;
-
+  Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash);
 
   Grid* m_pGrid;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vCells;

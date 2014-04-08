@@ -67,8 +67,8 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType) {
         default:
           return;
       }
-      std::cout << "OutParam (" << x << "," << y << "," << z << "): " <<
-      dParam << std::endl;
+//      std::cout << "OutParam (" << x << "," << y << "," << z << "): " <<
+//      dParam << std::endl;
       fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
     }
   }

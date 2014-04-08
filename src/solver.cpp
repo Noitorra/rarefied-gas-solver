@@ -33,9 +33,6 @@ void Solver::Init() {
   
   // Building grid configuration
   m_pGrid->BuildWithActiveConfig();
-  
-  // Print
-  m_pGrid->PrintCellsLinkage();
 }
 
 void Solver::Run() {
