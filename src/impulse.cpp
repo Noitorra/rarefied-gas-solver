@@ -15,10 +15,20 @@ Impulse::Impulse() {
 
 	m_dDeltaImpulse = 0.0;
 	m_dDeltaImpulseQube = 0.0;
+
+  m_pxyz2i = nullptr;
 }
 
 Impulse::~Impulse() {
-	// TODO Auto-generated destructor stub
+  if (m_pxyz2i) {
+    for (unsigned int x = 0; x < m_uResolution; x++) {
+      for (unsigned int y = 0; y < m_uResolution; y++) {
+        delete[] m_pxyz2i[x][y];
+      }
+      delete[] m_pxyz2i[x];
+    }
+    delete[] m_pxyz2i;
+  }
 }
 
 void Impulse::Init() {
@@ -36,14 +46,22 @@ void Impulse::Init() {
 			//std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
 		}
 
+    // xyz2i
+    m_pxyz2i = new int**[m_uResolution];
+
 		// creating impulse sphere
 		for(unsigned int x=0;x<line.size();x++) {
+      m_pxyz2i[x] = new int*[m_uResolution];
 			for(unsigned int y=0;y<line.size();y++) {
+        m_pxyz2i[x][y] = new int[m_uResolution];
 				for(unsigned int z=0;z<line.size();z++) {
 					Vector3d vec(line[x], line[y], line[z]);
-					if( vec.mod() < m_dMaxImpulse ) {
-						m_vImpulse.push_back( vec );
-					}
+          if (vec.mod() < m_dMaxImpulse) {
+            m_pxyz2i[x][y][z] = m_vImpulse.size();
+            m_vImpulse.push_back(vec);
+          } else {
+            m_pxyz2i[x][y][z] = -1;
+          }
 				}
 			}
 		}

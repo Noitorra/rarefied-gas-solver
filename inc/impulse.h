@@ -24,6 +24,7 @@ private:
 	double m_dDeltaImpulse;
 	double m_dDeltaImpulseQube;
 	ImpulseVector m_vImpulse;
+  int*** m_pxyz2i;
 
 	SolverInfo* m_cSolverInfo;
 public:
@@ -38,6 +39,7 @@ public:
 
 	unsigned int getResolution();
 	double getMaxImpulse();
+  int*** getXYZ2I() { return m_pxyz2i; }
 
 	double getDeltaImpulse();
 	double getDeltaImpulseQube();
