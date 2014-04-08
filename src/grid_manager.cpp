@@ -71,13 +71,14 @@ void GridManager::Build(Config* pConfig) {
       break;
     case sep::DEBUG1_GRID_GEOMETRY:
       BuildDebugTypeGrid(pConfig);
+      break;
     default:
       break;
   }
 }
 
 void GridManager::BuildDebugTypeGrid(Config* pConfig) {
-  std::cout << "Building comb type grid" << std::endl;
+  std::cout << "Building debug type grid" << std::endl;
   InitEmptyBox(pConfig->GetGridSize());
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
   //  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
@@ -90,6 +91,21 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   std::cout << "Building comb type grid" << std::endl;
   InitEmptyBox(pConfig->GetGridSize());
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
+  
+  const Vector3i& vGSize = pConfig->GetGridSize();
+  Vector3i vBlockSize = Vector3i(vGSize.x()/2, vGSize.y()/10, 1);
+  
+  int iSlashX = 6;
+  Vector3i vStart(8, 6, 0);
+  int iDeltaY = vBlockSize.y() + 5;
+  int iBlockN = 3;
+  for (int i = 0; i < iBlockN; i++) {
+    int iTempSlashX = i % 2 ? iSlashX : 0;
+    Vector3i vTempStart = vStart + Vector3i(iTempSlashX, iDeltaY * i, 0);
+    
+    AddBox(vTempStart, vBlockSize, Vector3b(false, false, false), true, 0.4, false);
+  }
+  
   FillInGrid(pConfig);
   LinkCells(pConfig);
 }

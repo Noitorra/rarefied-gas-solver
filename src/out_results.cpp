@@ -57,8 +57,8 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   
   const Vector3i& vSize = m_pGrid->GetSize();
   // Edge cells are faked
-  for (int x = 1; x < vSize.x() - 1; x++) {
-    for (int y = 1; y < vSize.y() - 1; y++) {
+  for (int y = 1; y < vSize.y() - 1; y++) {
+    for (int x = 1; x < vSize.x() - 1; x++) {
       int z = iZLayer;
       double dParam = 0.0;
       if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL) {

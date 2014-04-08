@@ -43,8 +43,8 @@ void Solver::Init() {
   initCellType(sep::Y);
   initCellType(sep::Z);
 
-  m_pGrid->GetGridManager()->Print(sep::X);
-  m_pGrid->GetGridManager()->Print(sep::Y);
+//  m_pGrid->GetGridManager()->Print(sep::X);
+//  m_pGrid->GetGridManager()->Print(sep::Y);
   // m_pGrid->GetGridManager()->Print(sep::Z);
 }
 
