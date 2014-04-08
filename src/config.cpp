@@ -3,7 +3,8 @@
 using namespace std;
 
 void Config::SetGridSize(const Vector3i& vGridSize) {
-  m_vGridSize = vGridSize;
+  // 2D case only
+  m_vGridSize = Vector3i(vGridSize.x() + 2, vGridSize.y() + 2, vGridSize.z());
 }
 
 void Config::PrintMe() {

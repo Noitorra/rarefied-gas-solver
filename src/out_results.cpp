@@ -61,6 +61,8 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   for (int x = 0; x < vSize.x(); x++) {
     for (int y = 0; y < vSize.y(); y++) {
       int z = iZLayer;
+      if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL)
+        continue;
       double dParam = 0.0;
       switch (eType) {
         case sep::T_PARAM:

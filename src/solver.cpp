@@ -47,8 +47,11 @@ void Solver::Init() {
 void Solver::Run() {
 	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
 
+  // Save initial state
+  m_pGrid->GetOutResults()->OutAll(0);
 
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
+    
 		makeStep(sep::X);
 //		makeStep(sep::Y);
 //		makeStep(sep::Z);
@@ -58,8 +61,8 @@ void Solver::Run() {
 			item->testInnerValuesRange();
 		}
     
-    // Saving data
-    m_pGrid->GetOutResults()->OutAll(iteration);
+    // Output data
+    m_pGrid->GetOutResults()->OutAll(iteration + 1);
 	}
 }
 
