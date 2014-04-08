@@ -21,6 +21,8 @@ int main(int argc, char * argv[])
   // Building grid configuration
   pSolver->GetGrid()->BuildWithActiveConfig();
 
+
+
   // LAST: here we apparently stop all nodes....
   pSolver->getParallel()->FinalizeMPI();
   return 0;

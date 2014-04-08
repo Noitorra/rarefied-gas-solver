@@ -27,6 +27,7 @@ private:
 	GasVector m_vGas;
 
 	double m_dTimestep;
+	int m_iMaxIteration;
 
 	Solver* m_pSolver;
 public:
@@ -40,6 +41,7 @@ public:
 	GasVector& getGasVector() { return m_vGas; }
 
 	double getTimestep() { return m_dTimestep; }
+	int getMaxIteration() { return m_iMaxIteration; }
 
 	Solver* getSolver() {
 		return m_pSolver;

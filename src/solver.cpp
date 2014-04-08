@@ -4,6 +4,7 @@
 #include "solver_info.h"
 #include "options.h"
 #include "grid.h"
+#include "cell.h"
 
 Solver::Solver()
 : m_pParallel(new Parallel),
@@ -30,7 +31,37 @@ void Solver::Init() {
 }
 
 void Solver::Run() {
+	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+	for(int iteration = 0;iteration<m_pSolverInfo->getMaxIteration();iteration++) {
+		makeStep(sep::X);
+		makeStep(sep::Y);
+		makeStep(sep::Z);
 
+		// here we can test data, if needed...
+		for( auto& item : cellVector ) {
+			item->testInnerValuesRange();
+		}
+
+		// Saving data
+
+	}
+}
+
+void Solver::makeStep(sep::Axis axis) {
+	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+	// make half
+	for( auto& item : cellVector ) {
+		item->computeHalf(axis);
+	}
+	// make value
+	for( auto& item : cellVector ) {
+		item->computeValue(axis);
+	}
+	// make integral
+	// TODO: add integral count...
+	for( auto& item : cellVector ) {
+		item->computeIntegral(axis);
+	}
 }
 
 Config* Solver::GetActiveConfig() const {

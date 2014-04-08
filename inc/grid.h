@@ -28,6 +28,8 @@ public:
 
   void Init();
   void AddCell(std::shared_ptr<Cell> pCell);
+  std::vector<std::shared_ptr<Cell>>& getCellVector();
+
   GridManager* GetGridManager() const;
   void BuildWithActiveConfig();
 

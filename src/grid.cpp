@@ -14,6 +14,10 @@ void Grid::AddCell(std::shared_ptr<Cell> pCell) {
   m_vCells.push_back(pCell);
 }
 
+std::vector<std::shared_ptr<Cell>>& Grid::getCellVector() {
+	return m_vCells;
+}
+
 GridManager* Grid::GetGridManager() const {
   return m_pGridManager.get();
 }

@@ -12,7 +12,7 @@ class Gas {
 private:
 	double m_dMass;
 public:
-	Gas();
+	Gas(double mass);
 	virtual ~Gas();
 
 	double getMass() const { return m_dMass; }

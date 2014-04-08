@@ -1,6 +1,7 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
+#include "main.h"
 #include <memory>
 
 class Parallel;
@@ -17,6 +18,8 @@ public:
   void Init();
   void Run();
   
+  void makeStep(sep::Axis axis);
+
   Parallel* getParallel() const { return m_pParallel.get(); }
 	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }
 	Grid* GetGrid() const { return m_pGrid.get(); }

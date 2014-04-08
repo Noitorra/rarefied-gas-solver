@@ -124,6 +124,39 @@ void Cell::computeIntegral(unsigned int dim) {
 	// TODO:: Add realization
 }
 
+bool Cell::testInnerValuesRange() {
+	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	GasVector& gasv = sinfo->getGasVector();
+	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+
+	bool result = true;
+
+	for(unsigned int gi=0;gi<gasv.size();gi++) {
+		for(unsigned int ii=0;ii<impulsev.size();ii++) {
+			if( 0.0 <= m_vValue[gi][ii] && m_vValue[gi][ii] <= 1.0 ) {
+				// all is good
+			} else {
+				// wrong values
+				result = false;
+				std::cout << "Cell::testInnerValuesRange() : Error in gi = " << gi
+						<< " ii = " << ii
+						<< " value = " << m_vValue[gi][ii] << std::endl;
+			}
+			if( 0.0 <= m_vHalf[gi][ii] && m_vHalf[gi][ii] <= 1.0 ) {
+				// all is good
+			} else {
+				// wrong values
+				result = false;
+				std::cout << "Cell::testInnerValuesRange() : Error in gi = " << gi
+						<< " ii = " << ii
+						<< " half = " << m_vHalf[gi][ii] << std::endl;
+			}
+		}
+	}
+
+	return result;
+}
+
 /* private */
 
 // help methods

@@ -13,11 +13,19 @@
 
 SolverInfo::SolverInfo()
 : m_pImpulse(new Impulse),
-  m_pOptions(new Options)
+  m_pOptions(new Options),
+  m_pSolver(nullptr)
 {
 	// TODO Auto-generated constructor stub
 	m_pImpulse->setSolverInfo( this );
 	m_pOptions->setSolverInfo( this );
+
+	// some variables
+	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
+	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
+
+	m_dTimestep = 0.01;
+	m_iMaxIteration = 100;
 }
 
 SolverInfo::~SolverInfo() {

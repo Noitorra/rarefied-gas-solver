@@ -58,6 +58,9 @@ public:
 	void computeValue(unsigned int dim);
 	void computeHalf(unsigned int dim);
 	void computeIntegral(unsigned int dim);
+
+	// tests
+	bool testInnerValuesRange();
 private:
 	// help methods
 	void compute_type(unsigned int dim);
