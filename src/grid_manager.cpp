@@ -257,7 +257,7 @@ void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFa
   }
 }
 
-void GridManager::Print() {
+void GridManager::Print(sep::Axis axis) {
   const Vector3i& vSize = m_pGrid->GetSize();
   for (int y = 0; y < vSize.y(); y++) {
     for (int x = 0; x < vSize.x(); x++) {
@@ -266,10 +266,11 @@ void GridManager::Print() {
         std::cout << "x" << " ";
         continue;
       }
-       std::cout << cell->m_vType[0] << " ";
+      std::cout << cell->m_vType[axis] << " ";
      }
      std::cout << std::endl;
   }
+  std::cout << std::endl;
 }
 
 

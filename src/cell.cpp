@@ -90,7 +90,7 @@ void Cell::computeHalf(unsigned int dim) {
 	//std::cout << "Type: " << m_vType[dim] << std::endl;
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
+		//std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
 		break;
 		case CT_LEFT:
 		compute_half_left(dim);
@@ -111,7 +111,7 @@ void Cell::computeHalf(unsigned int dim) {
 void Cell::computeValue(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
+		//std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
 		break;
 //		case CT_LEFT:
 //		computeValue_Left(dim);

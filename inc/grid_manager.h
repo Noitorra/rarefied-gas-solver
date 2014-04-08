@@ -29,7 +29,7 @@ public:
   void SetParent(Grid* pGrid);
   void SaveGridConfig(Config* pConfig);
   void LoadGridConfig(Config* pConfig);
-  void Print();
+  void Print(sep::Axis axis);
   
 private:
   bool Write(const std::string& sName);
