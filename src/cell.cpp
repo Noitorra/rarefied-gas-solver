@@ -107,7 +107,7 @@ void Cell::computeValue(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
 		compute_type(dim);
-		computeValue(dim);
+		if(m_vType[dim] != CT_UNDEFINED ) computeValue(dim);
 		break;
 //		case CT_LEFT:
 //		computeValue_Left(dim);
