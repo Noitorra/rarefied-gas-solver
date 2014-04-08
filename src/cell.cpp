@@ -66,6 +66,9 @@ void Cell::Init() {
     C = m_dStartDensity/C;
 
     // Allocating space for values and half's
+    m_vHalf.resize(gasv.size());
+    m_vValue.resize(gasv.size());
+
     m_vHalf[gi].resize( impulsev.size() );
     m_vValue[gi].resize( impulsev.size() );
 
