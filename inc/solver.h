@@ -31,7 +31,6 @@ private:
 
   void initCellType(sep::Axis axis);
   void makeStep(sep::Axis axis);
-  void initIntegral();
   void makeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
 };
 

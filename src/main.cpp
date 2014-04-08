@@ -17,7 +17,6 @@ int main(int argc, char * argv[])
   pSolver->Init(); // Linking children and initialization
   
   pSolver->Run();
-  pSolver->GetGrid()->GetGridManager()->Print();
 
   // LAST: here we apparently stop all nodes....
   std::cout << "Done..." << std::endl;

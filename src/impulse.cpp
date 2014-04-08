@@ -60,6 +60,7 @@ void Impulse::Init() {
             m_pxyz2i[x][y][z] = m_vImpulse.size();
             m_vImpulse.push_back(vec);
           } else {
+            // TODO: the fuck should i do here ... ?
             m_pxyz2i[x][y][z] = -1;
           }
 				}

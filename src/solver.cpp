@@ -53,11 +53,12 @@ void Solver::Run() {
 
   // TODO: Add some flag, which determines integral usage
   // if we want to use integral ...
-  // initIntegral();
+  //ci::HSPotential potential;
+  //ci::init(&potential, ci::NO_SYMM);
 
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
 		makeStep(sep::X);
-//		makeStep(sep::Y);
+		makeStep(sep::Y);
 //		makeStep(sep::Z);
 
     // TODO: Add some flag, which determines integral usage
@@ -79,6 +80,7 @@ void Solver::Run() {
     
     // Saving data
     m_pGrid->GetOutResults()->OutAll(iteration);
+    std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
 	}
 }
 
@@ -104,11 +106,6 @@ void Solver::makeStep(sep::Axis axis) {
 
 Config* Solver::GetConfig() const {
   return m_pSolverInfo->getOptions()->GetConfig();
-}
-
-void Solver::initIntegral() {
-  ci::HSPotential potential;
-  ci::init(&potential, ci::NO_SYMM);
 }
 
 void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
