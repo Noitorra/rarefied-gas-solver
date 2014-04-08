@@ -12,7 +12,8 @@
 namespace sep {
   enum GridGeometry {
     DIMAN_GRID_GEOMETRY = 0,
-    PROHOR_GRID_GEOMTRY
+    PROHOR_GRID_GEOMTRY,
+    DEBUG1_GRID_GEOMETRY
   };
   
   enum CellType {

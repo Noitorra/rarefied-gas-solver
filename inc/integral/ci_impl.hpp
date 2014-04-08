@@ -1,6 +1,6 @@
 #ifndef _CI_IMPL_
 #define _CI_IMPL_
-#define M_PI       3.14159265358979323846
+//#define M_PI       3.14159265358979323846
 
 #include <cmath>
 #include <cstdlib>

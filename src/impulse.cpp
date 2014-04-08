@@ -57,7 +57,7 @@ void Impulse::Init() {
 				for(unsigned int z=0;z<line.size();z++) {
 					Vector3d vec(line[x], line[y], line[z]);
           if (vec.mod() < m_dMaxImpulse) {
-            m_pxyz2i[x][y][z] = m_vImpulse.size();
+            m_pxyz2i[x][y][z] = (int)m_vImpulse.size();
             m_vImpulse.push_back(vec);
           } else {
             // TODO: the fuck should i do here ... ?

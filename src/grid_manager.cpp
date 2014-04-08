@@ -69,17 +69,27 @@ void GridManager::Build(Config* pConfig) {
     case sep::PROHOR_GRID_GEOMTRY:
       BuildHTypeGrid(pConfig);
       break;
+    case sep::DEBUG1_GRID_GEOMETRY:
+      BuildDebugTypeGrid(pConfig);
     default:
       break;
   }
+}
+
+void GridManager::BuildDebugTypeGrid(Config* pConfig) {
+  std::cout << "Building comb type grid" << std::endl;
+  InitEmptyBox(pConfig->GetGridSize());
+  AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
+  //  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
+  AddBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), Vector3b(false, false, false), true, 0.4, false);
+  FillInGrid(pConfig);
+  LinkCells(pConfig);
 }
 
 void GridManager::BuildCombTypeGrid(Config* pConfig) {
   std::cout << "Building comb type grid" << std::endl;
   InitEmptyBox(pConfig->GetGridSize());
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
-//  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
-  AddBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), Vector3b(false, false, false), true, 0.4, false);
   FillInGrid(pConfig);
   LinkCells(pConfig);
 }

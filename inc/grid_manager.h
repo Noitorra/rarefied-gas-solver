@@ -41,6 +41,7 @@ private:
   void Build(Config* pConfig);
   void BuildCombTypeGrid(Config* pConfig);
   void BuildHTypeGrid(Config* pConfig);
+  void BuildDebugTypeGrid(Config* pConfig);
   void InitEmptyBox(const Vector3i& vSize);
   void SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::CellType eType, double dWallT);
   void FillInGrid(Config* pConfig);
