@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(RarefiedGasSolver)
 
 # Initialize CXXFLAGS.
-# set(CMAKE_CXX_FLAGS                "-Wall -std=c++0x")
+set(CMAKE_CXX_FLAGS                "-Wall -std=c++0x")
 # set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
 # set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 # set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
