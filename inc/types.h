@@ -146,6 +146,13 @@ public:
 		return *this;
 	}
 
+	inline bool operator==(const Vector3& rhs) const {
+    bool bEqual = true;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			bEqual = this->m_vMass[i] == rhs.m_vMass[i] && bEqual;
+		}
+		return bEqual;
+	}
 };
 
 typedef Vector3<double> 			 Vector3d;

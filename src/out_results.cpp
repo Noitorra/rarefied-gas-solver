@@ -44,7 +44,7 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType) {
       filename = "Temp.bin";
       break;
     case sep::C_PARAM:
-      filename = "out/Conc.bin";
+      filename = "../out/Conc.bin";
       break;
     default:
       // We are not able to print flow yet
