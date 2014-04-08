@@ -22,5 +22,6 @@ int main(int argc, char * argv[])
   
   // LAST: here we apparently stop all nodes....
   pSolver->getParallel()->FinalizeMPI();
+  
   return 0;
 }

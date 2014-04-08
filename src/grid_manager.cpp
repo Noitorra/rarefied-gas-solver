@@ -184,7 +184,7 @@ void GridManager::LinkCells(Config* pConfig) {
         
         // Set parameters
         std::vector<double> vAreaStep(3);
-        vAreaStep.resize(3, 0.001); // ?
+        vAreaStep.resize(3, 0.1);
         cell->setParameters(1.0, 1.0, vAreaStep);
         
         cell->Init();

@@ -14,7 +14,7 @@ void OutResults::OutAll() {
   }
   LoadParameters();
   OutParameterSingletone(sep::T_PARAM);
-  OutParameterSingletone(sep::C_PARAM);
+//  OutParameterSingletone(sep::C_PARAM);
 }
 
 // prepare parameters to be printed out
@@ -41,7 +41,7 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType) {
   std::string filename;
   switch (eType) {
     case sep::T_PARAM:
-      filename = "out/Temp.bin";
+      filename = "Temp.bin";
       break;
     case sep::C_PARAM:
       filename = "out/Conc.bin";
