@@ -12,13 +12,13 @@ int main(int argc, char * argv[])
   // Just testing some reading/writing functions
   std::shared_ptr<Solver> pSolver(new Solver());
   // FIRST: we need to start mpi process...
-  pSolver->getParallel()->InitMPI(argc, argv);
+  //pSolver->getParallel()->InitMPI(argc, argv);
 
   pSolver->Init(); // Linking children and initialization
   
   pSolver->Run();
   
   // LAST: here we apparently stop all nodes....
-  pSolver->getParallel()->FinalizeMPI();
+  //pSolver->getParallel()->FinalizeMPI();
   return 0;
 }
