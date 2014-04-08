@@ -5,19 +5,25 @@
 class Grid;
 class Config;
 class Cell;
+class OutResults;
+class MacroParam;
 
 class InitCellData {
   friend class GridManager;
+  friend OutResults;
 protected:
   InitCellData(sep::CellType eType) :
   m_eType(eType),
-  m_pCell(nullptr) {};
+  m_pCell(nullptr),
+  m_pMacroParam(nullptr) {};
   
   sep::CellType m_eType;
   Cell* m_pCell;
+  std::shared_ptr<MacroParam> m_pMacroParam;
 };
 
 class GridManager {
+  friend OutResults;
 public:
   GridManager();
   void SetParent(Grid* pGrid);
@@ -40,6 +46,6 @@ private:
   Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash) ;
 
 
-  class Grid* m_pGrid;
+  Grid* m_pGrid;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vCells;
 };

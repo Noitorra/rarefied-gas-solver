@@ -129,7 +129,7 @@ void GridManager::FillInGrid(Config* pConfig) {
         Cell* pCell = new Cell(m_pGrid);
         m_pGrid->AddCell(std::shared_ptr<Cell>(pCell));
         m_vCells[x][y][z]->m_pCell = pCell;
-        std::cout << "Adding cell("<< x << "," << y << "," << z << ")" << std::endl;
+//        std::cout << "Adding cell("<< x << "," << y << "," << z << ")" << std::endl;
       }
     }
   }

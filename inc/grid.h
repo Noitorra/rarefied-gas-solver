@@ -6,6 +6,7 @@
 class Cell;
 class GridManager;
 class Solver;
+class OutResults;
 
 // this is only this process part of whole grid
 class Grid {
@@ -31,6 +32,7 @@ public:
   std::vector<std::shared_ptr<Cell>>& getCellVector();
 
   GridManager* GetGridManager() const;
+  OutResults* GetOutResults() const;
   void BuildWithActiveConfig();
 
 private:
@@ -39,7 +41,8 @@ private:
   Vector3i m_vStart; // place where this grid starts in whole grid
   Vector3i m_vWholeSize; // size of whole grid
 
-  std::shared_ptr<class GridManager> m_pGridManager;
+  std::shared_ptr<GridManager> m_pGridManager;
+  std::shared_ptr<OutResults> m_pOutResults;
   Solver* m_pSolver;
   
   std::vector<std::shared_ptr<Cell>> m_vCells;

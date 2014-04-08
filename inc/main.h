@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <memory>
@@ -21,5 +22,11 @@ namespace sep {
     X = 0,
     Y,
     Z
+  };
+  
+  enum MacroParamType {
+    T_PARAM = 0, // Temperature
+    C_PARAM, // Concentration
+    FLOW_PARAM // Flow
   };
 }

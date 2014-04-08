@@ -1,13 +1,16 @@
 #include "grid.h"
 #include "grid_manager.h"
 #include "solver.h"
+#include "out_results.h"
 
 Grid::Grid() :
 m_pGridManager(new GridManager()),
+m_pOutResults(new OutResults()),
 m_pSolver(nullptr) {}
 
 void Grid::Init() {
   m_pGridManager->SetParent(this);
+  m_pOutResults->Init(this, m_pGridManager.get());
 }
 
 void Grid::AddCell(std::shared_ptr<Cell> pCell) {
@@ -20,6 +23,9 @@ std::vector<std::shared_ptr<Cell>>& Grid::getCellVector() {
 
 GridManager* Grid::GetGridManager() const {
   return m_pGridManager.get();
+}
+OutResults* Grid::GetOutResults() const {
+  return m_pOutResults.get();
 }
 
 void Grid::BuildWithActiveConfig() {
