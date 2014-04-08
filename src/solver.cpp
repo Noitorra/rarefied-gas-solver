@@ -55,8 +55,12 @@ void Solver::Run() {
   // if we want to use integral ...
   //ci::HSPotential potential;
   //ci::init(&potential, ci::NO_SYMM);
+  
+  // Save initial state
+  m_pGrid->GetOutResults()->OutAll(0);
 
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
+    
 		makeStep(sep::X);
 		makeStep(sep::Y);
 //		makeStep(sep::Z);
@@ -78,8 +82,8 @@ void Solver::Run() {
 			item->testInnerValuesRange();
 		}
     
-    // Saving data
-    m_pGrid->GetOutResults()->OutAll(iteration);
+    // Output data
+    m_pGrid->GetOutResults()->OutAll(iteration + 1);
     std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
 	}
 }
