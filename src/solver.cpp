@@ -122,7 +122,7 @@ void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
   ci::gen(timestep, 50000, impulse->getResolution() / 2, impulse->getResolution() / 2,
     impulse->getXYZ2I(), impulse->getXYZ2I(),
     impulse->getMaxImpulse() / (impulse->getResolution() / 2),
-    gasv[0]->getMass(), gasv[0]->getMass(),
+    gasv[gi0]->getMass(), gasv[gi1]->getMass(),
     particle, particle);
 
   std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
