@@ -18,8 +18,6 @@ public:
   void Init();
   void Run();
   
-  void makeStep(sep::Axis axis);
-
   Parallel* getParallel() const { return m_pParallel.get(); }
 	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }
 	Grid* GetGrid() const { return m_pGrid.get(); }
@@ -30,6 +28,8 @@ private:
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<SolverInfo> m_pSolverInfo;
   std::shared_ptr<Grid> m_pGrid;
+
+  void makeStep(sep::Axis axis);
 };
 
 #endif /* SOLVER_H_ */
