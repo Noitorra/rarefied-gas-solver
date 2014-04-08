@@ -36,7 +36,6 @@ public:
   OutResults* GetOutResults() const;
   void BuildWithActiveConfig();
   Config* GetConfig() const;
-  void PrintCellsLinkage();
 
 private:
   // size of this

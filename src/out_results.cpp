@@ -1,20 +1,23 @@
 #include "out_results.h"
 #include "grid.h"
 #include "grid_manager.h"
+#include "cell.h"
 
 void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
   m_pGrid = pGrid;
   m_pGridManager = pGridManager;
 }
 
-void OutResults::OutAll() {
+void OutResults::OutAll(int iIteration) {
   if (!m_pGrid || !m_pGridManager) {
     std::cout << "Error: member OutResults is not initialized yet" << std::endl;
     return;
   }
   LoadParameters();
-  OutParameterSingletone(sep::T_PARAM);
-//  OutParameterSingletone(sep::C_PARAM);
+  for (int iGas = 0; iGas < 2; iGas++) {
+    OutParameterSingletone(sep::T_PARAM, iGas, iIteration);
+    OutParameterSingletone(sep::C_PARAM, iGas, iIteration);
+  }
 }
 
 // prepare parameters to be printed out
@@ -27,24 +30,26 @@ void OutResults::LoadParameters() {
   for (int x = 0; x < vSize.x(); x++) {
     for (int y = 0; y < vSize.y(); y++) {
       int z = iZLayer;
-      std::shared_ptr<MacroParam>& pMacroPar = m_vCells[x][y][z]->m_pMacroParam;
-      pMacroPar = std::shared_ptr<MacroParam>(new MacroParam());
       if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL)
         continue;
+      Cell* cell = m_vCells[x][y][z].get()->m_pCell;
+      cell->computeMacroData();
+      const std::vector<MacroData>& vMacroData = cell->getMacroData();
+      m_vCells[x][y][z]->m_vMacroData = vMacroData;
     }
   }
 }
 
-void OutResults::OutParameterSingletone(sep::MacroParamType eType) {
+void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int iIndex) {
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
   
   std::string filename;
   switch (eType) {
     case sep::T_PARAM:
-      filename = "Temp.bin";
+      filename = "../out/gas" + std::to_string(iGas) + "/temp/" + std::to_string(iIndex) + ".bin";
       break;
     case sep::C_PARAM:
-      filename = "../out/Conc.bin";
+      filename = "../out/gas" + std::to_string(iGas) + "/den/" + std::to_string(iIndex) + ".bin";
       break;
     default:
       // We are not able to print flow yet
@@ -59,10 +64,10 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType) {
       double dParam = 0.0;
       switch (eType) {
         case sep::T_PARAM:
-          dParam = m_vCells[x][y][z]->m_pMacroParam->m_dT;
+          dParam = m_vCells[x][y][z]->m_vMacroData[0].Temperature;
           break;
         case sep::C_PARAM:
-          dParam = m_vCells[x][y][z]->m_pMacroParam->m_dC;
+          dParam = m_vCells[x][y][z]->m_vMacroData[0].Concentration;
           break;
         default:
           return;

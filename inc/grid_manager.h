@@ -6,7 +6,7 @@ class Grid;
 class Config;
 class Cell;
 class OutResults;
-class MacroParam;
+class MacroData;
 
 class InitCellData {
   friend class GridManager;
@@ -14,12 +14,13 @@ class InitCellData {
 protected:
   InitCellData(sep::CellType eType) :
   m_eType(eType),
-  m_pCell(nullptr),
-  m_pMacroParam(nullptr) {};
+  m_pCell(nullptr) {
+    m_vMacroData.resize(2);
+  };
   
   sep::CellType m_eType;
   Cell* m_pCell;
-  std::shared_ptr<MacroParam> m_pMacroParam;
+  std::vector<MacroData> m_vMacroData;
 };
 
 class GridManager {

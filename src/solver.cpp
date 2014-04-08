@@ -50,9 +50,10 @@ void Solver::Run() {
 		for( auto& item : cellVector ) {
 			item->testInnerValuesRange();
 		}
+    
+    // Saving data
+    m_pGrid->GetOutResults()->OutAll(iteration);
 	}
-  // Saving data
-  m_pGrid->GetOutResults()->OutAll();
 }
 
 void Solver::initCellType(sep::Axis axis) {

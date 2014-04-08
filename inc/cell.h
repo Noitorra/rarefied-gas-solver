@@ -9,18 +9,10 @@
 #define CELL_H_
 
 #include "types.h"
+#include "main.h"
 
 class Grid;
 class GridManager;
-
-struct MacroData {
-	// Concentration
-	double Concentration;
-	double Temperature;
-
-	Vector3d Stream;
-	Vector3d HeatStream;
-};
 
 class Cell {
   friend GridManager;

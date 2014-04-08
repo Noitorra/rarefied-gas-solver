@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 
+#include "types.h"
+
 namespace sep {
   enum GridGeometry {
     DIMAN_GRID_GEOMETRY = 0,
@@ -31,3 +33,19 @@ namespace sep {
     FLOW_PARAM // Flow
   };
 }
+
+class MacroData {
+public:
+  MacroData() :
+  Concentration(0.0),
+  Temperature(0.0)
+  {};
+	// Concentration
+	double Concentration;
+	double Temperature;
+  
+	Vector3d Stream;
+	Vector3d HeatStream;
+};
+
+
