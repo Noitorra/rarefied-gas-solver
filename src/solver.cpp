@@ -51,6 +51,10 @@ void Solver::Init() {
 void Solver::Run() {
 	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
 
+  // TODO: Add some flag, which determines integral usage
+  // if we want to use integral ...
+  // initIntegral();
+  
   // Save initial state
   m_pGrid->GetOutResults()->OutAll(0);
 
