@@ -250,7 +250,7 @@ void GridManager::Print() {
    for (int y = 0; y < vSize.y(); y++) {
      Cell* cell = m_vCells[0][y][0]->m_pCell;
      while(true) {
-       std::cout << cell->m_vType[0] << " ";
+       std::cout << cell->m_vType[1] << " ";
        if (cell->m_vNext[sep::X].empty())
          break;
        cell = cell->m_vNext[sep::X][0];
