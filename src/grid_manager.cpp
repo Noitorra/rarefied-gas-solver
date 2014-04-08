@@ -77,8 +77,9 @@ void GridManager::Build(Config* pConfig) {
 void GridManager::BuildCombTypeGrid(Config* pConfig) {
   std::cout << "Building comb type grid" << std::endl;
   InitEmptyBox(pConfig->GetGridSize());
-//  SetBox(Vector3i(), pConfig->GetGridSize(), sep::NORMAL_CELL);
-  AddGasBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true);
+  AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
+//  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
+  AddBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), Vector3b(false, false, false), true, 0.4, false);
   FillInGrid(pConfig);
   LinkCells(pConfig);
 }
@@ -103,12 +104,12 @@ void GridManager::InitEmptyBox(const Vector3i& vSize) {
   }
 }
 
-// DOn't need this function for now
-void GridManager::SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::CellType eType) {
+void GridManager::SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::CellType eType, double dWallT) {
   for (int x = vStart.x(); x < vStart.x() + vSize.x(); x++) {
     for (int y = vStart.y(); y < vStart.y() + vSize.y(); y++) {
       for (int z = vStart.z(); z < vStart.z() + vSize.z(); z++) {
         m_vCells[x][y][z]->m_eType = eType;
+        m_vCells[x][y][z]->m_cInitCond.Temperature = dWallT;
       }
     }
   }
@@ -157,6 +158,7 @@ void GridManager::LinkCells(Config* pConfig) {
     for (int y = 0; y < vSize.y(); y++) {
       for (int z = 0; z < vSize.z(); z++) {
         Cell* cell = m_vCells[x][y][z]->m_pCell;
+        const MacroData& init_cond = m_vCells[x][y][z]->m_cInitCond;
         if (m_vCells[x][y][z]->m_eType == sep::EMPTY_CELL)
           continue;
         // Init vectors
@@ -183,7 +185,7 @@ void GridManager::LinkCells(Config* pConfig) {
         // Set parameters
         std::vector<double> vAreaStep;
         vAreaStep.resize(3, 0.1);
-        cell->setParameters(1.0, 1.0, vAreaStep);
+        cell->setParameters(init_cond.Concentration, init_cond.Temperature, vAreaStep);
         
         cell->Init();
       }
@@ -201,7 +203,7 @@ bool GridManager::IsConer(Vector3i vStart, Vector3i vEnd, Vector3i vP) {
 }
 
 // Add box with fake cells around it
-void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ) {
+void GridManager::AddBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ, double dWallT, bool bGasBox) {
   
   int n, m, p;
   
@@ -227,7 +229,7 @@ void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFa
         // one rule: (do we need this?)
         // if cell is already exist and it's type is normal
         // we do not overwrite it
-        if (cell->m_eType == sep::NORMAL_CELL)
+        if (bGasBox && cell->m_eType == sep::NORMAL_CELL)
           continue;
         
         if (i == vStart.x() || i == n-1 ||
@@ -247,11 +249,16 @@ void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFa
             }
         else {
           // normal cells
-          cell->m_eType = sep::NORMAL_CELL;
+          if (bGasBox)
+            cell->m_eType = sep::NORMAL_CELL;
+          else
+            cell->m_eType = sep::EMPTY_CELL;
         }
         
-        if (IsConer(vStart, vStart + vSize + Vector3i(-1, -1, -1), Vector3i(i, j, k)))
+        if (bGasBox && IsConer(vStart, vStart + vSize + Vector3i(-1, -1, -1), Vector3i(i, j, k)))
           cell->m_eType = sep::EMPTY_CELL;
+        
+        m_vCells[i][j][k]->m_cInitCond.Temperature = dWallT;
       }
     }
   }

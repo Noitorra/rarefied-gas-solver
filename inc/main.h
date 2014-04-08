@@ -37,8 +37,8 @@ namespace sep {
 class MacroData {
 public:
   MacroData() :
-  Concentration(0.0),
-  Temperature(0.0)
+  Concentration(1.0),
+  Temperature(1.0)
   {};
 	// Concentration
 	double Concentration;

@@ -21,6 +21,7 @@ protected:
   sep::CellType m_eType;
   Cell* m_pCell;
   std::vector<MacroData> m_vMacroData;
+  MacroData m_cInitCond;
 };
 
 class GridManager {
@@ -41,10 +42,10 @@ private:
   void BuildCombTypeGrid(Config* pConfig);
   void BuildHTypeGrid(Config* pConfig);
   void InitEmptyBox(const Vector3i& vSize);
-  void SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::CellType eType);
+  void SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::CellType eType, double dWallT);
   void FillInGrid(Config* pConfig);
   void LinkCells(Config* pConfig);
-  void AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ);
+  void AddBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ, double dWallT, bool bGasBox);
   Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash);
   bool IsConer(Vector3i vStart, Vector3i vEnd, Vector3i vP);
 
