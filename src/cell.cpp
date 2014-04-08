@@ -84,7 +84,7 @@ void Cell::computeHalf(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
 		compute_type(dim);
-		computeHalf(dim);
+		if(m_vType[dim] != CT_UNDEFINED ) computeHalf(dim);
 		break;
 		case CT_LEFT:
 		compute_half_left(dim);
@@ -182,7 +182,7 @@ void Cell::compute_type(unsigned int dim) {
 		if ( !m_vNext[dim].empty() ) {
 			m_vType[dim] = CT_LEFT;
 		} else {
-			std::cout << "Cell has no neighbors in dim = " << dim << std::endl;
+			//std::cout << "Cell has no neighbors in dim = " << dim << std::endl;
 		}
 	} else {
 		if( m_vNext[dim].empty() ) {
@@ -197,7 +197,7 @@ void Cell::compute_type(unsigned int dim) {
 	}
 
 	if( m_vType[dim] == CT_UNDEFINED) {
-		std::cout << "Cannot find this cell type, maybe cells are not linked, or linked wrong." << std::endl;
+		//std::cout << "Cannot find this cell type, maybe cells are not linked, or linked wrong." << std::endl;
 	}
 }
 
