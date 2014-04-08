@@ -37,18 +37,30 @@ void Solver::Init() {
 
 void Solver::Run() {
 	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+
+	initCellType(sep::X);
+	initCellType(sep::Y);
+	initCellType(sep::Z);
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
 		makeStep(sep::X);
-		makeStep(sep::Y);
-		makeStep(sep::Z);
+//		makeStep(sep::Y);
+//		makeStep(sep::Z);
 
 		// here we can test data, if needed...
-		for( auto& item : cellVector ) {
-			item->testInnerValuesRange();
-		}
+//		for( auto& item : cellVector ) {
+//			item->testInnerValuesRange();
+//		}
 	}
   // Saving data
   m_pGrid->GetOutResults()->OutAll();
+}
+
+void Solver::initCellType(sep::Axis axis) {
+	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+	// make type
+	for( auto& item : cellVector ) {
+		item->computeType(axis);
+	}
 }
 
 void Solver::makeStep(sep::Axis axis) {
@@ -61,11 +73,11 @@ void Solver::makeStep(sep::Axis axis) {
 	for( auto& item : cellVector ) {
 		item->computeValue(axis);
 	}
-	// make integral
-	// TODO: add integral count...
-	for( auto& item : cellVector ) {
-		item->computeIntegral(axis);
-	}
+//	// make integral
+//	// TODO: add integral count...
+//	for( auto& item : cellVector ) {
+//		item->computeIntegral(axis);
+//	}
 }
 
 Config* Solver::GetConfig() const {

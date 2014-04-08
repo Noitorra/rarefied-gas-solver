@@ -29,6 +29,7 @@ private:
 	std::shared_ptr<SolverInfo> m_pSolverInfo;
   std::shared_ptr<Grid> m_pGrid;
 
+  void initCellType(sep::Axis axis);
   void makeStep(sep::Axis axis);
 };
 
