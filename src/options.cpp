@@ -31,7 +31,7 @@ void Options::Init() {
   
   // Debug configuration 1
   std::shared_ptr<Config> pDebugConfig1(new Config("debug_1"));
-  pDebugConfig1->SetGridSize(Vector3i(10, 10, 1));
+  pDebugConfig1->SetGridSize(Vector3i(6, 6, 1));
   pDebugConfig1->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   pDebugConfig1->SetMaxIteration(0);
   AddConfig(pDebugConfig1);

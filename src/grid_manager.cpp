@@ -191,6 +191,15 @@ void GridManager::LinkCells(Config* pConfig) {
   }
 }
 
+bool GridManager::IsConer(Vector3i vStart, Vector3i vEnd, Vector3i vP) {
+  // Only 2D!
+  Vector3i vCorn0 = Vector3i(vStart.x(), vEnd.y(), vStart.z());
+  Vector3i vCorn1 = Vector3i(vEnd.x(), vStart.y(), vStart.z());
+  if (vP == vStart || vP == vEnd || vP == vCorn0 || vP == vCorn1)
+    return true;
+  return false;
+}
+
 // Add box with fake cells around it
 void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ) {
   
@@ -240,6 +249,9 @@ void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFa
           // normal cells
           cell->m_eType = sep::NORMAL_CELL;
         }
+        
+        if (IsConer(vStart, vStart + vSize + Vector3i(-1, -1, -1), Vector3i(i, j, k)))
+          cell->m_eType = sep::EMPTY_CELL;
       }
     }
   }
@@ -247,16 +259,17 @@ void GridManager::AddGasBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFa
 
 void GridManager::Print() {
   const Vector3i& vSize = m_pGrid->GetSize();
-   for (int y = 0; y < vSize.y(); y++) {
-     Cell* cell = m_vCells[0][y][0]->m_pCell;
-     while(true) {
+  for (int y = 0; y < vSize.y(); y++) {
+    for (int x = 0; x < vSize.x(); x++) {
+       Cell* cell = m_vCells[x][y][0]->m_pCell;
+      if (!cell) {
+        std::cout << "x" << " ";
+        continue;
+      }
        std::cout << cell->m_vType[0] << " ";
-       if (cell->m_vNext[sep::X].empty())
-         break;
-       cell = cell->m_vNext[sep::X][0];
      }
      std::cout << std::endl;
-   }
+  }
 }
 
 
