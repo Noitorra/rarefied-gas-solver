@@ -5,6 +5,7 @@
 #include "options.h"
 #include "grid.h"
 #include "cell.h"
+#include "out_results.h"
 
 Solver::Solver()
 : m_pParallel(new Parallel),
@@ -28,6 +29,9 @@ void Solver::Init() {
   // Init grid
   m_pGrid->SetParent(this);
   m_pGrid->Init();
+  
+  // Building grid configuration
+  m_pGrid->BuildWithActiveConfig();
 }
 
 void Solver::Run() {
@@ -41,10 +45,9 @@ void Solver::Run() {
 		for( auto& item : cellVector ) {
 			item->testInnerValuesRange();
 		}
-
-		// Saving data
-
 	}
+  // Saving data
+  m_pGrid->GetOutResults()->OutAll();
 }
 
 void Solver::makeStep(sep::Axis axis) {

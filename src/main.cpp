@@ -18,11 +18,7 @@ int main(int argc, char * argv[])
 
   pSolver->Init(); // Linking children and initialization
   
-  // Building grid configuration
-  pSolver->GetGrid()->BuildWithActiveConfig();
-
   pSolver->Run();
-
   // LAST: here we apparently stop all nodes....
   pSolver->getParallel()->FinalizeMPI();
   return 0;
