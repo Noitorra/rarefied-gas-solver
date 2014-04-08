@@ -234,10 +234,10 @@ void Cell::compute_half_left(unsigned int dim) {
          		compute_anv(m_vNext[dim], dim, gi, ii, 0),
          		compute_anv(m_vNext[dim], dim, gi, ii, 1) );
 
-        C1_up += abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
-        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0))/2);
+        C1_up += std::abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
+        C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0)) / 2);
       } else {
-        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
+        C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
       }
     }
 
@@ -305,10 +305,10 @@ void Cell::compute_half_right(unsigned int dim) {
 //	                                                                                                               m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vValue[gi][ii]);
 
-	        C1_up += abs(impulsev[ii][dim]*compute_aph(m_vPrev[dim], dim, gi, ii, 0));
-	        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0))/2);
+          C1_up += std::abs(impulsev[ii][dim] * compute_aph(m_vPrev[dim], dim, gi, ii, 0));
+          C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0)) / 2);
 	      } else {
-	        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
+          C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
 	      }
 	    }
 
@@ -398,7 +398,7 @@ double Cell::compute_anh(CellVector& cellv, unsigned int dim, unsigned int gi, u
 }
 
 double Cell::fast_exp(const double& mass, const double& temp, const Vector3d& impulse) {
-	return std::exp(-impulse.mod()/mass/2/temp);
+	return std::exp(-impulse.mod2()/mass/2/temp);
 }
 
 double Cell::limiter_superbee(const double& x, const double& y, const double& z) {
@@ -432,17 +432,24 @@ double Cell::compute_temperature(unsigned int gi) {
   Vector3d uvec;
 
   for(unsigned int ii=0;ii<impulsev.size();ii++) {
-  	uvec += impulsev[ii]/gasv[gi]->getMass()*m_vValue[gi][ii];
+    for (unsigned int vi = 0; vi < uvec.getMass().size(); vi++) {
+      uvec[vi] += impulsev[ii][vi] / gasv[gi]->getMass() * m_vValue[gi][ii];
+    }
   }
+
   uvec *= impulse->getDeltaImpulseQube()/concentration;
 
   for(unsigned int ii=0;ii<impulsev.size();ii++) {
-  	uvec = impulsev[ii]/gasv[gi]->getMass() - uvec;
-    //uvec[2] = 0.0; // TODO: WTFFFFFFFFFUUUUCK
-    temperature += gasv[gi]->getMass()*uvec.mod2()*m_vValue[gi][ii];
+    Vector3d tempvec;
+    for (unsigned int vi = 0; vi < uvec.getMass().size(); vi++) {
+      tempvec[vi] = impulsev[ii][vi] / gasv[gi]->getMass() - uvec[vi];
+    }
+    temperature += gasv[gi]->getMass()*tempvec.mod2()*m_vValue[gi][ii];
   }
   //cout << uvec[0] << ":" << uvec[1] << ":" << uvec[2] << endl;
-  temperature *= impulse->getDeltaImpulseQube()/concentration/3;
+  temperature *= impulse->getDeltaImpulseQube() / concentration / 3;
+
+  //std::cout << temperature << std::endl;
   return temperature;
 }
 

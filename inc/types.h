@@ -14,6 +14,8 @@ public:
 		m_vMass.clear();
 	}
 
+  std::vector<T>& getMass() { return m_vMass; }
+
 	const T mod() const {
 		return std::sqrt(mod2());
 	}
@@ -29,7 +31,8 @@ private:
 	const T calc_mod2() const {
 		T loc_mod2 = T(0);
 		for( auto& item : m_vMass) {
-			loc_mod2 += item*item;
+			// loc_mod2 += (item*item);
+      loc_mod2 += (item*item);
 		}
 		return loc_mod2;
 	}
@@ -43,7 +46,7 @@ template<typename T>
 class Vector2 : public VectorBase<T> {
 public:
 	Vector2() {
-		this->m_vMass.resize(2);
+		this->m_vMass.resize(2, T(0));
 	}
 	Vector2(const T& x, const T& y) : Vector2() {
 		set(x, y);
@@ -71,7 +74,7 @@ template<typename T>
 class Vector3 : public VectorBase<T> {
 public:
 	Vector3() {
-		this->m_vMass.resize(3);
+		this->m_vMass.resize(3, T(0));
 	}
 	Vector3(const T& x, const T& y, const T& z) : Vector3() {
 		set(x, y, z);
