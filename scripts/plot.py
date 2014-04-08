@@ -14,6 +14,10 @@ for gas in range(gas_num):
   for i in range(max_files):
     s = "%i" % i
     D = numpy.fromfile(data_folder+'den/'+s+'.bin', dtype=float).reshape(NX, NY)
+    for x in range(NX):
+      for y in range(NY):
+        if D[x][y] == 0.0:
+          D[x][y] = nan;
     plt.imshow(D, vmin=0.993, vmax=1.007, interpolation='nearest')
     plt.colorbar()
     plt.contour(D, colors='black')

@@ -60,23 +60,25 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   for (int x = 1; x < vSize.x() - 1; x++) {
     for (int y = 1; y < vSize.y() - 1; y++) {
       int z = iZLayer;
-//      if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL)
-//        continue;
       double dParam = 0.0;
-      switch (eType) {
-        case sep::T_PARAM:
-          dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Temperature;
-          std::cout << "Temp ";
-          break;
-        case sep::C_PARAM:
-          dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Concentration;
-          std::cout << "Conc ";
-          break;
-        default:
-          return;
+      if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL) {
+        dParam = 0.0;
+      } else {
+        switch (eType) {
+          case sep::T_PARAM:
+            dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Temperature;
+//            std::cout << "Temp ";
+            break;
+          case sep::C_PARAM:
+            dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Concentration;
+//            std::cout << "Conc ";
+            break;
+          default:
+            return;
+        }
       }
-      std::cout << "(" << x << "," << y << "," << z << "): " <<
-      dParam << std::endl;
+//      std::cout << "(" << x << "," << y << "," << z << "): " <<
+//      dParam << std::endl;
       fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
     }
   }
