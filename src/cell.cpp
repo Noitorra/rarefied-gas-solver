@@ -12,6 +12,7 @@
 #include "solver_info.h"
 #include "gas.h"
 #include "impulse.h"
+#include "config.h"
 
 #include <iostream>
 
@@ -191,6 +192,7 @@ void Cell::compute_half_left(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+  Config* config = m_pGrid->GetConfig();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     double C1_up = 0.0;
@@ -198,7 +200,7 @@ void Cell::compute_half_left(unsigned int dim) {
     double C2_up = 0.0;
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
       if(impulsev[ii][dim] < 0) {
-        double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
+        double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 
         m_vValue[gi][ii] = 2*compute_anv(m_vNext[dim], dim, gi, ii, 0) - compute_anv(m_vNext[dim], dim, gi, ii, 1);
         if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
@@ -228,10 +230,11 @@ void Cell::compute_half_normal(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+  Config* config = m_pGrid->GetConfig();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 		for(unsigned int ii=0;ii<impulsev.size();ii++) {
-			double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
+			double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 			if(impulsev[ii][dim] > 0) {
 				m_vHalf[gi][ii] = m_vValue[gi][ii] + (1-y)/2*limiter(
 						compute_apv(m_vPrev[dim], dim, gi, ii, 0),
@@ -253,6 +256,7 @@ void Cell::compute_half_right(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+  Config* config = m_pGrid->GetConfig();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 	    double C1_up = 0.0;
@@ -260,7 +264,7 @@ void Cell::compute_half_right(unsigned int dim) {
 	    double C2_up = 0.0;
 	    for(unsigned int ii=0;ii<impulsev.size();ii++) {
 	      if(impulsev[ii][dim] > 0) {
-	      	double y = sinfo->getTimestep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
+	      	double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 
 	         m_vValue[gi][ii] = 2*compute_apv(m_vPrev[dim], dim, gi, ii, 0) - compute_apv(m_vPrev[dim], dim, gi, ii, 1);
 	        if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
@@ -302,10 +306,11 @@ void Cell::compute_value_normal(unsigned int dim) {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+  Config* config = m_pGrid->GetConfig();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
-		    double y = sinfo->getTimestep()/gasv[gi]->getMass()*impulsev[ii][dim]/m_vAreastep[dim];
+		    double y = config->GetTimeStep()/gasv[gi]->getMass()*impulsev[ii][dim]/m_vAreastep[dim];
         m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_aph(m_vPrev[dim], dim, gi, ii, 0));
     }
   }

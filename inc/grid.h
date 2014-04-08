@@ -7,6 +7,7 @@ class Cell;
 class GridManager;
 class Solver;
 class OutResults;
+class Config;
 
 // this is only this process part of whole grid
 class Grid {
@@ -34,6 +35,7 @@ public:
   GridManager* GetGridManager() const;
   OutResults* GetOutResults() const;
   void BuildWithActiveConfig();
+  Config* GetConfig() const;
 
 private:
   // size of this

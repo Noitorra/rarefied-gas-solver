@@ -17,6 +17,7 @@ class Solver;
 class Options;
 class Impulse;
 class Gas;
+class Config;
 
 typedef std::vector< std::shared_ptr<Gas> > GasVector;
 
@@ -25,9 +26,6 @@ private:
 	std::shared_ptr<Impulse> m_pImpulse;
 	std::shared_ptr<Options> m_pOptions;
 	GasVector m_vGas;
-
-	double m_dTimestep;
-	int m_iMaxIteration;
 
 	Solver* m_pSolver;
 public:
@@ -39,9 +37,7 @@ public:
 	Options* getOptions() { return m_pOptions.get(); }
 	Impulse* getImpulse() { return m_pImpulse.get(); }
 	GasVector& getGasVector() { return m_vGas; }
-
-	double getTimestep() { return m_dTimestep; }
-	int getMaxIteration() { return m_iMaxIteration; }
+  Config* GetConfig() const;
 
 	Solver* getSolver() {
 		return m_pSolver;

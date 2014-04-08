@@ -33,6 +33,7 @@ void Options::Init() {
   std::shared_ptr<Config> pDebugConfig1(new Config("debug_1"));
   pDebugConfig1->SetGridSize(Vector3i(10, 10, 1));
   pDebugConfig1->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
+  pDebugConfig1->SetMaxIteration(0);
   AddConfig(pDebugConfig1);
   
   // Finally, select wich is active
@@ -49,7 +50,7 @@ bool Options::SetActiveConfig(const std::string& sName) {
   m_sActiveConfig = sName;
   try {
     std::cout << "Activating config: ";
-    GetActiveConfig()->PrintMe();
+    GetConfig()->PrintMe();
   } catch (char const* sExc) {
     std::cout << "Exception occurs: " << sExc << std::endl;
     return false;
@@ -57,7 +58,7 @@ bool Options::SetActiveConfig(const std::string& sName) {
   return true;
 }
 
-Config* Options::GetActiveConfig() {
+Config* Options::GetConfig() {
   if (m_mConfigs.find(m_sActiveConfig) == m_mConfigs.end())
     throw "No active config yet";
   return m_mConfigs[m_sActiveConfig].get();

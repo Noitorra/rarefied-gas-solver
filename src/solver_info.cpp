@@ -23,9 +23,6 @@ SolverInfo::SolverInfo()
 	// some variables
 	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
 	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
-
-	m_dTimestep = 0.01;
-	m_iMaxIteration = 100;
 }
 
 SolverInfo::~SolverInfo() {
@@ -35,4 +32,8 @@ SolverInfo::~SolverInfo() {
 void SolverInfo::Init() {
 	m_pImpulse->Init();
 	m_pOptions->Init();
+}
+
+Config* SolverInfo::GetConfig() const {
+  return m_pOptions->GetConfig();
 }

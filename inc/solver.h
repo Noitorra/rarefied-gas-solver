@@ -24,7 +24,7 @@ public:
 	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }
 	Grid* GetGrid() const { return m_pGrid.get(); }
   // Throws const char*
-  Config* GetActiveConfig() const;
+  Config* GetConfig() const;
   
 private:
   std::shared_ptr<Parallel> m_pParallel;

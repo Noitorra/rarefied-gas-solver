@@ -6,6 +6,7 @@
 #include "grid.h"
 #include "cell.h"
 #include "out_results.h"
+#include "config.h"
 
 Solver::Solver()
 : m_pParallel(new Parallel),
@@ -36,7 +37,7 @@ void Solver::Init() {
 
 void Solver::Run() {
 	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
-	for(int iteration = 0;iteration<m_pSolverInfo->getMaxIteration();iteration++) {
+	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
 		makeStep(sep::X);
 		makeStep(sep::Y);
 		makeStep(sep::Z);
@@ -67,6 +68,6 @@ void Solver::makeStep(sep::Axis axis) {
 	}
 }
 
-Config* Solver::GetActiveConfig() const {
-  return m_pSolverInfo->getOptions()->GetActiveConfig();
+Config* Solver::GetConfig() const {
+  return m_pSolverInfo->getOptions()->GetConfig();
 }

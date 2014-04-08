@@ -26,7 +26,7 @@ public:
   
   void Init();
   // Throws char const*
-  Config* GetActiveConfig();
+  Config* GetConfig(); // Get active config
   
 private:
   void AddConfig(std::shared_ptr<Config> pConfig);
