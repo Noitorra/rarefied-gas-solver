@@ -36,14 +36,14 @@ void Impulse::Init() {
 		std::cout << "[Error][Impulse] Before using Init, set SolverInfo..." << std::endl;
 	} else {
 		// calc delta impulse
-		m_dDeltaImpulse = 2*m_dMaxImpulse/(m_uResolution - 1);
+		m_dDeltaImpulse = 2*m_dMaxImpulse/(m_uResolution);
 		m_dDeltaImpulseQube = std::pow(m_dDeltaImpulse, 3);
 
 		// calc line impulse vector
 		std::vector<double> line;
 		for( unsigned int i=0; i<m_uResolution; i++ ) {
-			line.push_back( m_dDeltaImpulse*i - m_dMaxImpulse );
-			//std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
+			line.push_back( m_dDeltaImpulse*(i+0.5) - m_dMaxImpulse );
+			std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
 		}
 
     // xyz2i
