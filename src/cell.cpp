@@ -15,6 +15,7 @@
 #include "config.h"
 
 #include <iostream>
+#include <algorithm>
 
 Cell::Cell() {
 	// TODO Auto-generated constructor stub

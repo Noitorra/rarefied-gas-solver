@@ -4,8 +4,6 @@
 #include "grid_manager.h"
 #include "parallel.h"
 
-#include <mpi.h>
-
 #include <memory>
 // Simple main function to debug some demo functionality
 
