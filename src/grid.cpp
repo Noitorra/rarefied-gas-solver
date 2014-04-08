@@ -2,6 +2,7 @@
 #include "grid_manager.h"
 #include "solver.h"
 #include "out_results.h"
+#include "cell.h"
 
 Grid::Grid() :
 m_pGridManager(new GridManager()),
@@ -39,3 +40,30 @@ void Grid::BuildWithActiveConfig() {
     return;
   }
 }
+
+void Grid::PrintCellsLinkage() {
+  if (m_vCells.empty()) {
+    return;
+  }
+  Cell* first_cell = m_vCells[1].get();
+  Cell* cell = first_cell;
+  Cell* cell_y = first_cell;
+  
+  while (true) {
+    while (true) {
+      std::cout << cell->m_vType[0] << " ";
+      if (cell->m_vNext[sep::X].empty())
+        break;
+      cell = cell->m_vNext[sep::X][0];
+    }
+    std::cout << std::endl;
+    if (cell_y->m_vNext[sep::Y].empty())
+      break;
+    cell_y = cell_y->m_vNext[sep::Y][0];
+    cell = cell_y;
+  }
+}
+
+
+
+

@@ -167,11 +167,9 @@ void GridManager::LinkCells(Config* pConfig) {
         
         // Link
         Vector3i vCoord(x, y, z);
-        if (m_vCells[x][y][z]->m_eType == sep::NORMAL_CELL) {
-          for (int ax = 0; ax < 3; ax++) {
-            cell->m_vPrev[ax][0] = GetNeighb(vCoord, (sep::Axis)ax, -1);
-            cell->m_vNext[ax][0] = GetNeighb(vCoord, (sep::Axis)ax, +1);
-          }
+        for (int ax = 0; ax < 3; ax++) {
+          cell->m_vPrev[ax][0] = GetNeighb(vCoord, (sep::Axis)ax, -1);
+          cell->m_vNext[ax][0] = GetNeighb(vCoord, (sep::Axis)ax, +1);
         }
         
         // Remove nulls
@@ -183,7 +181,7 @@ void GridManager::LinkCells(Config* pConfig) {
         }
         
         // Set parameters
-        std::vector<double> vAreaStep(3);
+        std::vector<double> vAreaStep;
         vAreaStep.resize(3, 0.1);
         cell->setParameters(1.0, 1.0, vAreaStep);
         

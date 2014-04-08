@@ -24,6 +24,7 @@ struct MacroData {
 
 class Cell {
   friend GridManager;
+  friend Grid;
 public:
 	enum CellType {
 		CT_UNDEFINED,
