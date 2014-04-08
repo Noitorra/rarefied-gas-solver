@@ -17,6 +17,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include "integral/ci.hpp"
+
 Cell::Cell() {
 	// TODO Auto-generated constructor stub
 	m_vType.resize(3, CT_UNDEFINED);
@@ -129,8 +131,8 @@ void Cell::computeValue(unsigned int dim) {
 		break;
 	}
 }
-void Cell::computeIntegral(unsigned int dim) {
-	// TODO:: Add realization
+void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
+  ci::iter(m_vValue[gi0], m_vValue[gi1]);
 }
 
 void Cell::computeMacroData() {
