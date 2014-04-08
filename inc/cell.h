@@ -13,6 +13,15 @@
 class Grid;
 class GridManager;
 
+struct MacroData {
+	// Concentration
+	double Concentration;
+	double Temperature;
+
+	Vector3d Stream;
+	Vector3d HeatStream;
+};
+
 class Cell {
   friend GridManager;
 public:
@@ -40,6 +49,8 @@ private:
 
 	std::vector< CellType > m_vType;
 
+	std::vector<MacroData> m_vMacroData;
+
 	Grid* m_pGrid;
 public:
 	Cell();
@@ -61,6 +72,10 @@ public:
 
 	// tests
 	bool testInnerValuesRange();
+
+	// macro data
+	void computeMacroData();
+	const std::vector<MacroData>& getMacroData() const { return m_vMacroData; }
 private:
 	// help methods
 	void compute_type(unsigned int dim);
@@ -92,6 +107,10 @@ private:
 	}
 	double limiter_superbee(const double& x, const double& y, const double& z);
 
+	double compute_concentration(unsigned int gi);
+	double compute_temperature(unsigned int gi);
+	Vector3d compute_stream(unsigned int gi);
+	Vector3d compute_heatstream(unsigned int gi);
 };
 
 #endif /* CELL_H_ */

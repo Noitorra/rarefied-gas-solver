@@ -68,6 +68,7 @@ void Cell::Init() {
     // Allocating space for values and half's
     m_vHalf.resize(gasv.size());
     m_vValue.resize(gasv.size());
+    m_vMacroData.resize(gasv.size());
 
     m_vHalf[gi].resize( impulsev.size() );
     m_vValue[gi].resize( impulsev.size() );
@@ -127,6 +128,19 @@ void Cell::computeIntegral(unsigned int dim) {
 	// TODO:: Add realization
 }
 
+void Cell::computeMacroData() {
+	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	GasVector& gasv = sinfo->getGasVector();
+
+	for(unsigned int gi=0;gi<gasv.size();gi++) {
+		m_vMacroData[gi].Concentration = compute_concentration(gi);
+		m_vMacroData[gi].Temperature = compute_temperature(gi);
+		m_vMacroData[gi].Stream = compute_stream(gi);
+		m_vMacroData[gi].HeatStream = compute_heatstream(gi);
+	}
+}
+
+/* Tests */
 bool Cell::testInnerValuesRange() {
 	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
@@ -375,4 +389,52 @@ double Cell::fast_exp(const double& mass, const double& temp, const Vector3d& im
 double Cell::limiter_superbee(const double& x, const double& y, const double& z) {
   if( (z-y)*(y-x) <= 0 ) return 0.0;
   else return std::max(0.0, std::min(2*std::abs(y-x), std::min(std::abs(z-y), std::min(std::abs(y-x), 2*std::abs(z-y)))))*sgn(z-y);
+}
+
+/* Macro Data */
+
+double Cell::compute_concentration(unsigned int gi) {
+	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	Impulse* impulse = sinfo->getImpulse();
+	ImpulseVector& impulsev = impulse->getVector();
+
+  double concentration = 0.0;
+  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  	concentration += m_vValue[gi][ii];
+  }
+  concentration *= impulse->getDeltaImpulseQube();
+  return concentration;
+}
+
+double Cell::compute_temperature(unsigned int gi) {
+	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	GasVector& gasv = sinfo->getGasVector();
+	Impulse* impulse = sinfo->getImpulse();
+	ImpulseVector& impulsev = impulse->getVector();
+
+	double concentration = m_vMacroData[gi].Concentration;
+  double temperature = 0.0;
+  Vector3d uvec;
+
+  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  	uvec += impulsev[ii]/gasv[gi]->getMass()*m_vValue[gi][ii];
+  }
+  uvec *= impulse->getDeltaImpulseQube()/concentration;
+
+  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  	uvec = impulsev[ii]/gasv[gi]->getMass() - uvec;
+    //uvec[2] = 0.0; // TODO: WTFFFFFFFFFUUUUCK
+    temperature += gasv[gi]->getMass()*uvec.mod2()*m_vValue[gi][ii];
+  }
+  //cout << uvec[0] << ":" << uvec[1] << ":" << uvec[2] << endl;
+  temperature *= impulse->getDeltaImpulseQube()/concentration/3;
+  return temperature;
+}
+
+Vector3d Cell::compute_stream(unsigned int gi) {
+	return Vector3d();
+}
+
+Vector3d Cell::compute_heatstream(unsigned int gi) {
+	return Vector3d();
 }

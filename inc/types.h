@@ -89,6 +89,63 @@ public:
 	const T& x() const { return this->m_vMass[0]; }
 	const T& y() const { return this->m_vMass[1]; }
 	const T& z() const { return this->m_vMass[2]; }
+
+	const Vector3 operator+(const Vector3& right) const {
+		Vector3 v3;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			v3.m_vMass[i] = this->m_vMass[i] + right.m_vMass[i];
+		}
+		return v3;
+	}
+
+	const Vector3& operator+=(const Vector3& right) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] += right.m_vMass[i];
+		}
+		return *this;
+	}
+
+	const Vector3 operator-(const Vector3& right) const {
+		Vector3 v3;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			v3.m_vMass[i] = this->m_vMass[i] - right.m_vMass[i];
+		}
+		return v3;
+	}
+
+	const Vector3& operator-=(const Vector3& right) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] += right.m_vMass[i];
+		}
+		return *this;
+	}
+
+	template<typename TValue>
+	const Vector3 operator/(const TValue& right) const {
+		Vector3 v3;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			v3.m_vMass[i] = this->m_vMass[i] / right;
+		}
+		return v3;
+	}
+
+	template<typename TValue>
+	const Vector3 operator*(const TValue& right) const {
+		Vector3 v3;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			v3.m_vMass[i] = this->m_vMass[i] * right;
+		}
+		return v3;
+	}
+
+	template<typename TValue>
+	const Vector3& operator*=(const TValue& right) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] *= right;
+		}
+		return *this;
+	}
+
 };
 
 typedef Vector3<double> 			 Vector3d;
