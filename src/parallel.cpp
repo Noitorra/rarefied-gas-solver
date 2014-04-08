@@ -6,7 +6,8 @@
  */
 
 #include "parallel.h"
-#include <mpi.h>
+#include <iostream>
+// #include <mpi.h>
 
 Parallel::Parallel() {
 	m_dStartTime = 0.0;
@@ -20,19 +21,19 @@ Parallel::~Parallel() {}
 
 /* public */
 void Parallel::InitMPI(int & argc, char **& argv) {
-	MPI::Init(argc, argv);
-	m_dStartTime = MPI::Wtime();
-	m_iSize = MPI::COMM_WORLD.Get_size();
-	m_iRank = MPI::COMM_WORLD.Get_rank();
+	//MPI::Init(argc, argv);
+	//m_dStartTime = MPI::Wtime();
+	//m_iSize = MPI::COMM_WORLD.Get_size();
+	//m_iRank = MPI::COMM_WORLD.Get_rank();
 	construct_msg();
 }
 
 void Parallel::FinalizeMPI() {
 	// waiting until all nodes execute
-	m_dEndTime = MPI::Wtime();
-	print_exec_time(m_dEndTime - m_dStartTime);
-	MPI::COMM_WORLD.Barrier();
-	MPI::Finalize();
+	//m_dEndTime = MPI::Wtime();
+	//print_exec_time(m_dEndTime - m_dStartTime);
+	//MPI::COMM_WORLD.Barrier();
+	//MPI::Finalize();
 }
 
 /* private */

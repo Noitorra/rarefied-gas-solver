@@ -15,6 +15,7 @@
 #include "config.h"
 
 #include <iostream>
+#include <algorithm>
 
 Cell::Cell() {
 	// TODO Auto-generated constructor stub
@@ -28,7 +29,7 @@ Cell::Cell() {
 	m_vAreastep.resize(3, 0.0);
 
 	m_dStartTemperature = 0.0;
-	m_dStartDensity = 0.0;
+  m_dStartConcentration = 0.0;
 
 	// Grid....
 	m_pGrid = nullptr;
@@ -45,8 +46,8 @@ Cell::~Cell() {
 /* public */
 
 // main methods
-void Cell::setParameters(const double& _Density, const double& _Temperature, const DoubleVector& _Areastep) {
-	m_dStartDensity = _Density;
+void Cell::setParameters(double _Concentration, double _Temperature, DoubleVector _Areastep) {
+  m_dStartConcentration = _Concentration;
 	m_dStartTemperature = _Temperature;
 	m_vAreastep = _Areastep;
 }
@@ -64,7 +65,7 @@ void Cell::Init() {
     }
 
     C *= impulse->getDeltaImpulseQube();
-    C = m_dStartDensity/C;
+    C = m_dStartConcentration / C;
 
     // Allocating space for values and half's
     m_vHalf.resize(gasv.size());
@@ -159,18 +160,22 @@ bool Cell::testInnerValuesRange() {
 			} else {
 				// wrong values
 				result = false;
-				std::cout << "Cell::testInnerValuesRange() : Error in gi = " << gi
-						<< " ii = " << ii
-						<< " value = " << m_vValue[gi][ii] << std::endl;
+        std::cout << "Cell::testIVR(): Error [type][gi][ii]"
+          << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
+          << "[" << gi << "]"
+          << "[" << ii << "]"
+          << " value = " << m_vValue[gi][ii] << std::endl;
 			}
 			if( 0.0 <= m_vHalf[gi][ii] && m_vHalf[gi][ii] <= 1.0 ) {
 				// all is good
 			} else {
 				// wrong values
 				result = false;
-				std::cout << "Cell::testInnerValuesRange() : Error in gi = " << gi
-						<< " ii = " << ii
-						<< " half = " << m_vHalf[gi][ii] << std::endl;
+        std::cout << "Cell::testIVR(): Error [type][gi][ii]"
+          << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
+          << "[" << gi << "]"
+          << "[" << ii << "]"
+					<< " half = " << m_vHalf[gi][ii] << std::endl;
 			}
 		}
 	}

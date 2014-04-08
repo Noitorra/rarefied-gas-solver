@@ -37,7 +37,7 @@ public:
 	typedef std::vector< Cell* > CellVector;
 	typedef std::vector<double> DoubleVector;
 private:
-	double m_dStartDensity;
+  double m_dStartConcentration;
 	double m_dStartTemperature;
 	std::vector<double> m_vAreastep;
 
@@ -63,7 +63,7 @@ public:
 
 	// main methods
 	/* set all necessary parameters */
-	void setParameters(const double& _Density, const double& _Temperature, const DoubleVector& _Areastep);
+  void setParameters(double _Concentration, double _Temperature, DoubleVector _Areastep);
 	/* creates cells inner values, takes long time */
 	void Init();
 

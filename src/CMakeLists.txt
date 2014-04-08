@@ -50,6 +50,6 @@ harvest_directory("${CMAKE_SOURCE_DIR}" "src")
 add_executable(${TARGET_NAME} ${${TARGET_NAME}_source})
 
 # MPI
-include_directories(${MPI_INCLUDE_PATH})
-MESSAGE(STATUS MPI_LIBRARIES=${MPI_LIBRARIES})
-target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES}) 
+# include_directories(${MPI_INCLUDE_PATH})
+# MESSAGE(STATUS MPI_LIBRARIES=${MPI_LIBRARIES})
+# target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES}) 

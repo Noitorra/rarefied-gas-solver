@@ -50,9 +50,9 @@ void Solver::Run() {
 //		makeStep(sep::Z);
 
 		// here we can test data, if needed...
-//		for( auto& item : cellVector ) {
-//			item->testInnerValuesRange();
-//		}
+		for( auto& item : cellVector ) {
+			item->testInnerValuesRange();
+		}
 	}
   // Saving data
   m_pGrid->GetOutResults()->OutAll();

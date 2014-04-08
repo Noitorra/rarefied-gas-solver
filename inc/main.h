@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <string>
 
 namespace sep {
   enum GridGeometry {
