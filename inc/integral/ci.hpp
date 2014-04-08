@@ -4,6 +4,7 @@
 #define _CI_H_
 
 #include <vector>
+#include <string>
 
 namespace ci {
 
