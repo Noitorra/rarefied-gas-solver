@@ -22,8 +22,6 @@ void OutResults::OutAll(int iIteration) {
 
 // prepare parameters to be printed out
 void OutResults::LoadParameters() {
-  // Shouldn't we pass gas number to this function?
-  
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
   
   const Vector3i& vSize = m_pGrid->GetSize();
@@ -58,24 +56,27 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
   const Vector3i& vSize = m_pGrid->GetSize();
-  for (int x = 0; x < vSize.x(); x++) {
-    for (int y = 0; y < vSize.y(); y++) {
+  // Edge cells are faked
+  for (int x = 1; x < vSize.x() - 1; x++) {
+    for (int y = 1; y < vSize.y() - 1; y++) {
       int z = iZLayer;
-      if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL)
-        continue;
+//      if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL)
+//        continue;
       double dParam = 0.0;
       switch (eType) {
         case sep::T_PARAM:
-          dParam = m_vCells[x][y][z]->m_vMacroData[0].Temperature;
+          dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Temperature;
+          std::cout << "Temp ";
           break;
         case sep::C_PARAM:
-          dParam = m_vCells[x][y][z]->m_vMacroData[0].Concentration;
+          dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Concentration;
+          std::cout << "Conc ";
           break;
         default:
           return;
       }
-//      std::cout << "OutParam (" << x << "," << y << "," << z << "): " <<
-//      dParam << std::endl;
+      std::cout << "(" << x << "," << y << "," << z << "): " <<
+      dParam << std::endl;
       fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
     }
   }

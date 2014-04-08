@@ -234,10 +234,10 @@ void Cell::compute_half_left(unsigned int dim) {
          		compute_anv(m_vNext[dim], dim, gi, ii, 0),
          		compute_anv(m_vNext[dim], dim, gi, ii, 1) );
 
-        C1_up += abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
-        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0))/2);
+        C1_up += std::abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
+        C2_up += std::abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0))/2);
       } else {
-        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
+        C1_down += std::abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
       }
     }
 
@@ -305,10 +305,10 @@ void Cell::compute_half_right(unsigned int dim) {
 //	                                                                                                               m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vValue[gi][ii]);
 
-	        C1_up += abs(impulsev[ii][dim]*compute_aph(m_vPrev[dim], dim, gi, ii, 0));
-	        C2_up += abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0))/2);
+	        C1_up += std::abs(impulsev[ii][dim]*compute_aph(m_vPrev[dim], dim, gi, ii, 0));
+	        C2_up += std::abs(impulsev[ii][dim]*(m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0))/2);
 	      } else {
-	        C1_down += abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
+	        C1_down += std::abs(impulsev[ii][dim]*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
 	      }
 	    }
 
