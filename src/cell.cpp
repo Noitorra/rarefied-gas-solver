@@ -71,8 +71,8 @@ void Cell::Init() {
     m_vValue.resize(gasv.size());
     m_vMacroData.resize(gasv.size());
 
-    m_vHalf[gi].resize( impulsev.size() );
-    m_vValue[gi].resize( impulsev.size() );
+    m_vHalf[gi].resize( impulsev.size(), 0.0 );
+    m_vValue[gi].resize( impulsev.size(), 0.0 );
 
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
       m_vValue[gi][ii] = C*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
@@ -81,11 +81,15 @@ void Cell::Init() {
   }
 }
 
+void Cell::computeType(unsigned int dim) {
+	compute_type(dim);
+}
+
 void Cell::computeHalf(unsigned int dim) {
+	//std::cout << "Type: " << m_vType[dim] << std::endl;
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		compute_type(dim);
-		if(m_vType[dim] != CT_UNDEFINED ) computeHalf(dim);
+		std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
 		break;
 		case CT_LEFT:
 		compute_half_left(dim);
@@ -106,8 +110,7 @@ void Cell::computeHalf(unsigned int dim) {
 void Cell::computeValue(unsigned int dim) {
 	switch(m_vType[dim]) {
 		case CT_UNDEFINED:
-		compute_type(dim);
-		if(m_vType[dim] != CT_UNDEFINED ) computeValue(dim);
+		std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
 		break;
 //		case CT_LEFT:
 //		computeValue_Left(dim);

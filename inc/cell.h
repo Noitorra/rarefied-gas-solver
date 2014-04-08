@@ -66,6 +66,7 @@ public:
 	/* creates cells inner values, takes long time */
 	void Init();
 
+	void computeType(unsigned int dim);
 	void computeValue(unsigned int dim);
 	void computeHalf(unsigned int dim);
 	void computeIntegral(unsigned int dim);
