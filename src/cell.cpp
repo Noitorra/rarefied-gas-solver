@@ -28,7 +28,7 @@ Cell::Cell() {
 	m_vPrev.resize(3);
 
 	// size of a cell
-	m_vAreastep.resize(3, 0.0);
+	// m_vAreastep.resize(3, 0.0);
 
 	m_dStartTemperature = 0.0;
   m_dStartConcentration = 0.0;
@@ -48,7 +48,7 @@ Cell::~Cell() {
 /* public */
 
 // main methods
-void Cell::setParameters(double _Concentration, double _Temperature, DoubleVector _Areastep) {
+void Cell::setParameters(double _Concentration, double _Temperature, Vector3d _Areastep) {
   m_dStartConcentration = _Concentration;
 	m_dStartTemperature = _Temperature;
 	m_vAreastep = _Areastep;

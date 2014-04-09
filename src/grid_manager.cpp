@@ -222,8 +222,7 @@ void GridManager::LinkCells(Config* pConfig) {
         }
         
         // Set parameters
-        std::vector<double> vAreaStep;
-        vAreaStep.resize(3, 0.1);
+        Vector3d vAreaStep(0.1, 0.1, 0.1);
         cell->setParameters(init_cond.Concentration, init_cond.Temperature, vAreaStep);
         
         cell->Init();

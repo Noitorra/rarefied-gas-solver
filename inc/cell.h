@@ -13,10 +13,16 @@
 
 class Grid;
 class GridManager;
+class VesselGrid;
+class LeftVesselGrid;
+class RightVesselGrid;
 
 class Cell {
   friend GridManager;
   friend Grid;
+  friend VesselGrid;
+  friend LeftVesselGrid;
+  friend RightVesselGrid;
 public:
 	enum CellType {
 		CT_UNDEFINED,
@@ -31,7 +37,7 @@ public:
 private:
   double m_dStartConcentration;
 	double m_dStartTemperature;
-	std::vector<double> m_vAreastep;
+  Vector3d m_vAreastep;
 
 	// variables ... ?
 	std::vector< CellVector > m_vNext;
@@ -55,7 +61,7 @@ public:
 
 	// main methods
 	/* set all necessary parameters */
-  void setParameters(double _Concentration, double _Temperature, DoubleVector _Areastep);
+  void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep);
 	/* creates cells inner values, takes long time */
 	void Init();
 

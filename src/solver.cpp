@@ -11,6 +11,8 @@
 #include "impulse.h"
 #include "gas.h"
 
+#include "vessel_grid.h"
+
 #include "integral/ci.hpp"
 
 Solver::Solver()
@@ -42,6 +44,18 @@ void Solver::Init() {
   initCellType(sep::X);
   initCellType(sep::Y);
   initCellType(sep::Z);
+
+  LeftVesselGrid lvg;
+  lvg.getVesselGridInfo()->dStartConcentration = 1.0;
+  lvg.getVesselGridInfo()->dStartTemperature = 1.0;
+  lvg.getVesselGridInfo()->iAdditionalLenght = 0;
+  lvg.getVesselGridInfo()->iNy = 8;
+  lvg.getVesselGridInfo()->iNz = 1;
+  lvg.getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
+
+  lvg.SetVesselGridType(VesselGrid::VGT_CYCLED); 
+  lvg.CreateAndLinkVessel(); // not working, waiting m_pGrid .... no pCell->Init();
+  lvg.PrintLinkage(sep::X);
 
 //  m_pGrid->GetGridManager()->Print(sep::X);
 //  m_pGrid->GetGridManager()->Print(sep::Y);
