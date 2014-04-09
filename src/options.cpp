@@ -38,9 +38,9 @@ void Options::Init() {
   
   // Bigger grid
   std::shared_ptr<Config> pDebugConfig2(new Config("more_bigger"));
-  pDebugConfig2->SetGridSize(Vector3i(30, 30, 1));
+  pDebugConfig2->SetGridSize(Vector3i(64, 64, 1));
   pDebugConfig2->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
-  pDebugConfig2->SetMaxIteration(5);
+  pDebugConfig2->SetMaxIteration(100);
   AddConfig(pDebugConfig2);
   
   // Finally, select wich is active

@@ -121,9 +121,9 @@ void Cell::computeValue(unsigned int dim) {
 		case CT_NORMAL:
 		compute_value_normal(dim);
 		break;
-//		case CT_PRERIGHT:
-//		computeValue_PreRight(dim);
-//		break;
+		case CT_PRERIGHT:
+    compute_value_normal(dim);
+		break;
 //		case CT_RIGHT:
 //		computeValue_Right(dim);
 //		break;

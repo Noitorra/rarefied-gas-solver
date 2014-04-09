@@ -90,21 +90,34 @@ void GridManager::BuildDebugTypeGrid(Config* pConfig) {
 void GridManager::BuildCombTypeGrid(Config* pConfig) {
   std::cout << "Building comb type grid" << std::endl;
   InitEmptyBox(pConfig->GetGridSize());
-  AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
+  AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 0.5, true);
   
   const Vector3i& vGSize = pConfig->GetGridSize();
-  Vector3i vBlockSize = Vector3i(vGSize.x()/2, vGSize.y()/10, 1);
   
-  int iSlashX = 6;
-  Vector3i vStart(8, 6, 0);
-  int iDeltaY = vBlockSize.y() + 5;
-  int iBlockN = 3;
-  for (int i = 0; i < iBlockN; i++) {
-    int iTempSlashX = i % 2 ? iSlashX : 0;
-    Vector3i vTempStart = vStart + Vector3i(iTempSlashX, iDeltaY * i, 0);
-    
-    AddBox(vTempStart, vBlockSize, Vector3b(false, false, false), true, 0.4, false);
-  }
+  //// Test 1: Done
+  //// Left and Right walls are 1.0
+  //for (int y = 0; y < vGSize.y(); y++) {
+  //  m_vCells[0][y][0]->m_cInitCond.Temperature = 1.0;
+  //  m_vCells[vGSize.x()-1][y][0]->m_cInitCond.Temperature = 1.0;
+  //}
+
+  Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
+  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8, vGSize.y()*1/8, 0);
+  Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8, vGSize.y()*5/8, 0);
+  AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
+  AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
+
+
+  //int iSlashX = 6;
+  //Vector3i vStart(8, 6, 0);
+  //int iDeltaY = vBlockSize.y() + 5;
+  //int iBlockN = 3;
+  //for (int i = 0; i < iBlockN; i++) {
+  //  int iTempSlashX = i % 2 ? iSlashX : 0;
+  //  Vector3i vTempStart = vStart + Vector3i(iTempSlashX, iDeltaY * i, 0);
+  //  
+  //  AddBox(vTempStart, vBlockSize, Vector3b(false, false, false), true, 0.4, false);
+  //}
   
   FillInGrid(pConfig);
   LinkCells(pConfig);

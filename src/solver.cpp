@@ -53,8 +53,8 @@ void Solver::Run() {
 
   // TODO: Add some flag, which determines integral usage
   // if we want to use integral ...
-//  ci::HSPotential potential;
-//  ci::init(&potential, ci::NO_SYMM);
+  ci::HSPotential potential;
+  ci::init(&potential, ci::NO_SYMM);
   
   // Save initial state
   m_pGrid->GetOutResults()->OutAll(0);
@@ -65,16 +65,16 @@ void Solver::Run() {
 		makeStep(sep::Y);
 		makeStep(sep::Z);
 
-//    // TODO: Add some flag, which determines integral usage
-//    // make integral
-//    if (m_pSolverInfo->getGasVector().size() == 2) {
-//      makeIntegral(0, 0, GetConfig()->GetTimeStep());
-//      makeIntegral(0, 1, GetConfig()->GetTimeStep() * 2);
-//      makeIntegral(1, 1, GetConfig()->GetTimeStep());
-//    }
-//    else {
-//      makeIntegral(0, 0, GetConfig()->GetTimeStep());
-//    }
+    // TODO: Add some flag, which determines integral usage
+    // make integral
+    if (m_pSolverInfo->getGasVector().size() == 2) {
+      makeIntegral(0, 0, GetConfig()->GetTimeStep());
+      makeIntegral(0, 1, GetConfig()->GetTimeStep() * 2);
+      makeIntegral(1, 1, GetConfig()->GetTimeStep());
+    }
+    else {
+      makeIntegral(0, 0, GetConfig()->GetTimeStep());
+    }
 
 
 		// here we can test data, if needed...
