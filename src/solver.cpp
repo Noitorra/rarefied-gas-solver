@@ -18,7 +18,7 @@
 Solver::Solver()
 : m_pParallel(new Parallel),
   m_pSolverInfo(new SolverInfo),
-  m_pGrid(new Grid)
+  m_pGridManager(new GridManager)
 {
 	// TODO Auto-generated constructor stub
 }
@@ -27,6 +27,8 @@ Solver::~Solver() {
 	// TODO Auto-generated destructor stub
 }
 
+Grid* Solver::GetGrid() const { return m_pGridManager->GetGrid(); }
+
 void Solver::Init() {
 	// We must OBEY order:
 	// first info (impulse, etc)
@@ -34,28 +36,28 @@ void Solver::Init() {
   m_pSolverInfo->setSolver(this);
   m_pSolverInfo->Init();
 
-  // Init grid
-  m_pGrid->SetParent(this);
-  m_pGrid->Init();
+  // Init grid manager
+  m_pGridManager->SetParent(this);
+  m_pGridManager->Init();
+  m_pGrid = m_pGridManager->GetGrid();
   
-  // Building grid configuration
-  m_pGrid->BuildWithActiveConfig();
+  m_pGridManager->BuildGrid();
 
   initCellType(sep::X);
   initCellType(sep::Y);
   initCellType(sep::Z);
 
-  LeftVesselGrid lvg;
-  lvg.getVesselGridInfo()->dStartConcentration = 1.0;
-  lvg.getVesselGridInfo()->dStartTemperature = 1.0;
-  lvg.getVesselGridInfo()->iAdditionalLenght = 0;
-  lvg.getVesselGridInfo()->iNy = 8;
-  lvg.getVesselGridInfo()->iNz = 1;
-  lvg.getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
+  //LeftVesselGrid lvg;
+  //lvg.getVesselGridInfo()->dStartConcentration = 1.0;
+  //lvg.getVesselGridInfo()->dStartTemperature = 1.0;
+  //lvg.getVesselGridInfo()->iAdditionalLenght = 0;
+  //lvg.getVesselGridInfo()->iNy = 8;
+  //lvg.getVesselGridInfo()->iNz = 1;
+  //lvg.getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
 
-  lvg.SetVesselGridType(VesselGrid::VGT_CYCLED); 
-  lvg.CreateAndLinkVessel(); // not working, waiting m_pGrid .... no pCell->Init();
-  lvg.PrintLinkage(sep::X);
+  //lvg.SetVesselGridType(VesselGrid::VGT_CYCLED); 
+  //lvg.CreateAndLinkVessel(); // not working, waiting m_pGrid .... no pCell->Init();
+  //lvg.PrintLinkage(sep::X);
 
 //  m_pGrid->GetGridManager()->Print(sep::X);
 //  m_pGrid->GetGridManager()->Print(sep::Y);
@@ -71,7 +73,7 @@ void Solver::Run() {
   ci::init(&potential, ci::NO_SYMM);
   
   // Save initial state
-  m_pGrid->GetOutResults()->OutAll(0);
+  m_pGridManager->GetOutResults()->OutAll(0);
 
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
     
@@ -79,17 +81,16 @@ void Solver::Run() {
 		makeStep(sep::Y);
 		makeStep(sep::Z);
 
-    // TODO: Add some flag, which determines integral usage
-    // make integral
-    if (m_pSolverInfo->getGasVector().size() == 2) {
-      makeIntegral(0, 0, GetConfig()->GetTimeStep());
-      makeIntegral(0, 1, GetConfig()->GetTimeStep() * 2);
-      makeIntegral(1, 1, GetConfig()->GetTimeStep());
+    if (GetConfig()->GetUseIntegral()) {
+      if (m_pSolverInfo->getGasVector().size() == 2) {
+        makeIntegral(0, 0, GetConfig()->GetTimeStep());
+        makeIntegral(0, 1, GetConfig()->GetTimeStep() * 2);
+        makeIntegral(1, 1, GetConfig()->GetTimeStep());
+      }
+      else {
+        makeIntegral(0, 0, GetConfig()->GetTimeStep());
+      }
     }
-    else {
-      makeIntegral(0, 0, GetConfig()->GetTimeStep());
-    }
-
 
 		// here we can test data, if needed...
 		for( auto& item : cellVector ) {
@@ -97,7 +98,7 @@ void Solver::Run() {
 		}
     
     // Output data
-    m_pGrid->GetOutResults()->OutAll(iteration + 1);
+    m_pGridManager->GetOutResults()->OutAll(iteration + 1);
     std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
 	}
 }

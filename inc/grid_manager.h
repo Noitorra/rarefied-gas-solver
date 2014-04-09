@@ -7,6 +7,7 @@ class Config;
 class Cell;
 class OutResults;
 class MacroData;
+class Solver;
 
 class InitCellData {
   friend class GridManager;
@@ -28,12 +29,18 @@ class GridManager {
   friend OutResults;
 public:
   GridManager();
-  void SetParent(Grid* pGrid);
-  void SaveGridConfig(Config* pConfig);
-  void LoadGridConfig(Config* pConfig);
+  void Init();
+  void SetParent(Solver* pSolver);
+  Grid* GetGrid() const { return m_pGrid.get(); }
+  Solver* getSolver() { return m_pSolver; }
+  OutResults* GetOutResults() const;
+  Config* GetConfig() const;
+  void BuildGrid();
   void Print(sep::Axis axis);
   
 private:
+  void SaveGridConfig(Config* pConfig);
+  void LoadGridConfig(Config* pConfig);
   bool Write(const std::string& sName);
   bool Read(const std::string& sName);
   // Throws char const*
@@ -50,6 +57,8 @@ private:
   Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash);
   bool IsConer(Vector3i vStart, Vector3i vEnd, Vector3i vP);
 
-  Grid* m_pGrid;
+  std::shared_ptr<Grid> m_pGrid;
+  std::shared_ptr<OutResults> m_pOutResults;
+  Solver* m_pSolver;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vCells;
 };

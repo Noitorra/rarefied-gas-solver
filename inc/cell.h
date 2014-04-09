@@ -50,14 +50,14 @@ private:
 
 	std::vector<MacroData> m_vMacroData;
 
-	Grid* m_pGrid;
+	GridManager* m_pGridManager;
 public:
-	Cell();
-	Cell(Grid* _Grid);
+	Cell(GridManager* _GridManager);
 	virtual ~Cell();
 
-	void setGrid(Grid* _Grid) { m_pGrid = _Grid; }
-	Grid* getGrid() { return m_pGrid; }
+	void setGridManager(GridManager* _GridManager) { m_pGridManager = _GridManager; }
+	GridManager* getGridManager() { return m_pGridManager; }
+  Grid* getGrid() const;
 
 	// main methods
 	/* set all necessary parameters */
@@ -77,6 +77,7 @@ public:
 	void computeMacroData();
 	const std::vector<MacroData>& getMacroData() const { return m_vMacroData; }
 private:
+  Cell();
 	// help methods
 	void compute_type(unsigned int dim);
 

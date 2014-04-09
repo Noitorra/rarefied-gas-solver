@@ -9,7 +9,8 @@ public:
   m_vGridSize(Vector3i(10, 10, 1)),
   m_eGridGeometryType(sep::DIMAN_GRID_GEOMETRY),
   m_dTimestep(0.01),
-  m_iMaxIteration(100) {};
+  m_iMaxIteration(100),
+  m_bUseIntegral(true) {};
   ~Config() {};
   
   const std::string& GetName() const { return m_sName; }
@@ -22,6 +23,8 @@ public:
   void SetTimeStep(double dTimeStep) { m_dTimestep = dTimeStep; }
   int GetMaxIteration() const { return m_iMaxIteration; }
   void SetMaxIteration(int iMaxIteration) { m_iMaxIteration = iMaxIteration; }
+  bool GetUseIntegral() const { return m_bUseIntegral; }
+  void SetUseIntegral(bool bUseIntegral) { m_bUseIntegral = bUseIntegral; }
 private:
   // Please, add new members to PrintMe() function
   std::string m_sName;
@@ -29,4 +32,5 @@ private:
   sep::GridGeometry m_eGridGeometryType;
 	double m_dTimestep;
 	int m_iMaxIteration;
+  bool m_bUseIntegral;
 };

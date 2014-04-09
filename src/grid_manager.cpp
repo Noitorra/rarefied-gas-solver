@@ -2,17 +2,37 @@
 #include "grid.h"
 #include "cell.h"
 #include "config.h"
+#include "solver.h"
+#include "out_results.h"
 
-GridManager::GridManager() {
-  
+GridManager::GridManager() :
+m_pGrid(new Grid),
+m_pOutResults(new OutResults()),
+m_pSolver(nullptr) {}
+
+void GridManager::Init() {
+  m_pGrid->Init();
+  m_pOutResults->Init(m_pGrid.get(), this);
 }
 
-void GridManager::SetParent(Grid* pGrid) {
-  m_pGrid = pGrid;
+void GridManager::SetParent(Solver* pSolver) {
+  m_pSolver = pSolver;
 }
 
+Config* GridManager::GetConfig() const {
+  return m_pSolver->GetConfig();
+}
+
+OutResults* GridManager::GetOutResults() const {
+  return m_pOutResults.get();
+}
+
+void GridManager::BuildGrid() {
+    Build(GetConfig());
+}
+
+// Currently we don't need this func
 void GridManager::SaveGridConfig(Config* pConfig) {
-  Build(pConfig);
   std::string file_name;
   try {
     file_name = GenerateFileName(pConfig->GetGridGeometryType());
@@ -166,7 +186,7 @@ void GridManager::FillInGrid(Config* pConfig) {
       for (int z = 0; z < vSize.z(); z++) {
         if (m_vCells[x][y][z]->m_eType == sep::EMPTY_CELL)
           continue;
-        Cell* pCell = new Cell(m_pGrid);
+        Cell* pCell = new Cell(this);
         m_pGrid->AddCell(std::shared_ptr<Cell>(pCell));
         m_vCells[x][y][z]->m_pCell = pCell;
 //        std::cout << "Adding cell("<< x << "," << y << "," << z << ")" << std::endl;
