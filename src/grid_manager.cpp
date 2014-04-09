@@ -4,6 +4,7 @@
 #include "config.h"
 #include "solver.h"
 #include "out_results.h"
+#include "vessel_grid.h"
 
 GridManager::GridManager() :
 m_pGrid(new Grid),
@@ -28,7 +29,12 @@ OutResults* GridManager::GetOutResults() const {
 }
 
 void GridManager::BuildGrid() {
-    Build(GetConfig());
+  Config* pConfig = GetConfig();
+  Build(pConfig);
+  FillInGrid(pConfig);
+  LinkCells(pConfig);
+  InitVessels();
+  LinkVessels();
 }
 
 // Currently we don't need this func
@@ -103,8 +109,6 @@ void GridManager::BuildDebugTypeGrid(Config* pConfig) {
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
   //  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
   AddBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), Vector3b(false, false, false), true, 0.4, false);
-  FillInGrid(pConfig);
-  LinkCells(pConfig);
 }
 
 void GridManager::BuildCombTypeGrid(Config* pConfig) {
@@ -138,9 +142,6 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   //  
   //  AddBox(vTempStart, vBlockSize, Vector3b(false, false, false), true, 0.4, false);
   //}
-  
-  FillInGrid(pConfig);
-  LinkCells(pConfig);
 }
 
 void GridManager::BuildHTypeGrid(Config* pConfig) {
@@ -339,11 +340,27 @@ void GridManager::Print(sep::Axis axis) {
 }
 
 void GridManager::InitVessels() {
+  m_vLeftVess.push_back(std::shared_ptr<VesselGrid>(new LeftVesselGrid));
+  VesselGrid* lvg = m_vLeftVess[0].get();
+  Config* pConfig = GetConfig();
+  lvg->getVesselGridInfo()->dStartConcentration = 1.0;
+  lvg->getVesselGridInfo()->dStartTemperature = 1.0;
+  lvg->getVesselGridInfo()->iAdditionalLenght = 0;
+  lvg->getVesselGridInfo()->iNy = pConfig->GetGridSize().y();
+  lvg->getVesselGridInfo()->iNz = 1;
+  lvg->getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
   
+  lvg->SetVesselGridType(VesselGrid::VGT_CYCLED);
+  lvg->CreateAndLinkVessel();
 }
 
 void GridManager::LinkVessels() {
-  
+  Config* pConfig = GetConfig();
+  int iNy = pConfig->GetGridSize().y();
+  VesselGrid* pVess = m_vLeftVess[0].get();
+  for (int i = 0; i < iNy; i++) {
+//    pVess->getVesselGridInfo()
+  }
 }
 
 
