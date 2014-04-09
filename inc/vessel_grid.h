@@ -4,6 +4,7 @@
 #include "main.h"
 
 class Cell;
+class GridManager;
 
 struct VesselGridInfo {
   VesselGridInfo() {
@@ -32,6 +33,10 @@ public:
 
   VesselGrid() : m_pVGInfo(new VesselGridInfo) {}
   virtual ~VesselGrid() {}
+
+  void setGridManager(GridManager* pGridManager) { m_pGridManager = pGridManager; }
+  GridManager* getGridManager() { return m_pGridManager; }
+
   // this is a slice of 3D, so it must be 2D, that's why Ny, Nz
   // they must be "mod 2 = 0"
   // also i need vAreastep, meaning this is normal areastep
@@ -53,6 +58,8 @@ public:
   void computeIntegral(unsigned int gi0, unsigned int gi1);
   void computeMacroData();
 protected:
+  GridManager* m_pGridManager;
+
   VesselGridType m_eType;
 
   std::shared_ptr<VesselGridInfo> m_pVGInfo;
@@ -77,6 +84,22 @@ public:
   LeftVesselGrid() {}
   virtual ~LeftVesselGrid() {}
   
+protected:
+  virtual void create_normal_vessel();
+  virtual void create_cycled_vessel();
+
+  virtual void link_normal_vessel();
+  virtual void link_cycled_vessel();
+
+  virtual void generate_normal_print_vector(std::vector<Cell*>& vPrintVector);
+  virtual void generate_cycled_print_vector(std::vector<Cell*>& vPrintVector);
+};
+
+class RightVesselGrid : public VesselGrid {
+public:
+  RightVesselGrid() {}
+  virtual ~RightVesselGrid() {}
+
 protected:
   virtual void create_normal_vessel();
   virtual void create_cycled_vessel();
