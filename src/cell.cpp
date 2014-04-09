@@ -8,6 +8,7 @@
 #include "cell.h"
 
 #include "grid.h"
+#include "grid_manager.h"
 #include "solver.h"
 #include "solver_info.h"
 #include "gas.h"
@@ -34,11 +35,11 @@ Cell::Cell() {
   m_dStartConcentration = 0.0;
 
 	// Grid....
-	m_pGrid = nullptr;
+	m_pGridManager = nullptr;
 }
 
-Cell::Cell(Grid* _Grid) : Cell() {
-	setGrid( _Grid );
+Cell::Cell(GridManager* _GridManager) : Cell() {
+  m_pGridManager = _GridManager;
 }
 
 Cell::~Cell() {
@@ -46,6 +47,8 @@ Cell::~Cell() {
 }
 
 /* public */
+
+Grid* Cell::getGrid() const { return m_pGridManager->GetGrid(); }
 
 // main methods
 void Cell::setParameters(double _Concentration, double _Temperature, DoubleVector _Areastep) {
@@ -55,7 +58,7 @@ void Cell::setParameters(double _Concentration, double _Temperature, DoubleVecto
 }
 
 void Cell::Init() {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	Impulse* impulse = sinfo->getImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
@@ -136,7 +139,7 @@ void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
 }
 
 void Cell::computeMacroData() {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -149,7 +152,7 @@ void Cell::computeMacroData() {
 
 /* Tests */
 bool Cell::testInnerValuesRange() {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
 
@@ -213,10 +216,10 @@ void Cell::compute_type(unsigned int dim) {
 }
 
 void Cell::compute_half_left(unsigned int dim) {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
-  Config* config = m_pGrid->GetConfig();
+  Config* config = m_pGridManager->GetConfig();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     double C1_up = 0.0;
@@ -251,10 +254,10 @@ void Cell::compute_half_left(unsigned int dim) {
   }
 }
 void Cell::compute_half_normal(unsigned int dim) {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
-  Config* config = m_pGrid->GetConfig();
+  Config* config = m_pGridManager->GetConfig();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 		for(unsigned int ii=0;ii<impulsev.size();ii++) {
@@ -277,10 +280,10 @@ void Cell::compute_half_preright(unsigned int dim) {
 
 }
 void Cell::compute_half_right(unsigned int dim) {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
-  Config* config = m_pGrid->GetConfig();
+  Config* config = m_pGridManager->GetConfig();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 	    double C1_up = 0.0;
@@ -327,10 +330,10 @@ void Cell::compute_half_right(unsigned int dim) {
 }
 
 void Cell::compute_value_normal(unsigned int dim) {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
-  Config* config = m_pGrid->GetConfig();
+  Config* config = m_pGridManager->GetConfig();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
@@ -409,7 +412,7 @@ double Cell::limiter_superbee(const double& x, const double& y, const double& z)
 /* Macro Data */
 
 double Cell::compute_concentration(unsigned int gi) {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	Impulse* impulse = sinfo->getImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
@@ -422,7 +425,7 @@ double Cell::compute_concentration(unsigned int gi) {
 }
 
 double Cell::compute_temperature(unsigned int gi) {
-	SolverInfo* sinfo = m_pGrid->getSolver()->getSolverInfo();
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
 	GasVector& gasv = sinfo->getGasVector();
 	Impulse* impulse = sinfo->getImpulse();
 	ImpulseVector& impulsev = impulse->getVector();

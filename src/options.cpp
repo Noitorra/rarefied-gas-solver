@@ -34,6 +34,7 @@ void Options::Init() {
   pDebugConfig1->SetGridSize(Vector3i(10, 10, 1));
   pDebugConfig1->SetGridGeometryType(sep::DEBUG1_GRID_GEOMETRY);
   pDebugConfig1->SetMaxIteration(5);
+  pDebugConfig1->SetUseIntegral(true);
   AddConfig(pDebugConfig1);
   
   // Bigger grid
@@ -41,6 +42,7 @@ void Options::Init() {
   pDebugConfig2->SetGridSize(Vector3i(64, 64, 1));
   pDebugConfig2->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   pDebugConfig2->SetMaxIteration(100);
+  pDebugConfig2->SetUseIntegral(true);
   AddConfig(pDebugConfig2);
   
   // Finally, select wich is active

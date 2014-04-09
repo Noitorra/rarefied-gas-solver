@@ -25,7 +25,7 @@ void LeftVesselGrid::create_cycled_vessel() {
     // Here we create line of iNy cells
     for (int i = 0; i < iNy; i++) {
       // TODO: Make refactoring ...
-      Cell* newCell = new Cell(/* ... */);
+      Cell* newCell = new Cell(/* ... */nullptr);
       // newCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, m_pVGInfo->vAreastep);
     }
 

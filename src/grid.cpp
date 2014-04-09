@@ -4,15 +4,9 @@
 #include "out_results.h"
 #include "cell.h"
 
-Grid::Grid() :
-m_pGridManager(new GridManager()),
-m_pOutResults(new OutResults()),
-m_pSolver(nullptr) {}
+Grid::Grid() {}
 
-void Grid::Init() {
-  m_pGridManager->SetParent(this);
-  m_pOutResults->Init(this, m_pGridManager.get());
-}
+void Grid::Init() {}
 
 void Grid::AddCell(std::shared_ptr<Cell> pCell) {
   m_vCells.push_back(pCell);
@@ -23,23 +17,10 @@ std::vector<std::shared_ptr<Cell>>& Grid::getCellVector() {
 }
 
 GridManager* Grid::GetGridManager() const {
-  return m_pGridManager.get();
-}
-OutResults* Grid::GetOutResults() const {
-  return m_pOutResults.get();
-}
-Config* Grid::GetConfig() const {
-  return m_pSolver->GetConfig();
+  return m_pGridManager;
 }
 
-void Grid::BuildWithActiveConfig() {
-  try {
-    m_pGridManager->SaveGridConfig(GetConfig());
-  } catch (char const* sExc) {
-    std::cout << "Exception occurs: " << sExc << std::endl;
-    return;
-  }
-}
+
 
 
 
