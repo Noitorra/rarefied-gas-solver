@@ -52,12 +52,11 @@ private:
 
 	GridManager* m_pGridManager;
 public:
-	Cell(GridManager* _GridManager);
+	Cell(GridManager* pGridManager);
 	virtual ~Cell();
 
-	void setGridManager(GridManager* _GridManager) { m_pGridManager = _GridManager; }
+	void setGridManager(GridManager* pGridManager) { m_pGridManager = pGridManager; }
 	GridManager* getGridManager() { return m_pGridManager; }
-  Grid* getGrid() const;
 
 	// main methods
 	/* set all necessary parameters */
