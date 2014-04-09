@@ -25,12 +25,11 @@ public:
     return m_vWholeSize;
   }
 
-  void SetParent(GridManager* pGridManager) { m_pGridManager = pGridManager; }
-
   void Init();
   void AddCell(std::shared_ptr<Cell> pCell);
   std::vector<std::shared_ptr<Cell>>& getCellVector();
 
+  void SetParent(GridManager* pGridManager) { m_pGridManager = pGridManager; }
   GridManager* GetGridManager() const;
 
 private:

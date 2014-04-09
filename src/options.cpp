@@ -39,7 +39,7 @@ void Options::Init() {
   
   // Bigger grid
   std::shared_ptr<Config> pDebugConfig2(new Config("more_bigger"));
-  pDebugConfig2->SetGridSize(Vector3i(8, 8, 1));
+  pDebugConfig2->SetGridSize(Vector3i(32, 32, 1));
   pDebugConfig2->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   pDebugConfig2->SetMaxIteration(100);
   pDebugConfig2->SetUseIntegral(true);

@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 64
-NY = 64
-max_files = 5
+NX = 32
+NY = 32
+max_files = 22
 gas_num = 2
 
 for gas in range(gas_num):
