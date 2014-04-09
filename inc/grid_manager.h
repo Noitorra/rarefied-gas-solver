@@ -8,6 +8,7 @@ class Cell;
 class OutResults;
 class MacroData;
 class Solver;
+class VesselGrid;
 
 class InitCellData {
   friend class GridManager;
@@ -56,9 +57,14 @@ private:
   void AddBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ, double dWallT, bool bGasBox);
   Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash);
   bool IsConer(Vector3i vStart, Vector3i vEnd, Vector3i vP);
+  void InitVessels();
+  void LinkVessels();
 
   std::shared_ptr<Grid> m_pGrid;
   std::shared_ptr<OutResults> m_pOutResults;
   Solver* m_pSolver;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vCells;
+  
+  std::vector<std::shared_ptr<VesselGrid>> m_vRightVess;
+  std::vector<std::shared_ptr<VesselGrid>> m_vLeftVess;
 };

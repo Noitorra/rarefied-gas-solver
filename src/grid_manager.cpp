@@ -338,9 +338,13 @@ void GridManager::Print(sep::Axis axis) {
   std::cout << std::endl;
 }
 
+void GridManager::InitVessels() {
+  
+}
 
-
-
+void GridManager::LinkVessels() {
+  
+}
 
 
 
