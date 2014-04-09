@@ -157,3 +157,29 @@ void LeftVesselGrid::generate_cycled_print_vector(std::vector<Cell*>& vPrintVect
   }
   // std::cout << std::endl;
 }
+
+/* RightVesselGrid */
+
+void RightVesselGrid::create_normal_vessel() {
+
+}
+
+void RightVesselGrid::create_cycled_vessel() {
+
+}
+
+void RightVesselGrid::link_normal_vessel() {
+
+}
+
+void RightVesselGrid::link_cycled_vessel() {
+
+}
+
+void RightVesselGrid::generate_normal_print_vector(std::vector<Cell*>& vPrintVector) {
+
+}
+
+void RightVesselGrid::generate_cycled_print_vector(std::vector<Cell*>& vPrintVector) {
+
+}
