@@ -50,6 +50,7 @@ public:
   const std::vector<Cell*>& GetPrintVector() const { return m_vPrintVector; }
 
   // access method for linking last colomn
+  Cell* GetBorderCell(int iIndexY) { return m_vCells[m_vCells.size() - m_pVGInfo->iNy + iIndexY].get(); }
 
   // action methods:
   void computeType(sep::Axis aAxis);

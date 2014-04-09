@@ -38,8 +38,8 @@ Cell::Cell() {
 	m_pGridManager = nullptr;
 }
 
-Cell::Cell(GridManager* _GridManager) : Cell() {
-  m_pGridManager = _GridManager;
+Cell::Cell(GridManager* pGridManager) : Cell() {
+  m_pGridManager = pGridManager;
 }
 
 Cell::~Cell() {
@@ -47,8 +47,6 @@ Cell::~Cell() {
 }
 
 /* public */
-
-Grid* Cell::getGrid() const { return m_pGridManager->GetGrid(); }
 
 // main methods
 void Cell::setParameters(double _Concentration, double _Temperature, Vector3d _Areastep) {

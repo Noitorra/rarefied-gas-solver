@@ -1,5 +1,6 @@
 #include "vessel_grid.h"
 #include "cell.h"
+#include "grid_manager.h"
 
 void VesselGrid::CreateAndLinkVessel() {
   switch (m_eType) {
@@ -83,11 +84,11 @@ void LeftVesselGrid::create_cycled_vessel() {
     // Here we create line of iNy cells
     for (int i = 0; i < iNy; i++) {
       // TODO: Make refactoring ...
-      std::shared_ptr<Cell> pCell( new Cell(/* ... */) );
+      std::shared_ptr<Cell> pCell( new Cell(m_pGridManager) );
       Vector3d vAreastep = m_pVGInfo->vAreastep;
       vAreastep.y() *= m_pVGInfo->iNy / iNy;
       pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
-      //pCell->Init();
+      pCell->Init();
       m_vCells.push_back(pCell);
     }
 
