@@ -9,7 +9,7 @@ void VesselGrid::CreateAndLinkVessel() {
     switch (m_eType) {
     case VGT_NORMAL:
       if (compute_binary_log(m_pVGInfo->iNy - 2) == -1) {
-        throw std::exception("Wrong iNy, needed 2^n + 2");
+        throw "Wrong iNy, needed 2^n + 2";
       }
       create_normal_vessel();
       link_normal_vessel();
@@ -17,7 +17,7 @@ void VesselGrid::CreateAndLinkVessel() {
       break;
     case VGT_CYCLED:
       if (compute_binary_log(m_pVGInfo->iNy) == -1) {
-        throw std::exception("Wrong iNy, needed 2^n");
+        throw "Wrong iNy, needed 2^n";
       }
       create_cycled_vessel();
       link_cycled_vessel();

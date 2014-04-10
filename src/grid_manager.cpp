@@ -141,14 +141,14 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   m_vCells[vGSize.x() - 1][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
   
   // Left up and down corners. Only without vessel!
-  if (!pConfig->GetUseVessels()) {
+//  if (!pConfig->GetUseVessels()) {
     m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
     m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
-  }
+//  }
   
   // Should be good for vessel
   if (pConfig->GetUseVessels()) {
-    SetVesselBorderBox(Vector3i(), Vector3i(1, vGSize.y(), 1), true, 0, 1.0);
+    SetVesselBorderBox(Vector3i(0, 1, 0), Vector3i(1, vGSize.y() - 2, 1), true, 0, 1.0);
   }
   
   // Should be good looping with vessel
