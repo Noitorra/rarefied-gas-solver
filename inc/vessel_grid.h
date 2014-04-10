@@ -53,7 +53,7 @@ public:
   const Vector2i& GetPrintVectorSize() const { return m_vPrintVectorSize; }
 
   // access method for linking last colomn
-  Cell* GetBorderCell(int iIndexY) { return m_vCells[m_vCells.size() - m_pVGInfo->iNy + iIndexY].get(); }
+  Cell* GetBorderCell(int iIndexY) { return m_vPrintVector[m_vPrintVectorSize.x() - 1][iIndexY]; }
 
   // action methods:
   void computeType(sep::Axis aAxis);
