@@ -6,7 +6,11 @@
  */
 
 #include "impulse.h"
+#include "solver_info.h"
+#include "gas.h"
+
 #include <iostream>
+#include <algorithm>
 
 Impulse::Impulse() {
 	m_cSolverInfo = nullptr;
@@ -35,6 +39,17 @@ void Impulse::Init() {
 	if( m_cSolverInfo == nullptr ) {
 		std::cout << "[Error][Impulse] Before using Init, set SolverInfo..." << std::endl;
 	} else {
+    // TODO: do something with that...
+    GasVector& gasv = m_cSolverInfo->getGasVector();
+    if (gasv.size() >= 2) {
+      m_dMaxImpulse = std::max(gasv[0]->getMass(), gasv[1]->getMass()) * m_dMaxImpulse;
+      std::cout << "Impulse::Init() : gasv.size() >= 2" << std::endl;
+    }
+    else {
+      std::cout << "Impulse::Init() : gasv.size() < 2" << std::endl;
+    }
+    std::cout << "Impulse::Init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
+
 		// calc delta impulse
 		m_dDeltaImpulse = 2*m_dMaxImpulse/(m_uResolution);
 		m_dDeltaImpulseQube = std::pow(m_dDeltaImpulse, 3);

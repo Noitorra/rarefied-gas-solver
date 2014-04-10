@@ -449,15 +449,16 @@ void LeftVesselGrid::generate_cycled_print_vector() {
     for (int iPrintNy = 0; iPrintNy < m_vPrintVectorSize.y(); iPrintNy++) {
       int iIndex = iIndexStart;
       if (iNyMax == 1) {
-        if (iPrintNy == 0) {
-          iIndex = -1;
-        }
-        else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
-          iIndex = -1;
-        }
-        else {
-          iIndex += 0;
-        }
+        iIndex += 0;
+        //if (iPrintNy == 0) {
+        //  iIndex = -1;
+        //}
+        //else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
+        //  iIndex = -1;
+        //}
+        //else {
+        //  iIndex += 0;
+        //}
       }
       else {
         if (iPrintNy == 0) {
@@ -486,25 +487,369 @@ void LeftVesselGrid::generate_cycled_print_vector() {
 /* RightVesselGrid */
 
 void RightVesselGrid::create_normal_vessel() {
+  // calc num cells, allocate space .... ?!
+  int iNumCells = compute_binary_summ(m_pVGInfo->iNy - 2);
+  iNumCells += m_pVGInfo->iAdditionalLenght;
 
+  int iCoreLenght = compute_binary_log(m_pVGInfo->iNy - 2) + 1;
+  int iLenght = iCoreLenght + m_pVGInfo->iAdditionalLenght;
+  iNumCells += iLenght * 2;
+
+  iLenght += 1; // last one for LeftBorderVesselCell
+  iNumCells += 1; // last one for LeftBorderVesselCell
+
+  std::cout << "RightVesselGrid: iNy = " << m_pVGInfo->iNy << std::endl;
+  std::cout << "RightVesselGrid: iCoreLenght = " << iCoreLenght << std::endl;
+  std::cout << "RightVesselGrid: iLenght = " << iLenght << std::endl;
+  std::cout << "RightVesselGrid: NumCells = " << iNumCells << std::endl;
+
+  m_vCells.clear();
+
+  for (int iNx = 0; iNx < iLenght; iNx++) {
+    // Max Ny index
+    int iNyMax = 0;
+    if (iNx == 0) {
+      // Left Border Cell
+      iNyMax = 1;
+    }
+    else if (iNx < m_pVGInfo->iAdditionalLenght + 1) {
+      // Additional cells
+      iNyMax = 3;
+    }
+    else {
+      int iNxCore = iNx - m_pVGInfo->iAdditionalLenght - 1;
+      iNyMax = compute_binary_pow(2, iNxCore) + 2;
+      //std::cout << "iNyMax = " << iNyMax << std::endl;
+    }
+    for (int iNy = 0; iNy < iNyMax; iNy++) {
+      std::shared_ptr<Cell> pCell(new Cell(m_pGridManager));
+      m_vCells.push_back(pCell);
+      Vector3d vAreastep = m_pVGInfo->vAreastep;
+      vAreastep.y() *= (m_pVGInfo->iNy - 2) / (iNyMax - 2);
+      pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
+      pCell->Init();
+    }
+  }
 }
 
 void RightVesselGrid::create_cycled_vessel() {
+  // calc num cells, allocate space .... ?!
+  int iNumCells = compute_binary_summ(m_pVGInfo->iNy);
+  iNumCells += m_pVGInfo->iAdditionalLenght;
 
+  int iCoreLenght = compute_binary_log(m_pVGInfo->iNy) + 1;
+  int iLenght = iCoreLenght + m_pVGInfo->iAdditionalLenght;
+
+  iLenght += 1; // last one for LeftBorderVesselCell
+  iNumCells += 1; // last one for LeftBorderVesselCell
+
+  std::cout << "RightVesselGrid: iNy = " << m_pVGInfo->iNy << std::endl;
+  std::cout << "RightVesselGrid: iCoreLenght = " << iCoreLenght << std::endl;
+  std::cout << "RightVesselGrid: iLenght = " << iLenght << std::endl;
+  std::cout << "RightVesselGrid: NumCells = " << iNumCells << std::endl;
+
+  m_vCells.clear();
+
+  for (int iNx = 0; iNx < iLenght; iNx++) {
+    // Max Ny index
+    int iNyMax = 0;
+    if (iNx == 0) {
+      // Left Border Cell
+      iNyMax = 1;
+    }
+    else if (iNx < m_pVGInfo->iAdditionalLenght + 1) {
+      // Additional cells
+      iNyMax = 1;
+    }
+    else {
+      int iNxCore = iNx - m_pVGInfo->iAdditionalLenght - 1;
+      iNyMax = compute_binary_pow(2, iNxCore);
+      //std::cout << "iNyMax = " << iNyMax << std::endl;
+    }
+    for (int iNy = 0; iNy < iNyMax; iNy++) {
+      std::shared_ptr<Cell> pCell(new Cell(m_pGridManager));
+      m_vCells.push_back(pCell);
+      Vector3d vAreastep = m_pVGInfo->vAreastep;
+      vAreastep.y() *= (m_pVGInfo->iNy) / (iNyMax);
+      pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
+      pCell->Init();
+    }
+  }
 }
 
 void RightVesselGrid::link_normal_vessel() {
+  int iCoreLenght = compute_binary_log(m_pVGInfo->iNy - 2) + 1;
+  int iLenght = iCoreLenght + m_pVGInfo->iAdditionalLenght;
 
+  iLenght += 1; // last one for LeftBorderVesselCell
+
+  int iStartIndex = 0;
+
+  for (int iNx = 0; iNx < iLenght; iNx++) {
+    // Max Ny index
+    int iNyMax = 0;
+    if (iNx == 0) { // m_vPrev
+      // Left Border Cell
+      iNyMax = 1;
+      m_vCells[iStartIndex]->m_vPrev[sep::X].push_back(m_vCells[iStartIndex + 2].get());
+      m_vCells[iStartIndex + 2]->m_vNext[sep::X].push_back(m_vCells[iStartIndex].get());
+    }
+    else if (iNx < m_pVGInfo->iAdditionalLenght + 1) {
+      // Additional cells
+      iNyMax = 3;
+      for (int iNy = 0; iNy < iNyMax; iNy++) {
+        int iIndex = iStartIndex + iNy;
+        Cell* pCell = m_vCells[iIndex].get();
+
+        int iNextX = iIndex + (iNyMax - iNy) + 2 * (iNy - 1) + 1;
+        int iNextY = iIndex + 1;
+        int iPrevY = iIndex - 1;
+
+        if (iNy == 0) {
+          pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+        }
+        else if (iNy = iNyMax - 1) {
+          pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
+        }
+        else {
+          if (iNx != iLenght - 1) { // m_vPrev
+            pCell->m_vPrev[sep::X].push_back(m_vCells[iNextX].get());
+            m_vCells[iNextX]->m_vNext[sep::X].push_back(pCell);
+
+            pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
+            pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+          }
+        }
+      }
+    }
+    else {
+      int iNxCore = iNx - m_pVGInfo->iAdditionalLenght - 1;
+      iNyMax = compute_binary_pow(2, iNxCore) + 2;
+
+      for (int iNy = 0; iNy < iNyMax; iNy++) {
+        int iIndex = iStartIndex + iNy;
+        Cell* pCell = m_vCells[iIndex].get();
+
+        int iNextX = iIndex + (iNyMax - iNy) + 2 * (iNy - 1) + 1;
+        int iNextY = iIndex + 1;
+        int iPrevY = iIndex - 1;
+
+        if (iNy == 0) {
+          pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+        }
+        else if (iNy == iNyMax - 1) {
+          pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
+        }
+        else {
+          if (iNx != iLenght - 1) { // m_vPrev
+            pCell->m_vPrev[sep::X].push_back(m_vCells[iNextX].get());
+            pCell->m_vPrev[sep::X].push_back(m_vCells[iNextX + 1].get());
+
+            m_vCells[iNextX]->m_vNext[sep::X].push_back(pCell);
+            m_vCells[iNextX + 1]->m_vNext[sep::X].push_back(pCell);
+          }
+
+          pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
+          pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+        }
+      }
+    }
+    iStartIndex += iNyMax;
+  }
 }
 
 void RightVesselGrid::link_cycled_vessel() {
+  int iCoreLenght = compute_binary_log(m_pVGInfo->iNy) + 1;
+  int iLenght = iCoreLenght + m_pVGInfo->iAdditionalLenght;
 
+  iLenght += 1; // last one for LeftBorderVesselCell
+
+  int iStartIndex = 0;
+
+  for (int iNx = 0; iNx < iLenght; iNx++) {
+    // Max Ny index
+    int iNyMax = 0;
+    if (iNx == 0) { // m_vPrev
+      // Left Border Cell
+      iNyMax = 1;
+      m_vCells[iStartIndex]->m_vPrev[sep::X].push_back(m_vCells[iStartIndex + 1].get());
+      m_vCells[iStartIndex + 1]->m_vNext[sep::X].push_back(m_vCells[iStartIndex].get());
+    }
+    else if (iNx < m_pVGInfo->iAdditionalLenght + 1) {
+      // Additional cells
+      iNyMax = 1;
+      if (iNx != iLenght - 1) { // m_vPrev
+        m_vCells[iStartIndex]->m_vPrev[sep::X].push_back(m_vCells[iStartIndex + 1].get());
+        m_vCells[iStartIndex + 1]->m_vNext[sep::X].push_back(m_vCells[iStartIndex].get());
+
+        m_vCells[iStartIndex]->m_vNext[sep::Y].push_back(m_vCells[iStartIndex].get());
+        m_vCells[iStartIndex]->m_vPrev[sep::Y].push_back(m_vCells[iStartIndex].get());
+      }
+    }
+    else {
+      int iNxCore = iNx - m_pVGInfo->iAdditionalLenght - 1;
+      iNyMax = compute_binary_pow(2, iNxCore);
+
+      for (int iNy = 0; iNy < iNyMax; iNy++) {
+        int iIndex = iStartIndex + iNy;
+        Cell* pCell = m_vCells[iIndex].get();
+
+        int iNextX = iIndex + (iNyMax - iNy) + 2 * (iNy);
+        int iNextY = iIndex + 1;
+        int iPrevY = iIndex - 1;
+
+        if (iNy == 0) iPrevY = iStartIndex + iNyMax - 1;
+        if (iNy == iNyMax - 1) iNextY = iStartIndex;
+
+        if (iNx != iLenght - 1) { // m_vPrev
+          pCell->m_vPrev[sep::X].push_back(m_vCells[iNextX].get());
+          pCell->m_vPrev[sep::X].push_back(m_vCells[iNextX + 1].get());
+
+          m_vCells[iNextX]->m_vNext[sep::X].push_back(pCell);
+          m_vCells[iNextX + 1]->m_vNext[sep::X].push_back(pCell);
+        }
+
+        pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
+        pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+      }
+    }
+    iStartIndex += iNyMax;
+  }
 }
 
 void RightVesselGrid::generate_normal_print_vector() {
+  int iCoreLenght = compute_binary_log(m_pVGInfo->iNy - 2) + 1;
+  int iLenght = iCoreLenght + m_pVGInfo->iAdditionalLenght;
 
+  iLenght += 1; // last one for LeftBorderVesselCell
+
+  m_vPrintVectorSize.set(iLenght, m_pVGInfo->iNy);
+
+  m_vPrintVector.clear();
+  m_vPrintVector.resize(m_vPrintVectorSize.x());
+  for (auto& item : m_vPrintVector) {
+    item.resize(m_vPrintVectorSize.y(), nullptr);
+  }
+
+  int iIndexStart = 0;
+  for (int iPrintNx = 0; iPrintNx < m_vPrintVectorSize.x(); iPrintNx++) {
+    // Max Ny index
+    int iNyMax = 0;
+    if (iPrintNx == 0) {
+      // Left Border Cell
+      iNyMax = 1;
+    }
+    else if (iPrintNx < m_pVGInfo->iAdditionalLenght + 1) {
+      // Additional cells
+      iNyMax = 3;
+    }
+    else {
+      int iNxCore = iPrintNx - m_pVGInfo->iAdditionalLenght - 1;
+      iNyMax = compute_binary_pow(2, iNxCore) + 2;
+      //std::cout << "iNyMax = " << iNyMax << std::endl;
+    }
+    for (int iPrintNy = 0; iPrintNy < m_vPrintVectorSize.y(); iPrintNy++) {
+      int iIndex = iIndexStart;
+      if (iNyMax == 1) {
+        if (iPrintNy == 0) {
+          iIndex = -1;
+        }
+        else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
+          iIndex = -1;
+        }
+        else {
+          iIndex += 0;
+        }
+      }
+      else {
+        if (iPrintNy == 0) {
+          iIndex += 0;
+        }
+        else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
+          iIndex += iNyMax - 1;
+        }
+        else {
+          iIndex += ((iNyMax - 2) * (iPrintNy - 1) / (m_vPrintVectorSize.y() - 2)) + 1;
+        }
+      }
+      //std::cout << iIndex << " : ";
+      if (iIndex < 0) {
+        m_vPrintVector[iPrintNx][iPrintNy] = nullptr;
+      }
+      else {
+        m_vPrintVector[iPrintNx][iPrintNy] = m_vCells[iIndex].get();
+      }
+    }
+    iIndexStart += iNyMax;
+    //std::cout << std::endl;
+  }
 }
 
 void RightVesselGrid::generate_cycled_print_vector() {
+  int iCoreLenght = compute_binary_log(m_pVGInfo->iNy) + 1;
+  int iLenght = iCoreLenght + m_pVGInfo->iAdditionalLenght;
 
+  iLenght += 1; // last one for LeftBorderVesselCell
+
+  m_vPrintVectorSize.set(iLenght, m_pVGInfo->iNy);
+
+  m_vPrintVector.clear();
+  m_vPrintVector.resize(m_vPrintVectorSize.x());
+  for (auto& item : m_vPrintVector) {
+    item.resize(m_vPrintVectorSize.y(), nullptr);
+  }
+
+  int iIndexStart = 0;
+  for (int iPrintNx = 0; iPrintNx < m_vPrintVectorSize.x(); iPrintNx++) {
+    // Max Ny index
+    int iNyMax = 0;
+    if (iPrintNx == 0) {
+      // Left Border Cell
+      iNyMax = 1;
+    }
+    else if (iPrintNx < m_pVGInfo->iAdditionalLenght + 1) {
+      // Additional cells
+      iNyMax = 1;
+    }
+    else {
+      int iNxCore = iPrintNx - m_pVGInfo->iAdditionalLenght - 1;
+      iNyMax = compute_binary_pow(2, iNxCore);
+      //std::cout << "iNyMax = " << iNyMax << std::endl;
+    }
+    for (int iPrintNy = 0; iPrintNy < m_vPrintVectorSize.y(); iPrintNy++) {
+      int iIndex = iIndexStart;
+      if (iNyMax == 1) {
+        iIndex += 0;
+        //if (iPrintNy == 0) {
+        //  iIndex = -1;
+        //}
+        //else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
+        //  iIndex = -1;
+        //}
+        //else {
+        //  iIndex += 0;
+        //}
+      }
+      else {
+        if (iPrintNy == 0) {
+          iIndex += 0;
+        }
+        else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
+          iIndex += iNyMax - 1;
+        }
+        else {
+          iIndex += ((iNyMax)* (iPrintNy) / (m_vPrintVectorSize.y()));
+        }
+      }
+      //std::cout << iIndex << " : ";
+      if (iIndex < 0) {
+        m_vPrintVector[iPrintNx][iPrintNy] = nullptr;
+      }
+      else {
+        m_vPrintVector[iPrintNx][iPrintNy] = m_vCells[iIndex].get();
+      }
+    }
+    iIndexStart += iNyMax;
+    //std::cout << std::endl;
+  }
 }
