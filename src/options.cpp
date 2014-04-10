@@ -45,9 +45,17 @@ void Options::Init() {
   pDebugConfig2->SetUseIntegral(true);
   AddConfig(pDebugConfig2);
   
+  // H type grid
+  std::shared_ptr<Config> pHTypeConfig(new Config("h_type"));
+  pHTypeConfig->SetGridSize(Vector3i(32, 32, 1));
+  pHTypeConfig->SetGridGeometryType(sep::PROHOR_GRID_GEOMTRY);
+  pHTypeConfig->SetMaxIteration(100);
+  pHTypeConfig->SetUseIntegral(true);
+  AddConfig(pHTypeConfig);
+  
   // Finally, select wich is active
-//  SetActiveConfig("debug_1");
   SetActiveConfig("more_bigger");
+//  SetActiveConfig("h_type");
 }
 
 void Options::AddConfig(std::shared_ptr<Config> pConfig) {

@@ -154,7 +154,89 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
 }
 
 void GridManager::BuildHTypeGrid(Config* pConfig) {
-    std::cout << "Building H type grid" << std::endl;
+  std::cout << "Building H type grid" << std::endl;
+  InitEmptyBox(pConfig->GetGridSize());
+  bool flat_z = true;
+  AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), flat_z, 0.5, false);
+  
+  const Vector3i& vGSize = pConfig->GetGridSize();
+  
+  int n, m, p, D, l, d, h;
+  int gaps_q;
+  
+  n = vGSize.x();
+  m = vGSize.y();
+  p = vGSize.z();
+  
+  D = m / 3;
+  l = m - 2*D;
+  d = 4;
+  h = 3;
+  gaps_q = 3;
+
+  
+  // Add 2D case
+  if (flat_z) {
+    p = 1;
+  }
+  
+  int x_space = (n - ((gaps_q - 1)*(d + h) + d))/2;
+  
+
+  Vector3i start;
+  Vector3i size;
+  Vector3b without_fakes;
+  
+  // Add first box
+  
+  without_fakes[sep::X] = false;
+  without_fakes[sep::Y] = false;
+  without_fakes[sep::Z] = false;
+  
+  start[sep::X] = 0;
+  start[sep::Y] = D + l;
+  start[sep::Z] = 0;
+  
+  size[sep::X] = n;
+  size[sep::Y] = D;
+  size[sep::Z] = D;
+  
+  AddBox(start, size, without_fakes, flat_z, 1.0, true);
+  
+  // Add second box
+  
+  without_fakes[sep::X] = false;
+  without_fakes[sep::Y] = false;
+  without_fakes[sep::Z] = false;
+  
+  start[sep::X] = 0;
+  start[sep::Y] = 0;
+  start[sep::Z] = 0;
+  
+  size[sep::X] = n;
+  size[sep::Y] = D;
+  size[sep::Z] = D;
+  
+  AddBox(start, size, without_fakes, flat_z, 0.8, true);
+  
+  // Add gaps boxes
+  
+  without_fakes[sep::X] = false;
+  without_fakes[sep::Y] = true;
+  without_fakes[sep::Z] = false;
+  
+  for (int i=0; i<gaps_q; i++) {
+    
+    start[sep::X] = x_space + (d + h) * i;
+    start[sep::Y] = D - 2;  // -2 because of fake cells
+    start[sep::Z] = D/2 - d/2;
+    
+    size[sep::X] = d + 2; // +2 because of fake cells
+    size[sep::Y] = l + 4; // +4 because of fake cells
+    size[sep::Z] = d + 2; // +2 because of fake cells
+    
+    AddBox(start, size, without_fakes, flat_z, 0.9, true);
+  }  
 }
 
 void GridManager::InitEmptyBox(const Vector3i& vSize) {
