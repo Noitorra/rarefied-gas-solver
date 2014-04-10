@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 64
-NY = 32
+NX = 32
+NY = 16
 max_files = 1
 gas_num = 2
 

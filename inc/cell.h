@@ -16,6 +16,7 @@ class GridManager;
 class VesselGrid;
 class LeftVesselGrid;
 class RightVesselGrid;
+class OutResults;
 
 class Cell {
   friend GridManager;
@@ -23,6 +24,7 @@ class Cell {
   friend VesselGrid;
   friend LeftVesselGrid;
   friend RightVesselGrid;
+  friend OutResults;
 public:
 	enum CellType {
 		CT_UNDEFINED,

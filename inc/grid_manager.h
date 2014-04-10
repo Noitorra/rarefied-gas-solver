@@ -54,6 +54,12 @@ public:
   const std::vector<std::shared_ptr<VesselGrid>>& GetRightVessels() const {
     return m_vRightVess;
   }
+  const std::vector<std::shared_ptr<VesselGrid>>& GetLeftRightVessels(bool bIsLeft) const {
+    if (bIsLeft)
+      return m_vLeftVess;
+    else
+      return m_vRightVess;
+  }
   
 private:
   void SaveGridConfig(Config* pConfig);

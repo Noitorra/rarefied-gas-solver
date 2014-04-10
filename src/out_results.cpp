@@ -58,50 +58,147 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   }
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
-  const Vector3i& vGridSize = m_pGrid->GetSize();
+//  const Vector3i& vGridSize = m_pGrid->GetSize();
+//  const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
+//  const Vector3i& vOutputSize = pConfig->GetOutputSize();
+//  
+//  // Edge cells are faked
+//  for (int y = 0; y < vOutputSize.y(); y++) {
+//    for (int x = 0; x < vOutputSize.x(); x++) {
+//      int z = iZLayer;
+//      double dParam = 0.0;
+//      
+//      int g_x = x - vStartOutGrid.x();
+//      int g_y = y - vStartOutGrid.y();
+//      int g_z = z - vStartOutGrid.z();
+//      dParam = 0.0;
+//      int iEdge = 0;
+//      // Out grid
+//      if (g_x >= 0 + iEdge && g_y >= 0 + iEdge && g_z >= 0 + iEdge &&
+//          g_x < vGridSize.x() - iEdge && g_y < vGridSize.y() - iEdge && g_z < vGridSize.z() - iEdge) {
+//        if (m_vCells[g_x][g_y][g_z]->m_eType != sep::NORMAL_CELL) {
+//          dParam = 0.0;
+//        } else {
+//          switch (eType) {
+//            case sep::T_PARAM:
+//              dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Temperature;
+//              break;
+//            case sep::C_PARAM:
+//              dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Concentration;
+//              break;
+//            default:
+//              return;
+//          }
+//        }
+//      } else {
+//        // Looking for vessels
+//        
+//        // Left vessel
+//        
+//      }
+////      std::cout << "(" << x << "," << y << "," << z << "): " <<
+////      dParam << std::endl;
+//      fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
+//    }
+//  }
+  
+  
+  const Vector3i& vGridSize = pConfig->GetGridSize();
   const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
   const Vector3i& vOutputSize = pConfig->GetOutputSize();
   
-  // Left vessel
-//  const Vector3i& vLVesselStart = m_pGridManager->m_vLeftVess[0]->getVesselGridInfo()->vStart;
-//  const Vector3i& vLVesselSize = m_pGridManager->m_vLeftVess[0]->getVesselGridInfo()->vSize;
-  
-  // Edge cells are faked
   for (int y = 0; y < vOutputSize.y(); y++) {
     for (int x = 0; x < vOutputSize.x(); x++) {
-      int z = iZLayer;
+      int z = 0;
       double dParam = 0.0;
       
       int g_x = x - vStartOutGrid.x();
       int g_y = y - vStartOutGrid.y();
       int g_z = z - vStartOutGrid.z();
-      dParam = 0.0;
+      // Edge cells are faked
       int iEdge = 0;
       // Out grid
       if (g_x >= 0 + iEdge && g_y >= 0 + iEdge && g_z >= 0 + iEdge &&
           g_x < vGridSize.x() - iEdge && g_y < vGridSize.y() - iEdge && g_z < vGridSize.z() - iEdge) {
-        if (m_vCells[g_x][g_y][g_z]->m_eType != sep::NORMAL_CELL) {
+        
+        Cell* cell = m_vCells[g_x][g_y][g_z]->m_pCell;
+        if (!cell) {
           dParam = 0.0;
         } else {
-          switch (eType) {
-            case sep::T_PARAM:
-              dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Temperature;
-              break;
-            case sep::C_PARAM:
-              dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Concentration;
-              break;
-            default:
-              return;
+          if (m_vCells[g_x][g_y][g_z]->m_eType != sep::NORMAL_CELL) {
+            dParam = 0.0;
+          } else {
+            switch (eType) {
+              case sep::T_PARAM:
+                dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Temperature;
+                break;
+              case sep::C_PARAM:
+                dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Concentration;
+                break;
+              default:
+                return;
+            }
           }
         }
       } else {
         // Looking for vessels
         
-        // Left vessel
-        
+        if (!pConfig->GetUseVessels()) {
+          dParam = 0.0;
+          goto next_cell_label;
+        }
+               
+        for (int iLeftVess = 0; iLeftVess < 2; iLeftVess++) {
+          const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGridManager->GetLeftRightVessels(iLeftVess);
+          
+          for (auto& pVessel : vVessels) {
+
+            const std::vector< std::vector<Cell*> >& vVessCells = pVessel->GetPrintVector();
+            const Vector2i& vVesselSize2D = pVessel->GetPrintVectorSize();
+            Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
+            Vector3i vVesselStart = pVessel->getVesselGridInfo()->vStart;
+            vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
+            
+            int v_x = x - vVesselStart.x();
+            int v_y = y - vVesselStart.y();
+            int v_z = z - vVesselStart.z();
+            
+            iEdge = 0;
+            if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
+                v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
+              
+              Cell* cell = vVessCells[v_x][v_y];
+              if (!cell) {
+                dParam = 0.0;
+                goto next_cell_label;
+              }
+              else {
+                if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
+                     cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
+                    (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
+                     cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
+                  switch (eType) {
+                    case sep::T_PARAM:
+                      dParam = cell->m_vMacroData[iGas].Temperature;
+                      break;
+                    case sep::C_PARAM:
+                      dParam = cell->m_vMacroData[iGas].Concentration;
+                      break;
+                    default:
+                      return;
+                  }
+                } else {
+                  dParam = 0.0;
+                }
+              }
+            } else {
+              dParam = 0.0;
+              goto next_cell_label;
+            }
+          }
+        }
       }
-//      std::cout << "(" << x << "," << y << "," << z << "): " <<
-//      dParam << std::endl;
+      next_cell_label:
       fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
     }
   }

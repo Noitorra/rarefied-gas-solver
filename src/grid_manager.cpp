@@ -485,8 +485,6 @@ void GridManager::Print(sep::Axis axis) {
   const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
   const Vector3i& vOutputSize = pConfig->GetOutputSize();
   
-
-  // Edge cells are faked
   for (int y = 0; y < vOutputSize.y(); y++) {
     for (int x = 0; x < vOutputSize.x(); x++) {
       int z = 0;
@@ -494,6 +492,7 @@ void GridManager::Print(sep::Axis axis) {
       int g_x = x - vStartOutGrid.x();
       int g_y = y - vStartOutGrid.y();
       int g_z = z - vStartOutGrid.z();
+      // Edge cells are faked
       int iEdge = 0;
       // Out grid
       if (g_x >= 0 + iEdge && g_y >= 0 + iEdge && g_z >= 0 + iEdge &&
