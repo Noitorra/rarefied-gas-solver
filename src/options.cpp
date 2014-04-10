@@ -78,11 +78,28 @@ void Options::Init() {
   pHTypeConfig->SetAdditionalVesselLenght(60);
   AddConfig(pHTypeConfig);
   
+  // Comb type grid
+  std::shared_ptr<Config> pCombTypeConfig(new Config("comb_type"));
+//  pCombTypeConfig->SetGridSize(Vector3i(512, 64, 1));
+//  pCombTypeConfig->SetOutputGridStart(Vector3i(-192, 0, 0));
+//  pCombTypeConfig->SetOutputSize(Vector3i(128, 64, 1));
+  pCombTypeConfig->SetGridSize(Vector3i(20, 20, 1));
+  pCombTypeConfig->SetOutputGridStart(Vector3i(0, 0, 0));
+  pCombTypeConfig->SetOutputSize(Vector3i(20, 20, 1));
+  pCombTypeConfig->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
+  pCombTypeConfig->SetMaxIteration(200);
+  pCombTypeConfig->SetUseIntegral(true);
+  pCombTypeConfig->SetUseVessels(false);
+  pCombTypeConfig->SetUseLooping(true);
+  pCombTypeConfig->SetAdditionalVesselLenght(0);
+  AddConfig(pCombTypeConfig);
+  
   // Finally, select wich is active
 //  SetActiveConfig("debug_1");
-  SetActiveConfig("more_bigger");
+//  SetActiveConfig("more_bigger");
 //  SetActiveConfig("debug_3");
 //  SetActiveConfig("h_type");
+    SetActiveConfig("comb_type");
 }
 
 void Options::AddConfig(std::shared_ptr<Config> pConfig) {

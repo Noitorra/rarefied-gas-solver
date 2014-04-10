@@ -108,6 +108,14 @@ void GridManager::Build(Config* pConfig) {
 
 void GridManager::BuildDebugTypeGrid(Config* pConfig) {
   std::cout << "Building debug type grid" << std::endl;
+  
+  //// Test 1: Done
+  //// Left and Right walls are 1.0
+  //for (int y = 0; y < vGSize.y(); y++) {
+  //  m_vCells[0][y][0]->m_cInitCond.Temperature = 1.0;
+  //  m_vCells[vGSize.x()-1][y][0]->m_cInitCond.Temperature = 1.0;
+  //}
+  
   InitEmptyBox(pConfig->GetGridSize());
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
   //  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
@@ -121,13 +129,6 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   
   const Vector3i& vGSize = pConfig->GetGridSize();
   
-  //// Test 1: Done
-  //// Left and Right walls are 1.0
-  //for (int y = 0; y < vGSize.y(); y++) {
-  //  m_vCells[0][y][0]->m_cInitCond.Temperature = 1.0;
-  //  m_vCells[vGSize.x()-1][y][0]->m_cInitCond.Temperature = 1.0;
-  //}
-
   // Blocks
   // +1 - Hack for small grid (stupid, sorry)
 //  Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
@@ -135,34 +136,32 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
 //  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8-1, vGSize.y()*1/8+1, 0);
   Vector3i vBlockStart1 = Vector3i(4, 5, 0);
   Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8+1, vGSize.y()*5/8-1, 0);
-  AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
-//  AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
+  AddBox(Vector3i(10, 10, 0), Vector3i(5, 5, 1), Vector3b(false, false, false), true, 1.0, false);
 
   // Right up and down corners
   m_vCells[vGSize.x() - 1][0][0]->m_eType = sep::FAKE_CELL;
   m_vCells[vGSize.x() - 1][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
   
-  // Left up and down corners. Only without vessel!
-//  if (!pConfig->GetUseVessels()) {
-    m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
-    m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+  // Left up and down corners
+  m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+
+  
+//  // Vessel
+//  if (pConfig->GetUseVessels() && !pConfig->GetUseLooping()) {
+//    SetVesselBorderBox(Vector3i(vGSize.x() - 1, 1, 0), Vector3i(1, vGSize.y() - 2, 1), false, 0, 0.5);
+//  }
+//  
+//  // Vessel
+//  if (pConfig->GetUseVessels() && pConfig->GetUseLooping()) {
+//    SetVesselBorderBox(Vector3i(vGSize.x() - 1, 0, 0), Vector3i(1, vGSize.y(), 1), false, 0, 0.5);
 //  }
   
-  // Vessel
-  if (pConfig->GetUseVessels() && !pConfig->GetUseLooping()) {
-    SetVesselBorderBox(Vector3i(vGSize.x() - 1, 1, 0), Vector3i(1, vGSize.y() - 2, 1), false, 0, 0.5);
-  }
-  
-  // Vessel
-  if (pConfig->GetUseVessels() && pConfig->GetUseLooping()) {
-    SetVesselBorderBox(Vector3i(vGSize.x() - 1, 0, 0), Vector3i(1, vGSize.y(), 1), false, 0, 0.5);
-  }
-  
-  // Should be good looping with vessel
-  if (pConfig->GetUseLooping() && pConfig->GetUseVessels()) {
-    SetLoopedBox(Vector3i(), Vector3i(vGSize.x() - 1, 1, 1), true, 0.5);
-    SetLoopedBox(Vector3i(0, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 1, 1, 1), false, 0.5);
-  }
+//  // Should be good looping with vessel
+//  if (pConfig->GetUseLooping() && pConfig->GetUseVessels()) {
+//    SetLoopedBox(Vector3i(), Vector3i(vGSize.x() - 1, 1, 1), true, 0.5);
+//    SetLoopedBox(Vector3i(0, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 1, 1, 1), false, 0.5);
+//  }
 
   // Looping without vessel
   if (pConfig->GetUseLooping() && !pConfig->GetUseVessels()) {
@@ -505,10 +504,10 @@ void GridManager::AddBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes
               ((k == vStart.z() || k == p-1) && !vWithoutFakes.z())) {
             // only for some edges
             
-            if (bGasBox)
+//            if (bGasBox)
               cell->m_eType = sep::FAKE_CELL;
-            else
-              cell->m_eType = sep::EMPTY_CELL;
+//            else
+//              cell->m_eType = sep::EMPTY_CELL;
           }
         } else {
           // normal cells
