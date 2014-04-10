@@ -449,15 +449,16 @@ void LeftVesselGrid::generate_cycled_print_vector() {
     for (int iPrintNy = 0; iPrintNy < m_vPrintVectorSize.y(); iPrintNy++) {
       int iIndex = iIndexStart;
       if (iNyMax == 1) {
-        if (iPrintNy == 0) {
-          iIndex = -1;
-        }
-        else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
-          iIndex = -1;
-        }
-        else {
-          iIndex += 0;
-        }
+        iIndex += 0;
+        //if (iPrintNy == 0) {
+        //  iIndex = -1;
+        //}
+        //else if (iPrintNy == m_vPrintVectorSize.y() - 1) {
+        //  iIndex = -1;
+        //}
+        //else {
+        //  iIndex += 0;
+        //}
       }
       else {
         if (iPrintNy == 0) {
