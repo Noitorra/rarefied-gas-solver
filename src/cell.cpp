@@ -227,16 +227,16 @@ void Cell::compute_half_left(unsigned int dim) {
       if(impulsev[ii][dim] < 0) {
         double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 
-        m_vValue[gi][ii] = 2*compute_anv(m_vNext[dim], dim, gi, ii, 0) - compute_anv(m_vNext[dim], dim, gi, ii, 1);
+        m_vValue[gi][ii] = 2*compute_av(dim, gi, ii, AD_NEXT) - compute_av(dim, gi, ii, AD_NEXTNEXT);
         if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
 
-        m_vHalf[gi][ii] = compute_anv(m_vNext[dim], dim, gi, ii, 0) - (1-y)/2*limiter(
+        m_vHalf[gi][ii] = compute_av(dim, gi, ii, AD_NEXT) - (1 - y) / 2 * limiter(
          		m_vValue[gi][ii],
-         		compute_anv(m_vNext[dim], dim, gi, ii, 0),
-         		compute_anv(m_vNext[dim], dim, gi, ii, 1) );
+            compute_av(dim, gi, ii, AD_NEXT),
+            compute_av(dim, gi, ii, AD_NEXTNEXT));
 
         C1_up += std::abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
-        C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_anv(m_vNext[dim], dim, gi, ii, 0)) / 2);
+        C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_NEXT)) / 2);
       } else {
         C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
       }
@@ -245,7 +245,7 @@ void Cell::compute_half_left(unsigned int dim) {
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
       if(impulsev[ii][dim] > 0) {
         m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
-        m_vValue[gi][ii] = 2*C2_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]) - compute_anv(m_vNext[dim], dim, gi, ii, 0);
+        m_vValue[gi][ii] = 2 * C2_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]) - compute_av(dim, gi, ii, AD_NEXT);
         if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
       }
     }
@@ -262,14 +262,14 @@ void Cell::compute_half_normal(unsigned int dim) {
 			double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 			if(impulsev[ii][dim] > 0) {
 				m_vHalf[gi][ii] = m_vValue[gi][ii] + (1-y)/2*limiter(
-						compute_apv(m_vPrev[dim], dim, gi, ii, 0),
+						compute_av(dim, gi, ii, AD_PREV),
 						m_vValue[gi][ii],
-						compute_anv(m_vNext[dim], dim, gi, ii, 0) );
+            compute_av(dim, gi, ii, AD_NEXT));
 			} else {
-				m_vHalf[gi][ii] = compute_anv(m_vNext[dim], dim, gi, ii, 0) - (1-y)/2*limiter(
+        m_vHalf[gi][ii] = compute_av(dim, gi, ii, AD_NEXT) - (1 - y) / 2 * limiter(
 						m_vValue[gi][ii],
-						compute_anv(m_vNext[dim], dim, gi, ii, 0),
-						compute_anv(m_vNext[dim], dim, gi, ii, 1) );
+            compute_av(dim, gi, ii, AD_NEXT),
+            compute_av(dim, gi, ii, AD_NEXTNEXT));
 			}
 		}
 	}
@@ -291,23 +291,23 @@ void Cell::compute_half_right(unsigned int dim) {
 	      if(impulsev[ii][dim] > 0) {
 	      	double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
 
-	         m_vValue[gi][ii] = 2*compute_apv(m_vPrev[dim], dim, gi, ii, 0) - compute_apv(m_vPrev[dim], dim, gi, ii, 1);
+          m_vValue[gi][ii] = 2 * compute_av(dim, gi, ii, AD_PREV) - compute_av(dim, gi, ii, AD_PREVPREV);
 	        if (m_vValue[gi][ii] < 0) m_vValue[gi][ii] = 0;
 
 	        // TODO: check
 	        for( auto& item : m_vPrev[dim] ) {
-	        	item->m_vHalf[gi][ii] = item->m_vValue[gi][ii] + (1-y)/2*limiter(
-	        			compute_apv(item->m_vPrev[dim], dim, gi, ii, 0),
-	         			item->m_vValue[gi][ii],
-	         			compute_anv(item->m_vNext[dim], dim, gi, ii, 0) );
+            item->m_vHalf[gi][ii] = item->m_vValue[gi][ii] + (1 - y) / 2 * limiter(
+              compute_av(dim, gi, ii, AD_PREV),
+              item->m_vValue[gi][ii],
+              compute_av(dim, gi, ii, AD_NEXT));
 	        }
 	        // old code
 //	      	m_vPrev[dim]->m_vHalf[gi][ii] = m_vPrev[dim]->m_vValue[gi][ii] + (1-y)/2*limitter::super_bee(m_vPrev[dim]->m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vValue[gi][ii]);
 
-          C1_up += std::abs(impulsev[ii][dim] * compute_aph(m_vPrev[dim], dim, gi, ii, 0));
-          C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_apv(m_vPrev[dim], dim, gi, ii, 0)) / 2);
+          C1_up += std::abs(impulsev[ii][dim] * compute_ah(dim, gi, ii, AD_PREV));
+          C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_PREV)) / 2);
 	      } else {
           C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
 	      }
@@ -320,7 +320,7 @@ void Cell::compute_half_right(unsigned int dim) {
 	      		item->m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
 	      	}
 //	      	m_vPrev[dim]->m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]);
-					m_vValue[gi][ii] = 2*C2_up/C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]) - compute_apv(m_vPrev[dim], dim, gi, ii, 0);
+          m_vValue[gi][ii] = 2 * C2_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]) - compute_av(dim, gi, ii, AD_PREV);
 					if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
 	      }
 	    }
@@ -336,66 +336,82 @@ void Cell::compute_value_normal(unsigned int dim) {
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
 		    double y = config->GetTimeStep()/gasv[gi]->getMass()*impulsev[ii][dim]/m_vAreastep[dim];
-        m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_aph(m_vPrev[dim], dim, gi, ii, 0));
+        m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_ah(dim, gi, ii, AD_PREV));
     }
   }
 }
 
 // HELP METHODS
-double Cell::compute_apv(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth ) {
-	double result = 0.0;
-	unsigned int count = 0;
-	for( auto& item : cellv ) {
-		result += item->m_vValue[gi][ii];
-		count++;
-		if( depth > 0) {
-			result += compute_apv( item->m_vPrev[dim], dim, gi, ii, depth - 1 );
-			count++;
-		}
-	}
-	return result/count;
+double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth) {
+  double result = 0.0;
+  unsigned int count = 0;
+  switch (eAverageDepth) {
+  case AD_NEXT:
+    for (auto& item : m_vNext[dim]) {
+      result += item->m_vValue[gi][ii];
+      count++;
+    }
+    break;
+  case AD_NEXTNEXT:
+    for (auto& item1 : m_vNext[dim]) {
+      for (auto& item2 : item1->m_vNext[dim]) {
+        result += item2->m_vValue[gi][ii];
+        count++;
+      }
+    }
+    break;
+  case AD_PREV:
+    for (auto& item : m_vPrev[dim]) {
+      result += item->m_vValue[gi][ii];
+    }
+    break;
+  case AD_PREVPREV:
+    for (auto& item1 : m_vPrev[dim]) {
+      for (auto& item2 : item1->m_vPrev[dim]) {
+        result += item2->m_vValue[gi][ii];
+        count++;
+      }
+    }
+    break;
+  }
+  result /= count;
+  return result;
 }
 
-double Cell::compute_anv(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth ) {
-	double result = 0.0;
-	unsigned int count = 0;
-	for( auto& item : cellv ) {
-		result += item->m_vValue[gi][ii];
-		count++;
-		if( depth > 0) {
-			result += compute_anv( item->m_vNext[dim], dim, gi, ii, depth - 1 );
-			count++;
-		}
-	}
-	return result/count;
-}
-
-double Cell::compute_aph(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth ) {
-	double result = 0.0;
-	unsigned int count = 0;
-	for( auto& item : cellv ) {
-		result += item->m_vHalf[gi][ii];
-		count++;
-		if( depth > 0) {
-			result += compute_apv( item->m_vPrev[dim], dim, gi, ii, depth - 1 );
-			count++;
-		}
-	}
-	return result/count;
-}
-
-double Cell::compute_anh(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth ) {
-	double result = 0.0;
-	unsigned int count = 0;
-	for( auto& item : cellv ) {
-		result += item->m_vHalf[gi][ii];
-		count++;
-		if( depth > 0) {
-			result += compute_anv( item->m_vNext[dim], dim, gi, ii, depth - 1 );
-			count++;
-		}
-	}
-	return result/count;
+double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth) {
+  double result = 0.0;
+  unsigned int count = 0;
+  switch (eAverageDepth) {
+  case AD_NEXT:
+    for (auto& item : m_vNext[dim]) {
+      result += item->m_vHalf[gi][ii];
+      count++;
+    }
+    break;
+  case AD_NEXTNEXT:
+    for (auto& item1 : m_vNext[dim]) {
+      for (auto& item2 : item1->m_vNext[dim]) {
+        result += item2->m_vHalf[gi][ii];
+        count++;
+      }
+    }
+    break;
+  case AD_PREV:
+    for (auto& item : m_vPrev[dim]) {
+      result += item->m_vHalf[gi][ii];
+    }
+    break;
+  case AD_PREVPREV:
+    for (auto& item1 : m_vPrev[dim]) {
+      for (auto& item2 : item1->m_vPrev[dim]) {
+        result += item2->m_vHalf[gi][ii];
+        count++;
+      }
+    }
+    break;
+  }
+  result /= count;
+  return result;
 }
 
 double Cell::fast_exp(const double& mass, const double& temp, const Vector3d& impulse) {

@@ -82,7 +82,7 @@ private:
 	// help methods
 	void compute_type(unsigned int dim);
 
-	void compute_half_left(unsigned int dim);
+  void compute_half_left(unsigned int dim);
 	void compute_half_normal(unsigned int dim);
 	void compute_half_preright(unsigned int dim);
 	void compute_half_right(unsigned int dim);
@@ -93,10 +93,16 @@ private:
 //	void computeValue_Right(unsigned int dim);
 
 	// help methods
-	double compute_apv(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth = 0 );
-	double compute_anv(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth = 0 );
-	double compute_aph(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth = 0 );
-	double compute_anh(CellVector& cellv, unsigned int dim, unsigned int gi, unsigned int ii, unsigned int depth = 0 );
+  // help enum, not to fail this shit
+  enum AverageDepth {
+    AD_NEXT,
+    AD_NEXTNEXT,
+    AD_PREV,
+    AD_PREVPREV
+  };
+
+  double compute_av(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth);
+  double compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth);
 
 	double fast_exp(const double& mass, const double& temp, const Vector3d& impulse);
 
