@@ -558,7 +558,7 @@ void GridManager::InitVessels() {
   Config* pConfig = GetConfig();
   // Need Nx
   int iNx = pConfig->GetGridSize().y();
-  int iNy = pConfig->GetGridSize().y() + 2;
+  int iNy = pConfig->GetGridSize().y();
   int iNz = 1;
   lvg->setGridManager(this);
   lvg->getVesselGridInfo()->dStartConcentration = 1.0;
