@@ -146,9 +146,14 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
     m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
 //  }
   
-  // Should be good for vessel
-  if (pConfig->GetUseVessels()) {
-    SetVesselBorderBox(Vector3i(0, 1, 0), Vector3i(1, vGSize.y() - 2, 1), true, 0, 1.0);
+  // Vessel
+  if (pConfig->GetUseVessels() && !pConfig->GetUseLooping()) {
+    SetVesselBorderBox(Vector3i(0, 1, 0), Vector3i(1, vGSize.y() - 2, 1), true, 0, 0.5);
+  }
+  
+  // Vessel
+  if (pConfig->GetUseVessels() && pConfig->GetUseLooping()) {
+    SetVesselBorderBox(Vector3i(0, 0, 0), Vector3i(1, vGSize.y(), 1), true, 0, 0.5);
   }
   
   // Should be good looping with vessel
@@ -557,12 +562,12 @@ void GridManager::InitVessels() {
   VesselGrid* lvg = m_vLeftVess[0].get();
   Config* pConfig = GetConfig();
   // Need Nx
-  int iNx = pConfig->GetGridSize().y();
+  int iNx = pConfig->GetGridSize().y(); // ?
   int iNy = pConfig->GetGridSize().y();
   int iNz = 1;
   lvg->setGridManager(this);
   lvg->getVesselGridInfo()->dStartConcentration = 1.0;
-  lvg->getVesselGridInfo()->dStartTemperature = 1.0;
+  lvg->getVesselGridInfo()->dStartTemperature = 0.5;
   lvg->getVesselGridInfo()->iAdditionalLenght = 0;
   lvg->getVesselGridInfo()->iNy = iNy;
   lvg->getVesselGridInfo()->iNz = iNz;
@@ -570,7 +575,10 @@ void GridManager::InitVessels() {
   lvg->getVesselGridInfo()->vStart = Vector3i();
   lvg->getVesselGridInfo()->vSize = Vector3i(iNx, iNy, iNz);
   
-  lvg->SetVesselGridType(VesselGrid::VGT_NORMAL);
+  if (pConfig->GetUseLooping())
+    lvg->SetVesselGridType(VesselGrid::VGT_CYCLED);
+  else
+    lvg->SetVesselGridType(VesselGrid::VGT_NORMAL);
   lvg->CreateAndLinkVessel();
 }
 

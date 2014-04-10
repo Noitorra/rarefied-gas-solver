@@ -25,8 +25,8 @@ void VesselGrid::CreateAndLinkVessel() {
       break;
     }
   }
-  catch (std::exception& e) {
-    std::cout << "VesselGrid Exception: " << e.what() << std::endl;
+  catch (const char* e) {
+    std::cout << "VesselGrid Exception: " << e << std::endl;
   }
 }
 

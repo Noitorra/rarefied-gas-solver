@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 32
-NY = 16
-max_files = 1
+NX = 24
+NY = 18
+max_files = 33
 gas_num = 2
 
 # hack

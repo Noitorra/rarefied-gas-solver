@@ -43,9 +43,9 @@ void Options::Init() {
   
   // Bigger grid
   std::shared_ptr<Config> pDebugConfig2(new Config("more_bigger"));
-  pDebugConfig2->SetGridSize(Vector3i(32, 32, 1));
-  pDebugConfig2->SetOutputGridStart(Vector3i(32, 0, 0));
-  pDebugConfig2->SetOutputSize(Vector3i(64, 32, 1));
+  pDebugConfig2->SetGridSize(Vector3i(16, 16, 1));
+  pDebugConfig2->SetOutputGridStart(Vector3i(16, 0, 0));
+  pDebugConfig2->SetOutputSize(Vector3i(32, 16, 1));
   pDebugConfig2->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   pDebugConfig2->SetMaxIteration(100);
   pDebugConfig2->SetUseIntegral(true);
@@ -56,8 +56,8 @@ void Options::Init() {
   // Bigger grid 32x16
   std::shared_ptr<Config> pDebugConfig3(new Config("debug_3"));
   pDebugConfig3->SetGridSize(Vector3i(18, 18, 1));
-  pDebugConfig3->SetOutputGridStart(Vector3i(18, 0, 0));
-  pDebugConfig3->SetOutputSize(Vector3i(32, 18, 1));
+  pDebugConfig3->SetOutputGridStart(Vector3i(6, 0, 0));
+  pDebugConfig3->SetOutputSize(Vector3i(24, 18, 1));
   pDebugConfig3->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   pDebugConfig3->SetMaxIteration(100);
   pDebugConfig3->SetUseIntegral(true);
@@ -77,8 +77,8 @@ void Options::Init() {
   
   // Finally, select wich is active
 //  SetActiveConfig("debug_1");
-//  SetActiveConfig("more_bigger");
-  SetActiveConfig("debug_3");
+  SetActiveConfig("more_bigger");
+//  SetActiveConfig("debug_3");
 //  SetActiveConfig("h_type");
 }
 

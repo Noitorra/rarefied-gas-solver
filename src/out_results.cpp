@@ -25,6 +25,7 @@ void OutResults::OutAll(int iIteration) {
 // prepare parameters to be printed out
 void OutResults::LoadParameters() {
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
+  Config* pConfig = m_pGridManager->GetConfig();
   
   const Vector3i& vSize = m_pGrid->GetSize();
   for (int x = 0; x < vSize.x(); x++) {
@@ -36,6 +37,17 @@ void OutResults::LoadParameters() {
       cell->computeMacroData();
       const std::vector<MacroData>& vMacroData = cell->getMacroData();
       m_vCells[x][y][z]->m_vMacroData = vMacroData;
+    }
+  }
+  
+  if (pConfig->GetUseVessels()) {
+    // For all vessels
+    for (int iLeftVess = 0; iLeftVess < 2; iLeftVess++) {
+      const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGridManager->GetLeftRightVessels(iLeftVess);
+      
+      for (auto& pVessel : vVessels) {
+        pVessel->computeMacroData();
+      }
     }
   }
 }
