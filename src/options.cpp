@@ -62,7 +62,7 @@ void Options::Init() {
   pDebugConfig3->SetMaxIteration(100);
   pDebugConfig3->SetUseIntegral(true);
   pDebugConfig3->SetUseVessels(true);
-  pDebugConfig3->SetUseLooping(true);
+  pDebugConfig3->SetUseLooping(false);
   AddConfig(pDebugConfig3);
   
   // H type grid

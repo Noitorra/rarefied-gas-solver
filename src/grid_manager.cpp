@@ -129,9 +129,10 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   //}
 
   // Blocks
+  // +1 - Hack for small grid (stupid, sorry)
   Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
-  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8, vGSize.y()*1/8, 0);
-  Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8, vGSize.y()*5/8, 0);
+  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8-1, vGSize.y()*1/8+1, 0);
+  Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8+1, vGSize.y()*5/8-1, 0);
   AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
   AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
 
@@ -378,7 +379,8 @@ void GridManager::LinkCells(Config* pConfig) {
           if (init_cell->m_bIsVesselLeft) {
             pVess = m_vLeftVess[iVessN].get();
             // TODO: Use vessel coord, not just y
-            Cell* pVessCell = pVess->GetBorderCell(y);
+            int iVessStartY = pVess->getVesselGridInfo()->vStart.y();
+            Cell* pVessCell = pVess->GetBorderCell(y - iVessStartY);
             cell->m_vPrev[sep::X][0] = pVessCell;
             pVessCell->m_vNext[sep::X].push_back(cell);
           }
