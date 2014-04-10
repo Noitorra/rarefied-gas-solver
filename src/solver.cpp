@@ -92,6 +92,7 @@ void Solver::Run() {
     
     // Output data
     m_pGridManager->GetOutResults()->OutAll(iteration + 1);
+    m_pGridManager->GetOutResults()->OutAverageStream(iteration);
     std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
 	}
 }

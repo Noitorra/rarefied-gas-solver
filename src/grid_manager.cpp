@@ -131,12 +131,11 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   
   // Blocks
   // +1 - Hack for small grid (stupid, sorry)
-//  Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
-    Vector3i vBlockSize = Vector3i(4, 4, vGSize.z());
-//  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8-1, vGSize.y()*1/8+1, 0);
-  Vector3i vBlockStart1 = Vector3i(4, 5, 0);
+  Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
+  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8-1, vGSize.y()*1/8+1, 0);
   Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8+1, vGSize.y()*5/8-1, 0);
-  AddBox(Vector3i(10, 10, 0), Vector3i(5, 5, 1), Vector3b(false, false, false), true, 1.0, false);
+  AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
+  AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
 
     //m_vCells[3][3][0]->m_eType = sep::EMPTY_CELL;
 
