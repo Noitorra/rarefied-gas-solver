@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
 #include "types.h"
+#include "vessel_grid.h"
 
 class Grid;
 class Config;
@@ -83,7 +84,11 @@ private:
   void SetLoopedBox(const Vector3i& vStart, const Vector3i& vSize, bool bIsLoopedDown, double dT);
   void SetVesselBorderBox(const Vector3i& vStart, const Vector3i& vSize, bool bIsVesselLeft, int iVesselNumber, double dT);
   void InitVessels();
-
+  void InitHTypeVessels();
+  void InitCombTypeVessels();
+  void InitVessel(Vector3i vSize, double dT, double dConc, bool bIsLeft);
+  void InitVessel(int iStartY, int iSizeY, double dT, double dConc, bool bIsLeft, VesselGrid::VesselGridType eType);
+  
   std::shared_ptr<Grid> m_pGrid;
   std::shared_ptr<OutResults> m_pOutResults;
   Solver* m_pSolver;

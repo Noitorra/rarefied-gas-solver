@@ -56,10 +56,10 @@ void Options::Init() {
   // Bigger grid 32x16
   std::shared_ptr<Config> pDebugConfig3(new Config("debug_3"));
   pDebugConfig3->SetGridSize(Vector3i(18, 18, 1));
-  pDebugConfig3->SetOutputGridStart(Vector3i(6, 0, 0));
+  pDebugConfig3->SetOutputGridStart(Vector3i(0, 0, 0));
   pDebugConfig3->SetOutputSize(Vector3i(24, 18, 1));
   pDebugConfig3->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
-  pDebugConfig3->SetMaxIteration(100);
+  pDebugConfig3->SetMaxIteration(200);
   pDebugConfig3->SetUseIntegral(true);
   pDebugConfig3->SetUseVessels(true);
   pDebugConfig3->SetUseLooping(false);
@@ -67,12 +67,15 @@ void Options::Init() {
   
   // H type grid
   std::shared_ptr<Config> pHTypeConfig(new Config("h_type"));
-  pHTypeConfig->SetGridSize(Vector3i(40, 32, 1));
+  pHTypeConfig->SetGridSize(Vector3i(80, 40, 1));
+  pHTypeConfig->SetOutputGridStart(Vector3i(67, 0, 0));
+  pHTypeConfig->SetOutputSize(Vector3i(220, 40, 1));
   pHTypeConfig->SetGridGeometryType(sep::PROHOR_GRID_GEOMTRY);
-  pHTypeConfig->SetMaxIteration(100);
+  pHTypeConfig->SetMaxIteration(200);
   pHTypeConfig->SetUseIntegral(true);
   pHTypeConfig->SetUseVessels(true);
   pHTypeConfig->SetUseLooping(false);
+  pHTypeConfig->SetAdditionalVesselLenght(60);
   AddConfig(pHTypeConfig);
   
   // Finally, select wich is active

@@ -23,7 +23,6 @@ struct VesselGridInfo {
   int iNz;
   int iAdditionalLenght;
   Vector3i vStart;
-  Vector3i vSize;
 };
 
 class VesselGrid {

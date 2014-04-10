@@ -51,9 +51,8 @@ void Solver::Init() {
   m_pGrid->GetGridManager()->Print(sep::Y);
 //  m_pGrid->GetGridManager()->Print(sep::Z);
 
-  m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::X);
-  m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::Y);
-
+//  m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::X);
+//  m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::Y);
 }
 
 void Solver::Run() {
