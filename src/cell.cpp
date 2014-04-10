@@ -363,6 +363,7 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   case AD_PREV:
     for (auto& item : m_vPrev[dim]) {
       result += item->m_vValue[gi][ii];
+      count++;
     }
     break;
   case AD_PREVPREV:
@@ -399,6 +400,7 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   case AD_PREV:
     for (auto& item : m_vPrev[dim]) {
       result += item->m_vHalf[gi][ii];
+      count++;
     }
     break;
   case AD_PREVPREV:
