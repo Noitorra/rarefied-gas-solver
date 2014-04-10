@@ -48,6 +48,12 @@ public:
   Config* GetConfig() const;
   void BuildGrid();
   void Print(sep::Axis axis);
+  const std::vector<std::shared_ptr<VesselGrid>>& GetLeftVessels() const {
+    return m_vLeftVess;
+  }
+  const std::vector<std::shared_ptr<VesselGrid>>& GetRightVessels() const {
+    return m_vRightVess;
+  }
   
 private:
   void SaveGridConfig(Config* pConfig);

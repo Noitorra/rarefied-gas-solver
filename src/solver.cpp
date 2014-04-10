@@ -46,7 +46,7 @@ void Solver::Init() {
   initCellType(sep::X);
   initCellType(sep::Y);
   initCellType(sep::Z);
-  
+
   m_pGrid->GetGridManager()->Print(sep::X);
   m_pGrid->GetGridManager()->Print(sep::Y);
 //  m_pGrid->GetGridManager()->Print(sep::Z);
@@ -97,6 +97,19 @@ void Solver::initCellType(sep::Axis axis) {
 	for( auto& item : cellVector ) {
 		item->computeType(axis);
 	}
+  
+  // Vessels
+  const std::vector<std::shared_ptr<VesselGrid>>& vLVessels =
+  m_pGridManager->GetLeftVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vRVessels =
+  m_pGridManager->GetRightVessels();
+  
+  for (auto& item : vLVessels) {
+    item->computeType(axis);
+  }
+  for (auto& item : vRVessels) {
+    item->computeType(axis);
+  }
 }
 
 void Solver::makeStep(sep::Axis axis) {
@@ -105,10 +118,32 @@ void Solver::makeStep(sep::Axis axis) {
 	for( auto& item : cellVector ) {
 		item->computeHalf(axis);
 	}
+  
+  // Vessels
+  const std::vector<std::shared_ptr<VesselGrid>>& vLVessels =
+  m_pGridManager->GetLeftVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vRVessels =
+  m_pGridManager->GetRightVessels();
+  
+  for (auto& item : vLVessels) {
+    item->computeHalf(axis);
+  }
+  for (auto& item : vRVessels) {
+    item->computeHalf(axis);
+  }
+  
 	// make value
 	for( auto& item : cellVector ) {
 		item->computeValue(axis);
 	}
+  
+  // Vessels
+  for (auto& item : vLVessels) {
+    item->computeValue(axis);
+  }
+  for (auto& item : vRVessels) {
+    item->computeValue(axis);
+  }
 }
 
 Config* Solver::GetConfig() const {
@@ -132,5 +167,18 @@ void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
 
   for( auto& item : cellVector ) {
   	item->computeIntegral(gi0, gi1);
+  }
+  
+  // Vessels
+  const std::vector<std::shared_ptr<VesselGrid>>& vLVessels =
+  m_pGridManager->GetLeftVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vRVessels =
+  m_pGridManager->GetRightVessels();
+  
+  for (auto& item : vLVessels) {
+    item->computeIntegral(gi0, gi1);
+  }
+  for (auto& item : vRVessels) {
+    item->computeIntegral(gi0, gi1);
   }
 }

@@ -16,7 +16,7 @@ int main(int argc, char * argv[])
 
   pSolver->Init(); // Linking children and initialization
   
-  //pSolver->Run();
+  pSolver->Run();
 
   // LAST: here we apparently stop all nodes....
   std::cout << "Done..." << std::endl;

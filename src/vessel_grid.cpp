@@ -61,7 +61,7 @@ int VesselGrid::compute_binary_log(int value) {
   if (value == 1) return result;
   else {
     // Error
-    throw std::exception("Not binary value.");
+    throw std::exception();
   }
 }
 

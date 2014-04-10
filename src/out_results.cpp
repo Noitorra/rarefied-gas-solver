@@ -63,8 +63,8 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   const Vector3i& vOutputSize = pConfig->GetOutputSize();
   
   // Left vessel
-  const Vector3i& vLVesselStart = m_pGridManager->m_vLeftVess[0]->getVesselGridInfo()->vStart;
-  const Vector3i& vLVesselSize = m_pGridManager->m_vLeftVess[0]->getVesselGridInfo()->vSize;
+//  const Vector3i& vLVesselStart = m_pGridManager->m_vLeftVess[0]->getVesselGridInfo()->vStart;
+//  const Vector3i& vLVesselSize = m_pGridManager->m_vLeftVess[0]->getVesselGridInfo()->vSize;
   
   // Edge cells are faked
   for (int y = 0; y < vOutputSize.y(); y++) {

@@ -50,7 +50,7 @@ public:
 
   // access method for saving grid data
   const std::vector< std::vector<Cell*> >& GetPrintVector() const { return m_vPrintVector; }
-  const Vector2i GetPrintVectorSize() const { return m_vPrintVectorSize; }
+  const Vector2i& GetPrintVectorSize() const { return m_vPrintVectorSize; }
 
   // access method for linking last colomn
   Cell* GetBorderCell(int iIndexY) { return m_vCells[m_vCells.size() - m_pVGInfo->iNy + iIndexY].get(); }
