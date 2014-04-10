@@ -55,10 +55,11 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   }
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
+  int iDecr = 0;
   const Vector3i& vSize = m_pGrid->GetSize();
   // Edge cells are faked
-  for (int y = 1; y < vSize.y() - 1; y++) {
-    for (int x = 1; x < vSize.x() - 1; x++) {
+  for (int y = iDecr; y < vSize.y() - iDecr; y++) {
+    for (int x = iDecr; x < vSize.x() - iDecr; x++) {
       int z = iZLayer;
       double dParam = 0.0;
       if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL) {

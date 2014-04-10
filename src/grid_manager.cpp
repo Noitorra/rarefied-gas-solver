@@ -4,6 +4,7 @@
 #include "config.h"
 #include "solver.h"
 #include "out_results.h"
+#include "vessel_grid.h"
 
 GridManager::GridManager() :
 m_pGrid(new Grid),
@@ -12,6 +13,7 @@ m_pSolver(nullptr) {}
 
 void GridManager::Init() {
   m_pGrid->Init();
+  m_pGrid->SetParent(this);
   m_pOutResults->Init(m_pGrid.get(), this);
 }
 
@@ -28,7 +30,11 @@ OutResults* GridManager::GetOutResults() const {
 }
 
 void GridManager::BuildGrid() {
-    Build(GetConfig());
+  Config* pConfig = GetConfig();
+  Build(pConfig);
+  FillInGrid(pConfig);
+  InitVessels();
+  LinkCells(pConfig);
 }
 
 // Currently we don't need this func
@@ -103,8 +109,6 @@ void GridManager::BuildDebugTypeGrid(Config* pConfig) {
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
   //  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
   AddBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), Vector3b(false, false, false), true, 0.4, false);
-  FillInGrid(pConfig);
-  LinkCells(pConfig);
 }
 
 void GridManager::BuildCombTypeGrid(Config* pConfig) {
@@ -121,30 +125,118 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   //  m_vCells[vGSize.x()-1][y][0]->m_cInitCond.Temperature = 1.0;
   //}
 
+  // Blocks
   Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
   Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8, vGSize.y()*1/8, 0);
   Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8, vGSize.y()*5/8, 0);
   AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
-  AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
+  AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
 
-
-  //int iSlashX = 6;
-  //Vector3i vStart(8, 6, 0);
-  //int iDeltaY = vBlockSize.y() + 5;
-  //int iBlockN = 3;
-  //for (int i = 0; i < iBlockN; i++) {
-  //  int iTempSlashX = i % 2 ? iSlashX : 0;
-  //  Vector3i vTempStart = vStart + Vector3i(iTempSlashX, iDeltaY * i, 0);
-  //  
-  //  AddBox(vTempStart, vBlockSize, Vector3b(false, false, false), true, 0.4, false);
-  //}
+  // Right up and down corners
+  m_vCells[vGSize.x() - 1][0][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[vGSize.x() - 1][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
   
-  FillInGrid(pConfig);
-  LinkCells(pConfig);
+  // Left up and down corners. Only wothout vessel!
+  m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+  
+  // Should be good vessel
+//  SetVesselBorderBox(Vector3i(), Vector3i(1, vGSize.y(), 1), true, 0, 1.0);
+  
+  // Should be good looping with vessel
+//  SetLoopedBox(Vector3i(), Vector3i(vGSize.x() - 1, 1, 1), true, 1.0);
+//  SetLoopedBox(Vector3i(0, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 1, 1, 1), false, 1.0);
+
+  SetLoopedBox(Vector3i(1, 0, 0), Vector3i(vGSize.x() - 2, 1, 1), true, 0.5);
+  SetLoopedBox(Vector3i(1, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 2, 1, 1), false, 0.5);
+  
+
 }
 
 void GridManager::BuildHTypeGrid(Config* pConfig) {
-    std::cout << "Building H type grid" << std::endl;
+  std::cout << "Building H type grid" << std::endl;
+  InitEmptyBox(pConfig->GetGridSize());
+  bool flat_z = true;
+  AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), flat_z, 0.5, false);
+  
+  const Vector3i& vGSize = pConfig->GetGridSize();
+  
+  int n, m, p, D, l, d, h;
+  int gaps_q;
+  
+  n = vGSize.x();
+  m = vGSize.y();
+  p = vGSize.z();
+  
+  D = m / 3;
+  l = m - 2*D;
+  d = 4;
+  h = 3;
+  gaps_q = 3;
+
+  
+  // Add 2D case
+  if (flat_z) {
+    p = 1;
+  }
+  
+  int x_space = (n - ((gaps_q - 1)*(d + h) + d))/2;
+  
+
+  Vector3i start;
+  Vector3i size;
+  Vector3b without_fakes;
+  
+  // Add first box
+  
+  without_fakes[sep::X] = false;
+  without_fakes[sep::Y] = false;
+  without_fakes[sep::Z] = false;
+  
+  start[sep::X] = 0;
+  start[sep::Y] = D + l;
+  start[sep::Z] = 0;
+  
+  size[sep::X] = n;
+  size[sep::Y] = D;
+  size[sep::Z] = D;
+  
+  AddBox(start, size, without_fakes, flat_z, 0.8, true);
+  
+  // Add second box
+  
+  without_fakes[sep::X] = false;
+  without_fakes[sep::Y] = false;
+  without_fakes[sep::Z] = false;
+  
+  start[sep::X] = 0;
+  start[sep::Y] = 0;
+  start[sep::Z] = 0;
+  
+  size[sep::X] = n;
+  size[sep::Y] = D;
+  size[sep::Z] = D;
+  
+  AddBox(start, size, without_fakes, flat_z, 1.0, true);
+  
+  // Add gaps boxes
+  
+  without_fakes[sep::X] = false;
+  without_fakes[sep::Y] = true;
+  without_fakes[sep::Z] = false;
+  
+  for (int i=0; i<gaps_q; i++) {
+    
+    start[sep::X] = x_space + (d + h) * i;
+    start[sep::Y] = D - 2;  // -2 because of fake cells
+    start[sep::Z] = D/2 - d/2;
+    
+    size[sep::X] = d + 2; // +2 because of fake cells
+    size[sep::Y] = l + 4; // +4 because of fake cells
+    size[sep::Z] = d + 2; // +2 because of fake cells
+    
+    AddBox(start, size, without_fakes, flat_z, 0.9, true);
+  }  
 }
 
 void GridManager::InitEmptyBox(const Vector3i& vSize) {
@@ -169,6 +261,33 @@ void GridManager::SetBox(const Vector3i& vStart, const Vector3i& vSize, sep::Cel
       for (int z = vStart.z(); z < vStart.z() + vSize.z(); z++) {
         m_vCells[x][y][z]->m_eType = eType;
         m_vCells[x][y][z]->m_cInitCond.Temperature = dWallT;
+      }
+    }
+  }
+}
+
+void GridManager::SetLoopedBox(const Vector3i& vStart, const Vector3i& vSize, bool bIsLoopedDown, double dT) {
+  for (int x = vStart.x(); x < vStart.x() + vSize.x(); x++) {
+    for (int y = vStart.y(); y < vStart.y() + vSize.y(); y++) {
+      for (int z = vStart.z(); z < vStart.z() + vSize.z(); z++) {
+        m_vCells[x][y][z]->m_bIsLoopedCell = true;
+        m_vCells[x][y][z]->m_eType = sep::NORMAL_CELL;
+        m_vCells[x][y][z]->m_bIsLoopedDown = bIsLoopedDown;
+        m_vCells[x][y][z]->m_cInitCond.Temperature = dT;
+      }
+    }
+  }
+}
+
+void GridManager::SetVesselBorderBox(const Vector3i& vStart, const Vector3i& vSize, bool bIsVesselLeft, int iVesselNumber, double dT) {
+  for (int x = vStart.x(); x < vStart.x() + vSize.x(); x++) {
+    for (int y = vStart.y(); y < vStart.y() + vSize.y(); y++) {
+      for (int z = vStart.z(); z < vStart.z() + vSize.z(); z++) {
+        m_vCells[x][y][z]->m_bIsVesselCell = true;
+        m_vCells[x][y][z]->m_eType = sep::NORMAL_CELL;
+        m_vCells[x][y][z]->m_bIsVesselLeft = bIsVesselLeft;
+        m_vCells[x][y][z]->m_iVesselNumber = iVesselNumber;
+        m_vCells[x][y][z]->m_cInitCond.Temperature = dT;
       }
     }
   }
@@ -217,8 +336,9 @@ void GridManager::LinkCells(Config* pConfig) {
     for (int y = 0; y < vSize.y(); y++) {
       for (int z = 0; z < vSize.z(); z++) {
         Cell* cell = m_vCells[x][y][z]->m_pCell;
+        InitCellData* init_cell = m_vCells[x][y][z].get();
         const MacroData& init_cond = m_vCells[x][y][z]->m_cInitCond;
-        if (m_vCells[x][y][z]->m_eType == sep::EMPTY_CELL)
+        if (init_cell->m_eType == sep::EMPTY_CELL)
           continue;
         // Init vectors
         cell->m_vPrev[sep::X].push_back(NULL);
@@ -231,6 +351,31 @@ void GridManager::LinkCells(Config* pConfig) {
         for (int ax = 0; ax < 3; ax++) {
           cell->m_vPrev[ax][0] = GetNeighb(vCoord, (sep::Axis)ax, -1);
           cell->m_vNext[ax][0] = GetNeighb(vCoord, (sep::Axis)ax, +1);
+        }
+        
+        if (init_cell->m_bIsLoopedCell) {
+          if (init_cell->m_bIsLoopedDown)
+            cell->m_vPrev[sep::Y][0] = m_vCells[x][vSize.y() - 1][z]->m_pCell;
+          else
+            cell->m_vNext[sep::Y][0] = m_vCells[x][0][z]->m_pCell;
+        }
+        
+        if (init_cell->m_bIsVesselCell) {
+          VesselGrid* pVess = nullptr;
+          int iVessN = init_cell->m_iVesselNumber;
+          if (init_cell->m_bIsVesselLeft) {
+            pVess = m_vLeftVess[iVessN].get();
+            // TODO: Use vessel coord, not just y
+            Cell* pVessCell = pVess->GetBorderCell(y);
+            cell->m_vPrev[sep::X][0] = pVessCell;
+            pVessCell->m_vNext[sep::X].push_back(cell);
+          }
+          else {
+            pVess = m_vRightVess[iVessN].get();
+            Cell* pVessCell = pVess->GetBorderCell(y);
+            cell->m_vNext[sep::X][0] = pVessCell;
+            pVessCell->m_vPrev[sep::X].push_back(cell);
+          }
         }
         
         // Remove nulls
@@ -338,9 +483,21 @@ void GridManager::Print(sep::Axis axis) {
   std::cout << std::endl;
 }
 
-
-
-
+void GridManager::InitVessels() {
+  m_vLeftVess.push_back(std::shared_ptr<VesselGrid>(new LeftVesselGrid));
+  VesselGrid* lvg = m_vLeftVess[0].get();
+  Config* pConfig = GetConfig();
+  lvg->setGridManager(this);
+  lvg->getVesselGridInfo()->dStartConcentration = 1.0;
+  lvg->getVesselGridInfo()->dStartTemperature = 1.0;
+  lvg->getVesselGridInfo()->iAdditionalLenght = 0;
+  lvg->getVesselGridInfo()->iNy = pConfig->GetGridSize().y();
+  lvg->getVesselGridInfo()->iNz = 1;
+  lvg->getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
+  
+  lvg->SetVesselGridType(VesselGrid::VGT_CYCLED);
+  lvg->CreateAndLinkVessel();
+}
 
 
 

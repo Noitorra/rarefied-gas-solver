@@ -8,6 +8,7 @@ class Cell;
 class OutResults;
 class MacroData;
 class Solver;
+class VesselGrid;
 
 class InitCellData {
   friend class GridManager;
@@ -15,7 +16,12 @@ class InitCellData {
 protected:
   InitCellData(sep::CellType eType) :
   m_eType(eType),
-  m_pCell(nullptr) {
+  m_pCell(nullptr),
+  m_bIsVesselCell(false),
+  m_bIsVesselLeft(false),
+  m_iVesselNumber(-1),
+  m_bIsLoopedCell(false),
+  m_bIsLoopedDown(false) {
     m_vMacroData.resize(2);
   };
   
@@ -23,6 +29,11 @@ protected:
   Cell* m_pCell;
   std::vector<MacroData> m_vMacroData;
   MacroData m_cInitCond;
+  bool m_bIsVesselCell;
+  bool m_bIsVesselLeft; // Only for vessel cells
+  int m_iVesselNumber; // The same
+  bool m_bIsLoopedCell;
+  bool m_bIsLoopedDown; // Only for looped cells
 };
 
 class GridManager {
@@ -56,9 +67,16 @@ private:
   void AddBox(Vector3i vStart, Vector3i vSize, Vector3b vWithoutFakes, bool bFlatZ, double dWallT, bool bGasBox);
   Cell* GetNeighb(Vector3i vCoord, sep::Axis eAxis, int iSlash);
   bool IsConer(Vector3i vStart, Vector3i vEnd, Vector3i vP);
+  
+  void SetLoopedBox(const Vector3i& vStart, const Vector3i& vSize, bool bIsLoopedDown, double dT);
+  void SetVesselBorderBox(const Vector3i& vStart, const Vector3i& vSize, bool bIsVesselLeft, int iVesselNumber, double dT);
+  void InitVessels();
 
   std::shared_ptr<Grid> m_pGrid;
   std::shared_ptr<OutResults> m_pOutResults;
   Solver* m_pSolver;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vCells;
+  
+  std::vector<std::shared_ptr<VesselGrid>> m_vRightVess;
+  std::vector<std::shared_ptr<VesselGrid>> m_vLeftVess;
 };

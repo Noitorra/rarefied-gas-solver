@@ -63,7 +63,7 @@ void Solver::Init() {
 
 //  m_pGrid->GetGridManager()->Print(sep::X);
 //  m_pGrid->GetGridManager()->Print(sep::Y);
-  // m_pGrid->GetGridManager()->Print(sep::Z);
+//  m_pGrid->GetGridManager()->Print(sep::Z);
 }
 
 void Solver::Run() {

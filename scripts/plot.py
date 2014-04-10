@@ -4,10 +4,15 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 64
-NY = 64
-max_files = 5
+NX = 40
+NY = 32
+max_files = 1
 gas_num = 2
+
+# hack
+a = NX
+NX = NY
+NY = a
 
 for gas in range(gas_num):
   data_folder = '../out/gas' + '%i' % gas + '/'
