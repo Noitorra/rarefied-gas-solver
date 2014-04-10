@@ -6,9 +6,9 @@ from numpy import *
 
 NX = 86
 NY = 18
-max_files = 42
+max_files = 5
 gas_num = 2
-each = 5
+each = 1
 
 # hack
 a = NX
