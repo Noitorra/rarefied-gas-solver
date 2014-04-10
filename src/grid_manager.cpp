@@ -33,7 +33,10 @@ void GridManager::BuildGrid() {
   Config* pConfig = GetConfig();
   Build(pConfig);
   FillInGrid(pConfig);
-  InitVessels();
+  
+  if (pConfig->GetUseVessels())
+    InitVessels();
+
   LinkCells(pConfig);
 }
 
@@ -136,19 +139,28 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   m_vCells[vGSize.x() - 1][0][0]->m_eType = sep::FAKE_CELL;
   m_vCells[vGSize.x() - 1][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
   
-  // Left up and down corners. Only wothout vessel!
-  m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
-  m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+  // Left up and down corners. Only without vessel!
+  if (!pConfig->GetUseVessels()) {
+    m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
+    m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+  }
   
-  // Should be good vessel
-//  SetVesselBorderBox(Vector3i(), Vector3i(1, vGSize.y(), 1), true, 0, 1.0);
+  // Should be good for vessel
+  if (pConfig->GetUseVessels()) {
+    SetVesselBorderBox(Vector3i(), Vector3i(1, vGSize.y(), 1), true, 0, 1.0);
+  }
   
   // Should be good looping with vessel
-//  SetLoopedBox(Vector3i(), Vector3i(vGSize.x() - 1, 1, 1), true, 1.0);
-//  SetLoopedBox(Vector3i(0, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 1, 1, 1), false, 1.0);
+  if (pConfig->GetUseLooping() && pConfig->GetUseVessels()) {
+    SetLoopedBox(Vector3i(), Vector3i(vGSize.x() - 1, 1, 1), true, 0.5);
+    SetLoopedBox(Vector3i(0, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 1, 1, 1), false, 0.5);
+  }
 
-  SetLoopedBox(Vector3i(1, 0, 0), Vector3i(vGSize.x() - 2, 1, 1), true, 0.5);
-  SetLoopedBox(Vector3i(1, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 2, 1, 1), false, 0.5);
+  // Looping without vessel
+  if (pConfig->GetUseLooping() && !pConfig->GetUseVessels()) {
+    SetLoopedBox(Vector3i(1, 0, 0), Vector3i(vGSize.x() - 2, 1, 1), true, 0.5);
+    SetLoopedBox(Vector3i(1, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 2, 1, 1), false, 0.5);
+  }
   
 
 }
@@ -494,6 +506,9 @@ void GridManager::InitVessels() {
   lvg->getVesselGridInfo()->iNy = pConfig->GetGridSize().y();
   lvg->getVesselGridInfo()->iNz = 1;
   lvg->getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
+  lvg->getVesselGridInfo()->vStart = Vector3i();
+  // Need Nx
+  lvg->getVesselGridInfo()->vSize = Vector3i();
   
   lvg->SetVesselGridType(VesselGrid::VGT_CYCLED);
   lvg->CreateAndLinkVessel();
