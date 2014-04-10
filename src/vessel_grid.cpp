@@ -215,7 +215,7 @@ void LeftVesselGrid::link_normal_vessel() {
 
   int iStartIndex = 0;
 
-  for (int iNx = 0; iNx < iLenght - 1; iNx++) {
+  for (int iNx = 0; iNx < iLenght; iNx++) {
     // Max Ny index
     int iNyMax = 0;
     if (iNx == 0) {
@@ -242,11 +242,13 @@ void LeftVesselGrid::link_normal_vessel() {
           pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
         }
         else {
-          pCell->m_vNext[sep::X].push_back(m_vCells[iNextX].get());
-          m_vCells[iNextX]->m_vPrev[sep::X].push_back(pCell);
+          if (iNx != iLenght - 1) {
+            pCell->m_vNext[sep::X].push_back(m_vCells[iNextX].get());
+            m_vCells[iNextX]->m_vPrev[sep::X].push_back(pCell);
 
-          pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
-          pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+            pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
+            pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
+          }
         }
       }
     }
@@ -269,11 +271,13 @@ void LeftVesselGrid::link_normal_vessel() {
           pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
         }
         else {
-          pCell->m_vNext[sep::X].push_back(m_vCells[iNextX].get());
-          pCell->m_vNext[sep::X].push_back(m_vCells[iNextX + 1].get());
+          if (iNx != iLenght - 1) {
+            pCell->m_vNext[sep::X].push_back(m_vCells[iNextX].get());
+            pCell->m_vNext[sep::X].push_back(m_vCells[iNextX + 1].get());
 
-          m_vCells[iNextX]->m_vPrev[sep::X].push_back(pCell);
-          m_vCells[iNextX + 1]->m_vPrev[sep::X].push_back(pCell);
+            m_vCells[iNextX]->m_vPrev[sep::X].push_back(pCell);
+            m_vCells[iNextX + 1]->m_vPrev[sep::X].push_back(pCell);
+          }
 
           pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
           pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
@@ -292,7 +296,7 @@ void LeftVesselGrid::link_cycled_vessel() {
 
   int iStartIndex = 0;
 
-  for (int iNx = 0; iNx < iLenght - 1; iNx++) {
+  for (int iNx = 0; iNx < iLenght; iNx++) {
     // Max Ny index
     int iNyMax = 0;
     if (iNx == 0) {
@@ -304,11 +308,13 @@ void LeftVesselGrid::link_cycled_vessel() {
     else if (iNx < m_pVGInfo->iAdditionalLenght + 1) {
       // Additional cells
       iNyMax = 1;
-      m_vCells[iStartIndex]->m_vNext[sep::X].push_back(m_vCells[iStartIndex + 1].get());
-      m_vCells[iStartIndex + 1]->m_vPrev[sep::X].push_back(m_vCells[iStartIndex].get());
+      if (iNx != iLenght - 1) {
+        m_vCells[iStartIndex]->m_vNext[sep::X].push_back(m_vCells[iStartIndex + 1].get());
+        m_vCells[iStartIndex + 1]->m_vPrev[sep::X].push_back(m_vCells[iStartIndex].get());
 
-      m_vCells[iStartIndex]->m_vNext[sep::Y].push_back(m_vCells[iStartIndex].get());
-      m_vCells[iStartIndex]->m_vPrev[sep::Y].push_back(m_vCells[iStartIndex].get());
+        m_vCells[iStartIndex]->m_vNext[sep::Y].push_back(m_vCells[iStartIndex].get());
+        m_vCells[iStartIndex]->m_vPrev[sep::Y].push_back(m_vCells[iStartIndex].get());
+      }
     }
     else {
       int iNxCore = iNx - m_pVGInfo->iAdditionalLenght - 1;
@@ -325,11 +331,13 @@ void LeftVesselGrid::link_cycled_vessel() {
         if (iNy == 0) iPrevY = iStartIndex + iNyMax - 1;
         if (iNy == iNyMax - 1) iNextY = iStartIndex;
 
-        pCell->m_vNext[sep::X].push_back(m_vCells[iNextX].get());
-        pCell->m_vNext[sep::X].push_back(m_vCells[iNextX + 1].get());
+        if (iNx != iLenght - 1) {
+          pCell->m_vNext[sep::X].push_back(m_vCells[iNextX].get());
+          pCell->m_vNext[sep::X].push_back(m_vCells[iNextX + 1].get());
 
-        m_vCells[iNextX]->m_vPrev[sep::X].push_back(pCell);
-        m_vCells[iNextX + 1]->m_vPrev[sep::X].push_back(pCell);
+          m_vCells[iNextX]->m_vPrev[sep::X].push_back(pCell);
+          m_vCells[iNextX + 1]->m_vPrev[sep::X].push_back(pCell);
+        }
 
         pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
         pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
