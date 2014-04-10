@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 24
+NX = 86
 NY = 18
-max_files = 33
+max_files = 28
 gas_num = 2
+each = 1
 
 # hack
 a = NX
@@ -16,7 +17,8 @@ NY = a
 
 for gas in range(gas_num):
   data_folder = '../out/gas' + '%i' % gas + '/'
-  for i in range(max_files):
+  i = 0
+  while i < max_files:
     s = "%i" % i
     D = numpy.fromfile(data_folder+'den/'+s+'.bin', dtype=float).reshape(NX, NY)
     for x in range(NX):
@@ -29,7 +31,9 @@ for gas in range(gas_num):
     plt.savefig(data_folder+'den/pic/'+s+'.png', dpi=100)
     plt.close()
     print("%i of %i" % (i, max_files))
-  for i in range(max_files):
+    i += each
+  i = 0
+  while i < max_files:
     s = "%i" % i
     D = numpy.fromfile(data_folder+'temp/'+s+'.bin', dtype=float).reshape(NX, NY)
     for x in range(NX):
@@ -42,3 +46,4 @@ for gas in range(gas_num):
     plt.savefig(data_folder+'temp/pic/'+s+'.png', dpi=100)
     plt.close()
     print("%i of %i" % (i, max_files))
+    i += each
