@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 86
-NY = 18
-max_files = 28
-gas_num = 2
+NX = 20
+NY = 20
+max_files = 3
 each = 1
+gas_num = 2
 
 # hack
 a = NX
@@ -42,7 +42,7 @@ for gas in range(gas_num):
           D[x][y] = nan;
     plt.imshow(D, interpolation='nearest')
     plt.colorbar()
-    plt.contour(D, colors='black')
+#    plt.contour(D, colors='black')
     plt.savefig(data_folder+'temp/pic/'+s+'.png', dpi=100)
     plt.close()
     print("%i of %i" % (i, max_files))

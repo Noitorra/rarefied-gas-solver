@@ -53,7 +53,6 @@ void Solver::Init() {
 
   //m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::X);
   //m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::Y);
-
 }
 
 void Solver::Run() {

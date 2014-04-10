@@ -125,7 +125,10 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
             const Vector2i& vVesselSize2D = pVessel->GetPrintVectorSize();
             Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
             Vector3i vVesselStart = pVessel->getVesselGridInfo()->vStart;
-            vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
+            if (iLeftVess)
+              vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
+            else
+              vVesselStart.x() = vStartOutGrid.x() + vGridSize.x();
             
             int v_x = x - vVesselStart.x();
             int v_y = y - vVesselStart.y();
@@ -135,7 +138,12 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
             if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
                 v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
               
-              Cell* cell = vVessCells[v_x][v_y];
+              Cell* cell = nullptr;
+              if (!iLeftVess)
+                cell = vVessCells[vVesselSize.x() - v_x - 1][v_y];
+              else
+                cell = vVessCells[v_x][v_y];
+
               if (!cell) {
                 dParam = 0.0;
                 goto next_cell_label;
@@ -145,12 +153,15 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
                      cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
                     (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
                      cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
+//                if (true) {
                   switch (eType) {
                     case sep::T_PARAM:
                       dParam = cell->m_vMacroData[iGas].Temperature;
+                      goto next_cell_label;
                       break;
                     case sep::C_PARAM:
                       dParam = cell->m_vMacroData[iGas].Concentration;
+                      goto next_cell_label;
                       break;
                     default:
                       return;
@@ -159,12 +170,10 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
                   dParam = 0.0;
                 }
               }
-            } else {
-              dParam = 0.0;
-              goto next_cell_label;
             }
           }
         }
+        dParam = 0.0;
       }
       next_cell_label:
       fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
