@@ -48,14 +48,16 @@ void Solver::Init() {
   initCellType(sep::Z);
 
   //LeftVesselGrid lvg;
+  //lvg.setGridManager(m_pGridManager.get());
+
   //lvg.getVesselGridInfo()->dStartConcentration = 1.0;
   //lvg.getVesselGridInfo()->dStartTemperature = 1.0;
-  //lvg.getVesselGridInfo()->iAdditionalLenght = 0;
-  //lvg.getVesselGridInfo()->iNy = 8;
+  //lvg.getVesselGridInfo()->iAdditionalLenght = 2;
+  //lvg.getVesselGridInfo()->iNy = 6;
   //lvg.getVesselGridInfo()->iNz = 1;
   //lvg.getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
 
-  //lvg.SetVesselGridType(VesselGrid::VGT_CYCLED); 
+  //lvg.SetVesselGridType(VesselGrid::VGT_NORMAL); 
   //lvg.CreateAndLinkVessel(); // not working, waiting m_pGrid .... no pCell->Init();
   //lvg.PrintLinkage(sep::X);
 
