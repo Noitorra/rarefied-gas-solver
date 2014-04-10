@@ -142,8 +142,8 @@ void Cell::computeMacroData() {
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 		m_vMacroData[gi].Concentration = compute_concentration(gi);
-		m_vMacroData[gi].Temperature = compute_temperature(gi);
 		m_vMacroData[gi].Stream = compute_stream(gi);
+    m_vMacroData[gi].Temperature = compute_temperature(gi);
 		m_vMacroData[gi].HeatStream = compute_heatstream(gi);
 	}
 }
@@ -446,20 +446,13 @@ double Cell::compute_temperature(unsigned int gi) {
 
 	double concentration = m_vMacroData[gi].Concentration;
   double temperature = 0.0;
-  Vector3d uvec;
-
-  for(unsigned int ii=0;ii<impulsev.size();ii++) {
-    for (unsigned int vi = 0; vi < uvec.getMass().size(); vi++) {
-      uvec[vi] += impulsev[ii][vi] / gasv[gi]->getMass() * m_vValue[gi][ii];
-    }
-  }
-
-  uvec *= impulse->getDeltaImpulseQube()/concentration;
+  Vector3d vAverageSpeed = m_vMacroData[gi].Stream;
+  vAverageSpeed /= concentration;
 
   for(unsigned int ii=0;ii<impulsev.size();ii++) {
     Vector3d tempvec;
-    for (unsigned int vi = 0; vi < uvec.getMass().size(); vi++) {
-      tempvec[vi] = impulsev[ii][vi] / gasv[gi]->getMass() - uvec[vi];
+    for (unsigned int vi = 0; vi < vAverageSpeed.getMass().size(); vi++) {
+      tempvec[vi] = impulsev[ii][vi] / gasv[gi]->getMass() - vAverageSpeed[vi];
     }
     temperature += gasv[gi]->getMass()*tempvec.mod2()*m_vValue[gi][ii];
   }
@@ -471,7 +464,20 @@ double Cell::compute_temperature(unsigned int gi) {
 }
 
 Vector3d Cell::compute_stream(unsigned int gi) {
-	return Vector3d();
+  SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
+  GasVector& gasv = sinfo->getGasVector();
+  Impulse* impulse = sinfo->getImpulse();
+  ImpulseVector& impulsev = impulse->getVector();
+
+  Vector3d vStream;
+  for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
+    for (unsigned int vi = 0; vi < vStream.getMass().size(); vi++) {
+      vStream[vi] += impulsev[ii][vi] / gasv[gi]->getMass() * m_vValue[gi][ii];
+    }
+  }
+  vStream *= impulse->getDeltaImpulseQube();
+
+  return vStream;
 }
 
 Vector3d Cell::compute_heatstream(unsigned int gi) {

@@ -132,6 +132,14 @@ public:
 		return v3;
 	}
 
+  template<typename TValue>
+  const Vector3& operator/=(const TValue& right) {
+    for (unsigned int i = 0; i<this->m_vMass.size(); i++) {
+      this->m_vMass[i] /= right;
+    }
+    return *this;
+  }
+
 	template<typename TValue>
 	const Vector3 operator*(const TValue& right) const {
 		Vector3 v3;
