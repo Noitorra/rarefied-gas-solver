@@ -512,29 +512,36 @@ void GridManager::Print(sep::Axis axis) {
           continue;
         }
         
-        // Left vessel
-        const std::vector< std::vector<Cell*> >& vVessCells = m_vLeftVess[0]->GetPrintVector();
-        const Vector2i& vVesselSize2D = m_vLeftVess[0]->GetPrintVectorSize();
-        Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
-        Vector3i vVesselStart = m_vLeftVess[0]->getVesselGridInfo()->vStart;
-        vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
+        // For all vessels
+        for (int iLeftVess = 0; iLeftVess < 2; iLeftVess++) {
+          const std::vector<std::shared_ptr<VesselGrid>>& vVessels = GetLeftRightVessels(iLeftVess);
         
-        int v_x = x - vVesselStart.x();
-        int v_y = y - vVesselStart.y();
-        int v_z = z - vVesselStart.z();
+          for (auto& pVessel : vVessels) {
+            
+            const std::vector< std::vector<Cell*> >& vVessCells = pVessel->GetPrintVector();
+            const Vector2i& vVesselSize2D = pVessel->GetPrintVectorSize();
+            Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
+            Vector3i vVesselStart = pVessel->getVesselGridInfo()->vStart;
+            vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
         
-        iEdge = 0;
-        if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
-            v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
-          
-          Cell* cell = vVessCells[v_x][v_y];
-          if (!cell) {
-            std::cout << "x" << " ";
-            continue;
+            int v_x = x - vVesselStart.x();
+            int v_y = y - vVesselStart.y();
+            int v_z = z - vVesselStart.z();
+            
+            iEdge = 0;
+            if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
+                v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
+              
+              Cell* cell = vVessCells[v_x][v_y];
+              if (!cell) {
+                std::cout << "x" << " ";
+                continue;
+              }
+              std::cout << cell->m_vType[axis] << " ";
+            } else {
+              std::cout << "x" << " ";
+            }
           }
-          std::cout << cell->m_vType[axis] << " ";
-        } else {
-          std::cout << "x" << " ";
         }
       }
     }

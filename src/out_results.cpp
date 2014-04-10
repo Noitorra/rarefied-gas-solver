@@ -58,51 +58,6 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   }
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
-//  const Vector3i& vGridSize = m_pGrid->GetSize();
-//  const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
-//  const Vector3i& vOutputSize = pConfig->GetOutputSize();
-//  
-//  // Edge cells are faked
-//  for (int y = 0; y < vOutputSize.y(); y++) {
-//    for (int x = 0; x < vOutputSize.x(); x++) {
-//      int z = iZLayer;
-//      double dParam = 0.0;
-//      
-//      int g_x = x - vStartOutGrid.x();
-//      int g_y = y - vStartOutGrid.y();
-//      int g_z = z - vStartOutGrid.z();
-//      dParam = 0.0;
-//      int iEdge = 0;
-//      // Out grid
-//      if (g_x >= 0 + iEdge && g_y >= 0 + iEdge && g_z >= 0 + iEdge &&
-//          g_x < vGridSize.x() - iEdge && g_y < vGridSize.y() - iEdge && g_z < vGridSize.z() - iEdge) {
-//        if (m_vCells[g_x][g_y][g_z]->m_eType != sep::NORMAL_CELL) {
-//          dParam = 0.0;
-//        } else {
-//          switch (eType) {
-//            case sep::T_PARAM:
-//              dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Temperature;
-//              break;
-//            case sep::C_PARAM:
-//              dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Concentration;
-//              break;
-//            default:
-//              return;
-//          }
-//        }
-//      } else {
-//        // Looking for vessels
-//        
-//        // Left vessel
-//        
-//      }
-////      std::cout << "(" << x << "," << y << "," << z << "): " <<
-////      dParam << std::endl;
-//      fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
-//    }
-//  }
-  
-  
   const Vector3i& vGridSize = pConfig->GetGridSize();
   const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
   const Vector3i& vOutputSize = pConfig->GetOutputSize();
@@ -147,7 +102,8 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
           dParam = 0.0;
           goto next_cell_label;
         }
-               
+        
+        // For all vessels
         for (int iLeftVess = 0; iLeftVess < 2; iLeftVess++) {
           const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGridManager->GetLeftRightVessels(iLeftVess);
           
