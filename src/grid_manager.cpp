@@ -201,7 +201,7 @@ void GridManager::BuildHTypeGrid(Config* pConfig) {
   size[sep::Y] = D;
   size[sep::Z] = D;
   
-  AddBox(start, size, without_fakes, flat_z, 1.0, true);
+  AddBox(start, size, without_fakes, flat_z, 0.8, true);
   
   // Add second box
   
@@ -217,7 +217,7 @@ void GridManager::BuildHTypeGrid(Config* pConfig) {
   size[sep::Y] = D;
   size[sep::Z] = D;
   
-  AddBox(start, size, without_fakes, flat_z, 0.8, true);
+  AddBox(start, size, without_fakes, flat_z, 1.0, true);
   
   // Add gaps boxes
   
