@@ -90,11 +90,11 @@ void Options::Init() {
 //  pCombTypeConfig->SetGridSize(Vector3i(512, 64, 1));
 //  pCombTypeConfig->SetOutputGridStart(Vector3i(-192, 0, 0));
 //  pCombTypeConfig->SetOutputSize(Vector3i(128, 64, 1));
-  pCombTypeConfig->SetGridSize(Vector3i(64, 32, 1));
-  pCombTypeConfig->SetOutputGridStart(Vector3i(0, 0, 0));
-  pCombTypeConfig->SetOutputSize(Vector3i(64, 32, 1));
+  pCombTypeConfig->SetGridSize(Vector3i(256, 64, 1));
+  pCombTypeConfig->SetOutputGridStart(Vector3i(-64, 0, 0));
+  pCombTypeConfig->SetOutputSize(Vector3i(128, 64, 1));
   pCombTypeConfig->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
-  pCombTypeConfig->SetMaxIteration(400);
+  pCombTypeConfig->SetMaxIteration(2000);
   pCombTypeConfig->SetUseIntegral(true);
   pCombTypeConfig->SetUseVessels(false);
   pCombTypeConfig->SetUseLooping(true);

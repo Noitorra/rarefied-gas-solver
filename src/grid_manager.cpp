@@ -132,11 +132,15 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   
   const Vector3i& vGSize = pConfig->GetGridSize();
   
+  // 512 //64
+  // 128
+  // 192
+
   // Blocks
   // +1 - Hack for small grid (stupid, sorry)
-  Vector3i vBlockSize = Vector3i(vGSize.x()*4/8, vGSize.y()*2/8, vGSize.z());
-  Vector3i vBlockStart1 = Vector3i(vGSize.x()*3/8-1, vGSize.y()*1/8+1, 0);
-  Vector3i vBlockStart2 = Vector3i(vGSize.x()*1/8+1, vGSize.y()*5/8-1, 0);
+  Vector3i vBlockSize = Vector3i(128 * 4 / 8, vGSize.y() * 2 / 8, vGSize.z());
+  Vector3i vBlockStart1 = Vector3i(64 + 128 * 3 / 8 - 1, vGSize.y() * 1 / 8 + 1, 0);
+  Vector3i vBlockStart2 = Vector3i(64 + 128 * 1 / 8 + 1, vGSize.y() * 5 / 8 - 1, 0);
   AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
   AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
 
