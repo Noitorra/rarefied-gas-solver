@@ -31,6 +31,7 @@ namespace sep {
   enum MacroParamType {
     T_PARAM = 0, // Temperature
     C_PARAM, // Concentration
+    P_PARAM, // Pressure
     FLOW_PARAM // Flow
   };
 }

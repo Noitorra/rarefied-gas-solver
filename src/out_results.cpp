@@ -22,6 +22,7 @@ void OutResults::OutAll(int iIteration) {
   for (int iGas = 0; iGas < 2; iGas++) {
     OutParameterSingletone(sep::T_PARAM, iGas, iIteration);
     OutParameterSingletone(sep::C_PARAM, iGas, iIteration);
+    OutParameterSingletone(sep::P_PARAM, iGas, iIteration);
   }
   OutAverageStream(iIteration);
 }
@@ -66,7 +67,10 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
       filename = "../out/gas" + std::to_string(iGas) + "/temp/" + std::to_string(iIndex) + ".bin";
       break;
     case sep::C_PARAM:
-      filename = "../out/gas" + std::to_string(iGas) + "/den/" + std::to_string(iIndex) + ".bin";
+      filename = "../out/gas" + std::to_string(iGas) + "/conc/" + std::to_string(iIndex) + ".bin";
+      break;
+    case sep::P_PARAM:
+      filename = "../out/gas" + std::to_string(iGas) + "/pressure/" + std::to_string(iIndex) + ".bin";
       break;
     default:
       // We are not able to print flow yet
@@ -106,6 +110,9 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
               case sep::C_PARAM:
                 dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Concentration;
                 break;
+              case sep::P_PARAM:
+                dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
+                goto next_cell_label;
               default:
                 return;
             }
@@ -165,6 +172,10 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
                       break;
                     case sep::C_PARAM:
                       dParam = cell->m_vMacroData[iGas].Concentration;
+                      goto next_cell_label;
+                      break;
+                    case sep::P_PARAM:
+                      dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
                       goto next_cell_label;
                       break;
                     default:

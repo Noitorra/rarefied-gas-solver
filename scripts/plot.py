@@ -6,8 +6,8 @@ from numpy import *
 
 NX = 40
 NY = 20
-max_files = 2
-each = 1
+max_files = 41
+each = 5
 gas_num = 2
 
 # hack
@@ -20,15 +20,15 @@ for gas in range(gas_num):
   i = 0
   while i < max_files:
     s = "%i" % i
-    D = numpy.fromfile(data_folder+'den/'+s+'.bin', dtype=float).reshape(NX, NY)
+    D = numpy.fromfile(data_folder+'conc/'+s+'.bin', dtype=float).reshape(NX, NY)
     for x in range(NX):
       for y in range(NY):
         if D[x][y] == 0.0:
           D[x][y] = nan;
     plt.imshow(D, vmin=0.82, vmax=1.1, interpolation='nearest')
     plt.colorbar()
-#    plt.contour(D, colors='black')
-    plt.savefig(data_folder+'den/pic/'+s+'.png', dpi=100)
+    plt.contour(D, colors='black')
+    plt.savefig(data_folder+'conc/pic/'+s+'.png', dpi=100)
     plt.close()
     print("%i of %i" % (i, max_files))
     i += each
@@ -44,6 +44,21 @@ for gas in range(gas_num):
     plt.colorbar()
     plt.contour(D, colors='black')
     plt.savefig(data_folder+'temp/pic/'+s+'.png', dpi=100)
+    plt.close()
+    print("%i of %i" % (i, max_files))
+    i += each
+  i = 0
+  while i < max_files:
+    s = "%i" % i
+    D = numpy.fromfile(data_folder+'pressure/'+s+'.bin', dtype=float).reshape(NX, NY)
+    for x in range(NX):
+      for y in range(NY):
+        if D[x][y] == 0.0:
+          D[x][y] = nan;
+    plt.imshow(D, vmin=0.64, vmax=1.1, interpolation='nearest')
+    plt.colorbar()
+    plt.contour(D, colors='black')
+    plt.savefig(data_folder+'pressure/pic/'+s+'.png', dpi=100)
     plt.close()
     print("%i of %i" % (i, max_files))
     i += each

@@ -17,7 +17,7 @@ font = {'family' : 'serif',
 for gas in range(gas_num):
   data_folder = '/Users/prohor/Code/RarefiedGasSolver/out/gas' + '%i' % gas + '/'
   NX = 4
-  NY = 21
+  NY = 67
   #.reshape(NX, NY)
   valueAStream = numpy.fromfile(data_folder+'average_stream.bin', dtype=float).reshape(NY, NX)
   print(valueAStream)
