@@ -192,12 +192,12 @@ void GridManager::BuildHTypeGrid(Config* pConfig) {
   m = vGSize.y();
   p = vGSize.z();
   
-  D = 6;
+  D = 25;
 //  D = m / 3;
   l = m - 2*D;
   d = 4;
   h = 3;
-  gaps_q = 3;
+  gaps_q = 5;
 
   HTypeGridConfig* pGConfig = pConfig->GetHTypeGridConfig();
   pGConfig->D = D;

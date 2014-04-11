@@ -67,17 +67,22 @@ void Options::Init() {
   
   // H type grid
   std::shared_ptr<Config> pHTypeConfig(new Config("h_type"));
-  pHTypeConfig->SetGridSize(Vector3i(40, 20, 1));
+  pHTypeConfig->SetGridSize(Vector3i(130, 70, 1));
   pHTypeConfig->SetOutputGridStart(Vector3i(0, 0, 0));
-  pHTypeConfig->SetOutputSize(Vector3i(40, 20, 1));
+  pHTypeConfig->SetOutputSize(Vector3i(130, 70, 1));
   pHTypeConfig->SetGridGeometryType(sep::PROHOR_GRID_GEOMTRY);
-  pHTypeConfig->SetMaxIteration(200);
+  pHTypeConfig->SetMaxIteration(1000000);
   pHTypeConfig->SetUseIntegral(true);
   pHTypeConfig->SetUseVessels(false);
   pHTypeConfig->SetUseLooping(false);
   pHTypeConfig->SetAdditionalVesselLenght(0);
   pHTypeConfig->SetUseInitialConditions(true);
   pHTypeConfig->SetResetSomeCellsEachIter(true);
+  pHTypeConfig->SetOutputPrefix("../");
+//  pHTypeConfig->SetOutputPrefix("/Volumes/BACKUP HD/Google Drive/Results/");
+                                        // + "out/gas0/pressure"
+                                        // + "out/gas0/conc"
+                                        // + "out/gas0/temp"
   AddConfig(pHTypeConfig);
   
   // Comb type grid

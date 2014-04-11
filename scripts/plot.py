@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 40
-NY = 20
-max_files = 41
-each = 5
+NX = 130
+NY = 70
+max_files = 2
+each = 1
 gas_num = 2
 
 # hack

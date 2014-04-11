@@ -29,7 +29,8 @@ public:
   m_pHTypeGridConfig(new HTypeGridConfig),
   m_iAdditionalVesselLenght(0),
   m_bUseInitialConditions(false),
-  m_bResetSomeCellsEachIter(false) {};
+  m_bResetSomeCellsEachIter(false),
+  m_sOutputPrefix("../") {};
   ~Config() {};
   
   const std::string& GetName() const { return m_sName; }
@@ -65,6 +66,8 @@ public:
   bool GetUseInitialConditions() const { return m_bUseInitialConditions; }
   void SetResetSomeCellsEachIter(bool bResetSomeCellsEachIter) { m_bResetSomeCellsEachIter = bResetSomeCellsEachIter; }
   bool GetResetSomeCellsEachIter() const { return m_bResetSomeCellsEachIter; }
+  void SetOutputPrefix(std::string sOutputPrefix) { m_sOutputPrefix = sOutputPrefix; }
+  const std::string& GetOutputPrefix() const { return m_sOutputPrefix; }
 private:
   // Please, add new members to PrintMe() function
   std::string m_sName;
@@ -81,4 +84,5 @@ private:
   int m_iAdditionalVesselLenght;
   bool m_bUseInitialConditions;
   bool m_bResetSomeCellsEachIter;
+  std::string m_sOutputPrefix;
 };

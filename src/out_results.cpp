@@ -62,15 +62,16 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   Config* pConfig = m_pGridManager->GetConfig();
   
   std::string filename;
+  const std::string& sOutputPrefix = pConfig->GetOutputPrefix();
   switch (eType) {
     case sep::T_PARAM:
-      filename = "../out/gas" + std::to_string(iGas) + "/temp/" + std::to_string(iIndex) + ".bin";
+      filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/temp/" + std::to_string(iIndex) + ".bin";
       break;
     case sep::C_PARAM:
-      filename = "../out/gas" + std::to_string(iGas) + "/conc/" + std::to_string(iIndex) + ".bin";
+      filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/conc/" + std::to_string(iIndex) + ".bin";
       break;
     case sep::P_PARAM:
-      filename = "../out/gas" + std::to_string(iGas) + "/pressure/" + std::to_string(iIndex) + ".bin";
+      filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/pressure/" + std::to_string(iIndex) + ".bin";
       break;
     default:
       // We are not able to print flow yet
@@ -205,7 +206,8 @@ void OutResults::OutAverageStream(int iIteration) {
   GasVector& gasv = m_pGridManager->getSolver()->getSolverInfo()->getGasVector();
   Config* pConfig = m_pGridManager->GetConfig();
 
-  std::string sASFilenameBase = "../out/gas";
+  const std::string& sOutputPrefix = pConfig->GetOutputPrefix();
+  std::string sASFilenameBase = sOutputPrefix + "out/gas";
   for (unsigned int gi = 0; gi < gasv.size(); gi++) {
     std::string sASFilename = sASFilenameBase + std::to_string(gi);
     sASFilename += "/";
