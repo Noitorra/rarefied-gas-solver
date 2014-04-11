@@ -27,7 +27,9 @@ public:
   m_bUseVessels(true),
   m_bUseLooping(false),
   m_pHTypeGridConfig(new HTypeGridConfig),
-  m_iAdditionalVesselLenght(0) {};
+  m_iAdditionalVesselLenght(0),
+  m_bUseInitialConditions(false),
+  m_bResetSomeCellsEachIter(false) {};
   ~Config() {};
   
   const std::string& GetName() const { return m_sName; }
@@ -59,6 +61,10 @@ public:
   int GetAdditionalVesselLenght() const {
     return m_iAdditionalVesselLenght;
   }
+  void SetUseInitialConditions(bool bUseInitialConditions) { m_bUseInitialConditions = bUseInitialConditions; }
+  bool GetUseInitialConditions() const { return m_bUseInitialConditions; }
+  void SetResetSomeCellsEachIter(bool bResetSomeCellsEachIter) { m_bResetSomeCellsEachIter = bResetSomeCellsEachIter; }
+  bool GetResetSomeCellsEachIter() const { return m_bResetSomeCellsEachIter; }
 private:
   // Please, add new members to PrintMe() function
   std::string m_sName;
@@ -73,4 +79,6 @@ private:
   bool m_bUseLooping;
   std::shared_ptr<HTypeGridConfig> m_pHTypeGridConfig;
   int m_iAdditionalVesselLenght;
+  bool m_bUseInitialConditions;
+  bool m_bResetSomeCellsEachIter;
 };

@@ -62,14 +62,6 @@ void Cell::Init() {
 	ImpulseVector& impulsev = impulse->getVector();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
-    double C = 0.0;
-    for(unsigned int ii=0;ii<impulsev.size();ii++) {
-        C += fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
-    }
-
-    C *= impulse->getDeltaImpulseQube();
-    C = m_dStartConcentration / C;
-
     // Allocating space for values and half's
     m_vHalf.resize(gasv.size());
     m_vValue.resize(gasv.size());
@@ -78,10 +70,29 @@ void Cell::Init() {
     m_vHalf[gi].resize( impulsev.size(), 0.0 );
     m_vValue[gi].resize( impulsev.size(), 0.0 );
 
-    for(unsigned int ii=0;ii<impulsev.size();ii++) {
-      m_vValue[gi][ii] = C*fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]);
-      //m_half[gasIndex][impulseIndex] = 0.0;
-    }
+    ResetSpeed(gi, m_dStartConcentration, m_dStartTemperature);
+  }
+}
+
+// TODO: Change function name =)
+void Cell::ResetSpeed(unsigned int gi, double dConcentration, double dTemperature) {
+	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
+	GasVector& gasv = sinfo->getGasVector();
+	Impulse* impulse = sinfo->getImpulse();
+	ImpulseVector& impulsev = impulse->getVector();
+  
+
+  double C = 0.0;
+  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+    C += fast_exp(gasv[gi]->getMass(), dTemperature, impulsev[ii]);
+  }
+  
+  C *= impulse->getDeltaImpulseQube();
+  C = dConcentration / C;
+  
+  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+    m_vValue[gi][ii] = C*fast_exp(gasv[gi]->getMass(), dTemperature, impulsev[ii]);
+    //m_half[gasIndex][impulseIndex] = 0.0;
   }
 }
 

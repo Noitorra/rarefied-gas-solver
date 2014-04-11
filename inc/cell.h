@@ -105,6 +105,9 @@ private:
   double compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth);
 
 	double fast_exp(const double& mass, const double& temp, const Vector3d& impulse);
+  
+  // TODO: Change function name =)
+  void ResetSpeed(unsigned int gi, double dConcentration, double dTemperature);
 
 	template <typename T>
 	inline int sgn(T val) {

@@ -67,15 +67,17 @@ void Options::Init() {
   
   // H type grid
   std::shared_ptr<Config> pHTypeConfig(new Config("h_type"));
-  pHTypeConfig->SetGridSize(Vector3i(80, 40, 1));
-  pHTypeConfig->SetOutputGridStart(Vector3i(7, 0, 0));
-  pHTypeConfig->SetOutputSize(Vector3i(100, 40, 1));
+  pHTypeConfig->SetGridSize(Vector3i(40, 20, 1));
+  pHTypeConfig->SetOutputGridStart(Vector3i(0, 0, 0));
+  pHTypeConfig->SetOutputSize(Vector3i(40, 20, 1));
   pHTypeConfig->SetGridGeometryType(sep::PROHOR_GRID_GEOMTRY);
   pHTypeConfig->SetMaxIteration(200);
   pHTypeConfig->SetUseIntegral(true);
-  pHTypeConfig->SetUseVessels(true);
+  pHTypeConfig->SetUseVessels(false);
   pHTypeConfig->SetUseLooping(false);
   pHTypeConfig->SetAdditionalVesselLenght(0);
+  pHTypeConfig->SetUseInitialConditions(true);
+  pHTypeConfig->SetResetSomeCellsEachIter(true);
   AddConfig(pHTypeConfig);
   
   // Comb type grid

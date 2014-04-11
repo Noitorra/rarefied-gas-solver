@@ -23,6 +23,7 @@ void OutResults::OutAll(int iIteration) {
     OutParameterSingletone(sep::T_PARAM, iGas, iIteration);
     OutParameterSingletone(sep::C_PARAM, iGas, iIteration);
   }
+  OutAverageStream(iIteration);
 }
 
 // prepare parameters to be printed out
@@ -152,11 +153,11 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
                 goto next_cell_label;
               }
               else {
-//                if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
-//                     cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
-//                    (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
-//                     cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
-                if (true) {
+                if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
+                     cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
+                    (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
+                     cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
+//                if (true) {
                   switch (eType) {
                     case sep::T_PARAM:
                       dParam = cell->m_vMacroData[iGas].Temperature;
@@ -191,7 +192,7 @@ void OutResults::OutParameterMPI(sep::MacroParamType eType) {
 
 void OutResults::OutAverageStream(int iIteration) {
   GasVector& gasv = m_pGridManager->getSolver()->getSolverInfo()->getGasVector();
-  const Vector3i& vSize = m_pGrid->GetSize();
+  Config* pConfig = m_pGridManager->GetConfig();
 
   std::string sASFilenameBase = "../out/gas";
   for (unsigned int gi = 0; gi < gasv.size(); gi++) {
@@ -209,14 +210,17 @@ void OutResults::OutAverageStream(int iIteration) {
     }
     filestream.open(sASFilename, openmode);
     if (filestream.is_open()) {
-      double dLeftAverageStream = compute_average_column_stream(1, gi);
-      double dRightAverageStream = compute_average_column_stream(vSize.x() - 2, gi);
 
-      filestream.write(reinterpret_cast<const char*>(&dLeftAverageStream), sizeof(double));
-      filestream.write(reinterpret_cast<const char*>(&dRightAverageStream), sizeof(double));
-
-      std::cout << dLeftAverageStream << " : " << dRightAverageStream << std::endl;
-
+      switch (pConfig->GetGridGeometryType()) {
+        case sep::DIMAN_GRID_GEOMETRY:
+          OutAverageStreamComb(filestream, gi);
+          break;
+        case sep::PROHOR_GRID_GEOMTRY:
+          OutAverageStreamHType(filestream, gi);
+          break;
+        default:
+          return;
+      }
       filestream.close();
     }
     else {
@@ -225,16 +229,48 @@ void OutResults::OutAverageStream(int iIteration) {
   }
 }
 
-double OutResults::compute_average_column_stream(int iIndexX, unsigned int gi) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
+void OutResults::OutAverageStreamComb(std::fstream& filestream, int iGasN) {
   const Vector3i& vSize = m_pGrid->GetSize();
+  double dLeftAverageStream = ComputeAverageColumnStream(1, iGasN, 0, vSize.y());
+  double dRightAverageStream = ComputeAverageColumnStream(vSize.x() - 2, iGasN, 0, vSize.y());
+  
+  filestream.write(reinterpret_cast<const char*>(&dLeftAverageStream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&dRightAverageStream), sizeof(double));
+  
+  std::cout << dLeftAverageStream << " : " << dRightAverageStream << std::endl;
+}
+
+void OutResults::OutAverageStreamHType(std::fstream& filestream, int iGasN) {
+  const Vector3i& vSize = m_pGrid->GetSize();
+  Config* pConfig = m_pGridManager->GetConfig();
+  HTypeGridConfig* pHTypeConfig = pConfig->GetHTypeGridConfig();
+  int iShiftX = 5;
+  int D = pHTypeConfig->D;
+  int l = pHTypeConfig->l;
+  
+  double dLeftUpStream = ComputeAverageColumnStream(iShiftX, iGasN, 1, D - 2);
+  double dRightUpStream = ComputeAverageColumnStream(vSize.x() - 1 - iShiftX, iGasN, 1, D - 2);
+  double dLeftDownStream = ComputeAverageColumnStream(iShiftX, iGasN, D + l + 1, D - 2);
+  double dRightDownStream = ComputeAverageColumnStream(vSize.x() - 1 - iShiftX, iGasN, D + l + 1, D - 2);
+  
+  filestream.write(reinterpret_cast<const char*>(&dLeftUpStream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&dRightUpStream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&dLeftDownStream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&dRightDownStream), sizeof(double));
+  
+  std::cout << dLeftUpStream << " : " << dRightUpStream << " : " <<
+  dLeftDownStream << " : " << dRightDownStream << std::endl;
+}
+
+double OutResults::ComputeAverageColumnStream(int iIndexX, unsigned int gi, int iStartY, int iSizeY) {
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
 
   double dAverageStream = 0.0;
-  for (int y = 0; y < vSize.y(); y++) {
+  for (int y = iStartY; y < iStartY + iSizeY; y++) {
     dAverageStream += m_vCells[iIndexX][y][0]->m_vMacroData[gi].Stream.x();
   }
 
-  dAverageStream /= vSize.y();
+  dAverageStream /= iSizeY;
  
   return dAverageStream;
 }

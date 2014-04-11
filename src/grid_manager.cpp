@@ -5,6 +5,7 @@
 #include "solver.h"
 #include "out_results.h"
 #include "vessel_grid.h"
+#include "solver_info.h"
 
 GridManager::GridManager() :
 m_pGrid(new Grid),
@@ -37,6 +38,8 @@ void GridManager::BuildGrid() {
   if (pConfig->GetUseVessels())
     InitVessels();
 
+  if (pConfig->GetUseInitialConditions())
+    SetInitialConditions();
   LinkCells(pConfig);
 }
 
@@ -189,7 +192,7 @@ void GridManager::BuildHTypeGrid(Config* pConfig) {
   m = vGSize.y();
   p = vGSize.z();
   
-  D = 10;
+  D = 6;
 //  D = m / 3;
   l = m - 2*D;
   d = 4;
@@ -204,10 +207,10 @@ void GridManager::BuildHTypeGrid(Config* pConfig) {
   pGConfig->gaps_q = gaps_q;
   pGConfig->T1 = 1.0;
   pGConfig->T2 = 0.8;
-  pGConfig->n1 = 1.2;
-  pGConfig->n2 = 1.1;
-  pGConfig->n3 = 0.9;
-  pGConfig->n4 = 0.8;
+  pGConfig->n1 = 1.1;
+  pGConfig->n2 = 0.9;
+  pGConfig->n3 = 1.0;
+  pGConfig->n4 = 0.82;
   
   // Add 2D case
   if (flat_z) {
@@ -448,7 +451,6 @@ void GridManager::LinkCells(Config* pConfig) {
         // Set parameters
         Vector3d vAreaStep(0.1, 0.1, 0.1);
         cell->setParameters(init_cond.Concentration, init_cond.Temperature, vAreaStep);
-        
         cell->Init();
       }
     }
@@ -686,6 +688,102 @@ void GridManager::InitVessel(int iStartY, int iSizeY, double dT, double dConc, b
   lvg->SetVesselGridType(eType);
   lvg->CreateAndLinkVessel();
 }
+
+void GridManager::SetInitialConditions() {
+  switch (GetConfig()->GetGridGeometryType()) {
+    case sep::DIMAN_GRID_GEOMETRY:
+      SetInitialConditionsCombType();
+      break;
+    case sep::PROHOR_GRID_GEOMTRY:
+      SetInitialConditionsHType();
+      break;
+    default:
+      return;
+  }
+}
+
+void GridManager::SetInitialConditionsCombType() {
+  
+}
+
+void GridManager::SetInitialConditionsHType() {
+  Config* pConfig = GetConfig();
+  const Vector3i& vSize = pConfig->GetGridSize();
+  HTypeGridConfig* pHTypeConfig = pConfig->GetHTypeGridConfig();
+  int D = pHTypeConfig->D;
+  int l = pHTypeConfig->l;
+  double T1 = pHTypeConfig->T1;
+  double T2 = pHTypeConfig->T2;
+  double n1 = pHTypeConfig->n1;
+  double n2 = pHTypeConfig->n2;
+  double n3 = pHTypeConfig->n3;
+  double n4 = pHTypeConfig->n4;
+  for (int x = 0; x < vSize.x(); x++) {
+    for (int y = 0; y < vSize.y(); y++) {
+      for (int z = 0; z < vSize.z(); z++) {
+        InitCellData* init_cell = m_vCells[x][y][z].get();
+        MacroData& init_cond = m_vCells[x][y][z]->m_cInitCond;
+        if (init_cell->m_eType == sep::EMPTY_CELL)
+          continue;
+        
+        double dCoefX = (double)(x - 1) / (vSize.x() - 3);
+        double dCoefY = (double)(y - D + 1) / (l + 1);
+        dCoefY = dCoefY < 0.0 ? 0.0 : dCoefY;
+        dCoefY = dCoefY > 1.0 ? 1.0 : dCoefY;
+        
+        // Set temperature
+        double dT = T1 + (T2 - T1) * dCoefY;
+        
+        // Set concentration
+        double dConcUp = n1 + (n2 - n1) * dCoefX;
+        double dConcDown = n3 + (n4 - n3) * dCoefX;
+        double dConc = dConcUp + (dConcDown - dConcUp) * dCoefY;
+        
+        init_cond.Temperature = dT;
+        init_cond.Concentration = dConc;
+      }
+    }
+  }
+}
+
+// Prohor only for now
+void GridManager::ResetSomeCells() {
+  Config* pConfig = GetConfig();
+  if (pConfig->GetGridGeometryType() !=  sep::PROHOR_GRID_GEOMTRY)
+    return;
+  
+  const Vector3i& vSize = m_pGrid->GetSize();
+  HTypeGridConfig* pHTypeConfig = pConfig->GetHTypeGridConfig();
+  int D = pHTypeConfig->D;
+  int l = pHTypeConfig->l;
+  double T1 = pHTypeConfig->T1;
+  double T2 = pHTypeConfig->T2;
+  double n1 = pHTypeConfig->n1;
+  double n2 = pHTypeConfig->n2;
+  double n3 = pHTypeConfig->n3;
+  double n4 = pHTypeConfig->n4;
+  GasVector& gasv = getSolver()->getSolverInfo()->getGasVector();
+  
+  for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+    // Four vessels
+    // Left up
+    ResetCellColumn(gi, 1, 1, D - 2, n1, T1);
+    // Right up
+    ResetCellColumn(gi, vSize.x() - 2, 1, D - 2, n2, T1);
+    // Left down
+    ResetCellColumn(gi, 1, D + l + 1, D - 2, n3, T2);
+    // Right down
+    ResetCellColumn(gi, vSize.x() - 2, D + l + 1, D - 2, n4, T2);
+  }
+}
+
+void GridManager::ResetCellColumn(unsigned int gi, int iStartX, int iStartY, int iSizeY, double dConcentration, double dTemperature) {
+  
+  for (int y = iStartY; y < iStartY + iSizeY; y++) {
+    m_vCells[iStartX][y][0]->m_pCell->ResetSpeed(gi, dConcentration, dTemperature);
+  }
+}
+
 
 
 

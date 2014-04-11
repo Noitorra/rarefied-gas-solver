@@ -70,6 +70,9 @@ void Solver::Run() {
 
 	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
     
+    if (GetConfig()->GetResetSomeCellsEachIter())
+      m_pGridManager->ResetSomeCells();
+    
 		makeStep(sep::X);
 		makeStep(sep::Y);
 		makeStep(sep::Z);
@@ -92,7 +95,6 @@ void Solver::Run() {
     
     // Output data
     m_pGridManager->GetOutResults()->OutAll(iteration + 1);
-    m_pGridManager->GetOutResults()->OutAverageStream(iteration);
     std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
 	}
 }

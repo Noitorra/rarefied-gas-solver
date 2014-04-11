@@ -23,8 +23,10 @@ private:
   void OutParameterSingletone(sep::MacroParamType eType, int iGas, int iIndex);
   void OutParameterMPI(sep::MacroParamType eType);
 
-  // DIMAN!!!
-  double compute_average_column_stream(int iIndexX, unsigned int gi);
+  double ComputeAverageColumnStream(int iIndexX, unsigned int gi, int iStartY, int iSizeY);
+  
+  void OutAverageStreamComb(std::fstream& filestream, int iGasN);
+  void OutAverageStreamHType(std::fstream& filestream, int iGasN);
   
   Grid* m_pGrid;
   GridManager* m_pGridManager;

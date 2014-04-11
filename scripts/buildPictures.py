@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 64 #// 46 18
-NY = 128
+NX = 40
+NY = 20
 max_files = 2
 gas_num = 2
 
@@ -15,11 +15,11 @@ font = {'family' : 'serif',
         }
 
 for gas in range(gas_num):
-  data_folder = 'C:/Users/3D/Google Диск/out/gas' + '%i' % gas + '/'
-  NX = 2
-  NY = 1004
+  data_folder = '/Users/prohor/Code/RarefiedGasSolver/out/gas' + '%i' % gas + '/'
+  NX = 4
+  NY = 21
   #.reshape(NX, NY)
-  valueAStream = numpy.fromfile(data_folder+'average_stream1003.bin', dtype=float).reshape(NY, NX)
+  valueAStream = numpy.fromfile(data_folder+'average_stream.bin', dtype=float).reshape(NY, NX)
   print(valueAStream)
 
   print(valueAStream[:,0])
@@ -29,10 +29,21 @@ for gas in range(gas_num):
   plt.plot(time, valueAStream[:,0], 'k')
   plt.xlabel('time dt/t', fontdict=font)
   plt.ylabel('Ql', fontdict=font, rotation='horizontal')
-  plt.savefig(data_folder+'average_stream1003Left.png', dpi=100)
+  plt.savefig(data_folder+'average_streamLeftUp.png', dpi=100)
   plt.close()
   plt.plot(time, valueAStream[:,1], 'k')
   plt.xlabel('time dt/t', fontdict=font)
   plt.ylabel('Qr', fontdict=font, rotation='horizontal')
-  plt.savefig(data_folder+'average_stream1003Right.png', dpi=100)
+  plt.savefig(data_folder+'average_streamRightUp.png', dpi=100)
   plt.close()
+  if NX > 2:
+    plt.plot(time, valueAStream[:,2], 'k')
+    plt.xlabel('time dt/t', fontdict=font)
+    plt.ylabel('Ql', fontdict=font, rotation='horizontal')
+    plt.savefig(data_folder+'average_streamLeftDown.png', dpi=100)
+    plt.close()
+    plt.plot(time, valueAStream[:,3], 'k')
+    plt.xlabel('time dt/t', fontdict=font)
+    plt.ylabel('Qr', fontdict=font, rotation='horizontal')
+    plt.savefig(data_folder+'average_streamRightDown.png', dpi=100)
+    plt.close()

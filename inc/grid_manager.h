@@ -61,6 +61,7 @@ public:
     else
       return m_vRightVess;
   }
+  void ResetSomeCells();
   
 private:
   void SaveGridConfig(Config* pConfig);
@@ -88,6 +89,10 @@ private:
   void InitCombTypeVessels();
   void InitVessel(Vector3i vSize, double dT, double dConc, bool bIsLeft);
   void InitVessel(int iStartY, int iSizeY, double dT, double dConc, bool bIsLeft, VesselGrid::VesselGridType eType);
+  void SetInitialConditions();
+  void SetInitialConditionsCombType();
+  void SetInitialConditionsHType();
+  void ResetCellColumn(unsigned int gi, int iStartX, int iStartY, int iSizeY, double dConcentration, double dTemperature);
   
   std::shared_ptr<Grid> m_pGrid;
   std::shared_ptr<OutResults> m_pOutResults;
