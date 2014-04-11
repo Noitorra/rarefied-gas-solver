@@ -51,8 +51,8 @@ void Solver::Init() {
   m_pGrid->GetGridManager()->Print(sep::Y);
 //  m_pGrid->GetGridManager()->Print(sep::Z);
 
-//  m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::X);
-//  m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::Y);
+  //m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::X);
+  //m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::Y);
 }
 
 void Solver::Run() {
@@ -60,8 +60,10 @@ void Solver::Run() {
 
   // TODO: Add some flag, which determines integral usage
   // if we want to use integral ...
-  ci::HSPotential potential;
-  ci::init(&potential, ci::NO_SYMM);
+  if (GetConfig()->GetUseIntegral()) {
+    ci::HSPotential potential;
+    ci::init(&potential, ci::NO_SYMM);
+  }
   
   // Save initial state
   m_pGridManager->GetOutResults()->OutAll(0);
@@ -90,6 +92,7 @@ void Solver::Run() {
     
     // Output data
     m_pGridManager->GetOutResults()->OutAll(iteration + 1);
+    m_pGridManager->GetOutResults()->OutAverageStream(iteration);
     std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
 	}
 }

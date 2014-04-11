@@ -4,6 +4,9 @@
 #include "cell.h"
 #include "config.h"
 #include "vessel_grid.h"
+#include "gas.h"
+#include "solver_info.h"
+#include "solver.h"
 
 void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
   m_pGrid = pGrid;
@@ -186,6 +189,55 @@ void OutResults::OutParameterMPI(sep::MacroParamType eType) {
   // TODO: To implement
 }
 
+void OutResults::OutAverageStream(int iIteration) {
+  GasVector& gasv = m_pGridManager->getSolver()->getSolverInfo()->getGasVector();
+  const Vector3i& vSize = m_pGrid->GetSize();
+
+  std::string sASFilenameBase = "../out/gas";
+  for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+    std::string sASFilename = sASFilenameBase + std::to_string(gi);
+    sASFilename += "/";
+    sASFilename += "average_stream.bin";
+
+    std::fstream filestream;
+    std::ios::openmode openmode;
+    if (iIteration == 0) {
+      openmode = std::ios::out | std::ios::binary;
+    }
+    else {
+      openmode = std::ios::app | std::ios::binary;
+    }
+    filestream.open(sASFilename, openmode);
+    if (filestream.is_open()) {
+      double dLeftAverageStream = compute_average_column_stream(1, gi);
+      double dRightAverageStream = compute_average_column_stream(vSize.x() - 2, gi);
+
+      filestream.write(reinterpret_cast<const char*>(&dLeftAverageStream), sizeof(double));
+      filestream.write(reinterpret_cast<const char*>(&dRightAverageStream), sizeof(double));
+
+      std::cout << dLeftAverageStream << " : " << dRightAverageStream << std::endl;
+
+      filestream.close();
+    }
+    else {
+      std::cout << "OutResults::OutAverageStream() : Cannot open file - " << sASFilename << std::endl;
+    }
+  }
+}
+
+double OutResults::compute_average_column_stream(int iIndexX, unsigned int gi) {
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
+  const Vector3i& vSize = m_pGrid->GetSize();
+
+  double dAverageStream = 0.0;
+  for (int y = 0; y < vSize.y(); y++) {
+    dAverageStream += m_vCells[iIndexX][y][0]->m_vMacroData[gi].Stream.x();
+  }
+
+  dAverageStream /= vSize.y();
+ 
+  return dAverageStream;
+}
 
 
 

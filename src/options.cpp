@@ -43,14 +43,14 @@ void Options::Init() {
   
   // Bigger grid
   std::shared_ptr<Config> pDebugConfig2(new Config("more_bigger"));
-  pDebugConfig2->SetGridSize(Vector3i(60, 18, 1));
-  pDebugConfig2->SetOutputGridStart(Vector3i(26, 0, 0));
-  pDebugConfig2->SetOutputSize(Vector3i(86, 18, 1));
+  pDebugConfig2->SetGridSize(Vector3i(512, 64, 1));
+  pDebugConfig2->SetOutputGridStart(Vector3i(0, 0, 0));
+  pDebugConfig2->SetOutputSize(Vector3i(512, 64, 1));
   pDebugConfig2->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
-  pDebugConfig2->SetMaxIteration(200);
-  pDebugConfig2->SetUseIntegral(true);
-  pDebugConfig2->SetUseVessels(true);
-  pDebugConfig2->SetUseLooping(false);
+  pDebugConfig2->SetMaxIteration(100);
+  pDebugConfig2->SetUseIntegral(false);
+  pDebugConfig2->SetUseVessels(false);
+  pDebugConfig2->SetUseLooping(true);
   AddConfig(pDebugConfig2);
   
   // Bigger grid 32x16
@@ -83,11 +83,11 @@ void Options::Init() {
 //  pCombTypeConfig->SetGridSize(Vector3i(512, 64, 1));
 //  pCombTypeConfig->SetOutputGridStart(Vector3i(-192, 0, 0));
 //  pCombTypeConfig->SetOutputSize(Vector3i(128, 64, 1));
-  pCombTypeConfig->SetGridSize(Vector3i(20, 20, 1));
+  pCombTypeConfig->SetGridSize(Vector3i(64, 32, 1));
   pCombTypeConfig->SetOutputGridStart(Vector3i(0, 0, 0));
-  pCombTypeConfig->SetOutputSize(Vector3i(20, 20, 1));
+  pCombTypeConfig->SetOutputSize(Vector3i(64, 32, 1));
   pCombTypeConfig->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
-  pCombTypeConfig->SetMaxIteration(200);
+  pCombTypeConfig->SetMaxIteration(400);
   pCombTypeConfig->SetUseIntegral(true);
   pCombTypeConfig->SetUseVessels(false);
   pCombTypeConfig->SetUseLooping(true);

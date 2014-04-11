@@ -260,17 +260,18 @@ void Cell::compute_half_normal(unsigned int dim) {
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 		for(unsigned int ii=0;ii<impulsev.size();ii++) {
 			double y = config->GetTimeStep()/gasv[gi]->getMass()*std::abs(impulsev[ii][dim]/m_vAreastep[dim]);
-			if(impulsev[ii][dim] > 0) {
-				m_vHalf[gi][ii] = m_vValue[gi][ii] + (1-y)/2*limiter(
-						compute_av(dim, gi, ii, AD_PREV),
-						m_vValue[gi][ii],
-            compute_av(dim, gi, ii, AD_NEXT));
-			} else {
+      if (impulsev[ii][dim] > 0) {
+        m_vHalf[gi][ii] = m_vValue[gi][ii] + (1 - y) / 2 * limiter(
+          compute_av(dim, gi, ii, AD_PREV),
+          m_vValue[gi][ii],
+          compute_av(dim, gi, ii, AD_NEXT));
+      }
+      else {
         m_vHalf[gi][ii] = compute_av(dim, gi, ii, AD_NEXT) - (1 - y) / 2 * limiter(
-						m_vValue[gi][ii],
-            compute_av(dim, gi, ii, AD_NEXT),
-            compute_av(dim, gi, ii, AD_NEXTNEXT));
-			}
+          m_vValue[gi][ii],
+          compute_av(dim, gi, ii, AD_NEXT),
+          compute_av(dim, gi, ii, AD_NEXTNEXT));
+      }
 		}
 	}
 }
@@ -297,16 +298,15 @@ void Cell::compute_half_right(unsigned int dim) {
 	        // TODO: check
 	        for( auto& item : m_vPrev[dim] ) {
             item->m_vHalf[gi][ii] = item->m_vValue[gi][ii] + (1 - y) / 2 * limiter(
-              compute_av(dim, gi, ii, AD_PREV),
+              item->compute_av(dim, gi, ii, AD_PREV),
               item->m_vValue[gi][ii],
-              compute_av(dim, gi, ii, AD_NEXT));
+              item->compute_av(dim, gi, ii, AD_NEXT));
 	        }
 	        // old code
 //	      	m_vPrev[dim]->m_vHalf[gi][ii] = m_vPrev[dim]->m_vValue[gi][ii] + (1-y)/2*limitter::super_bee(m_vPrev[dim]->m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vPrev[dim]->m_vValue[gi][ii],
 //	                                                                                                               m_vValue[gi][ii]);
-
-          C1_up += std::abs(impulsev[ii][dim] * compute_ah(dim, gi, ii, AD_PREV));
+          C1_up += std::abs(impulsev[ii][dim] * compute_ah(dim, gi, ii, AD_PREV)); 
           C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_PREV)) / 2);
 	      } else {
           C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dStartTemperature, impulsev[ii]));
@@ -336,7 +336,11 @@ void Cell::compute_value_normal(unsigned int dim) {
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
 		    double y = config->GetTimeStep()/gasv[gi]->getMass()*impulsev[ii][dim]/m_vAreastep[dim];
+        // compute_ah(dim, gi, ii, AD_PREV)
         m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_ah(dim, gi, ii, AD_PREV));
+        //if (m_vValue[gi][ii] < 0) {
+        //  std::cout << m_vValue[gi][ii] << ":" << ii << std::endl;
+        //}
     }
   }
 }
@@ -375,6 +379,13 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     }
     break;
   }
+  //if (count == 2) {
+  //  std::cout << "Value" << eAverageDepth << " : " << count << " Type = " << m_vType[dim] << " result = " << result << std::endl;
+  //  std::cout << ":" << m_vNext[dim].size() << ":" << m_vPrev[dim].size() << std::endl;
+  //}
+
+  if (count == 0 || count > 4)
+    std::cout << "Value" << eAverageDepth << " : " << count << " Type = " << m_vType[dim] << std::endl;
   result /= count;
   return result;
 }
@@ -391,6 +402,8 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
+      //result += item1->m_vHalf[gi][ii];
+      //count++;
       for (auto& item2 : item1->m_vNext[dim]) {
         result += item2->m_vHalf[gi][ii];
         count++;
@@ -412,6 +425,8 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     }
     break;
   }
+  if (count == 0 || count > 4)
+    std::cout << "Half" << eAverageDepth << " : " << count << " Type = " << m_vType[dim] << std::endl;
   result /= count;
   return result;
 }

@@ -36,8 +36,8 @@ void VesselGrid::PrintLinkage(sep::Axis aAxis) {
       Cell* pCell = m_vPrintVector[x][y];
       if (pCell) {
         std::cout << pCell->m_vType[aAxis];
-        // std::cout << pCell->m_vNext[aAxis].size();
-        // std::cout << pCell->m_vPrev[aAxis].size();
+        //std::cout << pCell->m_vNext[aAxis].size();
+        // std::cout << pCell << " : ";
 
       }
       else {
@@ -47,6 +47,15 @@ void VesselGrid::PrintLinkage(sep::Axis aAxis) {
     std::cout << std::endl;
   }
   std::cout << std::endl;
+
+  //Cell* pCell = GetBorderCell(1);
+
+  //Cell* pCell = m_vCells[1].get();
+
+  //while (pCell) {
+  //  pCell = pCell->m_vNext[sep::Y][0];
+  //  std::cout << pCell << std::endl;
+  //}
 
   //for (auto& item : m_vCells) {
   //  std::cout << item->m_vType[aAxis];
