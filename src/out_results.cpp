@@ -149,11 +149,11 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
                 goto next_cell_label;
               }
               else {
-                if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
-                     cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
-                    (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
-                     cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
-//                if (true) {
+//                if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
+//                     cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
+//                    (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
+//                     cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
+                if (true) {
                   switch (eType) {
                     case sep::T_PARAM:
                       dParam = cell->m_vMacroData[iGas].Temperature;

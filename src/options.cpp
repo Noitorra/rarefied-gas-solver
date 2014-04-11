@@ -68,14 +68,14 @@ void Options::Init() {
   // H type grid
   std::shared_ptr<Config> pHTypeConfig(new Config("h_type"));
   pHTypeConfig->SetGridSize(Vector3i(80, 40, 1));
-  pHTypeConfig->SetOutputGridStart(Vector3i(67, 0, 0));
-  pHTypeConfig->SetOutputSize(Vector3i(220, 40, 1));
+  pHTypeConfig->SetOutputGridStart(Vector3i(7, 0, 0));
+  pHTypeConfig->SetOutputSize(Vector3i(100, 40, 1));
   pHTypeConfig->SetGridGeometryType(sep::PROHOR_GRID_GEOMTRY);
   pHTypeConfig->SetMaxIteration(200);
   pHTypeConfig->SetUseIntegral(true);
   pHTypeConfig->SetUseVessels(true);
   pHTypeConfig->SetUseLooping(false);
-  pHTypeConfig->SetAdditionalVesselLenght(60);
+  pHTypeConfig->SetAdditionalVesselLenght(0);
   AddConfig(pHTypeConfig);
   
   // Comb type grid
@@ -98,8 +98,8 @@ void Options::Init() {
 //  SetActiveConfig("debug_1");
 //  SetActiveConfig("more_bigger");
 //  SetActiveConfig("debug_3");
-//  SetActiveConfig("h_type");
-    SetActiveConfig("comb_type");
+  SetActiveConfig("h_type");
+//    SetActiveConfig("comb_type");
 }
 
 void Options::AddConfig(std::shared_ptr<Config> pConfig) {
