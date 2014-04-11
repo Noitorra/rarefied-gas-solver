@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 32 #// 46 18
-NY = 64
-max_files = 200
+NX = 64 #// 46 18
+NY = 128
+max_files = 2
 gas_num = 1
 
 for gas in range(gas_num):
@@ -24,7 +24,7 @@ for gas in range(gas_num):
     plt.close()
     print("%i of %i" % (i, max_files))
     """
-  """
+"""
   for i in range(max_files):
     s = "%i" % i
     valueT = numpy.fromfile(data_folder+'temp/'+s+'.bin', dtype=float).reshape(NX, NY)
@@ -41,6 +41,7 @@ for gas in range(gas_num):
     print("%i of %i" % (i, max_files))
 """
 
+
 NX = 2
 NY = 10
 #.reshape(NX, NY)
@@ -48,18 +49,17 @@ valueAStream = numpy.fromfile(data_folder+'average_stream1.bin', dtype=float)
 valueAStream = valueAStream.reshape(NY, NX)
 print(valueAStream)
 
-leftStream = 0
+print(valueAStream[:,0])
 
-for leftIndex in range(NY):
-    numpy.append(leftStream, valueAStream[leftIndex][0])
-    #print(valueAStream[leftIndex][0])
-print(leftStream)
-
-"""
-time = numpy.linspace(0, NX)
-plt.plot(time, valueAStream[0])
+time = numpy.arange(NY)
+print(time)
+#plt.plot(time, valueAStream[:,0])
+plt.plot(time, valueAStream[:,0], 'k')
 plt.show()
 
+plt.plot(time, valueAStream[:,1], 'k')
+plt.show()
+"""
 plt.imshow(valueT, interpolation='nearest')
 plt.colorbar()
 #plt.contour(valueT, colors='black')
