@@ -55,14 +55,14 @@ void Options::Init() {
   
   // Bigger grid 32x16
   std::shared_ptr<Config> pDebugConfig3(new Config("debug_3"));
-  pDebugConfig3->SetGridSize(Vector3i(4, 4, 1));
-  pDebugConfig3->SetOutputGridStart(Vector3i(0, 0, 0));
-  pDebugConfig3->SetOutputSize(Vector3i(8, 4, 1));
+  pDebugConfig3->SetGridSize(Vector3i(5, 4, 1));
+  pDebugConfig3->SetOutputGridStart(Vector3i(5, 0, 0));
+  pDebugConfig3->SetOutputSize(Vector3i(10, 4, 1));
   pDebugConfig3->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
   pDebugConfig3->SetMaxIteration(5);
   pDebugConfig3->SetUseIntegral(true);
   pDebugConfig3->SetUseVessels(true);
-  pDebugConfig3->SetUseLooping(false);
+  pDebugConfig3->SetUseLooping(true);
   AddConfig(pDebugConfig3);
   
   // H type grid
@@ -102,7 +102,11 @@ void Options::Init() {
   AddConfig(pCombTypeConfig);
   
   // Finally, select wich is active
+//  SetActiveConfig("debug_1");
+//  SetActiveConfig("more_bigger");
   SetActiveConfig("debug_3");
+//  SetActiveConfig("h_type");
+//    SetActiveConfig("comb_type");
 }
 
 void Options::AddConfig(std::shared_ptr<Config> pConfig) {
