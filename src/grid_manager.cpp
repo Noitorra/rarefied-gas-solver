@@ -144,8 +144,7 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
   AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
 
-    //m_vCells[3][3][0]->m_eType = sep::EMPTY_CELL;
-
+  
 
   // Right up and down corners
   m_vCells[vGSize.x() - 1][0][0]->m_eType = sep::FAKE_CELL;

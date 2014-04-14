@@ -55,11 +55,11 @@ void Options::Init() {
   
   // Bigger grid 32x16
   std::shared_ptr<Config> pDebugConfig3(new Config("debug_3"));
-  pDebugConfig3->SetGridSize(Vector3i(18, 18, 1));
+  pDebugConfig3->SetGridSize(Vector3i(4, 4, 1));
   pDebugConfig3->SetOutputGridStart(Vector3i(0, 0, 0));
-  pDebugConfig3->SetOutputSize(Vector3i(24, 18, 1));
+  pDebugConfig3->SetOutputSize(Vector3i(8, 4, 1));
   pDebugConfig3->SetGridGeometryType(sep::DIMAN_GRID_GEOMETRY);
-  pDebugConfig3->SetMaxIteration(200);
+  pDebugConfig3->SetMaxIteration(5);
   pDebugConfig3->SetUseIntegral(true);
   pDebugConfig3->SetUseVessels(true);
   pDebugConfig3->SetUseLooping(false);
@@ -78,7 +78,7 @@ void Options::Init() {
   pHTypeConfig->SetAdditionalVesselLenght(0);
   pHTypeConfig->SetUseInitialConditions(true);
   pHTypeConfig->SetResetSomeCellsEachIter(true);
-  pHTypeConfig->SetOutputPrefix("../");
+  pHTypeConfig->SetOutputPrefix("D:/GoogleDisk/Shared_Prohor/");
 //  pHTypeConfig->SetOutputPrefix("/Volumes/BACKUP HD/Google Drive/Results/");
                                         // + "out/gas0/pressure"
                                         // + "out/gas0/conc"
@@ -102,11 +102,7 @@ void Options::Init() {
   AddConfig(pCombTypeConfig);
   
   // Finally, select wich is active
-//  SetActiveConfig("debug_1");
-//  SetActiveConfig("more_bigger");
-//  SetActiveConfig("debug_3");
-  SetActiveConfig("h_type");
-//    SetActiveConfig("comb_type");
+  SetActiveConfig("debug_3");
 }
 
 void Options::AddConfig(std::shared_ptr<Config> pConfig) {
