@@ -112,13 +112,6 @@ void GridManager::Build(Config* pConfig) {
 void GridManager::BuildDebugTypeGrid(Config* pConfig) {
   std::cout << "Building debug type grid" << std::endl;
   
-  //// Test 1: Done
-  //// Left and Right walls are 1.0
-  //for (int y = 0; y < vGSize.y(); y++) {
-  //  m_vCells[0][y][0]->m_cInitCond.Temperature = 1.0;
-  //  m_vCells[vGSize.x()-1][y][0]->m_cInitCond.Temperature = 1.0;
-  //}
-  
   InitEmptyBox(pConfig->GetGridSize());
   AddBox(Vector3i(), pConfig->GetGridSize(), Vector3b(false, false, false), true, 1.0, true);
   //  SetBox(Vector3i(3, 3, 0), Vector3i(4, 4, 1), sep::EMPTY_CELL, 0.4);
@@ -132,53 +125,30 @@ void GridManager::BuildCombTypeGrid(Config* pConfig) {
   
   const Vector3i& vGSize = pConfig->GetGridSize();
   
-  // 512 //64
-  // 128
-  // 192
-
-  // Blocks
-  // +1 - Hack for small grid (stupid, sorry)
-  Vector3i vBlockSize = Vector3i(128 * 4 / 8, vGSize.y() * 2 / 8, vGSize.z());
-  Vector3i vBlockStart1 = Vector3i(64 + 128 * 3 / 8 - 1, vGSize.y() * 1 / 8 + 1, 0);
-  Vector3i vBlockStart2 = Vector3i(64 + 128 * 1 / 8 + 1, vGSize.y() * 5 / 8 - 1, 0);
-  AddBox(vBlockStart1, vBlockSize, Vector3b(false, false, false), true, 0.5, false);
-  AddBox(vBlockStart2, vBlockSize, Vector3b(false, false, false), true, 1.0, false);
-
-    //m_vCells[3][3][0]->m_eType = sep::EMPTY_CELL;
-
-
+  SetLoopedBox(Vector3i(0, 3, 0), Vector3i(4, 1, 1), false, 0.5);
+  SetLoopedBox(Vector3i(0, 0, 0), Vector3i(4, 1, 1), true, 0.5);
+  
   // Right up and down corners
-  m_vCells[vGSize.x() - 1][0][0]->m_eType = sep::FAKE_CELL;
-  m_vCells[vGSize.x() - 1][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[0][0][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[1][0][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[2][0][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[3][0][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[4][0][0]->m_eType = sep::NORMAL_CELL;
   
-  // Left up and down corners
-  m_vCells[0][0][0]->m_eType = sep::FAKE_CELL;
-  m_vCells[0][vGSize.y() - 1][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[0][3][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[1][3][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[2][3][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[3][3][0]->m_eType = sep::NORMAL_CELL;
+  m_vCells[4][3][0]->m_eType = sep::NORMAL_CELL;
+  
+  m_vCells[4][0][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[4][1][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[4][2][0]->m_eType = sep::FAKE_CELL;
+  m_vCells[4][3][0]->m_eType = sep::FAKE_CELL;
 
-  
-//  // Vessel
-//  if (pConfig->GetUseVessels() && !pConfig->GetUseLooping()) {
-//    SetVesselBorderBox(Vector3i(vGSize.x() - 1, 1, 0), Vector3i(1, vGSize.y() - 2, 1), false, 0, 0.5);
-//  }
-//  
-//  // Vessel
-//  if (pConfig->GetUseVessels() && pConfig->GetUseLooping()) {
-//    SetVesselBorderBox(Vector3i(vGSize.x() - 1, 0, 0), Vector3i(1, vGSize.y(), 1), false, 0, 0.5);
-//  }
-  
-//  // Should be good looping with vessel
-//  if (pConfig->GetUseLooping() && pConfig->GetUseVessels()) {
-//    SetLoopedBox(Vector3i(), Vector3i(vGSize.x() - 1, 1, 1), true, 0.5);
-//    SetLoopedBox(Vector3i(0, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 1, 1, 1), false, 0.5);
-//  }
+  SetVesselBorderBox(Vector3i(0, 0, 0), Vector3i(1, 4, 1), true, 0, 0.5);
 
-  // Looping without vessel
-  if (pConfig->GetUseLooping() && !pConfig->GetUseVessels()) {
-    SetLoopedBox(Vector3i(1, 0, 0), Vector3i(vGSize.x() - 2, 1, 1), true, 0.5);
-    SetLoopedBox(Vector3i(1, vGSize.y() - 1, 0), Vector3i(vGSize.x() - 2, 1, 1), false, 0.5);
-  }
-  
-
+  AddBox(Vector3i(1, 1, 0), Vector3i(2, 2, 1), Vector3b(false, false, false), true, 1.0, false);
 }
 
 void GridManager::BuildHTypeGrid(Config* pConfig) {
@@ -628,11 +598,9 @@ void GridManager::InitVessels() {
 }
 
 void GridManager::InitCombTypeVessels() {
-  m_vRightVess.push_back(std::shared_ptr<VesselGrid>(new RightVesselGrid));
-  VesselGrid* lvg = m_vRightVess[0].get();
+  m_vLeftVess.push_back(std::shared_ptr<VesselGrid>(new LeftVesselGrid));
+  VesselGrid* lvg = m_vLeftVess[0].get();
   Config* pConfig = GetConfig();
-  // Need Nx
-  int iNx = pConfig->GetGridSize().y(); // ?
   int iNy = pConfig->GetGridSize().y();
   int iNz = 1;
   lvg->setGridManager(this);
@@ -642,12 +610,12 @@ void GridManager::InitCombTypeVessels() {
   lvg->getVesselGridInfo()->iNy = iNy;
   lvg->getVesselGridInfo()->iNz = iNz;
   lvg->getVesselGridInfo()->vAreastep = Vector3d(0.1, 0.1, 0.1);
-  lvg->getVesselGridInfo()->vStart = Vector3i(iNx, 0, 0);
+  lvg->getVesselGridInfo()->vStart = Vector3i(0, 0, 0);
   
   if (pConfig->GetUseLooping())
-  lvg->SetVesselGridType(VesselGrid::VGT_CYCLED);
+    lvg->SetVesselGridType(VesselGrid::VGT_CYCLED);
   else
-  lvg->SetVesselGridType(VesselGrid::VGT_NORMAL);
+    lvg->SetVesselGridType(VesselGrid::VGT_NORMAL);
   lvg->CreateAndLinkVessel();
 }
 
