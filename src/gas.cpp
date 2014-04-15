@@ -1,10 +1,3 @@
-/*
- * gas.cpp
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #include "gas.h"
 
 Gas::Gas(double mass) {

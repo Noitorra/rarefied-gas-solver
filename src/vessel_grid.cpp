@@ -4,6 +4,10 @@
 
 #include <exception>
 
+void VesselGrid::Init(GridManager* pGridManager) {
+  m_pGridManager = pGridManager;
+}
+
 void VesselGrid::CreateAndLinkVessel() {
   try {
     switch (m_eType) {
@@ -164,12 +168,12 @@ void LeftVesselGrid::create_normal_vessel() {
       //std::cout << "iNyMax = " << iNyMax << std::endl;
     }
     for (int iNy = 0; iNy < iNyMax; iNy++) {
-      std::shared_ptr<Cell> pCell(new Cell(m_pGridManager));
+      std::shared_ptr<Cell> pCell(new Cell());
       m_vCells.push_back(pCell);
       Vector3d vAreastep = m_pVGInfo->vAreastep;
       vAreastep.y() *= (m_pVGInfo->iNy - 2) / (iNyMax - 2);
       pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
-      pCell->Init();
+      pCell->Init(m_pGridManager);
     }
   }
 }
@@ -209,12 +213,12 @@ void LeftVesselGrid::create_cycled_vessel() {
       //std::cout << "iNyMax = " << iNyMax << std::endl;
     }
     for (int iNy = 0; iNy < iNyMax; iNy++) {
-      std::shared_ptr<Cell> pCell(new Cell(m_pGridManager));
+      std::shared_ptr<Cell> pCell(new Cell());
       m_vCells.push_back(pCell);
       Vector3d vAreastep = m_pVGInfo->vAreastep;
       vAreastep.y() *= (m_pVGInfo->iNy) / (iNyMax);
       pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
-      pCell->Init();
+      pCell->Init(m_pGridManager);
     }
   }
 }
@@ -534,12 +538,12 @@ void RightVesselGrid::create_normal_vessel() {
       //std::cout << "iNyMax = " << iNyMax << std::endl;
     }
     for (int iNy = 0; iNy < iNyMax; iNy++) {
-      std::shared_ptr<Cell> pCell(new Cell(m_pGridManager));
+      std::shared_ptr<Cell> pCell(new Cell());
       m_vCells.push_back(pCell);
       Vector3d vAreastep = m_pVGInfo->vAreastep;
       vAreastep.y() *= (m_pVGInfo->iNy - 2) / (iNyMax - 2);
       pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
-      pCell->Init();
+      pCell->Init(m_pGridManager);
     }
   }
 }
@@ -579,12 +583,12 @@ void RightVesselGrid::create_cycled_vessel() {
       //std::cout << "iNyMax = " << iNyMax << std::endl;
     }
     for (int iNy = 0; iNy < iNyMax; iNy++) {
-      std::shared_ptr<Cell> pCell(new Cell(m_pGridManager));
+      std::shared_ptr<Cell> pCell(new Cell());
       m_vCells.push_back(pCell);
       Vector3d vAreastep = m_pVGInfo->vAreastep;
       vAreastep.y() *= (m_pVGInfo->iNy) / (iNyMax);
       pCell->setParameters(m_pVGInfo->dStartConcentration, m_pVGInfo->dStartTemperature, vAreastep);
-      pCell->Init();
+      pCell->Init(m_pGridManager);
     }
   }
 }

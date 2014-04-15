@@ -5,35 +5,38 @@
 #include <memory>
 
 class Parallel;
-class SolverInfo;
-class Options;
 class Grid;
+class Impulse;
+class Gas;
 class GridManager;
 class Config;
+class Solver;
+
+typedef std::vector<std::shared_ptr<Gas>> GasVector;
 
 class Solver {
 public:
   Solver();
-  virtual ~Solver();
 
-  void Init();
+  void Init(GridManager* pGridManager);
   void Run();
   
-  Parallel* getParallel() const { return m_pParallel.get(); }
-	SolverInfo* getSolverInfo() const { return m_pSolverInfo.get(); }
-	Grid* GetGrid() const;
-  // Throws const char*
-  Config* GetConfig() const;
-  
-private:
-  std::shared_ptr<Parallel> m_pParallel;
-	std::shared_ptr<SolverInfo> m_pSolverInfo;
-  std::shared_ptr<GridManager> m_pGridManager;
-  Grid* m_pGrid;
+  Parallel* GetParallel() const { return m_pParallel.get(); }
+	Impulse* GetImpulse() const { return m_pImpulse.get(); }
+  GasVector& GetGas() { return m_vGas; }
 
-  void initCellType(sep::Axis axis);
-  void makeStep(sep::Axis axis);
-  void makeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
+private:
+  void InitCellType(sep::Axis axis);
+  void MakeStep(sep::Axis axis);
+  void MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
+  
+  std::shared_ptr<Parallel> m_pParallel;
+	std::shared_ptr<Impulse> m_pImpulse;
+	GasVector m_vGas;
+  
+  GridManager* m_pGridManager;
+  Grid* m_pGrid;
+  Config* m_pConfig;
 };
 
 #endif /* SOLVER_H_ */

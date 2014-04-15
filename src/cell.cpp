@@ -1,16 +1,8 @@
-/*
- * cell.cpp
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #include "cell.h"
 
 #include "grid.h"
 #include "grid_manager.h"
 #include "solver.h"
-#include "solver_info.h"
 #include "gas.h"
 #include "impulse.h"
 #include "config.h"
@@ -20,7 +12,12 @@
 
 #include "integral/ci.hpp"
 
-Cell::Cell() {
+Cell::Cell() :
+m_pGridManager(nullptr),
+m_pSolver(nullptr),
+m_pGrid(nullptr),
+m_pConfig(nullptr)
+{
 	// TODO Auto-generated constructor stub
 	m_vType.resize(3, CT_UNDEFINED);
 
@@ -38,10 +35,6 @@ Cell::Cell() {
 	m_pGridManager = nullptr;
 }
 
-Cell::Cell(GridManager* pGridManager) : Cell() {
-  m_pGridManager = pGridManager;
-}
-
 Cell::~Cell() {
 	// TODO Auto-generated destructor stub
 }
@@ -55,10 +48,14 @@ void Cell::setParameters(double _Concentration, double _Temperature, Vector3d _A
 	m_vAreastep = _Areastep;
 }
 
-void Cell::Init() {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	Impulse* impulse = sinfo->getImpulse();
+void Cell::Init(GridManager* pGridManager) {
+  m_pGridManager = pGridManager;
+  m_pSolver = pGridManager->GetSolver();
+  m_pGrid = pGridManager->GetGrid();
+  m_pConfig = pGridManager->GetConfig();
+  
+	GasVector& gasv = m_pSolver->GetGas();
+	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -76,9 +73,8 @@ void Cell::Init() {
 
 // TODO: Change function name =)
 void Cell::ResetSpeed(unsigned int gi, double dConcentration, double dTemperature) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	Impulse* impulse = sinfo->getImpulse();
+	GasVector& gasv = m_pSolver->GetGas();
+	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
   
 
@@ -148,8 +144,7 @@ void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
 }
 
 void Cell::computeMacroData() {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
+	GasVector& gasv = m_pSolver->GetGas();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
 		m_vMacroData[gi].Concentration = compute_concentration(gi);
@@ -161,9 +156,8 @@ void Cell::computeMacroData() {
 
 /* Tests */
 bool Cell::testInnerValuesRange() {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+  GasVector& gasv = m_pSolver->GetGas();
+	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
 	bool result = true;
 
@@ -225,9 +219,8 @@ void Cell::compute_type(unsigned int dim) {
 }
 
 void Cell::compute_half_left(unsigned int dim) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+	GasVector& gasv = m_pSolver->GetGas();
+	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
   Config* config = m_pGridManager->GetConfig();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -263,9 +256,8 @@ void Cell::compute_half_left(unsigned int dim) {
   }
 }
 void Cell::compute_half_normal(unsigned int dim) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+	GasVector& gasv = m_pSolver->GetGas();
+	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
   Config* config = m_pGridManager->GetConfig();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -290,9 +282,8 @@ void Cell::compute_half_preright(unsigned int dim) {
 
 }
 void Cell::compute_half_right(unsigned int dim) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+	GasVector& gasv = m_pSolver->GetGas();
+	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
   Config* config = m_pGridManager->GetConfig();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -339,9 +330,8 @@ void Cell::compute_half_right(unsigned int dim) {
 }
 
 void Cell::compute_value_normal(unsigned int dim) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	ImpulseVector& impulsev = sinfo->getImpulse()->getVector();
+	GasVector& gasv = m_pSolver->GetGas();
+	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
   Config* config = m_pGridManager->GetConfig();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -454,8 +444,7 @@ double Cell::limiter_superbee(const double& x, const double& y, const double& z)
 /* Macro Data */
 
 double Cell::compute_concentration(unsigned int gi) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	Impulse* impulse = sinfo->getImpulse();
+	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
   double concentration = 0.0;
@@ -467,9 +456,8 @@ double Cell::compute_concentration(unsigned int gi) {
 }
 
 double Cell::compute_temperature(unsigned int gi) {
-	SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-	GasVector& gasv = sinfo->getGasVector();
-	Impulse* impulse = sinfo->getImpulse();
+	GasVector& gasv = m_pSolver->GetGas();
+	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
 	double concentration = m_vMacroData[gi].Concentration;
@@ -492,9 +480,8 @@ double Cell::compute_temperature(unsigned int gi) {
 }
 
 Vector3d Cell::compute_stream(unsigned int gi) {
-  SolverInfo* sinfo = m_pGridManager->getSolver()->getSolverInfo();
-  GasVector& gasv = sinfo->getGasVector();
-  Impulse* impulse = sinfo->getImpulse();
+	GasVector& gasv = m_pSolver->GetGas();
+	Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 
   Vector3d vStream;

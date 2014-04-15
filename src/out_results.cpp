@@ -5,7 +5,6 @@
 #include "config.h"
 #include "vessel_grid.h"
 #include "gas.h"
-#include "solver_info.h"
 #include "solver.h"
 
 void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
@@ -29,8 +28,7 @@ void OutResults::OutAll(int iIteration) {
 
 // prepare parameters to be printed out
 void OutResults::LoadParameters() {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
-  Config* pConfig = m_pGridManager->GetConfig();
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
   
   const Vector3i& vSize = m_pGrid->GetSize();
   for (int x = 0; x < vSize.x(); x++) {
@@ -45,20 +43,16 @@ void OutResults::LoadParameters() {
     }
   }
   
-  if (pConfig->GetUseVessels()) {
-    // For all vessels
-    for (int iLeftVess = 0; iLeftVess < 2; iLeftVess++) {
-      const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGridManager->GetLeftRightVessels(iLeftVess);
-      
-      for (auto& pVessel : vVessels) {
-        pVessel->computeMacroData();
-      }
-    }
+  const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGrid->GetVessels();
+  
+  for (auto& pVessel : vVessels) {
+    pVessel->computeMacroData();
   }
+
 }
 
 void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int iIndex) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
   Config* pConfig = m_pGridManager->GetConfig();
   
   std::string filename;
@@ -122,69 +116,62 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
       } else {
         // Looking for vessels
         
-        if (!pConfig->GetUseVessels()) {
-          dParam = 0.0;
-          goto next_cell_label;
-        }
-        
         // For all vessels
-        for (int iLeftVess = 0; iLeftVess < 2; iLeftVess++) {
-          const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGridManager->GetLeftRightVessels(iLeftVess);
+        const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGrid->GetVessels();
           
-          for (auto& pVessel : vVessels) {
+        for (auto& pVessel : vVessels) {
 
-            const std::vector< std::vector<Cell*> >& vVessCells = pVessel->GetPrintVector();
-            const Vector2i& vVesselSize2D = pVessel->GetPrintVectorSize();
-            Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
-            Vector3i vVesselStart = pVessel->getVesselGridInfo()->vStart;
-            if (iLeftVess)
-              vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
-            else
-              vVesselStart.x() = vStartOutGrid.x() + vGridSize.x();
+          const std::vector< std::vector<Cell*> >& vVessCells = pVessel->GetPrintVector();
+          const Vector2i& vVesselSize2D = pVessel->GetPrintVectorSize();
+          Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
+          Vector3i vVesselStart = pVessel->getVesselGridInfo()->vStart;
+//          if (iLeftVess)
+//            vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
+//          else
+//            vVesselStart.x() = vStartOutGrid.x() + vGridSize.x();
+          
+          int v_x = x - vVesselStart.x();
+          int v_y = y - vVesselStart.y();
+          int v_z = z - vVesselStart.z();
+          
+          iEdge = 0;
+          if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
+              v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
             
-            int v_x = x - vVesselStart.x();
-            int v_y = y - vVesselStart.y();
-            int v_z = z - vVesselStart.z();
-            
-            iEdge = 0;
-            if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
-                v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
-              
-              Cell* cell = nullptr;
-              if (!iLeftVess)
-                cell = vVessCells[vVesselSize.x() - v_x - 1][v_y];
-              else
-                cell = vVessCells[v_x][v_y];
+            Cell* cell = nullptr;
+//            if (!iLeftVess)
+//              cell = vVessCells[vVesselSize.x() - v_x - 1][v_y];
+//            else
+//              cell = vVessCells[v_x][v_y];
 
-              if (!cell) {
-                dParam = 0.0;
-                goto next_cell_label;
-              }
-              else {
-                if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
-                     cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
-                    (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
-                     cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
+            if (!cell) {
+              dParam = 0.0;
+              goto next_cell_label;
+            }
+            else {
+              if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
+                   cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
+                  (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
+                   cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
 //                if (true) {
-                  switch (eType) {
-                    case sep::T_PARAM:
-                      dParam = cell->m_vMacroData[iGas].Temperature;
-                      goto next_cell_label;
-                      break;
-                    case sep::C_PARAM:
-                      dParam = cell->m_vMacroData[iGas].Concentration;
-                      goto next_cell_label;
-                      break;
-                    case sep::P_PARAM:
-                      dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
-                      goto next_cell_label;
-                      break;
-                    default:
-                      return;
-                  }
-                } else {
-                  dParam = 0.0;
+                switch (eType) {
+                  case sep::T_PARAM:
+                    dParam = cell->m_vMacroData[iGas].Temperature;
+                    goto next_cell_label;
+                    break;
+                  case sep::C_PARAM:
+                    dParam = cell->m_vMacroData[iGas].Concentration;
+                    goto next_cell_label;
+                    break;
+                  case sep::P_PARAM:
+                    dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
+                    goto next_cell_label;
+                    break;
+                  default:
+                    return;
                 }
+              } else {
+                dParam = 0.0;
               }
             }
           }
@@ -203,7 +190,7 @@ void OutResults::OutParameterMPI(sep::MacroParamType eType) {
 }
 
 void OutResults::OutAverageStream(int iIteration) {
-  GasVector& gasv = m_pGridManager->getSolver()->getSolverInfo()->getGasVector();
+  GasVector& gasv = m_pGridManager->GetSolver()->GetGas();
   Config* pConfig = m_pGridManager->GetConfig();
 
   const std::string& sOutputPrefix = pConfig->GetOutputPrefix();
@@ -225,10 +212,10 @@ void OutResults::OutAverageStream(int iIteration) {
     if (filestream.is_open()) {
 
       switch (pConfig->GetGridGeometryType()) {
-        case sep::DIMAN_GRID_GEOMETRY:
+        case sep::COMB_GRID_GEOMETRY:
           OutAverageStreamComb(filestream, gi);
           break;
-        case sep::PROHOR_GRID_GEOMTRY:
+        case sep::H_GRID_GEOMTRY:
           OutAverageStreamHType(filestream, gi);
           break;
         default:
@@ -276,7 +263,7 @@ void OutResults::OutAverageStreamHType(std::fstream& filestream, int iGasN) {
 }
 
 double OutResults::ComputeAverageColumnStream(int iIndexX, unsigned int gi, int iStartY, int iSizeY) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGridManager->m_vCells;
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
 
   double dAverageStream = 0.0;
   for (int y = iStartY; y < iStartY + iSizeY; y++) {

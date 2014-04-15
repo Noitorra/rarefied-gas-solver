@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OUT_RESULTS_H_
+#define OUT_RESULTS_H_
 
 #include "main.h"
 #include "types.h"
@@ -32,3 +33,5 @@ private:
   GridManager* m_pGridManager;
   int iZLayer;
 };
+
+#endif // OUT_RESULTS_H_

@@ -32,11 +32,12 @@ public:
     VGT_CYCLED
   };
 
-  VesselGrid() : m_pVGInfo(new VesselGridInfo) {}
+  VesselGrid() :
+  m_pVGInfo(new VesselGridInfo),
+  m_pGridManager(nullptr) {}
   virtual ~VesselGrid() {}
 
-  void setGridManager(GridManager* pGridManager) { m_pGridManager = pGridManager; }
-  GridManager* getGridManager() { return m_pGridManager; }
+  void Init(GridManager* pGridManager);
 
   // this is a slice of 3D, so it must be 2D, that's why Ny, Nz
   // they must be "mod 2 = 0"

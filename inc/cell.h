@@ -1,10 +1,3 @@
-/*
- * cell.h
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #ifndef CELL_H_
 #define CELL_H_
 
@@ -13,6 +6,8 @@
 
 class Grid;
 class GridManager;
+class Solver;
+class Config;
 class VesselGrid;
 class LeftVesselGrid;
 class RightVesselGrid;
@@ -52,9 +47,8 @@ private:
 
 	std::vector<MacroData> m_vMacroData;
 
-	GridManager* m_pGridManager;
 public:
-	Cell(GridManager* pGridManager);
+	Cell();
 	virtual ~Cell();
 
 	void setGridManager(GridManager* pGridManager) { m_pGridManager = pGridManager; }
@@ -64,7 +58,7 @@ public:
 	/* set all necessary parameters */
   void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep);
 	/* creates cells inner values, takes long time */
-	void Init();
+	void Init(GridManager* pGridManager);
 
 	void computeType(unsigned int dim);
 	void computeValue(unsigned int dim);
@@ -78,7 +72,6 @@ public:
 	void computeMacroData();
 	const std::vector<MacroData>& getMacroData() const { return m_vMacroData; }
 private:
-  Cell();
 	// help methods
 	void compute_type(unsigned int dim);
 
@@ -122,6 +115,12 @@ private:
 	double compute_temperature(unsigned int gi);
 	Vector3d compute_stream(unsigned int gi);
 	Vector3d compute_heatstream(unsigned int gi);
+  
+  // Members should be last but not the least =)
+  GridManager* m_pGridManager;
+  Solver* m_pSolver;
+  Grid* m_pGrid;
+  Config* m_pConfig;
 };
 
 #endif /* CELL_H_ */

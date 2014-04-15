@@ -6,19 +6,24 @@
 
 Grid::Grid() {}
 
-void Grid::Init() {}
+void Grid::Init(GridManager* pGridManager) {}
 
 void Grid::AddCell(std::shared_ptr<Cell> pCell) {
   m_vCells.push_back(pCell);
 }
 
-std::vector<std::shared_ptr<Cell>>& Grid::getCellVector() {
+std::vector<std::shared_ptr<Cell>>& Grid::GetCells() {
 	return m_vCells;
 }
 
-GridManager* Grid::GetGridManager() const {
-  return m_pGridManager;
+std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& Grid::GetInitCells() {
+	return m_vInitCells;
 }
+
+std::vector<std::shared_ptr<VesselGrid>>& Grid::GetVessels() {
+  return m_vVessels;
+}
+
 
 
 

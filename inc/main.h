@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAIN_H_
+#define MAIN_H_
 
 #include <iostream>
 #include <fstream>
@@ -11,9 +12,8 @@
 
 namespace sep {
   enum GridGeometry {
-    DIMAN_GRID_GEOMETRY = 0,
-    PROHOR_GRID_GEOMTRY,
-    DEBUG1_GRID_GEOMETRY
+    COMB_GRID_GEOMETRY = 0,
+    H_GRID_GEOMTRY
   };
   
   enum CellType {
@@ -51,3 +51,4 @@ public:
 };
 
 
+#endif // MAIN_H_

@@ -1,10 +1,3 @@
-/*
- * parallel.cpp
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #include "parallel.h"
 #include <iostream>
 // #include <mpi.h>
@@ -17,7 +10,7 @@ Parallel::Parallel() {
 	m_iSize = 0;
 }
 
-Parallel::~Parallel() {}
+
 
 /* public */
 void Parallel::InitMPI(int & argc, char **& argv) {

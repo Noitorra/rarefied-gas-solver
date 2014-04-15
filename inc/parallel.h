@@ -1,10 +1,3 @@
-/*
- * parallel.h
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #ifndef PARALLEL_H_
 #define PARALLEL_H_
 
@@ -20,7 +13,6 @@ class Parallel {
 	std::string m_sMsg;
 public:
 	Parallel();
-	virtual ~Parallel();
 
 	void InitMPI(int & argc, char **& argv);
 	void FinalizeMPI();

@@ -1,19 +1,17 @@
-/*
- * impulse.cpp
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #include "impulse.h"
-#include "solver_info.h"
+
+#include "grid_manager.h"
+#include "solver.h"
 #include "gas.h"
 
 #include <iostream>
 #include <algorithm>
 
-Impulse::Impulse() {
-	m_cSolverInfo = nullptr;
+Impulse::Impulse() :
+m_pGridManager(nullptr),
+m_pGrid(nullptr),
+m_pSolver(nullptr),
+m_pConfig(nullptr) {
 	m_dMaxImpulse = 4.8;
 	m_uResolution = 20;
 
@@ -35,59 +33,54 @@ Impulse::~Impulse() {
   }
 }
 
-void Impulse::Init() {
-	if( m_cSolverInfo == nullptr ) {
-		std::cout << "[Error][Impulse] Before using Init, set SolverInfo..." << std::endl;
-	} else {
-    // TODO: do something with that...
-    GasVector& gasv = m_cSolverInfo->getGasVector();
-    if (gasv.size() >= 2) {
-      m_dMaxImpulse = std::max(gasv[0]->getMass(), gasv[1]->getMass()) * m_dMaxImpulse;
-      std::cout << "Impulse::Init() : gasv.size() >= 2" << std::endl;
+void Impulse::Init(GridManager* pGridManager) {
+  m_pGridManager = pGridManager;
+  m_pGrid = pGridManager->GetGrid();
+  m_pSolver = pGridManager->GetSolver();
+  m_pConfig = pGridManager->GetConfig();
+  
+  // TODO: do something with that...
+  GasVector& gasv = m_pSolver->GetGas();
+  if (gasv.size() >= 2) {
+    m_dMaxImpulse = std::max(gasv[0]->getMass(), gasv[1]->getMass()) * m_dMaxImpulse;
+    std::cout << "Impulse::Init() : gasv.size() >= 2" << std::endl;
+  }
+  else {
+    std::cout << "Impulse::Init() : gasv.size() < 2" << std::endl;
+  }
+  std::cout << "Impulse::Init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
+
+  // calc delta impulse
+  m_dDeltaImpulse = 2*m_dMaxImpulse/(m_uResolution);
+  m_dDeltaImpulseQube = std::pow(m_dDeltaImpulse, 3);
+
+  // calc line impulse vector
+  std::vector<double> line;
+  for( unsigned int i=0; i<m_uResolution; i++ ) {
+    line.push_back( m_dDeltaImpulse*(i+0.5) - m_dMaxImpulse );
+    // std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
+  }
+
+  // xyz2i
+  m_pxyz2i = new int**[m_uResolution];
+
+  // creating impulse sphere
+  for(unsigned int x=0;x<line.size();x++) {
+    m_pxyz2i[x] = new int*[m_uResolution];
+    for(unsigned int y=0;y<line.size();y++) {
+      m_pxyz2i[x][y] = new int[m_uResolution];
+      for(unsigned int z=0;z<line.size();z++) {
+        Vector3d vec(line[x], line[y], line[z]);
+        if (vec.mod() < m_dMaxImpulse) {
+          m_pxyz2i[x][y][z] = (int)m_vImpulse.size();
+          m_vImpulse.push_back(vec);
+        } else {
+          // TODO: the fuck should i do here ... ?
+          m_pxyz2i[x][y][z] = -1;
+        }
+      }
     }
-    else {
-      std::cout << "Impulse::Init() : gasv.size() < 2" << std::endl;
-    }
-    std::cout << "Impulse::Init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
-
-		// calc delta impulse
-		m_dDeltaImpulse = 2*m_dMaxImpulse/(m_uResolution);
-		m_dDeltaImpulseQube = std::pow(m_dDeltaImpulse, 3);
-
-		// calc line impulse vector
-		std::vector<double> line;
-		for( unsigned int i=0; i<m_uResolution; i++ ) {
-			line.push_back( m_dDeltaImpulse*(i+0.5) - m_dMaxImpulse );
-			// std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
-		}
-
-    // xyz2i
-    m_pxyz2i = new int**[m_uResolution];
-
-		// creating impulse sphere
-		for(unsigned int x=0;x<line.size();x++) {
-      m_pxyz2i[x] = new int*[m_uResolution];
-			for(unsigned int y=0;y<line.size();y++) {
-        m_pxyz2i[x][y] = new int[m_uResolution];
-				for(unsigned int z=0;z<line.size();z++) {
-					Vector3d vec(line[x], line[y], line[z]);
-          if (vec.mod() < m_dMaxImpulse) {
-            m_pxyz2i[x][y][z] = (int)m_vImpulse.size();
-            m_vImpulse.push_back(vec);
-          } else {
-            // TODO: the fuck should i do here ... ?
-            m_pxyz2i[x][y][z] = -1;
-          }
-				}
-			}
-		}
-
-
-	}
-}
-
-void Impulse::setSolverInfo(SolverInfo* argSolverInfo) {
-	m_cSolverInfo = argSolverInfo;
+  }
 }
 
 void Impulse::setMaxImpulse(double max_impulse) {

@@ -9,17 +9,13 @@
 
 int main(int argc, char * argv[])
 {
-  // Just testing some reading/writing functions
-  std::shared_ptr<Solver> pSolver(new Solver());
-  // FIRST: we need to start mpi process...
-  //pSolver->getParallel()->InitMPI(argc, argv);
+  std::shared_ptr<GridManager> pGridManager(new GridManager());
 
-  pSolver->Init(); // Linking children and initialization
+  pGridManager->Init();
   
-  pSolver->Run();
+  pGridManager->ConfigureGrid();
+  
+  pGridManager->GetSolver()->Run();
 
-  // LAST: here we apparently stop all nodes....
-  std::cout << "Done..." << std::endl;
-  //pSolver->getParallel()->FinalizeMPI();
   return 0;
 }

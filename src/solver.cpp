@@ -1,7 +1,6 @@
 #include "solver.h"
 
 #include "parallel.h"
-#include "solver_info.h"
 #include "options.h"
 #include "grid.h"
 #include "grid_manager.h"
@@ -10,183 +9,129 @@
 #include "config.h"
 #include "impulse.h"
 #include "gas.h"
-
 #include "vessel_grid.h"
-
 #include "integral/ci.hpp"
+#include "parallel.h"
 
-Solver::Solver()
-: m_pParallel(new Parallel),
-  m_pSolverInfo(new SolverInfo),
-  m_pGridManager(new GridManager)
-{
-	// TODO Auto-generated constructor stub
-}
+Solver::Solver() :
+m_pParallel(new Parallel),
+m_pImpulse(new Impulse),
+m_pGridManager(nullptr),
+m_pGrid(nullptr),
+m_pConfig(nullptr)
+{}
 
-Solver::~Solver() {
-	// TODO Auto-generated destructor stub
-}
+void Solver::Init(GridManager* pGridManager) {
+  m_pGridManager = pGridManager;
+  m_pGrid = pGridManager->GetGrid();
+  m_pConfig = pGridManager->GetConfig();
 
-Grid* Solver::GetGrid() const { return m_pGridManager->GetGrid(); }
-
-void Solver::Init() {
-	// We must OBEY order:
-	// first info (impulse, etc)
-	// second grid....
-  m_pSolverInfo->setSolver(this);
-  m_pSolverInfo->Init();
-
-  // Init grid manager
-  m_pGridManager->SetParent(this);
-  m_pGridManager->Init();
-  m_pGrid = m_pGridManager->GetGrid();
+  m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
+	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
   
-  m_pGridManager->BuildGrid();
-
-  initCellType(sep::X);
-  initCellType(sep::Y);
-  initCellType(sep::Z);
-
-  m_pGrid->GetGridManager()->Print(sep::X);
-  m_pGrid->GetGridManager()->Print(sep::Y);
-//  m_pGrid->GetGridManager()->Print(sep::Z);
-
-  //m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::X);
-  //m_pGridManager->GetLeftVessels()[0]->PrintLinkage(sep::Y);
+  m_pImpulse->Init(pGridManager);
 }
 
 void Solver::Run() {
-	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 
-  // TODO: Add some flag, which determines integral usage
-  // if we want to use integral ...
-  if (GetConfig()->GetUseIntegral()) {
+  if (m_pConfig->GetUseIntegral()) {
     ci::HSPotential potential;
     ci::init(&potential, ci::NO_SYMM);
   }
   
-  // Save initial state
-  m_pGridManager->GetOutResults()->OutAll(0);
 
-	for(int iteration = 0;iteration<GetConfig()->GetMaxIteration();iteration++) {
+	for(int it = 0; it < m_pConfig->GetMaxIteration(); it++) {
     
-    if (GetConfig()->GetResetSomeCellsEachIter())
-      m_pGridManager->ResetSomeCells();
-    
-		makeStep(sep::X);
-		makeStep(sep::Y);
-		makeStep(sep::Z);
+		MakeStep(sep::X);
+		MakeStep(sep::Y);
+    MakeStep(sep::Z);
 
-    if (GetConfig()->GetUseIntegral()) {
-      if (m_pSolverInfo->getGasVector().size() == 2) {
-        makeIntegral(0, 0, GetConfig()->GetTimeStep());
-        makeIntegral(0, 1, GetConfig()->GetTimeStep() * 2);
-        makeIntegral(1, 1, GetConfig()->GetTimeStep());
+    if (m_pConfig->GetUseIntegral()) {
+      if (m_vGas.size() == 2) {
+        MakeIntegral(0, 0, m_pConfig->GetTimeStep());
+        MakeIntegral(0, 1, m_pConfig->GetTimeStep() * 2);
+        MakeIntegral(1, 1, m_pConfig->GetTimeStep());
       }
       else {
-        makeIntegral(0, 0, GetConfig()->GetTimeStep());
+        MakeIntegral(0, 0, m_pConfig->GetTimeStep());
       }
     }
 
 		// here we can test data, if needed...
-		for( auto& item : cellVector ) {
+		for( auto& item : vCellVector ) {
 			item->testInnerValuesRange();
 		}
     
-    // Output data
-    m_pGridManager->GetOutResults()->OutAll(iteration + 1);
-    std::cout << "Run() : " << iteration << "/" << GetConfig()->GetMaxIteration() << std::endl;
+    std::cout << "Run() : " << it << "/" << m_pConfig->GetMaxIteration() << std::endl;
 	}
+  std::cout << "Done..." << std::endl;
 }
 
-void Solver::initCellType(sep::Axis axis) {
-	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+void Solver::InitCellType(sep::Axis axis) {
+	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 	// make type
-	for( auto& item : cellVector ) {
+	for( auto& item : vCellVector ) {
 		item->computeType(axis);
 	}
   
   // Vessels
-  const std::vector<std::shared_ptr<VesselGrid>>& vLVessels =
-  m_pGridManager->GetLeftVessels();
-  const std::vector<std::shared_ptr<VesselGrid>>& vRVessels =
-  m_pGridManager->GetRightVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
+  m_pGrid->GetVessels();
   
-  for (auto& item : vLVessels) {
-    item->computeType(axis);
-  }
-  for (auto& item : vRVessels) {
+  for (auto& item : vVessels) {
     item->computeType(axis);
   }
 }
 
-void Solver::makeStep(sep::Axis axis) {
-	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
-	// make half
+void Solver::MakeStep(sep::Axis axis) {
+	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+	// Make half
 	for( auto& item : cellVector ) {
 		item->computeHalf(axis);
 	}
   
   // Vessels
-  const std::vector<std::shared_ptr<VesselGrid>>& vLVessels =
-  m_pGridManager->GetLeftVessels();
-  const std::vector<std::shared_ptr<VesselGrid>>& vRVessels =
-  m_pGridManager->GetRightVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
+  m_pGrid->GetVessels();
   
-  for (auto& item : vLVessels) {
-    item->computeHalf(axis);
-  }
-  for (auto& item : vRVessels) {
+  for (auto& item : vVessels) {
     item->computeHalf(axis);
   }
   
-	// make value
+	// Make value
 	for( auto& item : cellVector ) {
 		item->computeValue(axis);
 	}
   
   // Vessels
-  for (auto& item : vLVessels) {
-    item->computeValue(axis);
-  }
-  for (auto& item : vRVessels) {
+  for (auto& item : vVessels) {
     item->computeValue(axis);
   }
 }
 
-Config* Solver::GetConfig() const {
-  return m_pSolverInfo->getOptions()->GetConfig();
-}
-
-void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
-  GasVector& gasv = getSolverInfo()->getGasVector();
-  Impulse* impulse = getSolverInfo()->getImpulse();
-
+void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
+	GasVector& gasv = GetGas();
   ci::Particle particle;
   particle.d = 1.;
 
-  ci::gen(timestep, 50000, impulse->getResolution() / 2, impulse->getResolution() / 2,
-    impulse->getXYZ2I(), impulse->getXYZ2I(),
-    impulse->getMaxImpulse() / (impulse->getResolution() / 2),
+  ci::gen(timestep, 50000, m_pImpulse->getResolution() / 2, m_pImpulse->getResolution() / 2,
+    m_pImpulse->getXYZ2I(), m_pImpulse->getXYZ2I(),
+    m_pImpulse->getMaxImpulse() / (m_pImpulse->getResolution() / 2),
     gasv[gi0]->getMass(), gasv[gi1]->getMass(),
     particle, particle);
 
-  std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->getCellVector();
+  std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
 
   for( auto& item : cellVector ) {
   	item->computeIntegral(gi0, gi1);
   }
   
   // Vessels
-  const std::vector<std::shared_ptr<VesselGrid>>& vLVessels =
-  m_pGridManager->GetLeftVessels();
-  const std::vector<std::shared_ptr<VesselGrid>>& vRVessels =
-  m_pGridManager->GetRightVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
+  m_pGrid->GetVessels();
   
-  for (auto& item : vLVessels) {
-    item->computeIntegral(gi0, gi1);
-  }
-  for (auto& item : vRVessels) {
+  for (auto& item : vVessels) {
     item->computeIntegral(gi0, gi1);
   }
 }

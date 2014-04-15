@@ -1,30 +1,17 @@
-/*
- * options.h
- *
- *  Created on: 04 апр. 2014 г.
- *      Author: kisame
- */
-
 #ifndef OPTIONS_H_
 #define OPTIONS_H_
 
-#include <map>
-#include <string>
-#include <memory>
+#include "main.h"
 
 class SolverInfo;
 class Config;
+class GridManager;
 
 class Options {
-	SolverInfo* m_cSolverInfo;
 public:
 	Options();
-	virtual ~Options();
-
-	void setSolverInfo(SolverInfo* _SolverInfo);
-	SolverInfo* getSolverInfo();
   
-  void Init();
+  void Init(GridManager* pGridManager);
   // Throws char const*
   Config* GetConfig(); // Get active config
   

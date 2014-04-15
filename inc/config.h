@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
 #include "main.h"
 #include "types.h"
 
@@ -20,54 +22,35 @@ public:
   m_vGridSize(Vector3i(10, 10, 1)),
   m_vOutputSize(Vector3i(10, 10, 1)),
   m_vOutputGridStart(Vector3i()),
-  m_eGridGeometryType(sep::DIMAN_GRID_GEOMETRY),
+  m_eGridGeometryType(sep::COMB_GRID_GEOMETRY),
   m_dTimestep(0.01),
   m_iMaxIteration(100),
   m_bUseIntegral(true),
-  m_bUseVessels(true),
-  m_bUseLooping(false),
   m_pHTypeGridConfig(new HTypeGridConfig),
-  m_iAdditionalVesselLenght(0),
-  m_bUseInitialConditions(false),
-  m_bResetSomeCellsEachIter(false),
   m_sOutputPrefix("../") {};
-  ~Config() {};
   
-  const std::string& GetName() const { return m_sName; }
   void SetGridSize(const Vector3i& vGridSize);
-  const Vector3i& GetGridSize() const { return m_vGridSize; }
   void SetOutputSize(const Vector3i& vOutputSize);
-  const Vector3i& GetOutputSize() const { return m_vOutputSize; }
   void SetOutputGridStart(const Vector3i& vOutputGridStart);
-  const Vector3i& GetOutputGridStart() const { return m_vOutputGridStart; }
-  void PrintMe();
   void SetGridGeometryType(sep::GridGeometry eGridGeometryType);
+  void SetTimeStep(double dTimeStep) { m_dTimestep = dTimeStep; }
+  void SetMaxIteration(int iMaxIteration) { m_iMaxIteration = iMaxIteration; }
+  void SetUseIntegral(bool bUseIntegral) { m_bUseIntegral = bUseIntegral; }
+  void SetOutputPrefix(std::string sOutputPrefix) { m_sOutputPrefix = sOutputPrefix; }
+  
+  const Vector3i& GetGridSize() const { return m_vGridSize; }
+  const Vector3i& GetOutputSize() const { return m_vOutputSize; }
+  const Vector3i& GetOutputGridStart() const { return m_vOutputGridStart; }
   sep::GridGeometry GetGridGeometryType() const { return m_eGridGeometryType; };
   double GetTimeStep() const { return m_dTimestep; }
-  void SetTimeStep(double dTimeStep) { m_dTimestep = dTimeStep; }
   int GetMaxIteration() const { return m_iMaxIteration; }
-  void SetMaxIteration(int iMaxIteration) { m_iMaxIteration = iMaxIteration; }
   bool GetUseIntegral() const { return m_bUseIntegral; }
-  void SetUseIntegral(bool bUseIntegral) { m_bUseIntegral = bUseIntegral; }
-  bool GetUseVessels() const { return m_bUseVessels; }
-  void SetUseVessels(bool bUseVessels) { m_bUseVessels = bUseVessels; }
-  bool GetUseLooping() const { return m_bUseLooping; }
-  void SetUseLooping(bool bUseLooping) { m_bUseLooping = bUseLooping; }
-  HTypeGridConfig* GetHTypeGridConfig() {
-    return m_pHTypeGridConfig.get();
-  }
-  void SetAdditionalVesselLenght(int iAdditionalVesselLenght) {
-    m_iAdditionalVesselLenght = iAdditionalVesselLenght;
-  }
-  int GetAdditionalVesselLenght() const {
-    return m_iAdditionalVesselLenght;
-  }
-  void SetUseInitialConditions(bool bUseInitialConditions) { m_bUseInitialConditions = bUseInitialConditions; }
-  bool GetUseInitialConditions() const { return m_bUseInitialConditions; }
-  void SetResetSomeCellsEachIter(bool bResetSomeCellsEachIter) { m_bResetSomeCellsEachIter = bResetSomeCellsEachIter; }
-  bool GetResetSomeCellsEachIter() const { return m_bResetSomeCellsEachIter; }
-  void SetOutputPrefix(std::string sOutputPrefix) { m_sOutputPrefix = sOutputPrefix; }
   const std::string& GetOutputPrefix() const { return m_sOutputPrefix; }
+  const std::string& GetName() const { return m_sName; }
+  HTypeGridConfig* GetHTypeGridConfig() { return m_pHTypeGridConfig.get(); }
+  
+  void PrintMe();
+  
 private:
   // Please, add new members to PrintMe() function
   std::string m_sName;
@@ -78,11 +61,8 @@ private:
 	double m_dTimestep;
 	int m_iMaxIteration;
   bool m_bUseIntegral;
-  bool m_bUseVessels;
-  bool m_bUseLooping;
   std::shared_ptr<HTypeGridConfig> m_pHTypeGridConfig;
-  int m_iAdditionalVesselLenght;
-  bool m_bUseInitialConditions;
-  bool m_bResetSomeCellsEachIter;
   std::string m_sOutputPrefix;
 };
+
+#endif // CONFIG_H_
