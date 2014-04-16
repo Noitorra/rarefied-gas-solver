@@ -29,6 +29,7 @@ private:
   void InitCellType(sep::Axis axis);
   void MakeStep(sep::Axis axis);
   void MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
+  void PreRun();
   
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<Impulse> m_pImpulse;

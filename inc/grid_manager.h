@@ -14,6 +14,7 @@ public:
   GridManager();
   void Init();
   void ConfigureGrid();
+  void PrintLinkage(sep::Axis eAxis);
 
   Grid* GetGrid() const { return m_pGrid.get(); }
   Solver* GetSolver() const { return m_pSolver.get(); }
@@ -32,11 +33,23 @@ private:
   void PreprocessGrid();
   void PostprocessGrid();
   void FindNeighbour(Vector2i vP, sep::CellType eType,
+                     sep::Axis& eAxis,
                      sep::NeighbType& eNeighb,
-                     sep::Axis& eAxis, int& iQuant);
-  bool GetNeighbour(Vector2i vP, sep::NeighbType eNeighb,
-                    sep::Axis eAxis, sep::CellType& eType);
+                     int& iQuant);
+  bool FindNeighbourWithIndex(Vector2i vP,
+                              sep::CellType eType,
+                              int iIndex,
+                              sep::Axis& eAxis,
+                              sep::NeighbType& eNeighb);
+  bool GetNeighbour(Vector2i vP, sep::Axis eAxis,
+                    sep::NeighbType eNeighb,
+                    sep::CellType& eType);
   int GetSlash(sep::NeighbType eType) const;
+  void FillInGrid();
+  void LinkCells();
+  void InitCells();
+  void LinkNeighb(Vector2i vP, sep::Axis eAxis,
+                  sep::NeighbType eNeighb);
   
   std::vector<double> m_vTemperatureStack;
   std::vector<double> m_vConcetrationStack;

@@ -35,6 +35,8 @@ void Solver::Init(GridManager* pGridManager) {
 void Solver::Run() {
 	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 
+  PreRun();
+  
   if (m_pConfig->GetUseIntegral()) {
     ci::HSPotential potential;
     ci::init(&potential, ci::NO_SYMM);
@@ -66,6 +68,15 @@ void Solver::Run() {
     std::cout << "Run() : " << it << "/" << m_pConfig->GetMaxIteration() << std::endl;
 	}
   std::cout << "Done..." << std::endl;
+}
+
+void Solver::PreRun() {
+  InitCellType(sep::X);
+  InitCellType(sep::Y);
+  InitCellType(sep::Z);
+  
+  m_pGridManager->PrintLinkage(sep::X);
+  m_pGridManager->PrintLinkage(sep::Y);
 }
 
 void Solver::InitCellType(sep::Axis axis) {
