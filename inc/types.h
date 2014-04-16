@@ -57,6 +57,36 @@ public:
 		this->m_vMass[1] = y;
 	}
 
+	const Vector2 operator+(const Vector2& right) const {
+		Vector2 v2;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			v2.m_vMass[i] = this->m_vMass[i] + right.m_vMass[i];
+		}
+		return v2;
+	}
+  
+	const Vector2& operator+=(const Vector2& right) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] += right.m_vMass[i];
+		}
+		return *this;
+	}
+  
+	const Vector2 operator-(const Vector2& right) const {
+		Vector2 v2;
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			v2.m_vMass[i] = this->m_vMass[i] - right.m_vMass[i];
+		}
+		return v2;
+	}
+  
+	const Vector2& operator-=(const Vector2& right) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] += right.m_vMass[i];
+		}
+		return *this;
+	}
+  
 	T& x() { return this->m_vMass[0]; }
 	T& y() { return this->m_vMass[1]; }
 	const T& x() const { return this->m_vMass[0]; }

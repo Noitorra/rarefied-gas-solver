@@ -34,6 +34,11 @@ namespace sep {
     P_PARAM, // Pressure
     FLOW_PARAM // Flow
   };
+  
+  enum NeighbType {
+    PREV = 0,
+    NEXT = 1
+  };
 }
 
 class MacroData {

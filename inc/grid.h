@@ -11,9 +11,11 @@ class Solver;
 class OutResults;
 class Config;
 class VesselGrid;
+class Grid;
 
 class InitCellData {
-  friend class GridManager;
+  friend GridManager;
+  friend Grid;
   friend OutResults;
 protected:
   InitCellData(sep::CellType eType) :
@@ -42,10 +44,12 @@ public:
 
   std::vector<std::shared_ptr<Cell>>& GetCells();
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& GetInitCells();
+  InitCellData* GetInitCell(Vector2i vP);
   std::vector<std::shared_ptr<VesselGrid>>& GetVessels();
 
 private:
   void AddCell(std::shared_ptr<Cell> pCell);
+  void AllocateInitData();
   
   Vector3i m_vSize; // This process grid size
   Vector3i m_vStart; // Place where this grid starts in whole grid

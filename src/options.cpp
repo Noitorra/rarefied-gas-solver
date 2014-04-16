@@ -10,11 +10,11 @@ void Options::Init(GridManager* pGridManager) {
   
   // Debug configuration
   std::shared_ptr<Config> pDebugConfig(new Config("debug"));
-  pDebugConfig->SetGridSize(Vector3i(16, 16, 1));
-  pDebugConfig->SetOutputGridStart(Vector3i(16, 0, 0));
-  pDebugConfig->SetOutputSize(Vector3i(32, 16, 1));
+  pDebugConfig->SetGridSize(Vector3i(10, 10, 1));
+  pDebugConfig->SetOutputGridStart(Vector3i(0, 0, 0));
+  pDebugConfig->SetOutputSize(Vector3i(10, 10, 1));
   pDebugConfig->SetGridGeometryType(sep::COMB_GRID_GEOMETRY);
-  pDebugConfig->SetMaxIteration(5);
+  pDebugConfig->SetMaxIteration(0);
   pDebugConfig->SetUseIntegral(true);
   AddConfig(pDebugConfig);
   
