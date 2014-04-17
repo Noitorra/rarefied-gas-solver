@@ -162,7 +162,11 @@ void GridManager::SetBox(Vector2i vP, Vector2i vSize) {
   for (int x = 0; x < vSize.x(); x++) {
     for (int y = 0; y < vSize.y(); y++) {
       Vector2i vTempPos = vP + Vector2i(x, y);
-      m_pGrid->GetInitCell(vTempPos)->m_eType = sep::NORMAL_CELL;
+      InitCellData* p_init_cell = m_pGrid->GetInitCell(vTempPos);
+      p_init_cell->m_eType = sep::NORMAL_CELL;
+      MacroData& init_cond = p_init_cell->m_cInitCond;
+      init_cond.Temperature = GetTemperature();
+      init_cond.Concentration = GetConcentration();
     }
   }
 }
@@ -177,6 +181,11 @@ double GridManager::PopTemperature() {
   m_vTemperatureStack.pop_back();
   return dT;
 }
+double GridManager::GetTemperature() {
+  if (m_vTemperatureStack.size() < 1)
+    return 0.0;
+  return m_vTemperatureStack.back();
+}
 
 void GridManager::PushConcentration(double dConc) {
   m_vConcetrationStack.push_back(dConc);
@@ -187,6 +196,11 @@ double GridManager::PopConcentration() {
   double dConc = m_vConcetrationStack.back();
   m_vConcetrationStack.pop_back();
   return dConc;
+}
+double GridManager::GetConcentration() {
+  if (m_vTemperatureStack.size() < 1)
+    return 0.0;
+  return m_vTemperatureStack.back();
 }
 
 void GridManager::FillInGrid() {

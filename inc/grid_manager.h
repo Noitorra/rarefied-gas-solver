@@ -24,8 +24,10 @@ public:
 private:
   void PushTemperature(double dT);
   double PopTemperature();
+  double GetTemperature();
   void PushConcentration(double dConc);
   double PopConcentration();
+  double GetConcentration();
   void SetLooping();
   void SetBox(Vector2i vP, Vector2i vSize);
   void SetVessel();
