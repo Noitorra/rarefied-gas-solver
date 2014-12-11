@@ -3,6 +3,7 @@
 #include "grid.h"
 #include "grid_manager.h"
 #include "parallel.h"
+#include "out_results.h"
 
 #include <memory>
 // Simple main function to debug some demo functionality
@@ -16,6 +17,8 @@ int main(int argc, char * argv[])
   pGridManager->ConfigureGrid();
   
   pGridManager->GetSolver()->Run();
+
+
 
   return 0;
 }

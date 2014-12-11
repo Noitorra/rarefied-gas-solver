@@ -1,6 +1,8 @@
 # RarefiedGasSolver, department project.
 SET(TARGET_NAME ${PROJECT_NAME})
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
+
 # find all dirs in curdir
 MACRO(find_subdirs result curdir)
   FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
@@ -49,7 +51,18 @@ harvest_directory("${CMAKE_SOURCE_DIR}" "src")
 
 add_executable(${TARGET_NAME} ${${TARGET_NAME}_source})
 
+# Boost
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+if(Boost_FOUND)
+	include_directories(${Boost_INCLUDE_DIRS})
+	include_directories(${BOOST_INCLUDE_PATH})
+	target_link_libraries(${TARGET_NAME}
+	  ${Boost_FILESYSTEM_LIBRARY}
+	  ${Boost_SYSTEM_LIBRARY}
+	)
+endif()
+
 # MPI
 # include_directories(${MPI_INCLUDE_PATH})
 # MESSAGE(STATUS MPI_LIBRARIES=${MPI_LIBRARIES})
-# target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES}) 
+# target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES})

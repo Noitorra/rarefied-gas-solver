@@ -240,3 +240,10 @@ src/CMakeFiles/
 
 # XCode project directory
 RarefiedGasSolver
+
+# CLion
+.idea/
+
+# system folders
+img/
+out/

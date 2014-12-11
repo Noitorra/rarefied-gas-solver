@@ -41,12 +41,14 @@ void Solver::Run() {
     ci::HSPotential potential;
     ci::init(&potential, ci::NO_SYMM);
   }
-  
 
-	for(int it = 0; it < m_pConfig->GetMaxIteration(); it++) {
-    
-		MakeStep(sep::X);
-		MakeStep(sep::Y);
+  // debug
+  std::shared_ptr<OutResults> out_results(new OutResults());
+  out_results->Init(m_pGrid, m_pGridManager);
+
+  for(int it = 0; it < m_pConfig->GetMaxIteration(); it++) {
+    MakeStep(sep::X);
+    MakeStep(sep::Y);
     MakeStep(sep::Z);
 
     if (m_pConfig->GetUseIntegral()) {
@@ -60,13 +62,24 @@ void Solver::Run() {
       }
     }
 
-		// here we can test data, if needed...
-		for( auto& item : vCellVector ) {
-			item->testInnerValuesRange();
-		}
-    
+    // here we can test data, if needed...
+    for( auto& item : vCellVector ) {
+        item->testInnerValuesRange();
+    }
+
+    // debug
+    std::cout << "Out results..." << std::endl;
+    out_results->OutAll(it);
+
     std::cout << "Run() : " << it << "/" << m_pConfig->GetMaxIteration() << std::endl;
-	}
+  }
+
+//  // debug
+//  std::cout << "Out results..." << std::endl;
+//  std::shared_ptr<OutResults> out_results(new OutResults());
+//  out_results->Init(m_pGrid, m_pGridManager);
+//  out_results->OutAll(m_pConfig->GetMaxIteration() - 1);
+
   std::cout << "Done..." << std::endl;
 }
 
@@ -96,11 +109,11 @@ void Solver::InitCellType(sep::Axis axis) {
 }
 
 void Solver::MakeStep(sep::Axis axis) {
-	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
-	// Make half
-	for( auto& item : cellVector ) {
-		item->computeHalf(axis);
-	}
+  std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+  // Make half
+  for( auto& item : cellVector ) {
+      item->computeHalf(axis);
+  }
   
   // Vessels
   const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
@@ -110,10 +123,10 @@ void Solver::MakeStep(sep::Axis axis) {
     item->computeHalf(axis);
   }
   
-	// Make value
-	for( auto& item : cellVector ) {
-		item->computeValue(axis);
-	}
+  // Make value
+  for( auto& item : cellVector ) {
+      item->computeValue(axis);
+  }
   
   // Vessels
   for (auto& item : vVessels) {

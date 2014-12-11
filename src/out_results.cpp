@@ -6,6 +6,8 @@
 #include "vessel_grid.h"
 #include "gas.h"
 #include "solver.h"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
   m_pGrid = pGrid;
@@ -199,6 +201,16 @@ void OutResults::OutAverageStream(int iIteration) {
     std::string sASFilename = sASFilenameBase + std::to_string(gi);
     sASFilename += "/";
     sASFilename += "average_stream.bin";
+
+    std::fstream test;
+    test.open("test.bin", std::ios::out | std::ios::binary);
+    test.close();
+
+    namespace fs = boost::filesystem;
+    fs::path full_path( fs::current_path() );
+    std::cout << "Current path is : " << full_path << std::endl;
+
+
 
     std::fstream filestream;
     std::ios::openmode openmode;

@@ -6,5 +6,8 @@ void GridConstructor::ConfigureGridGeometry() {
   PushTemperature(1.0);
   PushConcentration(1.0);
   
+  SetBox(Vector2i(1, 1), Vector2i(8, 8));
+
+  PushTemperature(2.0);
   SetBox(Vector2i(3, 3), Vector2i(2, 2));
 }

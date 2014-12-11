@@ -14,7 +14,7 @@ void Options::Init(GridManager* pGridManager) {
   pDebugConfig->SetOutputGridStart(Vector3i(0, 0, 0));
   pDebugConfig->SetOutputSize(Vector3i(10, 10, 1));
   pDebugConfig->SetGridGeometryType(sep::COMB_GRID_GEOMETRY);
-  pDebugConfig->SetMaxIteration(0);
+  pDebugConfig->SetMaxIteration(20);
   pDebugConfig->SetUseIntegral(true);
   AddConfig(pDebugConfig);
   
