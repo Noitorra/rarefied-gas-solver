@@ -58,8 +58,8 @@ private:
   Vector3i m_vOutputGridStart;
   Vector3i m_vOutputSize;
   sep::GridGeometry m_eGridGeometryType;
-	double m_dTimestep;
-	int m_iMaxIteration;
+  double m_dTimestep;
+  int m_iMaxIteration;
   bool m_bUseIntegral;
   std::shared_ptr<HTypeGridConfig> m_pHTypeGridConfig;
   std::string m_sOutputPrefix;

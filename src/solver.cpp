@@ -27,7 +27,7 @@ void Solver::Init(GridManager* pGridManager) {
   m_pConfig = pGridManager->GetConfig();
 
   m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
-	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
+  m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
   
   m_pImpulse->Init(pGridManager);
 }
@@ -47,6 +47,10 @@ void Solver::Run() {
   out_results->Init(m_pGrid, m_pGridManager);
 
   for(int it = 0; it < m_pConfig->GetMaxIteration(); it++) {
+    // debug
+    std::cout << "Out results..." << std::endl;
+    out_results->OutAll(it);
+
     MakeStep(sep::X);
     MakeStep(sep::Y);
     MakeStep(sep::Z);
@@ -67,18 +71,12 @@ void Solver::Run() {
         item->testInnerValuesRange();
     }
 
-    // debug
-    std::cout << "Out results..." << std::endl;
-    out_results->OutAll(it);
-
     std::cout << "Run() : " << it << "/" << m_pConfig->GetMaxIteration() << std::endl;
   }
 
-//  // debug
-//  std::cout << "Out results..." << std::endl;
-//  std::shared_ptr<OutResults> out_results(new OutResults());
-//  out_results->Init(m_pGrid, m_pGridManager);
-//  out_results->OutAll(m_pConfig->GetMaxIteration() - 1);
+  // debug
+  std::cout << "Out results..." << std::endl;
+  out_results->OutAll(m_pConfig->GetMaxIteration());
 
   std::cout << "Done..." << std::endl;
 }

@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-// GridManager inteface
+// GridManager interface
 class GridConstructor {
 protected:
     void ConfigureGridGeometry();

@@ -32,8 +32,7 @@ private:
   void SetBox(Vector2i vP, Vector2i vSize);
   void SetVessel();
   void PrintGrid();
-  void PreprocessGrid();
-  void PostprocessGrid();
+  void AdoptGridConfiguration();
   void FindNeighbour(Vector2i vP, sep::CellType eType,
                      sep::Axis& eAxis,
                      sep::NeighbType& eNeighb,

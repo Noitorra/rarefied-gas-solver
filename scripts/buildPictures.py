@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-NX = 40
-NY = 20
+NX = 10
+NY = 10
 max_files = 2
 gas_num = 2
 
@@ -16,8 +16,8 @@ font = {'family' : 'serif',
 
 for gas in range(gas_num):
   data_folder = '/Users/prohor/Code/RarefiedGasSolver/out/gas' + '%i' % gas + '/'
-  NX = 4
-  NY = 67
+  NX = 10
+  NY = 10
   #.reshape(NX, NY)
   valueAStream = numpy.fromfile(data_folder+'average_stream.bin', dtype=float).reshape(NY, NX)
   print(valueAStream)

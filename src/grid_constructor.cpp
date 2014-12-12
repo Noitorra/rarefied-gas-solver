@@ -1,6 +1,6 @@
 #include "grid_constructor.h"
 
-// This method being invoked while configurating the grid
+// This method being invoked while grid configuration
 // Feel free to edit this method
 void GridConstructor::ConfigureGridGeometry() {
   PushTemperature(1.0);

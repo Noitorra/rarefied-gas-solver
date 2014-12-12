@@ -78,6 +78,12 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   const Vector3i& vGridSize = pConfig->GetGridSize();
   const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
   const Vector3i& vOutputSize = pConfig->GetOutputSize();
+
+  // writing additional info
+  double tmp = (double)vOutputSize.x();
+  fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
+  tmp = (double)vOutputSize.y();
+  fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
   
   for (int y = 0; y < vOutputSize.y(); y++) {
     for (int x = 0; x < vOutputSize.x(); x++) {
