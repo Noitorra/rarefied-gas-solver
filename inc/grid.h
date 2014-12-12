@@ -9,7 +9,7 @@ class Cell;
 class GridManager;
 class Solver;
 class OutResults;
-class Config;
+struct Config;
 class VesselGrid;
 class Grid;
 

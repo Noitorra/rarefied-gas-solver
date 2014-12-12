@@ -6,7 +6,6 @@
 class GridManager;
 class Grid;
 class Solver;
-class Config;
 
 typedef std::vector<Vector3d> ImpulseVector;
 
@@ -41,7 +40,6 @@ private:
   GridManager* m_pGridManager;
   Grid* m_pGrid;
   Solver* m_pSolver;
-  Config* m_pConfig;
 };
 
 #endif /* IMPULSE_H_ */

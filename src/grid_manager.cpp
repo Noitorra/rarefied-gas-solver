@@ -1,26 +1,20 @@
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
-#include "options.h"
 #include "config.h"
 #include "cell.h"
 
 GridManager::GridManager() :
 m_pGrid(new Grid),
-m_pSolver(new Solver),
-m_pOptions(new Options),
-m_pConfig(nullptr) {
-}
+m_pSolver(new Solver) {}
 
 void GridManager::Init() {
-  m_pOptions->Init(this);
-  m_pConfig = m_pOptions->GetConfig();
   m_pGrid->Init(this);
   m_pSolver->Init(this);
 }
 
 void GridManager::PrintGrid() {
-  const Vector3i& vGridSize = m_pConfig->GetGridSize();
+  const Vector3i& vGridSize = Config::vGridSize;
   for (int z = 0; z < vGridSize.z(); z++) {
     for (int y = 0; y < vGridSize.y(); y++) {
       for (int x = 0; x < vGridSize.x(); x++) {
@@ -33,7 +27,7 @@ void GridManager::PrintGrid() {
 }
 
 void GridManager::PrintLinkage(sep::Axis eAxis) {
-  const Vector3i& vGridSize = m_pConfig->GetGridSize();
+  const Vector3i& vGridSize = Config::vGridSize;
   for (int z = 0; z < vGridSize.z(); z++) {
     for (int y = 0; y < vGridSize.y(); y++) {
       for (int x = 0; x < vGridSize.x(); x++) {
@@ -66,7 +60,7 @@ void GridManager::PreprocessGrid() {
 }
 
 void GridManager::PostprocessGrid() {
-  const Vector3i& vGridSize = m_pConfig->GetGridSize();
+  const Vector3i& vGridSize = Config::vGridSize;
   for (int x = 0; x < vGridSize.x(); x++) {
     for (int y = 0; y < vGridSize.y(); y++) {
       for (int z = 0; z < vGridSize.z(); z++) {
@@ -204,7 +198,7 @@ double GridManager::GetConcentration() {
 }
 
 void GridManager::FillInGrid() {
-  const Vector3i& vGridSize = m_pConfig->GetGridSize();
+  const Vector3i& vGridSize = Config::vGridSize;
   for (int x = 0; x < vGridSize.x(); x++) {
     for (int y = 0; y < vGridSize.y(); y++) {
       for (int z = 0; z < vGridSize.z(); z++) {
@@ -220,7 +214,7 @@ void GridManager::FillInGrid() {
 }
 
 void GridManager::LinkCells() {
-  const Vector3i& vGridSize = m_pConfig->GetGridSize();
+  const Vector3i& vGridSize = Config::vGridSize;
   for (int x = 0; x < vGridSize.x(); x++) {
     for (int y = 0; y < vGridSize.y(); y++) {
       for (int z = 0; z < vGridSize.z(); z++) {
@@ -252,7 +246,7 @@ void GridManager::LinkCells() {
 }
 
 void GridManager::InitCells() {
-  const Vector3i& vGridSize = m_pConfig->GetGridSize();
+  const Vector3i& vGridSize = Config::vGridSize;
   for (int x = 0; x < vGridSize.x(); x++) {
     for (int y = 0; y < vGridSize.y(); y++) {
       for (int z = 0; z < vGridSize.z(); z++) {

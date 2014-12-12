@@ -10,8 +10,7 @@
 Impulse::Impulse() :
 m_pGridManager(nullptr),
 m_pGrid(nullptr),
-m_pSolver(nullptr),
-m_pConfig(nullptr) {
+m_pSolver(nullptr) {
 	m_dMaxImpulse = 4.8;
 	m_uResolution = 20;
 
@@ -37,7 +36,6 @@ void Impulse::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
   m_pGrid = pGridManager->GetGrid();
   m_pSolver = pGridManager->GetSolver();
-  m_pConfig = pGridManager->GetConfig();
   
   // TODO: do something with that...
   GasVector& gasv = m_pSolver->GetGas();

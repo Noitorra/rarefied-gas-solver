@@ -8,8 +8,7 @@
 Grid::Grid() {}
 
 void Grid::Init(GridManager* pGridManager) {
-  Config* pConfig = pGridManager->GetConfig();
-  m_vSize = pConfig->GetGridSize();
+  m_vSize = Config::vGridSize;
   m_vStart = Vector3i();
   m_vWholeSize = m_vSize;
   
