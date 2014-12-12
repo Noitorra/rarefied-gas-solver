@@ -286,10 +286,3 @@ double OutResults::ComputeAverageColumnStream(int iIndexX, unsigned int gi, int 
  
   return dAverageStream;
 }
-
-
-
-
-
-
-
