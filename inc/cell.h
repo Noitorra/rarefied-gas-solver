@@ -7,7 +7,6 @@
 class Grid;
 class GridManager;
 class Solver;
-class Config;
 class VesselGrid;
 class LeftVesselGrid;
 class RightVesselGrid;
@@ -120,7 +119,6 @@ private:
   GridManager* m_pGridManager;
   Solver* m_pSolver;
   Grid* m_pGrid;
-  Config* m_pConfig;
 };
 
 #endif /* CELL_H_ */

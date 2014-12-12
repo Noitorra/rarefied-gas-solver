@@ -1,7 +1,6 @@
 #include "solver.h"
 
 #include "parallel.h"
-#include "options.h"
 #include "grid.h"
 #include "grid_manager.h"
 #include "cell.h"
@@ -17,17 +16,15 @@ Solver::Solver() :
 m_pParallel(new Parallel),
 m_pImpulse(new Impulse),
 m_pGridManager(nullptr),
-m_pGrid(nullptr),
-m_pConfig(nullptr)
+m_pGrid(nullptr)
 {}
 
 void Solver::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
   m_pGrid = pGridManager->GetGrid();
-  m_pConfig = pGridManager->GetConfig();
 
   m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
-  m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
+	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
   
   m_pImpulse->Init(pGridManager);
 }
@@ -37,7 +34,7 @@ void Solver::Run() {
 
   PreRun();
   
-  if (m_pConfig->GetUseIntegral()) {
+  if (Config::bUseIntegral) {
     ci::HSPotential potential;
     ci::init(&potential, ci::NO_SYMM);
   }
@@ -46,23 +43,19 @@ void Solver::Run() {
   std::shared_ptr<OutResults> out_results(new OutResults());
   out_results->Init(m_pGrid, m_pGridManager);
 
-  for(int it = 0; it < m_pConfig->GetMaxIteration(); it++) {
-    // debug
-    std::cout << "Out results..." << std::endl;
-    out_results->OutAll(it);
-
+  for(int it = 0; it < Config::iMaxIteration; it++) {
     MakeStep(sep::X);
     MakeStep(sep::Y);
     MakeStep(sep::Z);
 
-    if (m_pConfig->GetUseIntegral()) {
+    if (Config::bUseIntegral) {
       if (m_vGas.size() == 2) {
-        MakeIntegral(0, 0, m_pConfig->GetTimeStep());
-        MakeIntegral(0, 1, m_pConfig->GetTimeStep() * 2);
-        MakeIntegral(1, 1, m_pConfig->GetTimeStep());
+        MakeIntegral(0, 0, Config::dTimestep);
+        MakeIntegral(0, 1, Config::dTimestep * 2);
+        MakeIntegral(1, 1, Config::dTimestep);
       }
       else {
-        MakeIntegral(0, 0, m_pConfig->GetTimeStep());
+        MakeIntegral(0, 0, Config::dTimestep);
       }
     }
 
@@ -71,12 +64,18 @@ void Solver::Run() {
         item->testInnerValuesRange();
     }
 
-    std::cout << "Run() : " << it << "/" << m_pConfig->GetMaxIteration() << std::endl;
+    // debug
+    std::cout << "Out results..." << std::endl;
+    out_results->OutAll(it);
+
+    std::cout << "Run() : " << it << "/" << Config::iMaxIteration << std::endl;
   }
 
-  // debug
-  std::cout << "Out results..." << std::endl;
-  out_results->OutAll(m_pConfig->GetMaxIteration());
+//  // debug
+//  std::cout << "Out results..." << std::endl;
+//  std::shared_ptr<OutResults> out_results(new OutResults());
+//  out_results->Init(m_pGrid, m_pGridManager);
+//  out_results->OutAll(m_pConfig->GetMaxIteration() - 1);
 
   std::cout << "Done..." << std::endl;
 }

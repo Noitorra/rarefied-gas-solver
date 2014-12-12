@@ -9,7 +9,6 @@ class Grid;
 class Impulse;
 class Gas;
 class GridManager;
-class Config;
 class Solver;
 
 typedef std::vector<std::shared_ptr<Gas>> GasVector;
@@ -37,7 +36,6 @@ private:
   
   GridManager* m_pGridManager;
   Grid* m_pGrid;
-  Config* m_pConfig;
 };
 
 #endif /* SOLVER_H_ */

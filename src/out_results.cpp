@@ -55,10 +55,9 @@ void OutResults::LoadParameters() {
 
 void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int iIndex) {
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
-  Config* pConfig = m_pGridManager->GetConfig();
   
   std::string filename;
-  const std::string& sOutputPrefix = pConfig->GetOutputPrefix();
+  const std::string& sOutputPrefix = Config::sOutputPrefix;
   switch (eType) {
     case sep::T_PARAM:
       filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/temp/" + std::to_string(iIndex) + ".bin";
@@ -75,9 +74,9 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   }
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
-  const Vector3i& vGridSize = pConfig->GetGridSize();
-  const Vector3i& vStartOutGrid = pConfig->GetOutputGridStart();
-  const Vector3i& vOutputSize = pConfig->GetOutputSize();
+  const Vector3i& vGridSize = Config::vGridSize;
+  const Vector3i& vStartOutGrid = Config::vOutputGridStart;
+  const Vector3i& vOutputSize = Config::vOutputSize;
 
   // writing additional info
   double tmp = (double)vOutputSize.x();
@@ -199,9 +198,8 @@ void OutResults::OutParameterMPI(sep::MacroParamType eType) {
 
 void OutResults::OutAverageStream(int iIteration) {
   GasVector& gasv = m_pGridManager->GetSolver()->GetGas();
-  Config* pConfig = m_pGridManager->GetConfig();
 
-  const std::string& sOutputPrefix = pConfig->GetOutputPrefix();
+  const std::string& sOutputPrefix = Config::sOutputPrefix;
   std::string sASFilenameBase = sOutputPrefix + "out/gas";
   for (unsigned int gi = 0; gi < gasv.size(); gi++) {
     std::string sASFilename = sASFilenameBase + std::to_string(gi);
@@ -229,7 +227,7 @@ void OutResults::OutAverageStream(int iIteration) {
     filestream.open(sASFilename, openmode);
     if (filestream.is_open()) {
 
-      switch (pConfig->GetGridGeometryType()) {
+      switch (Config::eGridGeometryType) {
         case sep::COMB_GRID_GEOMETRY:
           OutAverageStreamComb(filestream, gi);
           break;
@@ -260,8 +258,7 @@ void OutResults::OutAverageStreamComb(std::fstream& filestream, int iGasN) {
 
 void OutResults::OutAverageStreamHType(std::fstream& filestream, int iGasN) {
   const Vector3i& vSize = m_pGrid->GetSize();
-  Config* pConfig = m_pGridManager->GetConfig();
-  HTypeGridConfig* pHTypeConfig = pConfig->GetHTypeGridConfig();
+  HTypeGridConfig* pHTypeConfig = Config::pHTypeGridConfig.get();
   int iShiftX = 5;
   int D = pHTypeConfig->D;
   int l = pHTypeConfig->l;
@@ -292,10 +289,3 @@ double OutResults::ComputeAverageColumnStream(int iIndexX, unsigned int gi, int 
  
   return dAverageStream;
 }
-
-
-
-
-
-
-
