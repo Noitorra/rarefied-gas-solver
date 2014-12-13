@@ -17,8 +17,6 @@ struct HTypeGridConfig {
 struct Config {
   static std::string sName;
   static Vector3i vGridSize;
-  static Vector3i vOutputGridStart;
-  static Vector3i vOutputSize;
   static sep::GridGeometry eGridGeometryType;
   static double dTimestep;
   static int iMaxIteration;

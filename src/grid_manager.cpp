@@ -45,9 +45,8 @@ void GridManager::PrintLinkage(sep::Axis eAxis) {
 }
 
 void GridManager::ConfigureGrid() {
-  PreprocessGrid();
   ConfigureGridGeometry();
-  PostprocessGrid();
+  AdoptGridConfiguration();
   PrintGrid();
   
   FillInGrid();
@@ -55,11 +54,7 @@ void GridManager::ConfigureGrid() {
   InitCells();
 }
 
-void GridManager::PreprocessGrid() {
-  // TODO: should we do here smth?
-}
-
-void GridManager::PostprocessGrid() {
+void GridManager::AdoptGridConfiguration() {
   const Vector3i& vGridSize = Config::vGridSize;
   for (int x = 0; x < vGridSize.x(); x++) {
     for (int y = 0; y < vGridSize.y(); y++) {

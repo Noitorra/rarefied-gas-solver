@@ -36,11 +36,8 @@ class Grid {
 public:
   Grid();
   void Init(GridManager* pGridManager);
-  
-  // Prepared for MPI
+
   const Vector3i& GetSize() const { return m_vSize; }
-  const Vector3i& GetStart() const { return m_vStart; }
-  const Vector3i& GetWholeSize() const { return m_vWholeSize; }
 
   std::vector<std::shared_ptr<Cell>>& GetCells();
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& GetInitCells();
@@ -51,9 +48,7 @@ private:
   void AddCell(std::shared_ptr<Cell> pCell);
   void AllocateInitData();
   
-  Vector3i m_vSize; // This process grid size
-  Vector3i m_vStart; // Place where this grid starts in whole grid
-  Vector3i m_vWholeSize; // Size of whole grid
+  Vector3i m_vSize;
 
   GridManager* m_pGridManager;
   

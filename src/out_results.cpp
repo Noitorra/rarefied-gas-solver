@@ -75,42 +75,37 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
   const Vector3i& vGridSize = Config::vGridSize;
-  const Vector3i& vStartOutGrid = Config::vOutputGridStart;
-  const Vector3i& vOutputSize = Config::vOutputSize;
 
   // writing additional info
-  double tmp = (double)vOutputSize.x();
+  double tmp = (double)vGridSize.x();
   fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
-  tmp = (double)vOutputSize.y();
+  tmp = (double)vGridSize.y();
   fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
   
-  for (int y = 0; y < vOutputSize.y(); y++) {
-    for (int x = 0; x < vOutputSize.x(); x++) {
+  for (int y = 0; y < vGridSize.y(); y++) {
+    for (int x = 0; x < vGridSize.x(); x++) {
       int z = 0;
       double dParam = 0.0;
-      
-      int g_x = x - vStartOutGrid.x();
-      int g_y = y - vStartOutGrid.y();
-      int g_z = z - vStartOutGrid.z();
+
       // Edge cells are faked
       int iEdge = 0;
       // Out grid
-      if (g_x >= 0 + iEdge && g_y >= 0 + iEdge && g_z >= 0 + iEdge &&
-          g_x < vGridSize.x() - iEdge && g_y < vGridSize.y() - iEdge && g_z < vGridSize.z() - iEdge) {
+      if (x >= 0 + iEdge && y >= 0 + iEdge && z >= 0 + iEdge &&
+          x < vGridSize.x() - iEdge && y < vGridSize.y() - iEdge && z < vGridSize.z() - iEdge) {
         
-        Cell* cell = m_vCells[g_x][g_y][g_z]->m_pCell;
+        Cell* cell = m_vCells[x][y][z]->m_pCell;
         if (!cell) {
           dParam = 0.0;
         } else {
-          if (m_vCells[g_x][g_y][g_z]->m_eType != sep::NORMAL_CELL) {
+          if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL) {
             dParam = 0.0;
           } else {
             switch (eType) {
               case sep::T_PARAM:
-                dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Temperature;
+                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Temperature;
                 break;
               case sep::C_PARAM:
-                dParam = m_vCells[g_x][g_y][g_z]->m_vMacroData[iGas].Concentration;
+                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Concentration;
                 break;
               case sep::P_PARAM:
                 dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
