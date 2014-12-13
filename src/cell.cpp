@@ -51,14 +51,14 @@ void Cell::setParameters(double _Concentration, double _Temperature, Vector3d _A
 	m_vAreastep = _Areastep;
 }
 
-void Cell::setBoundaryType(BoundaryType eBoundaryType, double dTemperature, double dStream, double dPressure) {
+void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, double dStream, double dPressure) {
   m_eBoundaryType = eBoundaryType;
   m_dBoundaryTemperature = dTemperature;
   m_dBoundaryStream = dStream;
   m_dBoundaryPressure = dPressure;
 }
 
-void Cell::setBoundaryType(BoundaryType eBoundaryType, double dTemperature) {
+void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature) {
   m_eBoundaryType = eBoundaryType;
   m_dBoundaryTemperature = dTemperature;
 }
