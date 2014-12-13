@@ -24,7 +24,8 @@ private:
     double PopConcentration();
     double GetConcentration();
     void SetLooping();
-    void SetBox(Vector2i p, Vector2i size);
+    void SetBox(Vector2i p, Vector2i size,
+            std::function<void(int x, int y, CellConfig* config)> config_func);
     void SetVessel();
     void PrintGrid();
     void GridGeometryToInitialCells();
@@ -56,8 +57,9 @@ private:
     struct GridBox {
         Vector2i p;
         Vector2i size;
-        double T;   // temperature
-        double C;   // concentration
+        CellConfig def_config;
+
+        std::function<void(int x, int y, CellConfig* config)> config_func;
     };
     std::vector<GridBox> boxes_stack_;
 };

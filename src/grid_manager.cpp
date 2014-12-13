@@ -3,7 +3,7 @@
 #include "solver.h"
 #include "config.h"
 #include "cell.h"
-#include <algorithm>
+#include <algorithm>  // for visual studio compilator
 
 GridManager::GridManager() :
   grid_(new Grid),
@@ -20,7 +20,6 @@ void GridManager::PrintGrid() {
   for (int z = 0; z < grid_size.z(); z++) {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int x = 0; x < grid_size.x(); x++) {
-//        std::cout << grid_->m_vInitCells[x][y][z]->m_eType << " ";
         std::cout << grid_->m_vInitCells[x][y][z]->m_cInitCond.C << " ";
       }
       std::cout << std::endl;
@@ -86,9 +85,9 @@ void GridManager::GridGeometryToInitialCells() {
           Vector2i vTempPos = box.p + Vector2i(x, y) - min;
           InitCellData* p_init_cell = grid_->GetInitCell(vTempPos);
           p_init_cell->m_eType = sep::NORMAL_CELL;
-          MacroData &init_cond = p_init_cell->m_cInitCond;
-          init_cond.T = box.T;
-          init_cond.C = box.C;
+          CellConfig &init_cond = p_init_cell->m_cInitCond;
+          init_cond = box.def_config;
+          box.config_func(x, y, &init_cond);
         }
       }
   });
@@ -120,7 +119,7 @@ void GridManager::AdoptInitialCells() {
 void GridManager::FindNeighbour(Vector2i p, sep::CellType type,
         sep::Axis&axis,
         sep::NeighborType &neighbor,
-        int&quant) {
+        int& quant) {
   int tmp_quant = 0;
   sep::CellType e_type;
   for (int ax = 0; ax <= sep::Z; ax++) {
@@ -142,18 +141,18 @@ void GridManager::FindNeighbour(Vector2i p, sep::CellType type,
 bool GridManager::FindNeighbourWithIndex(Vector2i p, sep::CellType type,
                                 int index, sep::Axis&axis,
                                 sep::NeighborType &neighbor) {
-  int i_quant = 0;
-  sep::CellType e_type;
+  int quant = 0;
+  sep::CellType tmp_type;
   for (int ax = 0; ax <= sep::Z; ax++) {
     for (int neighb = 0; neighb <= sep::NEXT; neighb++) {
-      if (GetNeighbour(p, (sep::Axis)ax, (sep::NeighborType)neighb, e_type)) {
-        if (e_type == type) {
-          if (i_quant == index) {
+      if (GetNeighbour(p, (sep::Axis)ax, (sep::NeighborType)neighb, tmp_type)) {
+        if (tmp_type == type) {
+          if (quant == index) {
             neighbor = (sep::NeighborType)neighb;
             axis = (sep::Axis)ax;
             return true;
           }
-          i_quant++;
+          quant++;
         }
       }
     }
@@ -187,8 +186,12 @@ int GridManager::GetSlash(sep::NeighborType type) const {
   }
 }
 
-void GridManager::SetBox(Vector2i p, Vector2i size) {
-  boxes_stack_.push_back({p, size, GetTemperature(), GetConcentration()});
+void GridManager::SetBox(Vector2i p, Vector2i size,
+        std::function<void(int x, int y, CellConfig* config)> config_func) {
+  CellConfig def_config;
+  def_config.C = GetConcentration();
+  def_config.T = GetTemperature();
+  boxes_stack_.push_back({p, size, def_config, config_func});
 }
 
 void GridManager::PushTemperature(double t) {
@@ -213,9 +216,9 @@ void GridManager::PushConcentration(double c) {
 double GridManager::PopConcentration() {
   if (concentration_stack_.size() < 1)
     return 0.0;
-  double dConc = concentration_stack_.back();
+  double c = concentration_stack_.back();
   concentration_stack_.pop_back();
-  return dConc;
+  return c;
 }
 double GridManager::GetConcentration() {
   if (concentration_stack_.size() < 1)
@@ -282,12 +285,15 @@ void GridManager::InitCells() {
         
         Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
-        const MacroData& init_cond = p_init_cell->m_cInitCond;
+        const CellConfig& init_cond = p_init_cell->m_cInitCond;
         // Set parameters
-        Vector3d vAreaStep(0.1, 0.1, 0.1);
-        p_cell->setParameters(init_cond.C,
-                              init_cond.T,
-                              vAreaStep);
+        Vector3d area_step(0.1, 0.1, 0.1);
+        p_cell->setParameters(
+                init_cond.C,
+                init_cond.T,
+                area_step,
+                init_cond.wall_T
+        );
         p_cell->Init(this);
       }
     }

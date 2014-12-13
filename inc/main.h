@@ -1,5 +1,4 @@
-#ifndef MAIN_H_
-#define MAIN_H_
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -39,20 +38,39 @@ namespace sep {
     PREV = 0,
     NEXT = 1
   };
+
+  enum BoundaryCondition {
+    NO_CONDITION = 0,
+    P_CONST = 1
+  };
 }
 
 class MacroData {
 public:
   MacroData() :
-  C(1.0),
-  T(1.0)
+          C(1.0),
+          T(1.0)
   {};
-	double C; // Concentration
-	double T; // Temperature
-  
-	Vector3d Stream;
-	Vector3d HeatStream;
+
+  double C; // concentration
+  double T; // temperature
+
+  Vector3d Stream;
+  Vector3d HeatStream;
 };
 
+class CellConfig {
+public:
+  CellConfig() :
+  C(1.0),
+  T(1.0),
+  wall_T(1.0),
+  boundary_cond(sep::NO_CONDITION)
+  {};
 
-#endif // MAIN_H_
+  double C; // concentration
+  double T; // temperature
+  double wall_T;  // wall temperature
+
+  sep::BoundaryCondition boundary_cond;
+};

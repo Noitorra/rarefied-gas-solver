@@ -22,7 +22,7 @@ protected:
   sep::CellType m_eType;
   Cell* m_pCell;
   std::vector<MacroData> m_vMacroData;
-  MacroData m_cInitCond;
+  CellConfig m_cInitCond;
 };
 
 class Grid {

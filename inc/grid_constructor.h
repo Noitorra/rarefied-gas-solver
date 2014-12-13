@@ -15,7 +15,9 @@ private:
   virtual double PopConcentration() = 0;
   virtual void PrintGrid() = 0;
   // Set box to normal
-  virtual void SetBox(Vector2i vP, Vector2i vSize) = 0;
+  virtual void SetBox(Vector2i vP, Vector2i vSize,
+          std::function<void(int x, int y, CellConfig* config)> config_func =
+          [] (int x, int y, CellConfig* config) {}) = 0;
 };
 
 #endif // GRID_CONSTRUCTOR_H_
