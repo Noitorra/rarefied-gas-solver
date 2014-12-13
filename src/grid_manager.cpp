@@ -15,11 +15,13 @@ void GridManager::Init() {
 }
 
 void GridManager::PrintGrid() {
+  std::cout << "Printing grid..." << std::endl;
   const Vector3i& grid_size = Config::vGridSize;
   for (int z = 0; z < grid_size.z(); z++) {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int x = 0; x < grid_size.x(); x++) {
-        std::cout << grid_->m_vInitCells[x][y][z]->m_eType << " ";
+//        std::cout << grid_->m_vInitCells[x][y][z]->m_eType << " ";
+        std::cout << grid_->m_vInitCells[x][y][z]->m_cInitCond.C << " ";
       }
       std::cout << std::endl;
     }
@@ -216,9 +218,9 @@ double GridManager::PopConcentration() {
   return dConc;
 }
 double GridManager::GetConcentration() {
-  if (temperature_stack_.size() < 1)
+  if (concentration_stack_.size() < 1)
     return 0.0;
-  return temperature_stack_.back();
+  return concentration_stack_.back();
 }
 
 void GridManager::FillInGrid() {
