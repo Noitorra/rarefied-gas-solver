@@ -30,6 +30,7 @@ public:
 private:
 	double m_dStartConcentration;
 	double m_dStartTemperature;
+  double m_dWallTemperature;
   Vector3d m_vAreastep;
 
 	// variables ... ?
@@ -52,7 +53,7 @@ public:
 
 	// main methods
 	/* set all necessary parameters */
-  void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep);
+  void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep, double _WallTemperature = 0.0);
 	/* creates cells inner values, takes long time */
 	void Init(GridManager* pGridManager);
 

@@ -1,9 +1,9 @@
-#include <curses.h>
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
 #include "config.h"
 #include "cell.h"
+#include <algorithm>
 
 GridManager::GridManager() :
   grid_(new Grid),
