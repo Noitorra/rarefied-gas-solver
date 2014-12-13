@@ -30,7 +30,7 @@ void Solver::Init(GridManager* pGridManager) {
 }
 
 void Solver::Run() {
-	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 
   PreRun();
   
@@ -44,6 +44,9 @@ void Solver::Run() {
   out_results->Init(m_pGrid, m_pGridManager);
 
   for(int it = 0; it < Config::iMaxIteration; it++) {
+    // debug
+    out_results->OutAll(it);
+
     MakeStep(sep::X);
     MakeStep(sep::Y);
     MakeStep(sep::Z);
@@ -61,21 +64,14 @@ void Solver::Run() {
 
     // here we can test data, if needed...
     for( auto& item : vCellVector ) {
-        item->testInnerValuesRange();
+      item->testInnerValuesRange();
     }
-
-    // debug
-    std::cout << "Out results..." << std::endl;
-    out_results->OutAll(it);
 
     std::cout << "Run() : " << it << "/" << Config::iMaxIteration << std::endl;
   }
 
-//  // debug
-//  std::cout << "Out results..." << std::endl;
-//  std::shared_ptr<OutResults> out_results(new OutResults());
-//  out_results->Init(m_pGrid, m_pGridManager);
-//  out_results->OutAll(m_pConfig->GetMaxIteration() - 1);
+  // debug
+  out_results->OutAll(Config::iMaxIteration);
 
   std::cout << "Done..." << std::endl;
 }

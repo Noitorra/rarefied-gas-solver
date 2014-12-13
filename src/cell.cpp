@@ -145,9 +145,9 @@ void Cell::computeMacroData() {
 	GasVector& gasv = m_pSolver->GetGas();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
-		m_vMacroData[gi].Concentration = compute_concentration(gi);
+		m_vMacroData[gi].C = compute_concentration(gi);
 		m_vMacroData[gi].Stream = compute_stream(gi);
-    m_vMacroData[gi].Temperature = compute_temperature(gi);
+    m_vMacroData[gi].T = compute_temperature(gi);
 		m_vMacroData[gi].HeatStream = compute_heatstream(gi);
 	}
 }
@@ -454,7 +454,7 @@ double Cell::compute_temperature(unsigned int gi) {
 	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
-	double concentration = m_vMacroData[gi].Concentration;
+	double concentration = m_vMacroData[gi].C;
   double temperature = 0.0;
   Vector3d vAverageSpeed = m_vMacroData[gi].Stream;
   vAverageSpeed /= concentration;

@@ -35,7 +35,7 @@ namespace sep {
     FLOW_PARAM // Flow
   };
   
-  enum NeighbType {
+  enum NeighborType {
     PREV = 0,
     NEXT = 1
   };
@@ -44,12 +44,11 @@ namespace sep {
 class MacroData {
 public:
   MacroData() :
-  Concentration(1.0),
-  Temperature(1.0)
+  C(1.0),
+  T(1.0)
   {};
-	// Concentration
-	double Concentration;
-	double Temperature;
+	double C; // Concentration
+	double T; // Temperature
   
 	Vector3d Stream;
 	Vector3d HeatStream;

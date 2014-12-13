@@ -9,8 +9,6 @@ Grid::Grid() {}
 
 void Grid::Init(GridManager* pGridManager) {
   m_vSize = Config::vGridSize;
-  
-  AllocateInitData();
 }
 
 void Grid::AddCell(std::shared_ptr<Cell> pCell) {
@@ -38,6 +36,8 @@ std::vector<std::shared_ptr<VesselGrid>>& Grid::GetVessels() {
 }
 
 void Grid::AllocateInitData() {
+  m_vSize = Config::vGridSize;
+
   for (int x = 0; x < m_vSize.x(); x++) {
     std::vector<std::vector<std::shared_ptr<InitCellData>> > vec_yz;
     m_vInitCells.push_back(vec_yz);

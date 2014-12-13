@@ -19,6 +19,8 @@ void OutResults::OutAll(int iIteration) {
     std::cout << "Error: member OutResults is not initialized yet" << std::endl;
     return;
   }
+  std::cout << "Out results " << iIteration << " ..." << std::endl;
+
   LoadParameters();
   for (int iGas = 0; iGas < 2; iGas++) {
     OutParameterSingletone(sep::T_PARAM, iGas, iIteration);
@@ -102,13 +104,13 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
           } else {
             switch (eType) {
               case sep::T_PARAM:
-                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Temperature;
+                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].T;
                 break;
               case sep::C_PARAM:
-                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].Concentration;
+                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].C;
                 break;
               case sep::P_PARAM:
-                dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
+                dParam = cell->m_vMacroData[iGas].C * cell->m_vMacroData[iGas].T;
                 goto next_cell_label;
               default:
                 return;
@@ -158,15 +160,15 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
 //                if (true) {
                 switch (eType) {
                   case sep::T_PARAM:
-                    dParam = cell->m_vMacroData[iGas].Temperature;
+                    dParam = cell->m_vMacroData[iGas].T;
                     goto next_cell_label;
                     break;
                   case sep::C_PARAM:
-                    dParam = cell->m_vMacroData[iGas].Concentration;
+                    dParam = cell->m_vMacroData[iGas].C;
                     goto next_cell_label;
                     break;
                   case sep::P_PARAM:
-                    dParam = cell->m_vMacroData[iGas].Concentration * cell->m_vMacroData[iGas].Temperature;
+                    dParam = cell->m_vMacroData[iGas].C * cell->m_vMacroData[iGas].T;
                     goto next_cell_label;
                     break;
                   default:

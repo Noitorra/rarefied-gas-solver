@@ -1,3 +1,4 @@
+#include <curses.h>
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
@@ -5,20 +6,20 @@
 #include "cell.h"
 
 GridManager::GridManager() :
-m_pGrid(new Grid),
-m_pSolver(new Solver) {}
+  grid_(new Grid),
+  solver_(new Solver) {}
 
 void GridManager::Init() {
-  m_pGrid->Init(this);
-  m_pSolver->Init(this);
+  grid_->Init(this);
+  solver_->Init(this);
 }
 
 void GridManager::PrintGrid() {
-  const Vector3i& vGridSize = Config::vGridSize;
-  for (int z = 0; z < vGridSize.z(); z++) {
-    for (int y = 0; y < vGridSize.y(); y++) {
-      for (int x = 0; x < vGridSize.x(); x++) {
-        std::cout << m_pGrid->m_vInitCells[x][y][z]->m_eType << " ";
+  const Vector3i& grid_size = Config::vGridSize;
+  for (int z = 0; z < grid_size.z(); z++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int x = 0; x < grid_size.x(); x++) {
+        std::cout << grid_->m_vInitCells[x][y][z]->m_eType << " ";
       }
       std::cout << std::endl;
     }
@@ -26,17 +27,17 @@ void GridManager::PrintGrid() {
   std::cout << std::endl;
 }
 
-void GridManager::PrintLinkage(sep::Axis eAxis) {
-  const Vector3i& vGridSize = Config::vGridSize;
-  for (int z = 0; z < vGridSize.z(); z++) {
-    for (int y = 0; y < vGridSize.y(); y++) {
-      for (int x = 0; x < vGridSize.x(); x++) {
+void GridManager::PrintLinkage(sep::Axis axis) {
+  const Vector3i& grid_size = Config::vGridSize;
+  for (int z = 0; z < grid_size.z(); z++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int x = 0; x < grid_size.x(); x++) {
         Vector2i v_p(x, y);
-        if (m_pGrid->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL) {
+        if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL) {
           std::cout << "x ";
           continue;
         }
-        std::cout << m_pGrid->GetInitCell(v_p)->m_pCell->m_vType[eAxis] << " ";
+        std::cout << grid_->GetInitCell(v_p)->m_pCell->m_vType[axis] << " ";
       }
       std::cout << std::endl;
     }
@@ -46,30 +47,67 @@ void GridManager::PrintLinkage(sep::Axis eAxis) {
 
 void GridManager::ConfigureGrid() {
   ConfigureGridGeometry();
-  AdoptGridConfiguration();
+  GridGeometryToInitialCells();
+  AdoptInitialCells();
   PrintGrid();
-  
+
   FillInGrid();
   LinkCells();
   InitCells();
 }
 
-void GridManager::AdoptGridConfiguration() {
-  const Vector3i& vGridSize = Config::vGridSize;
-  for (int x = 0; x < vGridSize.x(); x++) {
-    for (int y = 0; y < vGridSize.y(); y++) {
-      for (int z = 0; z < vGridSize.z(); z++) {
+void GridManager::GridGeometryToInitialCells() {
+  if (!boxes_stack_.size())
+    throw("no grid boxes");
+
+  // determine grid size
+  Vector2i min(boxes_stack_[0].p), max;
+  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
+      if (box.p.x() < min.x())
+        min.x() = box.p.x();
+      if (box.p.y() < min.y())
+        min.y() = box.p.y();
+
+      if (box.p.x() + box.size.x() > max.x())
+        max.x() = box.p.x() + box.size.x();
+      if (box.p.y() + box.size.y() > max.y())
+        max.y() = box.p.y() + box.size.y();
+  });
+  Vector2i size = max - min;
+  Config::vGridSize = Vector3i(size.x(), size.y(), 1);
+
+  grid_->AllocateInitData();
+
+  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
+      for (int x = 0; x < box.size.x(); x++) {
+        for (int y = 0; y < box.size.y(); y++) {
+          Vector2i vTempPos = box.p + Vector2i(x, y) - min;
+          InitCellData* p_init_cell = grid_->GetInitCell(vTempPos);
+          p_init_cell->m_eType = sep::NORMAL_CELL;
+          MacroData &init_cond = p_init_cell->m_cInitCond;
+          init_cond.T = box.T;
+          init_cond.C = box.C;
+        }
+      }
+  });
+}
+
+void GridManager::AdoptInitialCells() {
+  const Vector3i& grid_size = Config::vGridSize;
+  for (int x = 0; x < grid_size.x(); x++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int z = 0; z < grid_size.z(); z++) {
         Vector2i v_p(x, y);
-        if (m_pGrid->GetInitCell(v_p)->m_eType != sep::FAKE_CELL)
+        if (grid_->GetInitCell(v_p)->m_eType != sep::FAKE_CELL)
           continue;
         
-        sep::NeighbType e_neighb;
+        sep::NeighborType e_neighbor;
         sep::Axis e_ax;
         int i_q;
         // Remove alone fake cells (which without normal neighbour)
-        FindNeighbour(v_p, sep::NORMAL_CELL, e_ax, e_neighb, i_q);
+        FindNeighbour(v_p, sep::NORMAL_CELL, e_ax, e_neighbor, i_q);
         if (!i_q)
-          m_pGrid->GetInitCell(v_p)->m_eType = sep::EMPTY_CELL;
+          grid_->GetInitCell(v_p)->m_eType = sep::EMPTY_CELL;
       }
     }
   }
@@ -77,40 +115,40 @@ void GridManager::AdoptGridConfiguration() {
 
 // Find the position of first neighbour with given type
 // and whole quantity of such neighbours
-void GridManager::FindNeighbour(Vector2i vP, sep::CellType eType,
-                   sep::Axis& eAxis,
-                                sep::NeighbType& eNeighb,
-                   int& iQuant) {
-  int i_quant = 0;
+void GridManager::FindNeighbour(Vector2i p, sep::CellType type,
+        sep::Axis&axis,
+        sep::NeighborType &neighbor,
+        int&quant) {
+  int tmp_quant = 0;
   sep::CellType e_type;
   for (int ax = 0; ax <= sep::Z; ax++) {
     for (int neighb = 0; neighb <= sep::NEXT; neighb++) {
-      if (GetNeighbour(vP, (sep::Axis)ax, (sep::NeighbType)neighb, e_type)) {
-        if (e_type == eType) {
-          if (!i_quant) {
-            eNeighb = (sep::NeighbType)neighb;
-            eAxis = (sep::Axis)ax;
+      if (GetNeighbour(p, (sep::Axis)ax, (sep::NeighborType)neighb, e_type)) {
+        if (e_type == type) {
+          if (!tmp_quant) {
+            neighbor = (sep::NeighborType)neighb;
+            axis = (sep::Axis)ax;
           }
-          i_quant++;
+          tmp_quant++;
         }
       }
     }
   }
-  iQuant = i_quant;
+  quant = tmp_quant;
 }
 
-bool GridManager::FindNeighbourWithIndex(Vector2i vP, sep::CellType eType,
-                                int iIndex, sep::Axis& eAxis,
-                                sep::NeighbType& eNeighb) {
+bool GridManager::FindNeighbourWithIndex(Vector2i p, sep::CellType type,
+                                int index, sep::Axis&axis,
+                                sep::NeighborType &neighbor) {
   int i_quant = 0;
   sep::CellType e_type;
   for (int ax = 0; ax <= sep::Z; ax++) {
     for (int neighb = 0; neighb <= sep::NEXT; neighb++) {
-      if (GetNeighbour(vP, (sep::Axis)ax, (sep::NeighbType)neighb, e_type)) {
-        if (e_type == eType) {
-          if (i_quant == iIndex) {
-            eNeighb = (sep::NeighbType)neighb;
-            eAxis = (sep::Axis)ax;
+      if (GetNeighbour(p, (sep::Axis)ax, (sep::NeighborType)neighb, e_type)) {
+        if (e_type == type) {
+          if (i_quant == index) {
+            neighbor = (sep::NeighborType)neighb;
+            axis = (sep::Axis)ax;
             return true;
           }
           i_quant++;
@@ -121,23 +159,23 @@ bool GridManager::FindNeighbourWithIndex(Vector2i vP, sep::CellType eType,
   return false;
 }
 
-bool GridManager::GetNeighbour(Vector2i vP, sep::Axis eAxis,
-                               sep::NeighbType eNeighb, sep::CellType& eType) {
-  Vector2i v_slash;
-  v_slash[eAxis] = GetSlash(eNeighb);
-  vP += v_slash;
+bool GridManager::GetNeighbour(Vector2i p, sep::Axis axis,
+                               sep::NeighborType neighbor, sep::CellType&type) {
+  Vector2i slash;
+  slash[axis] = GetSlash(neighbor);
+  p += slash;
   sep::CellType e_type;
   try {
-    e_type = m_pGrid->GetInitCell(vP)->m_eType;
+    e_type = grid_->GetInitCell(p)->m_eType;
   } catch(const char* cStr) {
     return false;
   }
-  eType = e_type;
+  type = e_type;
   return true;
 }
 
-int GridManager::GetSlash(sep::NeighbType eType) const {
-  switch (eType) {
+int GridManager::GetSlash(sep::NeighborType type) const {
+  switch (type) {
     case sep::PREV:
       return -1;
     case sep::NEXT:
@@ -147,92 +185,83 @@ int GridManager::GetSlash(sep::NeighbType eType) const {
   }
 }
 
-void GridManager::SetBox(Vector2i vP, Vector2i vSize) {
-  for (int x = 0; x < vSize.x(); x++) {
-    for (int y = 0; y < vSize.y(); y++) {
-      Vector2i vTempPos = vP + Vector2i(x, y);
-      InitCellData* p_init_cell = m_pGrid->GetInitCell(vTempPos);
-      p_init_cell->m_eType = sep::NORMAL_CELL;
-      MacroData& init_cond = p_init_cell->m_cInitCond;
-      init_cond.Temperature = GetTemperature();
-      init_cond.Concentration = GetConcentration();
-    }
-  }
+void GridManager::SetBox(Vector2i p, Vector2i size) {
+  boxes_stack_.push_back({p, size, GetTemperature(), GetConcentration()});
 }
 
-void GridManager::PushTemperature(double dT) {
-  m_vTemperatureStack.push_back(dT);
+void GridManager::PushTemperature(double t) {
+  temperature_stack_.push_back(t);
 }
 double GridManager::PopTemperature() {
-  if (m_vTemperatureStack.size() < 1)
+  if (temperature_stack_.size() < 1)
     return 0.0;
-  double dT = m_vTemperatureStack.back();
-  m_vTemperatureStack.pop_back();
-  return dT;
+  double t = temperature_stack_.back();
+  temperature_stack_.pop_back();
+  return t;
 }
 double GridManager::GetTemperature() {
-  if (m_vTemperatureStack.size() < 1)
+  if (temperature_stack_.size() < 1)
     return 0.0;
-  return m_vTemperatureStack.back();
+  return temperature_stack_.back();
 }
 
-void GridManager::PushConcentration(double dConc) {
-  m_vConcetrationStack.push_back(dConc);
+void GridManager::PushConcentration(double c) {
+  concentration_stack_.push_back(c);
 }
 double GridManager::PopConcentration() {
-  if (m_vConcetrationStack.size() < 1)
+  if (concentration_stack_.size() < 1)
     return 0.0;
-  double dConc = m_vConcetrationStack.back();
-  m_vConcetrationStack.pop_back();
+  double dConc = concentration_stack_.back();
+  concentration_stack_.pop_back();
   return dConc;
 }
 double GridManager::GetConcentration() {
-  if (m_vTemperatureStack.size() < 1)
+  if (temperature_stack_.size() < 1)
     return 0.0;
-  return m_vTemperatureStack.back();
+  return temperature_stack_.back();
 }
 
 void GridManager::FillInGrid() {
-  const Vector3i& vGridSize = Config::vGridSize;
-  for (int x = 0; x < vGridSize.x(); x++) {
-    for (int y = 0; y < vGridSize.y(); y++) {
-      for (int z = 0; z < vGridSize.z(); z++) {
+  const Vector3i& grid_size = Config::vGridSize;
+  for (int x = 0; x < grid_size.x(); x++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int z = 0; z < grid_size.z(); z++) {
         Vector2i v_p(x, y);
-        if (m_pGrid->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
+        if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
           continue;
         Cell* p_cell = new Cell();
-        m_pGrid->AddCell(std::shared_ptr<Cell>(p_cell));
-        m_pGrid->GetInitCell(v_p)->m_pCell = p_cell;
+        grid_->AddCell(std::shared_ptr<Cell>(p_cell));
+        grid_->GetInitCell(v_p)->m_pCell = p_cell;
       }
     }
   }
 }
 
 void GridManager::LinkCells() {
-  const Vector3i& vGridSize = Config::vGridSize;
-  for (int x = 0; x < vGridSize.x(); x++) {
-    for (int y = 0; y < vGridSize.y(); y++) {
-      for (int z = 0; z < vGridSize.z(); z++) {
+  const Vector3i& grid_size = Config::vGridSize;
+  for (int x = 0; x < grid_size.x(); x++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int z = 0; z < grid_size.z(); z++) {
         Vector2i v_p(x, y);
-        if (m_pGrid->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
+        if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
           continue;
         
-        sep::NeighbType e_neighb;
-        sep::Axis e_ax;
-        int i_q;
+        sep::NeighborType neighbor;
+        sep::Axis ax;
+        int q;
         // Link to normal
-        FindNeighbour(v_p, sep::NORMAL_CELL, e_ax, e_neighb, i_q);
-        for (int i = 0; i < i_q; i++) {
-          FindNeighbourWithIndex(v_p, sep::NORMAL_CELL, i, e_ax, e_neighb);
-          LinkNeighb(v_p, e_ax, e_neighb);
+        FindNeighbour(v_p, sep::NORMAL_CELL, ax, neighbor, q);
+        for (int i = 0; i < q; i++) {
+          FindNeighbourWithIndex(v_p, sep::NORMAL_CELL, i, ax, neighbor);
+          LinkNeighbors(v_p, ax, neighbor);
         }
     
-        if (m_pGrid->GetInitCell(v_p)->m_eType != sep::FAKE_CELL) {
+        if (grid_->GetInitCell(v_p)->m_eType != sep::FAKE_CELL) {
           // Link to fake
-          FindNeighbour(v_p, sep::FAKE_CELL, e_ax, e_neighb, i_q);
-          for (int i = 0; i < i_q; i++) {
-            FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, e_ax, e_neighb);
-            LinkNeighb(v_p, e_ax, e_neighb);
+          FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
+          for (int i = 0; i < q; i++) {
+            FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
+            LinkNeighbors(v_p, ax, neighbor);
           }
         }
       }
@@ -241,21 +270,21 @@ void GridManager::LinkCells() {
 }
 
 void GridManager::InitCells() {
-  const Vector3i& vGridSize = Config::vGridSize;
-  for (int x = 0; x < vGridSize.x(); x++) {
-    for (int y = 0; y < vGridSize.y(); y++) {
-      for (int z = 0; z < vGridSize.z(); z++) {
+  const Vector3i& grid_size = Config::vGridSize;
+  for (int x = 0; x < grid_size.x(); x++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int z = 0; z < grid_size.z(); z++) {
         Vector2i v_p(x, y);
-        if (m_pGrid->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
+        if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
           continue;
         
-        Cell* p_cell = m_pGrid->GetInitCell(v_p)->m_pCell;
-        InitCellData* p_init_cell = m_pGrid->GetInitCell(v_p);
+        Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
+        InitCellData* p_init_cell = grid_->GetInitCell(v_p);
         const MacroData& init_cond = p_init_cell->m_cInitCond;
         // Set parameters
         Vector3d vAreaStep(0.1, 0.1, 0.1);
-        p_cell->setParameters(init_cond.Concentration,
-                              init_cond.Temperature,
+        p_cell->setParameters(init_cond.C,
+                              init_cond.T,
                               vAreaStep);
         p_cell->Init(this);
       }
@@ -263,23 +292,23 @@ void GridManager::InitCells() {
   }
 }
 
-void GridManager::LinkNeighb(Vector2i vP, sep::Axis eAxis,
-                             sep::NeighbType eNeighb) {
+void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
+        sep::NeighborType eNeighbor) {
   Vector2i v_slash;
-  v_slash[eAxis] = GetSlash(eNeighb);
-  Vector2i v_target = vP + v_slash;
-  Cell* p_target = m_pGrid->GetInitCell(v_target)->m_pCell;
-  Cell* p_cell = m_pGrid->GetInitCell(vP)->m_pCell;
-  switch (eNeighb) {
+  v_slash[axis] = GetSlash(eNeighbor);
+  Vector2i target_pos = p + v_slash;
+  Cell* target = grid_->GetInitCell(target_pos)->m_pCell;
+  Cell* cell = grid_->GetInitCell(p)->m_pCell;
+  switch (eNeighbor) {
     case sep::PREV:
-      if (!p_cell->m_vPrev[eAxis].empty())
+      if (!cell->m_vPrev[axis].empty())
         throw("Prev is already not emty");
-      p_cell->m_vPrev[eAxis].push_back(p_target);
+      cell->m_vPrev[axis].push_back(target);
       break;
     case sep::NEXT:
-      if (!p_cell->m_vNext[eAxis].empty())
+      if (!cell->m_vNext[axis].empty())
         throw("Next is already not emty");
-      p_cell->m_vNext[eAxis].push_back(p_target);
+      cell->m_vNext[axis].push_back(target);
       break;
   }
 }

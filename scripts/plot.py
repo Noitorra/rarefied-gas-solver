@@ -33,10 +33,11 @@ for param in params:
         for y in range(NY):
           if D[x][y] == 0.0:
             D[x][y] = nan;
-      plt.imshow(D, vmin=0.82, vmax=1.1, interpolation='nearest')
+      #plt.imshow(D, vmin=0.82, vmax=1.1, interpolation='nearest')
+      plt.imshow(D, vmin=min(input), vmax=max(input), interpolation='nearest')
       plt.colorbar()
       plt.contour(D, colors='black')
-      plt.savefig(data_folder+'conc/pic/'+s+'.png', dpi=100)
+      plt.savefig(data_folder + param + '/pic/'+s+'.png', dpi=100)
       plt.close()
       print("%i of %i" % (i, max_files))
       i += each
