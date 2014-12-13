@@ -6,17 +6,12 @@
 #include "types.h"
 
 class Cell;
-class GridManager;
-class Solver;
-class OutResults;
-struct Config;
 class VesselGrid;
-class Grid;
 
 class InitCellData {
-  friend GridManager;
-  friend Grid;
-  friend OutResults;
+  friend class GridManager;
+  friend class Grid;
+  friend class OutResults;
 protected:
   InitCellData(sep::CellType eType) :
   m_eType(eType),
@@ -30,12 +25,11 @@ protected:
   MacroData m_cInitCond;
 };
 
-// This is only this process part of whole grid
 class Grid {
-  friend GridManager;
+  friend class GridManager;
 public:
   Grid();
-  void Init(GridManager* pGridManager);
+  void Init(class GridManager* pGridManager);
 
   const Vector3i& GetSize() const { return m_vSize; }
 

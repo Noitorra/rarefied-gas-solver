@@ -4,21 +4,18 @@
 #include "types.h"
 #include "main.h"
 
-class Grid;
-class GridManager;
-class Solver;
 class VesselGrid;
-class LeftVesselGrid;
-class RightVesselGrid;
-class OutResults;
+class Solver;
+class GridManager;
+class Grid;
 
 class Cell {
-  friend GridManager;
-  friend Grid;
-  friend VesselGrid;
-  friend LeftVesselGrid;
-  friend RightVesselGrid;
-  friend OutResults;
+  friend class GridManager;
+  friend class Grid;
+  friend class VesselGrid;
+  friend class LeftVesselGrid;
+  friend class RightVesselGrid;
+  friend class OutResults;
 public:
 	enum CellType {
 		CT_UNDEFINED,
@@ -31,7 +28,7 @@ public:
 	typedef std::vector< Cell* > CellVector;
 	typedef std::vector<double> DoubleVector;
 private:
-  double m_dStartConcentration;
+	double m_dStartConcentration;
 	double m_dStartTemperature;
   Vector3d m_vAreastep;
 

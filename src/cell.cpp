@@ -155,38 +155,38 @@ void Cell::computeMacroData() {
 /* Tests */
 bool Cell::testInnerValuesRange() {
   GasVector& gasv = m_pSolver->GetGas();
-	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
+  ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
-	bool result = true;
+  bool result = true;
 
-	for(unsigned int gi=0;gi<gasv.size();gi++) {
-		for(unsigned int ii=0;ii<impulsev.size();ii++) {
-			if( 0.0 <= m_vValue[gi][ii] && m_vValue[gi][ii] <= 1.0 ) {
-				// all is good
-			} else {
-				// wrong values
-				result = false;
-        std::cout << "Cell::testIVR(): Error [type][gi][ii]"
-          << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
-          << "[" << gi << "]"
-          << "[" << ii << "]"
-          << " value = " << m_vValue[gi][ii] << std::endl;
-			}
-			if( 0.0 <= m_vHalf[gi][ii] && m_vHalf[gi][ii] <= 1.0 ) {
-				// all is good
-			} else {
-				// wrong values
-				result = false;
-        std::cout << "Cell::testIVR(): Error [type][gi][ii]"
-          << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
-          << "[" << gi << "]"
-          << "[" << ii << "]"
-					<< " half = " << m_vHalf[gi][ii] << std::endl;
-			}
-		}
-	}
+  for(unsigned int gi=0;gi<gasv.size();gi++) {
+    for(unsigned int ii=0;ii<impulsev.size();ii++) {
+        if( 0.0 <= m_vValue[gi][ii] && m_vValue[gi][ii] <= 1.0 ) {
+            // all is good
+        } else {
+            // wrong values
+            result = false;
+            std::cout << "Cell::testIVR(): Error [type][gi][ii]"
+              << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
+              << "[" << gi << "]"
+              << "[" << ii << "]"
+              << " value = " << m_vValue[gi][ii] << std::endl;
+                }
+                if( 0.0 <= m_vHalf[gi][ii] && m_vHalf[gi][ii] <= 1.0 ) {
+                    // all is good
+                } else {
+                    // wrong values
+                    result = false;
+            std::cout << "Cell::testIVR(): Error [type][gi][ii]"
+              << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
+              << "[" << gi << "]"
+              << "[" << ii << "]"
+              << " half = " << m_vHalf[gi][ii] << std::endl;
+        }
+    }
+  }
 
-	return result;
+  return result;
 }
 
 /* private */
