@@ -29,7 +29,10 @@ m_pGrid(nullptr)
 
 	m_dStartTemperature = 0.0;
   m_dStartConcentration = 0.0;
-  m_dWallTemperature = 0.0;
+
+  m_dBoundaryTemperature = 0.0;
+  m_dBoundaryStream = 0.0;
+  m_dBoundaryPressure = 0.0;
 
 	// Grid....
 	m_pGridManager = nullptr;
@@ -42,11 +45,22 @@ Cell::~Cell() {
 /* public */
 
 // main methods
-void Cell::setParameters(double _Concentration, double _Temperature, Vector3d _Areastep, double _WallTemperature) {
+void Cell::setParameters(double _Concentration, double _Temperature, Vector3d _Areastep) {
   m_dStartConcentration = _Concentration;
 	m_dStartTemperature = _Temperature;
 	m_vAreastep = _Areastep;
-  m_dWallTemperature = (_WallTemperature == 0.0) ? m_dStartTemperature : _WallTemperature;
+}
+
+void Cell::setBoundaryType(BoundaryType eBoundaryType, double dTemperature, double dStream, double dPressure) {
+  m_eBoundaryType = eBoundaryType;
+  m_dBoundaryTemperature = dTemperature;
+  m_dBoundaryStream = dStream;
+  m_dBoundaryPressure = dPressure;
+}
+
+void Cell::setBoundaryType(BoundaryType eBoundaryType, double dTemperature) {
+  m_eBoundaryType = eBoundaryType;
+  m_dBoundaryTemperature = dTemperature;
 }
 
 void Cell::Init(GridManager* pGridManager) {
@@ -241,14 +255,14 @@ void Cell::compute_half_left(unsigned int dim) {
         C1_up += std::abs(impulsev[ii][dim]*m_vHalf[gi][ii]);
         C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_NEXT)) / 2);
       } else {
-        C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dWallTemperature, impulsev[ii]));
+        C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dBoundaryTemperature, impulsev[ii]));
       }
     }
 
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
       if(impulsev[ii][dim] > 0) {
-        m_vHalf[gi][ii] = C1_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dWallTemperature, impulsev[ii]);
-        m_vValue[gi][ii] = 2 * C2_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dWallTemperature, impulsev[ii]) - compute_av(dim, gi, ii, AD_NEXT);
+        m_vHalf[gi][ii] = C1_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dBoundaryTemperature, impulsev[ii]);
+        m_vValue[gi][ii] = 2 * C2_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dBoundaryTemperature, impulsev[ii]) - compute_av(dim, gi, ii, AD_NEXT);
         if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
       }
     }
@@ -308,7 +322,7 @@ void Cell::compute_half_right(unsigned int dim) {
           C1_up += std::abs(impulsev[ii][dim] * compute_ah(dim, gi, ii, AD_PREV)); 
           C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_PREV)) / 2);
 	      } else {
-          C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dWallTemperature, impulsev[ii]));
+          C1_down += std::abs(impulsev[ii][dim] * fast_exp(gasv[gi]->getMass(), m_dBoundaryTemperature, impulsev[ii]));
 	      }
 	    }
 
@@ -316,10 +330,10 @@ void Cell::compute_half_right(unsigned int dim) {
 	      if(impulsev[ii][dim] < 0) {
 	      	// TODO: check
 	      	for( auto& item : m_vPrev[dim] ) {
-            item->m_vHalf[gi][ii] = C1_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dWallTemperature, impulsev[ii]);
+            item->m_vHalf[gi][ii] = C1_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dBoundaryTemperature, impulsev[ii]);
 	      	}
 //	      	m_vPrev[dim]->m_vHalf[gi][ii] = C1_up/C1_down*fast_exp(gasv[gi]->getMass(), T, impulsev[ii]);
-          m_vValue[gi][ii] = 2 * C2_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dWallTemperature, impulsev[ii]) - compute_av(dim, gi, ii, AD_PREV);
+          m_vValue[gi][ii] = 2 * C2_up / C1_down*fast_exp(gasv[gi]->getMass(), m_dBoundaryTemperature, impulsev[ii]) - compute_av(dim, gi, ii, AD_PREV);
 					if(m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
 	      }
 	    }

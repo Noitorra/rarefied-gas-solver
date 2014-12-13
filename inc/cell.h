@@ -25,11 +25,10 @@ public:
 		CT_RIGHT
 	};
 
-  enum BorderType
+  enum BoundaryType
   {
     BT_DIFFUSE,
-    BT_PRESSURE,
-    BT_STREAM
+    BT_STREAM_PRESSURE
   };
 
 	typedef std::vector< Cell* > CellVector;
@@ -37,7 +36,6 @@ public:
 private:
 	double m_dStartConcentration;
 	double m_dStartTemperature;
-  double m_dWallTemperature;
   Vector3d m_vAreastep;
 
 	// variables ... ?
@@ -48,7 +46,11 @@ private:
 	std::vector< DoubleVector > m_vHalf;
 
 	std::vector< CellType > m_vType;
-  std::vector< BorderType > m_vBorderType;
+
+  BoundaryType m_eBoundaryType;
+  double m_dBoundaryTemperature;
+  double m_dBoundaryStream;
+  double m_dBoundaryPressure;
 
 	std::vector<MacroData> m_vMacroData;
 
@@ -61,7 +63,9 @@ public:
 
 	// main methods
 	/* set all necessary parameters */
-  void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep, double _WallTemperature = 0.0);
+  void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep);
+  void setBoundaryType(BoundaryType eBoundaryType, double dTemperature, double dStream, double dPressure);
+  void setBoundaryType(BoundaryType eBoundaryType, double dTemperature);
 	/* creates cells inner values, takes long time */
 	void Init(GridManager* pGridManager);
 
