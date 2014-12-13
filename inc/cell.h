@@ -25,6 +25,13 @@ public:
 		CT_RIGHT
 	};
 
+  enum BorderType
+  {
+    BT_DIFFUSE,
+    BT_PRESSURE,
+    BT_STREAM
+  };
+
 	typedef std::vector< Cell* > CellVector;
 	typedef std::vector<double> DoubleVector;
 private:
@@ -41,6 +48,7 @@ private:
 	std::vector< DoubleVector > m_vHalf;
 
 	std::vector< CellType > m_vType;
+  std::vector< BorderType > m_vBorderType;
 
 	std::vector<MacroData> m_vMacroData;
 
