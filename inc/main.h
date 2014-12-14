@@ -49,11 +49,13 @@ class MacroData {
 public:
   MacroData() :
           C(1.0),
-          T(1.0)
+          T(1.0),
+          P(1.0)
   {};
 
   double C; // concentration
   double T; // temperature
+  double P; // pressure
 
   Vector3d Stream;
   Vector3d HeatStream;

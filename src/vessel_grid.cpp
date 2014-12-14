@@ -254,7 +254,7 @@ void LeftVesselGrid::link_normal_vessel() {
         if (iNy == 0) {
           pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
         }
-        else if (iNy = iNyMax - 1) {
+        else if (iNy == iNyMax - 1) {
           pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
         }
         else {
@@ -624,7 +624,7 @@ void RightVesselGrid::link_normal_vessel() {
         if (iNy == 0) {
           pCell->m_vNext[sep::Y].push_back(m_vCells[iNextY].get());
         }
-        else if (iNy = iNyMax - 1) {
+        else if (iNy == iNyMax - 1) {
           pCell->m_vPrev[sep::Y].push_back(m_vCells[iPrevY].get());
         }
         else {

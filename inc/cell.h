@@ -28,13 +28,14 @@ public:
   enum BoundaryType
   {
     BT_DIFFUSE,
-    BT_STREAM_PRESSURE
+    BT_STREAM,
+    BT_PRESSURE
   };
 
 	typedef std::vector< Cell* > CellVector;
 	typedef std::vector<double> DoubleVector;
 private:
-	double m_dStartConcentration;
+	double m_dStartPressure;
 	double m_dStartTemperature;
   Vector3d m_vAreastep;
 
@@ -49,7 +50,7 @@ private:
 
   BoundaryType m_eBoundaryType;
   double m_dBoundaryTemperature;
-  double m_dBoundaryStream;
+  Vector3d m_dBoundaryStream;
   double m_dBoundaryPressure;
 
 	std::vector<MacroData> m_vMacroData;
@@ -63,9 +64,8 @@ public:
 
 	// main methods
 	/* set all necessary parameters */
-  void setParameters(double _Concentration, double _Temperature, Vector3d _Areastep);
-  void setBoundaryType(BoundaryType eBoundaryType, double dTemperature, double dStream, double dPressure);
-  void setBoundaryType(BoundaryType eBoundaryType, double dTemperature);
+  void setParameters(double _Pressure, double _Temperature, Vector3d _Areastep);
+  void setBoundaryType(BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure);
 	/* creates cells inner values, takes long time */
 	void Init(GridManager* pGridManager);
 
@@ -88,6 +88,15 @@ private:
 	void compute_half_normal(unsigned int dim);
 	void compute_half_preright(unsigned int dim);
 	void compute_half_right(unsigned int dim);
+
+  void compute_half_diffuse_left(unsigned int dim);
+  void compute_half_diffuse_right(unsigned int dim);
+
+  void compute_half_stream_left(unsigned int dim);
+  void compute_half_stream_right(unsigned int dim);
+
+  void compute_half_pressure_left(unsigned int dim);
+  void compute_half_pressure_right(unsigned int dim);
 
 //	void computeValue_Left(unsigned int dim);
 	void compute_value_normal(unsigned int dim);
@@ -122,6 +131,7 @@ private:
 
 	double compute_concentration(unsigned int gi);
 	double compute_temperature(unsigned int gi);
+  double compute_pressure(unsigned int gi);
 	Vector3d compute_stream(unsigned int gi);
 	Vector3d compute_heatstream(unsigned int gi);
   
