@@ -26,6 +26,7 @@ void GridConstructor::ConfigureGridGeometry() {
     });
     // ==============================================================================
 
+//    // test 3 =======================================================================
 //    //Config::vCellSize = Vector2d(8.0, 0.25);
 //    Config::vCellSize = Vector2d(2.0, 0.25);
 //    double T1 = 325.0 + 273.0;
@@ -48,4 +49,8 @@ void GridConstructor::ConfigureGridGeometry() {
 //        if (x == 0)
 //            config->boundary_cond = sep::BT_DIFFUSE;    // gas <-> fluid bound
 //    });
+//    // ==============================================================================
+
+
+    // add here your configuration
 }
