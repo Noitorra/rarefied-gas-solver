@@ -24,7 +24,7 @@ private:
     double PopConcentration();
     double GetConcentration();
     void SetLooping();
-    void SetBox(Vector2i p, Vector2i size,
+    void SetBox(Vector2d p, Vector2d size,
             std::function<void(int x, int y, CellConfig* config)> config_func);
     void SetVessel();
     void PrintGrid();
@@ -55,8 +55,8 @@ private:
     std::shared_ptr<Solver> solver_;
 
     struct GridBox {
-        Vector2i p;
-        Vector2i size;
+        Vector2i p;     // mm
+        Vector2i size;  // mm
         CellConfig def_config;
 
         std::function<void(int x, int y, CellConfig* config)> config_func;

@@ -82,7 +82,21 @@ public:
   
 	const Vector2& operator-=(const Vector2& right) {
 		for(unsigned int i=0;i<this->m_vMass.size();i++) {
-			this->m_vMass[i] += right.m_vMass[i];
+			this->m_vMass[i] -= right.m_vMass[i];
+		}
+		return *this;
+	}
+
+	const Vector2& operator/=(const double val) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] /= val;
+		}
+		return *this;
+	}
+
+	const Vector2& operator*=(const double val) {
+		for(unsigned int i=0;i<this->m_vMass.size();i++) {
+			this->m_vMass[i] *= val;
 		}
 		return *this;
 	}

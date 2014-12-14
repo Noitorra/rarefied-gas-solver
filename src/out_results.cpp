@@ -9,9 +9,49 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
+std::string param_to_str(sep::MacroParamType param) {
+  switch (param) {
+    case sep::T_PARAM:
+      return "temp";
+          break;
+    case sep::C_PARAM:
+      return "conc";
+          break;
+    case sep::P_PARAM:
+      return "pressure";
+          break;
+    default:
+      return "no_param";
+  }
+}
+
 void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
   m_pGrid = pGrid;
   m_pGridManager = pGridManager;
+
+
+  // check if needed to create directories
+  namespace fs = boost::filesystem;
+
+  for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
+    for (int gas = 0; gas < m_pGridManager->GetSolver()->GetGas().size(); gas++) {
+      std::string dir = Config::sOutputPrefix + "out/gas" + std::to_string(gas) +
+              "/" + param_to_str((sep::MacroParamType)param) + "/data/";
+      fs::path file_path(dir);
+
+      boost::system::error_code ec;
+      fs::remove_all(file_path.parent_path(), ec);
+      if (ec)
+        throw("cannot remove directory");
+      boost::filesystem::create_directories(file_path, ec);
+      if (ec)
+        throw("cannot create directory");
+      fs::path pic_dir(file_path.parent_path().parent_path() / fs::path("pic"));
+      boost::filesystem::create_directories(pic_dir, ec);
+      if (ec)
+        throw("cannot create directory");
+    }
+  }
 }
 
 void OutResults::OutAll(int iIteration) {
@@ -60,20 +100,10 @@ void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int
   
   std::string filename;
   const std::string& sOutputPrefix = Config::sOutputPrefix;
-  switch (eType) {
-    case sep::T_PARAM:
-      filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/temp/" + std::to_string(iIndex) + ".bin";
-      break;
-    case sep::C_PARAM:
-      filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/conc/" + std::to_string(iIndex) + ".bin";
-      break;
-    case sep::P_PARAM:
-      filename = sOutputPrefix + "out/gas" + std::to_string(iGas) + "/pressure/" + std::to_string(iIndex) + ".bin";
-      break;
-    default:
-      // We are not able to print flow yet
-      return;
-  }
+
+  filename = sOutputPrefix + "out/gas" + std::to_string(iGas) +
+          "/" + param_to_str(eType) + "/data/" + std::to_string(iIndex) + ".bin";
+
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
   
   const Vector3i& vGridSize = Config::vGridSize;

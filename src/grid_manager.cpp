@@ -1,3 +1,5 @@
+#include <gas.h>
+#include <curses.h>
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
@@ -20,7 +22,7 @@ void GridManager::PrintGrid() {
   for (int z = 0; z < grid_size.z(); z++) {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int x = 0; x < grid_size.x(); x++) {
-        std::cout << grid_->m_vInitCells[x][y][z]->m_cInitCond.C << " ";
+        std::cout << grid_->m_vInitCells[x][y][z]->m_cInitCond.T << " ";
       }
       std::cout << std::endl;
     }
@@ -64,32 +66,58 @@ void GridManager::GridGeometryToInitialCells() {
   // determine grid size
   Vector2i min(boxes_stack_[0].p), max;
   std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
-      if (box.p.x() < min.x())
-        min.x() = box.p.x();
-      if (box.p.y() < min.y())
-        min.y() = box.p.y();
+    if (box.p.x() < min.x())
+      min.x() = box.p.x();
+    if (box.p.y() < min.y())
+      min.y() = box.p.y();
 
-      if (box.p.x() + box.size.x() > max.x())
-        max.x() = box.p.x() + box.size.x();
-      if (box.p.y() + box.size.y() > max.y())
-        max.y() = box.p.y() + box.size.y();
+    if (box.p.x() + box.size.x() > max.x())
+      max.x() = box.p.x() + box.size.x();
+    if (box.p.y() + box.size.y() > max.y())
+      max.y() = box.p.y() + box.size.y();
   });
-  Vector2i size = max - min;
+  Vector2i size = max - min + Vector2i(2, 2); // size += 2 for fake cells
   Config::vGridSize = Vector3i(size.x(), size.y(), 1);
+  min -= Vector2i(1, 1);  // min_p -= 1 for fake cells
 
   grid_->AllocateInitData();
 
   std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
-      for (int x = 0; x < box.size.x(); x++) {
-        for (int y = 0; y < box.size.y(); y++) {
-          Vector2i vTempPos = box.p + Vector2i(x, y) - min;
-          InitCellData* p_init_cell = grid_->GetInitCell(vTempPos);
-          p_init_cell->m_eType = sep::NORMAL_CELL;
-          CellConfig &init_cond = p_init_cell->m_cInitCond;
-          init_cond = box.def_config;
-          box.config_func(x, y, &init_cond);
+    for (int x = 0; x < box.size.x(); x++) {
+      for (int y = 0; y < box.size.y(); y++) {
+        Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
+        InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
+        init_cell->m_eType = sep::NORMAL_CELL;
+        CellConfig &init_cond = init_cell->m_cInitCond;
+        init_cond = box.def_config;
+        box.config_func(x, y, &init_cond);
+      }
+    }
+
+    // copy configuration to fake cells around the box, because it's boundary cells
+    for (int x = -1; x < box.size.x() + 1; x++) {
+      for (int y = -1; y < box.size.y() + 1; y++) {
+        Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
+        InitCellData* target_cell = grid_->GetInitCell(tmp_pos);
+        if (target_cell->m_eType == sep::FAKE_CELL) {
+          InitCellData* source_cell = NULL;
+          if (x == -1) {
+            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(1, 0));
+          } else if (x == box.size.x()) {
+            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(-1, 0));
+          } else if (y == -1) {
+            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(0, 1));
+          } else if (y == box.size.y()) {
+            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(0, -1));
+          }
+          if (!source_cell)
+            throw("null pointer");
+          CellConfig &init_cond = target_cell->m_cInitCond;
+          // copy configuration
+          init_cond = source_cell->m_cInitCond;
         }
       }
+    }
   });
 }
 
@@ -186,12 +214,18 @@ int GridManager::GetSlash(sep::NeighborType type) const {
   }
 }
 
-void GridManager::SetBox(Vector2i p, Vector2i size,
+void GridManager::SetBox(Vector2d p, Vector2d size,
         std::function<void(int x, int y, CellConfig* config)> config_func) {
   CellConfig def_config;
   def_config.C = GetConcentration();
   def_config.T = GetTemperature();
-  boxes_stack_.push_back({p, size, def_config, config_func});
+  def_config.wall_T = GetTemperature();
+
+  Vector2d& cell_size = Config::vCellSize;
+  Vector2i cells_p(p.x() / cell_size.x(), p.y() / cell_size.y());
+  Vector2i cells_size(size.x() / cell_size.x(), size.y() / cell_size.y());
+
+  boxes_stack_.push_back({cells_p, cells_size, def_config, config_func});
 }
 
 void GridManager::PushTemperature(double t) {
@@ -275,6 +309,16 @@ void GridManager::LinkCells() {
 }
 
 void GridManager::InitCells() {
+  GasVector& gases = solver_->GetGas();
+  double min_mass = 100.0;
+  double max_mass = 0.0;
+  std::for_each(gases.begin(), gases.end(), [&] (std::shared_ptr<Gas>& gas) {
+      const double& m = gas->getMass();
+      min_mass = std::min(m, min_mass);
+      max_mass = std::max(m, max_mass);
+  });
+  double max_impulse = 4.8 * max_mass;
+
   const Vector3i& grid_size = Config::vGridSize;
   for (int x = 0; x < grid_size.x(); x++) {
     for (int y = 0; y < grid_size.y(); y++) {
@@ -287,7 +331,16 @@ void GridManager::InitCells() {
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
         const CellConfig& init_cond = p_init_cell->m_cInitCond;
         // Set parameters
-        Vector3d area_step(0.1, 0.1, 0.1);
+        Vector2d cell_size = Config::vCellSize;
+        // normalize cell size to free path of molecule
+        const double free_path_of_molecule = 80.0; // TODO: set precise number
+        cell_size /= free_path_of_molecule;
+        Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
+
+        // decreasing time step if needed
+        double time_step = std::min(area_step.x(), area_step.y()) / (max_impulse / min_mass);
+        Config::dTimestep = std::min(Config::dTimestep, time_step);
+
         p_cell->setParameters(
                 init_cond.C,
                 init_cond.T,
