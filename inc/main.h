@@ -42,7 +42,8 @@ namespace sep {
   enum BoundaryType
   {
     BT_DIFFUSE,
-    BT_STREAM_PRESSURE
+    BT_STREAM,
+    BT_PRESSURE
   };
 }
 

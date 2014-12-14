@@ -293,7 +293,7 @@ void GridManager::InitCells() {
                 init_cond.T,
                 area_step
         );
-        p_cell->setBoundaryType(init_cond.boundary_cond, init_cond.wall_T);
+        p_cell->setBoundaryType(init_cond.boundary_cond, init_cond.wall_T, Vector3d(), 0.0);
         p_cell->Init(this);
       }
     }
