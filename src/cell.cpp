@@ -51,7 +51,7 @@ void Cell::setParameters(double _Pressure, double _Temperature, Vector3d _Areast
 	m_vAreastep = _Areastep;
 }
 
-void Cell::setBoundaryType(BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure) {
+void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure) {
   m_eBoundaryType = eBoundaryType;
   m_dBoundaryTemperature = dTemperature;
   m_dBoundaryStream = dStream;
@@ -231,13 +231,13 @@ void Cell::compute_type(unsigned int dim) {
 void Cell::compute_half_left(unsigned int dim) {
   switch (m_eBoundaryType)
   {
-  case BT_DIFFUSE:
+  case sep::BT_DIFFUSE:
     compute_half_diffuse_left(dim);
     break;
-  case BT_PRESSURE:
+  case sep::BT_PRESSURE:
     compute_half_pressure_left(dim);
     break;
-  case BT_STREAM:
+  case sep::BT_STREAM:
     compute_half_stream_left(dim);
     break;
   default:
@@ -275,13 +275,13 @@ void Cell::compute_half_preright(unsigned int dim) {
 void Cell::compute_half_right(unsigned int dim) {
   switch (m_eBoundaryType)
   {
-  case BT_DIFFUSE:
+  case sep::BT_DIFFUSE:
     compute_half_diffuse_right(dim);
     break;
-  case BT_PRESSURE:
+  case sep::BT_PRESSURE:
     compute_half_pressure_right(dim);
     break;
-  case BT_STREAM:
+  case sep::BT_STREAM:
     compute_half_stream_right(dim);
     break;
   default:

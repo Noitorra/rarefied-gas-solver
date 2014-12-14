@@ -291,9 +291,9 @@ void GridManager::InitCells() {
         p_cell->setParameters(
                 init_cond.C,
                 init_cond.T,
-                area_step,
-                init_cond.wall_T
+                area_step
         );
+        p_cell->setBoundaryType(init_cond.boundary_cond, init_cond.wall_T);
         p_cell->Init(this);
       }
     }
