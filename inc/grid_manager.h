@@ -55,8 +55,8 @@ private:
     std::shared_ptr<Solver> solver_;
 
     struct GridBox {
-        Vector2i p;     // mm
-        Vector2i size;  // mm
+        Vector2i p;     // in cells
+        Vector2i size;  // in cells
         CellConfig def_config;
 
         std::function<void(int x, int y, CellConfig* config)> config_func;
