@@ -37,15 +37,18 @@ void Impulse::Init(GridManager* pGridManager) {
   m_pGrid = pGridManager->GetGrid();
   m_pSolver = pGridManager->GetSolver();
   
-  // TODO: do something with that...
+  // TODO: Possibly very wrong!
+  /*
   GasVector& gasv = m_pSolver->GetGas();
   if (gasv.size() >= 2) {
-    m_dMaxImpulse = std::max(gasv[0]->getMass(), gasv[1]->getMass()) * m_dMaxImpulse;
+    m_dMaxImpulse = std::max(gasv[0]->getMass(), gasv[1]->getMass()) * m_dMaxImpulse; 
     std::cout << "Impulse::Init() : gasv.size() >= 2" << std::endl;
   }
   else {
     std::cout << "Impulse::Init() : gasv.size() < 2" << std::endl;
   }
+  */
+
   std::cout << "Impulse::Init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
 
   // calc delta impulse
