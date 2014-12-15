@@ -1,5 +1,4 @@
 #include <gas.h>
-#include <curses.h>
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
