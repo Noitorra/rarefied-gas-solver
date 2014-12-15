@@ -149,7 +149,7 @@ void GridManager::FindNeighbour(Vector2i p, sep::CellType type,
         int& quant) {
   int tmp_quant = 0;
   sep::CellType e_type;
-  for (int ax = 0; ax <= sep::Z; ax++) {
+  for (int ax = 0; ax <= sep::Y; ax++) {
     for (int neighb = 0; neighb <= sep::NEXT; neighb++) {
       if (GetNeighbour(p, (sep::Axis)ax, (sep::NeighborType)neighb, e_type)) {
         if (e_type == type) {
@@ -170,7 +170,7 @@ bool GridManager::FindNeighbourWithIndex(Vector2i p, sep::CellType type,
                                 sep::NeighborType &neighbor) {
   int quant = 0;
   sep::CellType tmp_type;
-  for (int ax = 0; ax <= sep::Z; ax++) {
+  for (int ax = 0; ax <= sep::Y; ax++) {
     for (int neighb = 0; neighb <= sep::NEXT; neighb++) {
       if (GetNeighbour(p, (sep::Axis)ax, (sep::NeighborType)neighb, tmp_type)) {
         if (tmp_type == type) {
