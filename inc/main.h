@@ -67,15 +67,25 @@ public:
 class CellConfig {
 public:
   CellConfig() :
-  C(1.0),
+  pressure(1.0),
   T(1.0),
-  wall_T(1.0),
-  boundary_cond(sep::BT_DIFFUSE)
+  boundary_cond(sep::BT_DIFFUSE),
+  boundary_T(1.0),
+  boundary_pressure(1.0)
   {};
 
-  double C; // concentration
-  double T; // temperature
-  double wall_T;  // wall temperature
-
+  double pressure; // initial pressure
+  double T; // initial temperature
   sep::BoundaryType boundary_cond;
+  double boundary_T;  // wall temperature
+  Vector3d boundary_stream;
+  double boundary_pressure;
+};
+
+struct GridBox {
+  Vector2i p;     // in cells
+  Vector2i size;  // in cells
+  CellConfig def_config;
+
+  std::function<void(int x, int y, CellConfig* config, GridBox* box)> config_func;
 };

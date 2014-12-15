@@ -20,12 +20,14 @@ private:
     void PushTemperature(double t);
     double PopTemperature();
     double GetTemperature();
-    void PushConcentration(double c);
-    double PopConcentration();
-    double GetConcentration();
+    void PushPressure(double c);
+    double PopPressure();
+    double GetPressure();
     void SetLooping();
     void SetBox(Vector2d p, Vector2d size,
-            std::function<void(int x, int y, CellConfig* config)> config_func);
+            std::function<void(int x, int y,
+                    CellConfig* config,
+                    GridBox* box)> config_func);
     void SetVessel();
     void PrintGrid();
     void GridGeometryToInitialCells();
@@ -50,16 +52,8 @@ private:
           sep::NeighborType eNeighbor);
 
     std::vector<double> temperature_stack_;
-    std::vector<double> concentration_stack_;
+    std::vector<double> pressure_stack_;
     std::shared_ptr<Grid> grid_;
     std::shared_ptr<Solver> solver_;
-
-    struct GridBox {
-        Vector2i p;     // in cells
-        Vector2i size;  // in cells
-        CellConfig def_config;
-
-        std::function<void(int x, int y, CellConfig* config)> config_func;
-    };
     std::vector<GridBox> boxes_stack_;
 };

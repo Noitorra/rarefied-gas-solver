@@ -90,7 +90,7 @@ void GridManager::GridGeometryToInitialCells() {
         init_cell->m_eType = sep::NORMAL_CELL;
         CellConfig &init_cond = init_cell->m_cInitCond;
         init_cond = box.def_config;
-        box.config_func(x, y, &init_cond);
+        box.config_func(x, y, &init_cond, &box);
       }
     }
 
@@ -215,11 +215,13 @@ int GridManager::GetSlash(sep::NeighborType type) const {
 }
 
 void GridManager::SetBox(Vector2d p, Vector2d size,
-        std::function<void(int x, int y, CellConfig* config)> config_func) {
+        std::function<void(int x, int y,
+                CellConfig* config,
+                GridBox* box)> config_func) {
   CellConfig def_config;
-  def_config.C = GetConcentration();
+  def_config.pressure = GetPressure();
   def_config.T = GetTemperature();
-  def_config.wall_T = GetTemperature();
+  def_config.boundary_T = GetTemperature();
 
   Vector2d& cell_size = Config::vCellSize;
   Vector2i cells_p(p.x() / cell_size.x(), p.y() / cell_size.y());
@@ -244,20 +246,20 @@ double GridManager::GetTemperature() {
   return temperature_stack_.back();
 }
 
-void GridManager::PushConcentration(double c) {
-  concentration_stack_.push_back(c);
+void GridManager::PushPressure(double c) {
+  pressure_stack_.push_back(c);
 }
-double GridManager::PopConcentration() {
-  if (concentration_stack_.size() < 1)
+double GridManager::PopPressure() {
+  if (pressure_stack_.size() < 1)
     return 0.0;
-  double c = concentration_stack_.back();
-  concentration_stack_.pop_back();
+  double c = pressure_stack_.back();
+  pressure_stack_.pop_back();
   return c;
 }
-double GridManager::GetConcentration() {
-  if (concentration_stack_.size() < 1)
+double GridManager::GetPressure() {
+  if (pressure_stack_.size() < 1)
     return 0.0;
-  return concentration_stack_.back();
+  return pressure_stack_.back();
 }
 
 void GridManager::FillInGrid() {
@@ -342,11 +344,16 @@ void GridManager::InitCells() {
         Config::dTimestep = std::min(Config::dTimestep, time_step);
 
         p_cell->setParameters(
-                init_cond.C,
+                init_cond.pressure,
                 init_cond.T,
                 area_step
         );
-        p_cell->setBoundaryType(init_cond.boundary_cond, init_cond.wall_T, Vector3d(), 0.0);
+        p_cell->setBoundaryType(
+                init_cond.boundary_cond,
+                init_cond.boundary_T,
+                init_cond.boundary_stream,
+                init_cond.boundary_pressure
+        );
         p_cell->Init(this);
       }
     }

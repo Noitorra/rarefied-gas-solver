@@ -12,13 +12,13 @@ protected:
 private:
   virtual void PushTemperature(double dT) = 0;
   virtual double PopTemperature() = 0;
-  virtual void PushConcentration(double dConc) = 0;
-  virtual double PopConcentration() = 0;
+  virtual void PushPressure(double pressure) = 0;
+  virtual double PopPressure() = 0;
   virtual void PrintGrid() = 0;
   // Set box to normal
   virtual void SetBox(Vector2d vP, Vector2d vSize,
-          std::function<void(int x, int y, CellConfig* config)> config_func =
-          [] (int x, int y, CellConfig* config) {}) = 0;
+          std::function<void(int x, int y, CellConfig* config, GridBox* box)> config_func =
+          [] (int x, int y, CellConfig* config, GridBox* box) {}) = 0;
 };
 
 #endif // GRID_CONSTRUCTOR_H_
