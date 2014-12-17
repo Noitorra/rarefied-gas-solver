@@ -24,7 +24,7 @@ void Solver::Init(GridManager* pGridManager) {
   m_pGrid = pGridManager->GetGrid();
 
   m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
-	m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
+	//m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
   
   m_pImpulse->Init(pGridManager);
 }

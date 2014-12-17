@@ -8,6 +8,7 @@
 #include <string>
 
 #include "types.h"
+#include <functional>
 
 namespace sep {
   enum GridGeometry {

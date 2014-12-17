@@ -28,7 +28,7 @@ public:
 	typedef std::vector< Cell* > CellVector;
 	typedef std::vector<double> DoubleVector;
 private:
-	double m_dStartPressure;
+  std::vector<double> m_vStartPressure;
 	double m_dStartTemperature;
   Vector3d m_vAreastep;
 
@@ -43,8 +43,8 @@ private:
 
   sep::BoundaryType m_eBoundaryType;
   double m_dBoundaryTemperature;
-  Vector3d m_dBoundaryStream;
-  double m_dBoundaryPressure;
+  std::vector<Vector3d> m_vBoundaryStream;
+  std::vector<double> m_vBoundaryPressure;
 
 	std::vector<MacroData> m_vMacroData;
 
@@ -57,8 +57,8 @@ public:
 
 	// main methods
 	/* set all necessary parameters */
-  void setParameters(double _Pressure, double _Temperature, Vector3d _Areastep);
-  void setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure);
+  void setParameters(double _Pressure, double _Temperature, Vector3d _Areastep, int _GasIndex = 0);
+  void setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure, int iGasIndex = 0);
 	/* creates cells inner values, takes long time */
 	void Init(GridManager* pGridManager);
 
@@ -72,10 +72,11 @@ public:
 
 	// macro data
 	void computeMacroData();
+  bool isValid();
 	const std::vector<MacroData>& getMacroData() const { return m_vMacroData; }
 private:
 	// help methods
-	void compute_type(unsigned int dim);
+  void compute_type(unsigned int dim);
 
   void compute_half_left(unsigned int dim);
 	void compute_half_normal(unsigned int dim);

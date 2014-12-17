@@ -28,11 +28,11 @@ m_pGrid(nullptr)
 	// m_vAreastep.resize(3, 0.0);
 
 	m_dStartTemperature = 0.0;
-  m_dStartPressure = 0.0;
+  m_vStartPressure.clear();
 
   m_dBoundaryTemperature = 0.0;
-  m_dBoundaryStream.set(0.0, 0.0, 0.0);
-  m_dBoundaryPressure = 0.0;
+  m_vBoundaryStream.clear();
+  m_vBoundaryPressure.clear();
 
 	// Grid....
 	m_pGridManager = nullptr;
@@ -45,17 +45,22 @@ Cell::~Cell() {
 /* public */
 
 // main methods
-void Cell::setParameters(double _Pressure, double _Temperature, Vector3d _Areastep) {
-  m_dStartPressure = _Pressure;
+void Cell::setParameters(double _Pressure, double _Temperature, Vector3d _Areastep, int _GasIndex) {
+  if (m_vStartPressure.size() <= _GasIndex) m_vStartPressure.resize(_GasIndex + 1);
+
+  m_vStartPressure[_GasIndex] = _Pressure;
 	m_dStartTemperature = _Temperature;
 	m_vAreastep = _Areastep;
 }
 
-void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure) {
+void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure, int iGasIndex) {
+  if (m_vBoundaryStream.size() <= iGasIndex) m_vBoundaryStream.resize(iGasIndex + 1);
+  if (m_vBoundaryPressure.size() <= iGasIndex) m_vBoundaryPressure.resize(iGasIndex + 1);
+
   m_eBoundaryType = eBoundaryType;
   m_dBoundaryTemperature = dTemperature;
-  m_dBoundaryStream = dStream;
-  m_dBoundaryPressure = dPressure;
+  m_vBoundaryStream[iGasIndex] = dStream;
+  m_vBoundaryPressure[iGasIndex] = dPressure;
 }
 
 void Cell::Init(GridManager* pGridManager) {
@@ -76,7 +81,7 @@ void Cell::Init(GridManager* pGridManager) {
     m_vHalf[gi].resize( impulsev.size(), 0.0 );
     m_vValue[gi].resize( impulsev.size(), 0.0 );
 
-    ResetSpeed(gi, m_dStartPressure / m_dStartTemperature, m_dStartTemperature);
+    ResetSpeed(gi, m_vStartPressure[gi] / m_dStartTemperature, m_dStartTemperature);
   }
 }
 
@@ -153,15 +158,33 @@ void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
 }
 
 void Cell::computeMacroData() {
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = m_pSolver->GetGas();
 
-	for(unsigned int gi=0;gi<gasv.size();gi++) {
-		m_vMacroData[gi].C = compute_concentration(gi);
-    m_vMacroData[gi].Stream = compute_stream(gi);
-    m_vMacroData[gi].T = compute_temperature(gi);
-    m_vMacroData[gi].P = compute_pressure(gi);
-		m_vMacroData[gi].HeatStream = compute_heatstream(gi);
-	}
+  if (!isValid()) {
+    for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+      m_vMacroData[gi].C = 0.0;
+      m_vMacroData[gi].Stream = Vector3d();
+      m_vMacroData[gi].T = 0.0;
+      m_vMacroData[gi].P = 0.0;
+      m_vMacroData[gi].HeatStream = Vector3d();
+    }
+  } else {
+    for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+      m_vMacroData[gi].C = compute_concentration(gi);
+      m_vMacroData[gi].Stream = compute_stream(gi);
+      m_vMacroData[gi].T = compute_temperature(gi);
+      m_vMacroData[gi].P = compute_pressure(gi);
+      m_vMacroData[gi].HeatStream = compute_heatstream(gi);
+    }
+  }
+}
+
+bool Cell::isValid()
+{
+  bool isX = m_vType[sep::X] == CT_NORMAL || m_vType[sep::X] == CT_PRERIGHT || m_vType[sep::X] == CT_UNDEFINED;
+  bool isY = m_vType[sep::Y] == CT_NORMAL || m_vType[sep::Y] == CT_PRERIGHT || m_vType[sep::Y] == CT_UNDEFINED;
+  bool isZ = m_vType[sep::Z] == CT_NORMAL || m_vType[sep::Z] == CT_PRERIGHT || m_vType[sep::Z] == CT_UNDEFINED;
+  return isX && isY && isZ;
 }
 
 /* Tests */
@@ -424,8 +447,12 @@ void Cell::compute_half_stream_left(unsigned int dim)
     }
 
     // OnlyDifference between these methods.
-    C1_up += m_dBoundaryStream[dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
-    C2_up += m_dBoundaryStream[dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
+    C1_up += m_vBoundaryStream[gi][dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
+    C2_up += m_vBoundaryStream[gi][dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
+
+    // Nessesary if we have very high stream.
+    if (C1_up < 0) C1_up = 0.0;
+    if (C2_up < 0) C2_up = 0.0;
 
     for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
       if (impulsev[ii][dim] > 0) {
@@ -474,8 +501,12 @@ void Cell::compute_half_stream_right(unsigned int dim)
     }
 
     // OnlyDifference between these methods.
-    C1_up -= m_dBoundaryStream[dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
-    C2_up -= m_dBoundaryStream[dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
+    C1_up -= m_vBoundaryStream[gi][dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
+    C2_up -= m_vBoundaryStream[gi][dim] * gasv[gi]->getMass() / impulse->getDeltaImpulseQube();
+
+    // Nessesary if we have very high stream.
+    if (C1_up < 0) C1_up = 0.0;
+    if (C2_up < 0) C2_up = 0.0;
 
     for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
       if (impulsev[ii][dim] < 0) {
@@ -522,8 +553,12 @@ void Cell::compute_half_pressure_left(unsigned int dim)
     }
 
     // Setting pressure here.
-    C1_up = m_dBoundaryPressure / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C1_up;
-    C2_up = m_dBoundaryPressure / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C2_up;
+    C1_up = m_vBoundaryPressure[gi] / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C1_up;
+    C2_up = m_vBoundaryPressure[gi] / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C2_up;
+
+    // Nessesary if we have very high stream.
+    if (C1_up < 0) C1_up = 0.0;
+    if (C2_up < 0) C2_up = 0.0;
 
     for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
       if (impulsev[ii][dim] > 0) {
@@ -572,8 +607,12 @@ void Cell::compute_half_pressure_right(unsigned int dim)
     }
 
     // Setting pressure here.
-    C1_up = m_dBoundaryPressure / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C1_up;
-    C2_up = m_dBoundaryPressure / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C2_up;
+    C1_up = m_vBoundaryPressure[gi] / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C1_up;
+    C2_up = m_vBoundaryPressure[gi] / m_dBoundaryTemperature / impulse->getDeltaImpulseQube() - C2_up;
+
+    // Nessesary if we have very high stream.
+    if (C1_up < 0) C1_up = 0.0;
+    if (C2_up < 0) C2_up = 0.0;
 
     for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
       if (impulsev[ii][dim] < 0) {
