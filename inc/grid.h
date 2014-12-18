@@ -22,7 +22,7 @@ protected:
   sep::CellType m_eType;
   Cell* m_pCell;
   std::vector<MacroData> m_vMacroData;
-  CellConfig m_cInitCond;
+  GasesConfigsMap m_mInitConds;  // initial configs for several gases
 };
 
 class Grid {

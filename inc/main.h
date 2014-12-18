@@ -83,10 +83,13 @@ public:
   double boundary_pressure;
 };
 
+typedef std::map<int, CellConfig> GasesConfigsMap;
+typedef std::function<void(int x, int y, GasesConfigsMap& configs, struct GridBox* box)> ConfigFunction;
+
 struct GridBox {
   Vector2i p;     // in cells
   Vector2i size;  // in cells
   CellConfig def_config;
 
-  std::function<void(int x, int y, CellConfig* config, GridBox* box)> config_func;
+  ConfigFunction config_func;
 };

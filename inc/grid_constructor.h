@@ -17,8 +17,7 @@ private:
   virtual void PrintGrid() = 0;
   // Set box to normal
   virtual void SetBox(Vector2d vP, Vector2d vSize,
-          std::function<void(int x, int y, CellConfig* config, GridBox* box)> config_func =
-          [] (int x, int y, CellConfig* config, GridBox* box) {}) = 0;
+          ConfigFunction config_func = [] (int x, int y, GasesConfigsMap& configs, struct GridBox* box) {}) = 0;
 };
 
 #endif // GRID_CONSTRUCTOR_H_
