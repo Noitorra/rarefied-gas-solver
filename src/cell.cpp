@@ -168,8 +168,8 @@ void Cell::computeMacroData() {
     for (unsigned int gi = 0; gi < gasv.size(); gi++) {
       m_vMacroData[gi].C = compute_concentration(gi);
       m_vMacroData[gi].Stream = compute_stream(gi);
-      m_vMacroData[gi].T = compute_temperature(gi);
-      m_vMacroData[gi].P = compute_pressure(gi);
+      m_vMacroData[gi].T = (m_vMacroData[gi].C == 0.0) ? 0.0 : compute_temperature(gi);
+      m_vMacroData[gi].P = (m_vMacroData[gi].C == 0.0) ? 0.0 : compute_pressure(gi);
       m_vMacroData[gi].HeatStream = compute_heatstream(gi);
     }
   }
@@ -192,28 +192,24 @@ bool Cell::testInnerValuesRange() {
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
     for(unsigned int ii=0;ii<impulsev.size();ii++) {
-        if( 0.0 <= m_vValue[gi][ii] && m_vValue[gi][ii] <= 1.0 ) {
-            // all is good
-        } else {
-            // wrong values
-            result = false;
-            std::cout << "Cell::testIVR(): Error [type][gi][ii]"
-              << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
-              << "[" << gi << "]"
-              << "[" << ii << "]"
-              << " value = " << m_vValue[gi][ii] << std::endl;
-                }
-                if( 0.0 <= m_vHalf[gi][ii] && m_vHalf[gi][ii] <= 1.0 ) {
-                    // all is good
-                } else {
-                    // wrong values
-                    result = false;
-            std::cout << "Cell::testIVR(): Error [type][gi][ii]"
-              << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
-              << "[" << gi << "]"
-              << "[" << ii << "]"
-              << " half = " << m_vHalf[gi][ii] << std::endl;
-        }
+      if (m_vValue[gi][ii] < 0) {
+        // wrong values
+        result = false;
+        std::cout << "Cell::testIVR(): Error [type][gi][ii]"
+          << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
+          << "[" << gi << "]"
+          << "[" << ii << "]"
+          << " value = " << m_vValue[gi][ii] << std::endl;
+      }
+      if (m_vHalf[gi][ii] < 0) {
+        // wrong values
+        result = false;
+        std::cout << "Cell::testIVR(): Error [type][gi][ii]"
+          << "[" << m_vType[0] << ":" << m_vType[1] << ":" << m_vType[2] << "]"
+          << "[" << gi << "]"
+          << "[" << ii << "]"
+          << " half = " << m_vHalf[gi][ii] << std::endl;
+      }
     }
   }
 

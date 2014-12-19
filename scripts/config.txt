@@ -1,0 +1,3 @@
+path="../build/out/"
+some_val="someval"
+rl_shit=2
