@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy
 from numpy import *
 
-max_files = 5
-each = 1
+max_files = 700
+each = 10
 gas_num = 2
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
