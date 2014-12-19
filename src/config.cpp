@@ -28,7 +28,7 @@ void Config::Init()
   else if (iGasesNumber == 2)
   {
     vGas[0] = std::shared_ptr<Gas>(new Gas(1.0));
-    vGas[1] = std::shared_ptr<Gas>(new Gas(0.5));
+    vGas[1] = std::shared_ptr<Gas>(new Gas(1.0));
   }
   else if (iGasesNumber == 3)
   {

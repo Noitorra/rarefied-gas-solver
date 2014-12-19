@@ -29,7 +29,7 @@ public:
 	typedef std::vector<double> DoubleVector;
 private:
   std::vector<double> m_vStartPressure;
-	double m_dStartTemperature;
+  std::vector<double> m_vStartTemperature;
   Vector3d m_vAreastep;
 
 	// variables ... ?
@@ -41,8 +41,8 @@ private:
 
 	std::vector< CellType > m_vType;
 
-  sep::BoundaryType m_eBoundaryType;
-  double m_dBoundaryTemperature;
+  std::vector<sep::BoundaryType> m_vBoundaryType;
+  std::vector<double> m_vBoundaryTemperature;
   std::vector<Vector3d> m_vBoundaryStream;
   std::vector<double> m_vBoundaryPressure;
 
@@ -83,14 +83,14 @@ private:
 	void compute_half_preright(unsigned int dim);
 	void compute_half_right(unsigned int dim);
 
-  void compute_half_diffuse_left(unsigned int dim);
-  void compute_half_diffuse_right(unsigned int dim);
+  void compute_half_diffuse_left(unsigned int dim, int gi);
+  void compute_half_diffuse_right(unsigned int dim, int gi);
 
-  void compute_half_stream_left(unsigned int dim);
-  void compute_half_stream_right(unsigned int dim);
+  void compute_half_stream_left(unsigned int dim, int gi);
+  void compute_half_stream_right(unsigned int dim, int gi);
 
-  void compute_half_pressure_left(unsigned int dim);
-  void compute_half_pressure_right(unsigned int dim);
+  void compute_half_pressure_left(unsigned int dim, int gi);
+  void compute_half_pressure_right(unsigned int dim, int gi);
 
 //	void computeValue_Left(unsigned int dim);
 	void compute_value_normal(unsigned int dim);
