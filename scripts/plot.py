@@ -41,9 +41,11 @@ for param in params:
             max_val = max(max_val, v)
             min_val = min(min_val, v)
 
-      if math.isnan(min_val) or math.isnan(max_val) == nan:
-        print 'max or min are nan!'
-        plt.imshow(D, origin='lower', vmin=0.82, vmax=1.1, interpolation='nearest')
+      if math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
+                              (max_val - min_val) < 1e-6:
+        print 'warning: max = min'
+        plt.imshow(D, origin='lower', vmin = max_val - 0.1, vmax= max_val + 0.1,
+                   interpolation='nearest')
       else:
         plt.imshow(D, origin='lower', vmin=min_val, vmax=max_val,
                   interpolation='none')

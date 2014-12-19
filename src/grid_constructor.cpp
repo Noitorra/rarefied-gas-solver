@@ -1,5 +1,4 @@
 #include "grid_constructor.h"
-#include "grid_manager.h"
 #include "config.h"
 
 // This method being invoked while grid configuration
@@ -71,6 +70,20 @@ void GridConstructor::ConfigureGridGeometry() {
         configs[0].boundary_cond = sep::BT_DIFFUSE;
         configs[0].boundary_T = dT2;
       }
+      /*
+    PushTemperature(0.8);
+    PushPressure(1.0);
+    SetBox(Vector2d(1, 1), Vector2d(15, 15), [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size) {
+        if (x == 0) {
+            configs[0].boundary_T = 1.0;
+            configs[1].boundary_T = 0.5;
+        }
+        if (x == size.x() - 1) {
+          configs[0].boundary_cond = sep::BT_STREAM;
+          configs[0].boundary_stream = Vector3d(-0.01, 0.0, 0.0);
+          configs[0].boundary_T = 1.0;
+        }
+        */
     });
     /*
     SetBox(Vector2d(10, 10), Vector2d(15, 15), [] (int x, int y, CellConfig* config, GridBox* box) {

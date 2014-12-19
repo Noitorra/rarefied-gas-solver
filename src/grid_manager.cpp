@@ -87,35 +87,20 @@ void GridManager::GridGeometryToInitialCells() {
         Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
         InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         init_cell->m_eType = sep::NORMAL_CELL;
+      }
+    }
+
+    for (int x = -1; x < box.size.x() + 1; x++) {
+      for (int y = -1; y < box.size.y() + 1; y++) {
+        Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
+        InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         GasesConfigsMap& init_conds = init_cell->m_mInitConds;
         for (int gas = 0; gas < Config::iGasesNumber; gas++) {
           init_conds[gas] = box.def_config;
         }
-        box.config_func(x, y, init_conds, &box);
-      }
-    }
-
-    // copy configuration to fake cells around the box, because it's boundary cells
-    for (int x = -1; x < box.size.x() + 1; x++) {
-      for (int y = -1; y < box.size.y() + 1; y++) {
-        Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
-        InitCellData* target_cell = grid_->GetInitCell(tmp_pos);
-        if (target_cell->m_eType == sep::FAKE_CELL) {
-          InitCellData* source_cell = NULL;
-          if (x == -1) {
-            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(1, 0));
-          } else if (x == box.size.x()) {
-            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(-1, 0));
-          } else if (y == -1) {
-            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(0, 1));
-          } else if (y == box.size.y()) {
-            source_cell = grid_->GetInitCell(tmp_pos + Vector2i(0, -1));
-          }
-          if (!source_cell)
-            throw("null pointer");
-          // copy configurations
-          target_cell->m_mInitConds = source_cell->m_mInitConds;
-        }
+        Vector2i size_with_fakes(box.size);
+        size_with_fakes += Vector2i(2, 2);
+        box.config_func(x + 1, y + 1, init_conds, size_with_fakes);
       }
     }
   });
