@@ -10,9 +10,31 @@ gas_num = 2
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
 
+"""
+Here is ULTRA param finder in config.txt it searches for path="some/path/to/out/dir"
+and sets out_dir variable to it.
+"""
+
+out_dir = '../out/'
+
+with open("config.txt", "r") as cfg_file:
+    str_list = cfg_file.readlines()
+    for str_index in range(len(str_list)):
+        str_line = str_list[str_index].replace('\n', '').split("=")
+        if len(str_line) == 2:
+            str_param = str_line[0]
+            str_value = str_line[1].replace('"', '')
+            if str_param == "path":
+                out_dir = str_value
+        else:
+            print("Wrong config line:" + str_line)
+
+"""
+"""
+
 for param in params:
   for gas in range(gas_num):
-    data_folder = '../out/gas' + '%i' % gas + '/'
+    data_folder = out_dir + 'gas' + '%i' % gas + '/'
     i = 0
     while i < max_files:
       s = "%i" % i
@@ -41,9 +63,11 @@ for param in params:
             max_val = max(max_val, v)
             min_val = min(min_val, v)
 
-      if math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
-                              (max_val - min_val) < 1e-6:
-        print 'warning: max = min'
+      has_min_max = math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
+                              (max_val - min_val) < 1e-6
+
+      if has_min_max:
+        print('warning: max = min')
         plt.imshow(D, origin='lower', vmin = max_val - 0.1, vmax= max_val + 0.1,
                    interpolation='nearest')
       else:
@@ -53,7 +77,8 @@ for param in params:
       plt.colorbar()
       plt.title(param + ' ' + s)
 
-      plt.contour(D, colors='black')
+      if not has_min_max:
+        plt.contour(D, colors='black')
       plt.savefig(data_folder + param + '/pic/' + param + s + '.png', dpi=100)
       plt.close()
       print("%i of %i" % (i, max_files))
