@@ -18,17 +18,58 @@ void GridConstructor::ConfigureGridGeometry() {
     // test 2 =======================================================================
     Config::vCellSize = Vector2d(1.0, 1.0);
     PushTemperature(1.0);
-    PushPressure(0.8);
-    SetBox(Vector2d(1, 1), Vector2d(15, 15), [] (int x, int y, GasesConfigsMap& configs, struct GridBox* box) {
+    PushPressure(1.0);
+    SetBox(Vector2d(1, 1), Vector2d(60, 20), [] (int x, int y, GasesConfigsMap& configs, struct GridBox* box) {
+      double dT1 = 1.0;
+      double dT2 = 0.5;
+
+
       configs[0].pressure = 1.0;
-      configs[1].pressure = 1.0;
+      configs[1].pressure = 0.0;
       if (x == 0)
       {
-        configs[0].boundary_cond = sep::BT_DIFFUSE;
-        configs[0].boundary_T = 1.0;
+        configs[0].boundary_cond = sep::BT_PRESSURE;
+        configs[0].boundary_pressure = 1.0;
+        configs[0].boundary_T = dT1 - (dT1 - dT2) * y / box->size.y();
 
-        configs[1].boundary_cond = sep::BT_DIFFUSE;
-        configs[1].boundary_T = 0.5;
+        configs[1].boundary_cond = sep::BT_PRESSURE;
+        configs[1].boundary_pressure = 0.0;
+        configs[1].boundary_T = 1.0;
+      }
+      if (x == box->size.x() - 1)
+      {
+        configs[0].boundary_cond = sep::BT_PRESSURE;
+        configs[0].boundary_pressure = 1.0;
+        configs[0].boundary_T = dT1 - (dT1 - dT2) * y / box->size.y();
+
+        configs[1].boundary_cond = sep::BT_STREAM;
+        configs[1].boundary_stream = Vector3d(20.0, 0.0, 0.0);
+        configs[1].boundary_T = 1.0;
+      }
+      if (y == 0)
+      {
+        if (x == int(box->size.x() * 1.0 / 3.0) || x == int(box->size.x() * 2.0 / 3.0))
+        {
+          configs[0].boundary_cond = sep::BT_PRESSURE;
+          configs[0].boundary_pressure = 1.0;
+          configs[0].boundary_T = dT1;
+
+          configs[1].boundary_cond = sep::BT_STREAM;
+          configs[1].boundary_stream = Vector3d(0.0, 10.0, 0.0);
+          configs[1].boundary_T = dT1;
+        }
+        else {
+          configs[0].boundary_cond = sep::BT_DIFFUSE;
+          configs[0].boundary_T = dT1;
+
+          configs[1].boundary_cond = sep::BT_DIFFUSE;
+          configs[1].boundary_T = dT1;
+        }
+      }
+      if (y == box->size.y() - 1)
+      {
+        configs[0].boundary_cond = sep::BT_DIFFUSE;
+        configs[0].boundary_T = dT2;
       }
     });
     /*
