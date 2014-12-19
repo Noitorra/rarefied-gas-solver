@@ -24,10 +24,7 @@ private:
     double PopPressure();
     double GetPressure();
     void SetLooping();
-    void SetBox(Vector2d p, Vector2d size,
-            std::function<void(int x, int y,
-                    CellConfig* config,
-                    GridBox* box)> config_func);
+    void SetBox(Vector2d p, Vector2d size, ConfigFunction config_func);
     void SetVessel();
     void PrintGrid();
     void GridGeometryToInitialCells();

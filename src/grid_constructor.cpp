@@ -18,45 +18,25 @@ void GridConstructor::ConfigureGridGeometry() {
     // test 2 =======================================================================
     Config::vCellSize = Vector2d(1.0, 1.0);
     PushTemperature(1.0);
-    PushPressure(1.0);
-
-    SetBox(Vector2d(1, 1), Vector2d(100, 30), [] (int x, int y, CellConfig* config, GridBox* box) {
-      double dTemperature1 = 1.0;
-      double dTemperature2 = 0.5;
-
+    PushPressure(0.8);
+    SetBox(Vector2d(1, 1), Vector2d(15, 15), [] (int x, int y, GasesConfigsMap& configs, struct GridBox* box) {
         if (x == 0) {
-          config->boundary_cond = sep::BT_PRESSURE;
-          config->boundary_T = dTemperature1 - (dTemperature1 - dTemperature2) * y / box->size.y();
-          config->boundary_pressure = 1.0;
-        }
-
-        if (x == box->size.x() - 1)
-        {
-          config->boundary_cond = sep::BT_PRESSURE;
-          config->boundary_T = dTemperature1 - (dTemperature1 - dTemperature2) * y / box->size.y();
-          config->boundary_pressure = 1.0;
-        }
-        
-        
-        if (y == 0)
-        {
-          config->boundary_cond = sep::BT_DIFFUSE;
-          config->boundary_T = dTemperature1;
-        }
-
-        if (y == box->size.y() - 1)
-        {
-          config->boundary_cond = sep::BT_DIFFUSE;
-          config->boundary_T = dTemperature2;
+//            configs[0].boundary_cond = sep::BT_PRESSURE;
+//            configs[0].boundary_pressure = 1.0;
+            configs[0].pressure = 1.0;
+            configs[1].pressure = 0.6;
         }
         
     });
     /*
     SetBox(Vector2d(10, 10), Vector2d(15, 15), [] (int x, int y, CellConfig* config, GridBox* box) {
+=======
+    SetBox(Vector2d(10, 10), Vector2d(15, 15), [] (int x, int y, GasesConfigsMap& configs, struct GridBox* box) {
+>>>>>>> origin/master
 //        config->wall_T = (x == 0 || x == 24) ? 2.0 : 1.0;
          if (x == box->size.x() - 1) {
-            config->boundary_cond = sep::BT_STREAM;
-            config->boundary_stream = Vector3d(-1.0, 0.0, 0.0);
+            configs[0].boundary_cond = sep::BT_STREAM;
+            configs[0].boundary_stream = Vector3d(-1.0, 0.0, 0.0);
         }
     });
     */

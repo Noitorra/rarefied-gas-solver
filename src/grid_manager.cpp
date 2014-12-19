@@ -21,7 +21,7 @@ void GridManager::PrintGrid() {
   for (int z = 0; z < grid_size.z(); z++) {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int x = 0; x < grid_size.x(); x++) {
-        std::cout << grid_->m_vInitCells[x][y][z]->m_cInitCond.T << " ";
+        std::cout << grid_->m_vInitCells[x][y][z]->m_mInitConds[0].T << " ";
       }
       std::cout << std::endl;
     }
@@ -87,9 +87,11 @@ void GridManager::GridGeometryToInitialCells() {
         Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
         InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         init_cell->m_eType = sep::NORMAL_CELL;
-        CellConfig &init_cond = init_cell->m_cInitCond;
-        init_cond = box.def_config;
-        box.config_func(x, y, &init_cond, &box);
+        GasesConfigsMap& init_conds = init_cell->m_mInitConds;
+        for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+          init_conds[gas] = box.def_config;
+        }
+        box.config_func(x, y, init_conds, &box);
       }
     }
 
@@ -111,9 +113,8 @@ void GridManager::GridGeometryToInitialCells() {
           }
           if (!source_cell)
             throw("null pointer");
-          CellConfig &init_cond = target_cell->m_cInitCond;
-          // copy configuration
-          init_cond = source_cell->m_cInitCond;
+          // copy configurations
+          target_cell->m_mInitConds = source_cell->m_mInitConds;
         }
       }
     }
@@ -213,10 +214,7 @@ int GridManager::GetSlash(sep::NeighborType type) const {
   }
 }
 
-void GridManager::SetBox(Vector2d p, Vector2d size,
-        std::function<void(int x, int y,
-                CellConfig* config,
-                GridBox* box)> config_func) {
+void GridManager::SetBox(Vector2d p, Vector2d size, ConfigFunction config_func) {
   CellConfig def_config;
   def_config.pressure = GetPressure();
   def_config.T = GetTemperature();
@@ -330,7 +328,6 @@ void GridManager::InitCells() {
         
         Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
-        const CellConfig& init_cond = p_init_cell->m_cInitCond;
         // Set parameters
         Vector2d cell_size = Config::vCellSize;
         // normalize cell size to free path of molecule
@@ -342,17 +339,24 @@ void GridManager::InitCells() {
         double time_step = std::min(area_step.x(), area_step.y()) / (max_impulse / min_mass);
         Config::dTimestep = std::min(Config::dTimestep, time_step);
 
-        p_cell->setParameters(
-                init_cond.pressure,
-                init_cond.T,
-                area_step
-        );
-        p_cell->setBoundaryType(
-                init_cond.boundary_cond,
-                init_cond.boundary_T,
-                init_cond.boundary_stream,
-                init_cond.boundary_pressure
-        );
+        const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
+        for (auto val : init_conds) {
+          const int& gas_number = val.first;
+          const CellConfig& cond = val.second;
+          p_cell->setParameters(
+                  cond.pressure,
+                  cond.T,
+                  area_step,
+                  gas_number
+          );
+          p_cell->setBoundaryType(
+                  cond.boundary_cond,
+                  cond.boundary_T,
+                  cond.boundary_stream,
+                  cond.boundary_pressure,
+                  gas_number
+          );
+        }
         p_cell->Init(this);
       }
     }

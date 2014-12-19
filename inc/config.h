@@ -24,6 +24,7 @@ struct Config {
   static std::shared_ptr<HTypeGridConfig> pHTypeGridConfig;
   static std::string sOutputPrefix;
   static Vector2d vCellSize;  // default cell size in mm
+  static int iGasesNumber;
 
   static void PrintMe();
 };
