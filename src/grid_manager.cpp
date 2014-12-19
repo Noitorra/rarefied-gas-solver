@@ -308,7 +308,7 @@ void GridManager::LinkCells() {
 }
 
 void GridManager::InitCells() {
-  GasVector& gases = solver_->GetGas();
+  GasVector& gases = Config::vGas;
   double min_mass = 100.0;
   double max_mass = 0.0;
   std::for_each(gases.begin(), gases.end(), [&] (std::shared_ptr<Gas>& gas) {

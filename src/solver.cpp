@@ -22,9 +22,6 @@ m_pGrid(nullptr)
 void Solver::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
   m_pGrid = pGridManager->GetGrid();
-
-  m_vGas.push_back( std::shared_ptr<Gas>(new Gas(1.0)) );
-	//m_vGas.push_back( std::shared_ptr<Gas>(new Gas(0.5)) );
   
   m_pImpulse->Init(pGridManager);
 }
@@ -52,7 +49,7 @@ void Solver::Run() {
     MakeStep(sep::Z);
 
     if (Config::bUseIntegral) {
-      if (m_vGas.size() == 2) {
+      if (Config::iGasesNumber == 2) {
         MakeIntegral(0, 0, Config::dTimestep);
         MakeIntegral(0, 1, Config::dTimestep * 2);
         MakeIntegral(1, 1, Config::dTimestep);
@@ -128,7 +125,7 @@ void Solver::MakeStep(sep::Axis axis) {
 }
 
 void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
-	GasVector& gasv = GetGas();
+  GasVector& gasv = Config::vGas;
   ci::Particle particle;
   particle.d = 1.;
 

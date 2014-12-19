@@ -68,7 +68,7 @@ void Cell::Init(GridManager* pGridManager) {
   m_pSolver = pGridManager->GetSolver();
   m_pGrid = pGridManager->GetGrid();
   
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
@@ -87,7 +87,7 @@ void Cell::Init(GridManager* pGridManager) {
 
 // TODO: Change function name =)
 void Cell::ResetSpeed(unsigned int gi, double dConcentration, double dTemperature) {
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
   
@@ -158,7 +158,7 @@ void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
 }
 
 void Cell::computeMacroData() {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 
   if (!isValid()) {
     for (unsigned int gi = 0; gi < gasv.size(); gi++) {
@@ -189,7 +189,7 @@ bool Cell::isValid()
 
 /* Tests */
 bool Cell::testInnerValuesRange() {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
   bool result = true;
@@ -269,7 +269,7 @@ void Cell::compute_half_left(unsigned int dim) {
 }
 
 void Cell::compute_half_normal(unsigned int dim) {
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
 	for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -313,7 +313,7 @@ void Cell::compute_half_right(unsigned int dim) {
 }
 
 void Cell::compute_value_normal(unsigned int dim) {
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
   for(unsigned int gi=0;gi<gasv.size();gi++) {
@@ -330,7 +330,7 @@ void Cell::compute_value_normal(unsigned int dim) {
 
 void Cell::compute_half_diffuse_left(unsigned int dim)
 {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
   for (unsigned int gi = 0; gi<gasv.size(); gi++) {
@@ -369,7 +369,7 @@ void Cell::compute_half_diffuse_left(unsigned int dim)
 
 void Cell::compute_half_diffuse_right(unsigned int dim)
 {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
   for (unsigned int gi = 0; gi<gasv.size(); gi++) {
@@ -418,7 +418,7 @@ void Cell::compute_half_diffuse_right(unsigned int dim)
 
 void Cell::compute_half_stream_left(unsigned int dim)
 {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 
@@ -466,7 +466,7 @@ void Cell::compute_half_stream_left(unsigned int dim)
 
 void Cell::compute_half_stream_right(unsigned int dim)
 {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 
@@ -524,7 +524,7 @@ void Cell::compute_half_stream_right(unsigned int dim)
 
 void Cell::compute_half_pressure_left(unsigned int dim)
 {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 
@@ -572,7 +572,7 @@ void Cell::compute_half_pressure_left(unsigned int dim)
 
 void Cell::compute_half_pressure_right(unsigned int dim)
 {
-  GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
   Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 
@@ -738,7 +738,7 @@ double Cell::compute_concentration(unsigned int gi) {
 }
 
 double Cell::compute_temperature(unsigned int gi) {
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
@@ -767,7 +767,7 @@ double Cell::compute_pressure(unsigned int gi)
 }
 
 Vector3d Cell::compute_stream(unsigned int gi) {
-	GasVector& gasv = m_pSolver->GetGas();
+  GasVector& gasv = Config::vGas;
 	Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 

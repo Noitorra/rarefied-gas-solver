@@ -11,7 +11,7 @@ class Gas;
 class GridManager;
 class Solver;
 
-typedef std::vector<std::shared_ptr<Gas>> GasVector;
+
 
 class Solver {
 public:
@@ -22,7 +22,6 @@ public:
   
   Parallel* GetParallel() const { return m_pParallel.get(); }
 	Impulse* GetImpulse() const { return m_pImpulse.get(); }
-  GasVector& GetGas() { return m_vGas; }
 
 private:
   void InitCellType(sep::Axis axis);
@@ -32,7 +31,6 @@ private:
   
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<Impulse> m_pImpulse;
-	GasVector m_vGas;
   
   GridManager* m_pGridManager;
   Grid* m_pGrid;

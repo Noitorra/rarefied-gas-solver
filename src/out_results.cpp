@@ -34,7 +34,7 @@ void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
   namespace fs = boost::filesystem;
 
   for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
-    for (int gas = 0; gas < m_pGridManager->GetSolver()->GetGas().size(); gas++) {
+    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
       std::string dir = Config::sOutputPrefix + "out/gas" + std::to_string(gas) +
               "/" + param_to_str((sep::MacroParamType)param) + "/data/";
       fs::path file_path(dir);
@@ -224,7 +224,7 @@ void OutResults::OutParameterMPI(sep::MacroParamType eType) {
 }
 
 void OutResults::OutAverageStream(int iIteration) {
-  GasVector& gasv = m_pGridManager->GetSolver()->GetGas();
+  GasVector& gasv = Config::vGas;
 
   const std::string& sOutputPrefix = Config::sOutputPrefix;
   std::string sASFilenameBase = sOutputPrefix + "out/gas";

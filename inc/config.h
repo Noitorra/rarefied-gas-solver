@@ -4,6 +4,10 @@
 #include "main.h"
 #include "types.h"
 
+class Gas;
+
+typedef std::vector<std::shared_ptr<Gas>> GasVector;
+
 struct HTypeGridConfig {
   int D;
   int l;
@@ -25,7 +29,9 @@ struct Config {
   static std::string sOutputPrefix;
   static Vector2d vCellSize;  // default cell size in mm
   static int iGasesNumber;
+  static GasVector vGas;
 
+  static void Init();
   static void PrintMe();
 };
 
