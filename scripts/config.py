@@ -8,7 +8,7 @@ and sets out_dir variable to it.
 def read_cfg_path(cfg_path):
     out_dir = '../out/'
 
-    with open("config.txt", "r") as cfg_file:
+    with open(cfg_path, "r") as cfg_file:
         str_list = cfg_file.readlines()
         for str_index in range(len(str_list)):
             str_line = str_list[str_index].replace('\n', '').split("=")
