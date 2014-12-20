@@ -3,6 +3,7 @@ __author__ = 'dimaxx'
 import matplotlib.pyplot as plt
 import numpy
 from numpy import *
+import config
 
 max_files = 700
 each = 10
@@ -10,27 +11,7 @@ gas_num = 2
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
 
-"""
-Here is ULTRA param finder in config.txt it searches for path="some/path/to/out/dir"
-and sets out_dir variable to it.
-"""
-
-out_dir = '../out/'
-
-with open("config.txt", "r") as cfg_file:
-    str_list = cfg_file.readlines()
-    for str_index in range(len(str_list)):
-        str_line = str_list[str_index].replace('\n', '').split("=")
-        if len(str_line) == 2:
-            str_param = str_line[0]
-            str_value = str_line[1].replace('"', '')
-            if str_param == "path":
-                out_dir = str_value
-        else:
-            print("Wrong config line:" + str_line)
-
-"""
-"""
+out_dir = config.read_cfg_path("config.txt")
 
 for param in params:
   for gas in range(gas_num):
