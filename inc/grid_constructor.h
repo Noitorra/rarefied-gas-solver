@@ -7,7 +7,8 @@
 // GridManager interface
 class GridConstructor {
 protected:
-    void ConfigureGridGeometry();
+    void ConfigureStandartGrid();
+    void ConfigureGPRT();
   
 private:
     virtual void PushTemperature(double dT) = 0;
@@ -20,8 +21,6 @@ private:
     virtual void SetBox(Vector2d vP, Vector2d vSize,
           ConfigFunction config_func =
           [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {}) = 0;
-
-    void ConfigureGPRT();
 };
 
 #endif // GRID_CONSTRUCTOR_H_

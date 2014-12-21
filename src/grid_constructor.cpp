@@ -3,7 +3,7 @@
 
 // This method being invoked while grid configuration
 // Feel free to edit this method
-void GridConstructor::ConfigureGridGeometry() {
+void GridConstructor::ConfigureStandartGrid() {
 //    // test 1 =======================================================================
 //    Config::vCellSize = Vector2d(1.0, 1.0);
 //    PushTemperature(1.5);

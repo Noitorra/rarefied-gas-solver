@@ -51,7 +51,10 @@ void GridManager::PrintLinkage(sep::Axis axis) {
 }
 
 void GridManager::ConfigureGrid() {
-  ConfigureGridGeometry();
+  if (Config::bGPRTGrid)
+    ConfigureGPRT();
+  else
+    ConfigureStandartGrid();
   GridGeometryToInitialCells();
   AdoptInitialCells();
   //PrintGrid();

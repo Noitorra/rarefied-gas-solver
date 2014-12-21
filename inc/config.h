@@ -30,6 +30,7 @@ struct Config {
   static Vector2d vCellSize;  // default cell size in mm
   static int iGasesNumber;
   static GasVector vGas;
+  static bool bGPRTGrid;
 
   static void Init();
   static void PrintMe();

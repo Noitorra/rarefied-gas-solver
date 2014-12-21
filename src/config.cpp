@@ -12,6 +12,7 @@ bool Config::bUseIntegral = true;
 std::shared_ptr<HTypeGridConfig> Config::pHTypeGridConfig = std::shared_ptr<HTypeGridConfig>(new HTypeGridConfig);
 std::string Config::sOutputPrefix = "../";
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size
+bool Config::bGPRTGrid = false;
 
 int Config::iGasesNumber = 2;
 GasVector Config::vGas;
