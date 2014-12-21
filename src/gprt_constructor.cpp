@@ -133,8 +133,7 @@ void GridConstructor::ConfigureGPRT() {
                 configs[0].boundary_T = 1.0;
             }
             if (x == 0) {
-                std::cout << "y = " << y << std::endl;
-                configs[0].mirror_type = sep::MT_ENABLED;
+                configs[0].mirror_type = sep::MT_BEGIN;
                 configs[0].mirror_axis = sep::X;
             }
         });
