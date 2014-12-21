@@ -18,16 +18,53 @@ void GridConstructor::ConfigureGridGeometry() {
     Config::vCellSize = Vector2d(1.0, 1.0);
     PushTemperature(1.0);
     PushPressure(1.0);
-    SetBox(Vector2d(1, 1), Vector2d(60, 20), [](int x, int y, GasesConfigsMap& configs, const Vector2i& size) {
+    SetBox(Vector2d(1, 1), Vector2d(90, 30), [](int x, int y, GasesConfigsMap& configs, const Vector2i& size) {
+
       double dT1 = 1.0;
       double dT2 = 0.5;
 
-
       configs[0].pressure = 1.0;
-      configs[1].pressure = 0.0;
+      configs[0].T = dT1 - (dT1 - dT2) * y / size.y();
+
       if (x == 0)
       {
         configs[0].boundary_cond = sep::BT_PRESSURE;
+        configs[0].boundary_pressure = 1.0;
+        configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
+      }
+      if (x == size.x() - 1)
+      {
+        configs[0].boundary_cond = sep::BT_DIFFUSE;
+        configs[0].boundary_pressure = 1.0;
+        configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
+      }
+      if (y == 0)
+      {
+        configs[0].boundary_cond = sep::BT_DIFFUSE;
+        configs[0].boundary_T = dT1;
+      }
+      if (y == size.y() - 1)
+      {
+        configs[0].boundary_cond = sep::BT_DIFFUSE;
+        configs[0].boundary_T = dT2;
+      }
+
+      /*
+      double dT1 = 1.0;
+      double dT2 = 0.5;
+
+      int iNumHoles = 9;
+      double dSummaryStream = 0.09;
+
+
+      configs[0].pressure = 1.0;
+      configs[0].T = dT1 - (dT1 - dT2) * y / size.y();
+
+      configs[1].pressure = 0.0;
+      
+      if (x == 0)
+      {
+        configs[0].boundary_cond = sep::BT_DIFFUSE;
         configs[0].boundary_pressure = 1.0;
         configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
 
@@ -42,19 +79,24 @@ void GridConstructor::ConfigureGridGeometry() {
         configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
 
         configs[1].boundary_cond = sep::BT_STREAM;
-        configs[1].boundary_stream = Vector3d(0.02, 0.0, 0.0);
+        configs[1].boundary_stream = Vector3d(dSummaryStream, 0.0, 0.0);
         configs[1].boundary_T = 1.0;
       }
       if (y == 0)
       {
-        if (x == int(size.x() * 1.0 / 3.0) || x == int(size.x() * 2.0 / 3.0))
+        bool isAHole = false;
+        for (int i = 0; i < iNumHoles; i++)
+        {
+          isAHole = isAHole || x == int(size.x() * double(i + 1) / (iNumHoles + 1));
+        }
+        if (isAHole)
         {
           configs[0].boundary_cond = sep::BT_PRESSURE;
           configs[0].boundary_pressure = 1.0;
           configs[0].boundary_T = dT1;
 
           configs[1].boundary_cond = sep::BT_STREAM;
-          configs[1].boundary_stream = Vector3d(0.0, 0.01, 0.0);
+          configs[1].boundary_stream = Vector3d(0.0, dSummaryStream / iNumHoles, 0.0);
           configs[1].boundary_T = dT1;
         }
         else {
@@ -69,21 +111,11 @@ void GridConstructor::ConfigureGridGeometry() {
       {
         configs[0].boundary_cond = sep::BT_DIFFUSE;
         configs[0].boundary_T = dT2;
+
+        configs[1].boundary_cond = sep::BT_DIFFUSE;
+        configs[1].boundary_T = dT1;
       }
-      /*
-    PushTemperature(0.8);
-    PushPressure(1.0);
-    SetBox(Vector2d(1, 1), Vector2d(15, 15), [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size) {
-        if (x == 0) {
-            configs[0].boundary_T = 1.0;
-            configs[1].boundary_T = 0.5;
-        }
-        if (x == size.x() - 1) {
-          configs[0].boundary_cond = sep::BT_STREAM;
-          configs[0].boundary_stream = Vector3d(-0.01, 0.0, 0.0);
-          configs[0].boundary_T = 1.0;
-        }
-        */
+      */
     });
     /*
     SetBox(Vector2d(10, 10), Vector2d(15, 15), [] (int x, int y, CellConfig* config, GridBox* box) {
