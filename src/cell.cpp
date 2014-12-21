@@ -632,7 +632,7 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+      if (m_vMirrorType[dim] == sep::MT_END) {
         for (auto& item2 : item1->m_vPrev[dim]) {
           result += item2->m_vValue[gi][ii];
           count++;
@@ -653,7 +653,7 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+      if (m_vMirrorType[dim] == sep::MT_BEGIN) {
         for (auto& item2 : item1->m_vNext[dim]) {
           result += item2->m_vValue[gi][ii];
           count++;
@@ -690,7 +690,7 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+      if (m_vMirrorType[dim] == sep::MT_END) {
         for (auto& item2 : item1->m_vPrev[dim]) {
           result += item2->m_vHalf[gi][ii];
           count++;
@@ -711,7 +711,7 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+      if (m_vMirrorType[dim] == sep::MT_BEGIN) {
         for (auto& item2 : item1->m_vNext[dim]) {
           result += item2->m_vHalf[gi][ii];
           count++;

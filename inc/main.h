@@ -24,8 +24,8 @@ namespace sep {
 
   enum Axis {
     X = 0,
-    Y,
-    Z
+    Y = 1,
+    Z = 2
   };
 
   enum MacroParamType {
@@ -51,7 +51,8 @@ namespace sep {
   enum MirrorType
   {
     MT_DISABLED,
-    MT_ENABLED
+    MT_BEGIN,
+    MT_END
   };
 }
 
