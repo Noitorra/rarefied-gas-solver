@@ -35,6 +35,8 @@ m_pGrid(nullptr)
   m_vBoundaryStream.resize(Config::iGasesNumber);
   m_vBoundaryPressure.resize(Config::iGasesNumber);
 
+  m_vMirrorType.resize(3, sep::MT_DISABLED);
+
 	// Grid....
 	m_pGridManager = nullptr;
 }
@@ -57,6 +59,11 @@ void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature,
   m_vBoundaryTemperature[iGasIndex] = dTemperature;
   m_vBoundaryStream[iGasIndex] = dStream;
   m_vBoundaryPressure[iGasIndex] = dPressure;
+}
+
+void Cell::setMirrorType(sep::MirrorType eMirrorType, sep::Axis eAxis)
+{
+  m_vMirrorType[eAxis] = eMirrorType;
 }
 
 void Cell::Init(GridManager* pGridManager) {
@@ -625,9 +632,14 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
-      for (auto& item2 : item1->m_vNext[dim]) {
-        result += item2->m_vValue[gi][ii];
+      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+        result += item1->m_vValue[gi][ii];
         count++;
+      } else {
+        for (auto& item2 : item1->m_vNext[dim]) {
+          result += item2->m_vValue[gi][ii];
+          count++;
+        }
       }
     }
     break;
@@ -639,9 +651,14 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
-      for (auto& item2 : item1->m_vPrev[dim]) {
-        result += item2->m_vValue[gi][ii];
+      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+        result += item1->m_vValue[gi][ii];
         count++;
+      } else {
+        for (auto& item2 : item1->m_vPrev[dim]) {
+          result += item2->m_vValue[gi][ii];
+          count++;
+        }
       }
     }
     break;
@@ -669,11 +686,14 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
-      //result += item1->m_vHalf[gi][ii];
-      //count++;
-      for (auto& item2 : item1->m_vNext[dim]) {
-        result += item2->m_vHalf[gi][ii];
+      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+        result += item1->m_vHalf[gi][ii];
         count++;
+      } else {
+        for (auto& item2 : item1->m_vNext[dim]) {
+          result += item2->m_vHalf[gi][ii];
+          count++;
+        }
       }
     }
     break;
@@ -685,9 +705,14 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
     break;
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
-      for (auto& item2 : item1->m_vPrev[dim]) {
-        result += item2->m_vHalf[gi][ii];
+      if (m_vMirrorType[dim] == sep::MT_ENABLED) {
+        result += item1->m_vHalf[gi][ii];
         count++;
+      } else {
+        for (auto& item2 : item1->m_vPrev[dim]) {
+          result += item2->m_vHalf[gi][ii];
+          count++;
+        }
       }
     }
     break;

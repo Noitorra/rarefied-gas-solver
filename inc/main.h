@@ -47,6 +47,12 @@ namespace sep {
     BT_STREAM,
     BT_PRESSURE
   };
+
+  enum MirrorType
+  {
+    MT_DISABLED,
+    MT_ENABLED
+  };
 }
 
 class MacroData {
