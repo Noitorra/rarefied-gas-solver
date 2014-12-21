@@ -8,12 +8,12 @@ Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the 
 sep::GridGeometry Config::eGridGeometryType = sep::COMB_GRID_GEOMETRY;
 double Config::dTimestep = 0.1;  // if needed may decrease automatically later
 int Config::iMaxIteration = 1000;
-bool Config::bUseIntegral = true;
+bool Config::bUseIntegral = false;
 std::shared_ptr<HTypeGridConfig> Config::pHTypeGridConfig = std::shared_ptr<HTypeGridConfig>(new HTypeGridConfig);
 std::string Config::sOutputPrefix = "../";
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size
 
-int Config::iGasesNumber = 2;
+int Config::iGasesNumber = 1;
 GasVector Config::vGas;
 
 
