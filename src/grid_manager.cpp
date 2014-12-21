@@ -1,10 +1,13 @@
 #include <gas.h>
+#include <curses.h>
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
 #include "config.h"
 #include "cell.h"
 #include <algorithm>  // for visual studio compilator
+
+extern double T1, T2, P_sat;
 
 GridManager::GridManager() :
   grid_(new Grid),
@@ -100,7 +103,7 @@ void GridManager::GridGeometryToInitialCells() {
         }
         Vector2i size_with_fakes(box.size);
         size_with_fakes += Vector2i(2, 2);
-        box.config_func(x + 1, y + 1, init_conds, size_with_fakes);
+        box.config_func(x + 1, y + 1, init_conds, size_with_fakes, box.p);
       }
     }
   });
