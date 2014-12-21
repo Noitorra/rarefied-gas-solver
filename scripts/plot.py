@@ -5,9 +5,9 @@ import numpy
 from numpy import *
 import config
 
-max_files = 700
+max_files = 1000
 each = 10
-gas_num = 2
+gas_num = 1
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
 
