@@ -90,7 +90,8 @@ public:
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
-typedef std::function<void(int x, int y, GasesConfigsMap& configs, const Vector2i& size)> ConfigFunction;
+typedef std::function<void(int x, int y, GasesConfigsMap& configs,
+        const Vector2i& size, const Vector2i& start)> ConfigFunction;
 
 struct GridBox {
   Vector2i p;     // in cells

@@ -3,19 +3,16 @@ __author__ = 'dimaxx'
 import matplotlib.pyplot as plt
 import numpy
 from numpy import *
-import config
 
-max_files = 1000
-each = 10
-gas_num = 1
+max_files = 5
+each = 1
+gas_num = 2
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
 
-out_dir = config.read_cfg_path("config.txt")
-
 for param in params:
   for gas in range(gas_num):
-    data_folder = out_dir + 'gas' + '%i' % gas + '/'
+    data_folder = '../out/gas' + '%i' % gas + '/'
     i = 0
     while i < max_files:
       s = "%i" % i
