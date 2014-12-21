@@ -320,27 +320,16 @@ void GridManager::LinkCells() {
 
         if (p_init_cell->m_eType != sep::FAKE_CELL) {
 
-//          if (init_conds.at(0).mirror_type == sep::MT_DISABLED) {
             // Link to fake
             FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
             for (int i = 0; i < q; i++) {
               FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
               LinkNeighbors(v_p, ax, neighbor);
             }
-//          } else {
-            if (init_conds.at(0).mirror_type == sep::MT_ENABLED) {
+            if (init_conds.at(0).mirror_type != sep::MT_DISABLED) {
               // Link to myself (mirror)
               LinkToMyself(v_p, init_conds.at(0).mirror_axis);
             }
-
-//            // Link only to right fakes
-//            FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
-//            for (int i = 0; i < q; i++) {
-//              FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
-//              if (ax == init_conds.at(0).mirror_axis)
-//                LinkNeighbors(v_p, ax, neighbor);
-//            }
-//          }
         }
       }
     }
