@@ -633,8 +633,10 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
       if (m_vMirrorType[dim] == sep::MT_ENABLED) {
-        result += item1->m_vValue[gi][ii];
-        count++;
+        for (auto& item2 : item1->m_vPrev[dim]) {
+          result += item2->m_vValue[gi][ii];
+          count++;
+        }
       } else {
         for (auto& item2 : item1->m_vNext[dim]) {
           result += item2->m_vValue[gi][ii];
@@ -652,8 +654,10 @@ double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
       if (m_vMirrorType[dim] == sep::MT_ENABLED) {
-        result += item1->m_vValue[gi][ii];
-        count++;
+        for (auto& item2 : item1->m_vNext[dim]) {
+          result += item2->m_vValue[gi][ii];
+          count++;
+        }
       } else {
         for (auto& item2 : item1->m_vPrev[dim]) {
           result += item2->m_vValue[gi][ii];
@@ -687,8 +691,10 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
       if (m_vMirrorType[dim] == sep::MT_ENABLED) {
-        result += item1->m_vHalf[gi][ii];
-        count++;
+        for (auto& item2 : item1->m_vPrev[dim]) {
+          result += item2->m_vHalf[gi][ii];
+          count++;
+        }
       } else {
         for (auto& item2 : item1->m_vNext[dim]) {
           result += item2->m_vHalf[gi][ii];
@@ -706,8 +712,10 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
       if (m_vMirrorType[dim] == sep::MT_ENABLED) {
-        result += item1->m_vHalf[gi][ii];
-        count++;
+        for (auto& item2 : item1->m_vNext[dim]) {
+          result += item2->m_vHalf[gi][ii];
+          count++;
+        }
       } else {
         for (auto& item2 : item1->m_vPrev[dim]) {
           result += item2->m_vHalf[gi][ii];
