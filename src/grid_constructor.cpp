@@ -18,7 +18,8 @@ void GridConstructor::ConfigureGridGeometry() {
     Config::vCellSize = Vector2d(1.0, 1.0);
     PushTemperature(1.0);
     PushPressure(1.0);
-    SetBox(Vector2d(1, 1), Vector2d(60, 20), [](int x, int y, GasesConfigsMap& configs, const Vector2i& size) {
+    SetBox(Vector2d(1, 1), Vector2d(60, 20), [](int x, int y, GasesConfigsMap& configs,
+            const Vector2i& size, const Vector2i& start) {
       double dT1 = 1.0;
       double dT2 = 0.5;
 
