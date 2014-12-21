@@ -78,7 +78,9 @@ public:
   T(1.0),
   boundary_cond(sep::BT_DIFFUSE),
   boundary_T(1.0),
-  boundary_pressure(1.0)
+  boundary_pressure(1.0),
+  mirror_type(sep::MT_DISABLED),
+  mirror_axis(sep::X)
   {};
 
   double pressure; // initial pressure
@@ -87,6 +89,8 @@ public:
   double boundary_T;  // wall temperature
   Vector3d boundary_stream;
   double boundary_pressure;
+  sep::MirrorType mirror_type;
+  sep::Axis mirror_axis;
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;

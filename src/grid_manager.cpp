@@ -10,7 +10,11 @@ extern double T1, T2, P_sat;
 
 GridManager::GridManager() :
   grid_(new Grid),
-  solver_(new Solver) {}
+  solver_(new Solver) {
+
+  PushTemperature(1.0);
+  PushPressure(1.0);
+}
 
 void GridManager::Init() {
   grid_->Init(this);
@@ -23,7 +27,7 @@ void GridManager::PrintGrid() {
   for (int z = 0; z < grid_size.z(); z++) {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int x = 0; x < grid_size.x(); x++) {
-        std::cout << grid_->m_vInitCells[x][y][z]->m_mInitConds[0].T << " ";
+        std::cout << grid_->m_vInitCells[x][y][z]->m_eType << " ";
       }
       std::cout << std::endl;
     }
@@ -56,7 +60,7 @@ void GridManager::ConfigureGrid() {
     ConfigureStandartGrid();
   GridGeometryToInitialCells();
   AdoptInitialCells();
-  //PrintGrid();
+  PrintGrid();
 
   FillInGrid();
   LinkCells();
@@ -117,7 +121,9 @@ void GridManager::AdoptInitialCells() {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int z = 0; z < grid_size.z(); z++) {
         Vector2i v_p(x, y);
-        if (grid_->GetInitCell(v_p)->m_eType != sep::FAKE_CELL)
+        InitCellData* init_cell = grid_->GetInitCell(v_p);
+        GasesConfigsMap& init_conds = init_cell->m_mInitConds;
+        if (init_cell->m_eType != sep::FAKE_CELL)
           continue;
         
         sep::NeighborType e_neighbor;
@@ -126,7 +132,33 @@ void GridManager::AdoptInitialCells() {
         // Remove alone fake cells (which without normal neighbour)
         FindNeighbour(v_p, sep::NORMAL_CELL, e_ax, e_neighbor, i_q);
         if (!i_q)
-          grid_->GetInitCell(v_p)->m_eType = sep::EMPTY_CELL;
+          init_cell->m_eType = sep::EMPTY_CELL;
+      }
+    }
+  }
+
+  // Check for mirror condition
+  for (int x = 0; x < grid_size.x(); x++) {
+    for (int y = 0; y < grid_size.y(); y++) {
+      for (int z = 0; z < grid_size.z(); z++) {
+        Vector2i v_p(x, y);
+        InitCellData* init_cell = grid_->GetInitCell(v_p);
+        GasesConfigsMap& init_conds = init_cell->m_mInitConds;
+
+        sep::NeighborType e_neighbor;
+        sep::Axis e_ax;
+        int i_q;
+        if (init_conds[0].mirror_type == sep::MT_DISABLED)
+          continue;
+
+        if (init_cell->m_eType == sep::EMPTY_CELL) {
+          init_cell->m_eType = sep::FAKE_CELL;
+          continue;
+        }
+        if (init_cell->m_eType == sep::FAKE_CELL) {
+          init_cell->m_eType = sep::NORMAL_CELL;
+          continue;
+        }
       }
     }
   }
@@ -271,9 +303,11 @@ void GridManager::LinkCells() {
     for (int y = 0; y < grid_size.y(); y++) {
       for (int z = 0; z < grid_size.z(); z++) {
         Vector2i v_p(x, y);
-        if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
+        InitCellData* p_init_cell = grid_->GetInitCell(v_p);
+        const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
+        if (p_init_cell->m_eType == sep::EMPTY_CELL)
           continue;
-        
+
         sep::NeighborType neighbor;
         sep::Axis ax;
         int q;
@@ -283,14 +317,30 @@ void GridManager::LinkCells() {
           FindNeighbourWithIndex(v_p, sep::NORMAL_CELL, i, ax, neighbor);
           LinkNeighbors(v_p, ax, neighbor);
         }
-    
-        if (grid_->GetInitCell(v_p)->m_eType != sep::FAKE_CELL) {
-          // Link to fake
-          FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
-          for (int i = 0; i < q; i++) {
-            FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
-            LinkNeighbors(v_p, ax, neighbor);
-          }
+
+        if (p_init_cell->m_eType != sep::FAKE_CELL) {
+
+//          if (init_conds.at(0).mirror_type == sep::MT_DISABLED) {
+            // Link to fake
+            FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
+            for (int i = 0; i < q; i++) {
+              FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
+              LinkNeighbors(v_p, ax, neighbor);
+            }
+//          } else {
+            if (init_conds.at(0).mirror_type == sep::MT_ENABLED) {
+              // Link to myself (mirror)
+              LinkToMyself(v_p, init_conds.at(0).mirror_axis);
+            }
+
+//            // Link only to right fakes
+//            FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
+//            for (int i = 0; i < q; i++) {
+//              FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
+//              if (ax == init_conds.at(0).mirror_axis)
+//                LinkNeighbors(v_p, ax, neighbor);
+//            }
+//          }
         }
       }
     }
@@ -346,6 +396,7 @@ void GridManager::InitCells() {
                   cond.boundary_pressure,
                   gas_number
           );
+          p_cell->setMirrorType(cond.mirror_type, cond.mirror_axis);
         }
         p_cell->Init(this);
       }
@@ -374,6 +425,20 @@ void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
   }
 }
 
+void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
+  Cell* cell = grid_->GetInitCell(p)->m_pCell;
+
+  int coord = mirror_axis == sep::X ? p.x() : p.y();
+  if (coord < 2) {
+    if (!cell->m_vPrev[mirror_axis].empty())
+      throw("Next is already not emty");
+    cell->m_vPrev[mirror_axis].push_back(cell);
+  } else {
+    if (!cell->m_vNext[mirror_axis].empty())
+      throw("Next is already not emty");
+    cell->m_vNext[mirror_axis].push_back(cell);
+  }
+}
 
 
 
