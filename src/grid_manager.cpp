@@ -60,7 +60,7 @@ void GridManager::ConfigureGrid() {
     ConfigureStandartGrid();
   GridGeometryToInitialCells();
   AdoptInitialCells();
-  PrintGrid();
+//  PrintGrid();
 
   FillInGrid();
   LinkCells();
