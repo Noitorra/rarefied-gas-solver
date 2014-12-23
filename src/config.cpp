@@ -14,7 +14,7 @@ std::string Config::sOutputPrefix = "../";
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size
 bool Config::bGPRTGrid = true;
 
-int Config::iGasesNumber = 1;
+int Config::iGasesNumber = 2;
 GasVector Config::vGas;
 
 
