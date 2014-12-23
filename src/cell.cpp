@@ -35,8 +35,6 @@ m_pGrid(nullptr)
   m_vBoundaryStream.resize(Config::iGasesNumber);
   m_vBoundaryPressure.resize(Config::iGasesNumber);
 
-  m_vMirrorType.resize(3, sep::MT_DISABLED);
-
 	// Grid....
 	m_pGridManager = nullptr;
 }
@@ -59,11 +57,6 @@ void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature,
   m_vBoundaryTemperature[iGasIndex] = dTemperature;
   m_vBoundaryStream[iGasIndex] = dStream;
   m_vBoundaryPressure[iGasIndex] = dPressure;
-}
-
-void Cell::setMirrorType(sep::MirrorType eMirrorType, sep::Axis eAxis)
-{
-  m_vMirrorType[eAxis] = eMirrorType;
 }
 
 void Cell::Init(GridManager* pGridManager) {
@@ -91,19 +84,19 @@ void Cell::Init(GridManager* pGridManager) {
 // TODO: Change function name =)
 void Cell::ResetSpeed(unsigned int gi, double dConcentration, double dTemperature) {
   GasVector& gasv = Config::vGas;
-	Impulse* impulse = m_pSolver->GetImpulse();
-	ImpulseVector& impulsev = impulse->getVector();
-  
+  Impulse* impulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = impulse->getVector();
+
 
   double C = 0.0;
-  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
     C += fast_exp(gasv[gi]->getMass(), dTemperature, impulsev[ii]);
   }
-  
+
   C *= impulse->getDeltaImpulseQube();
   C = dConcentration / C;
-  
-  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
     m_vValue[gi][ii] = C*fast_exp(gasv[gi]->getMass(), dTemperature, impulsev[ii]);
     //m_half[gasIndex][impulseIndex] = 0.0;
   }
@@ -114,47 +107,47 @@ void Cell::computeType(unsigned int dim) {
 }
 
 void Cell::computeHalf(unsigned int dim) {
-	//std::cout << "Type: " << m_vType[dim] << std::endl;
-	switch(m_vType[dim]) {
-		case CT_UNDEFINED:
-		//std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
-		break;
-		case CT_LEFT:
-		compute_half_left(dim);
-		break;
-		case CT_NORMAL:
-		compute_half_normal(dim);
-		break;
-		case CT_PRERIGHT:
-		compute_half_preright(dim);
-		break;
-		case CT_RIGHT:
-		compute_half_right(dim);
-		break;
-		default:
-		break;
-	}
+  //std::cout << "Type: " << m_vType[dim] << std::endl;
+  switch (m_vType[dim]) {
+  case CT_UNDEFINED:
+    //std::cout << "Cell::computeHalf() CT_UNDEFINED" << std::endl;
+    break;
+  case CT_LEFT:
+    compute_half_left(dim);
+    break;
+  case CT_NORMAL:
+    compute_half_normal(dim);
+    break;
+  case CT_PRERIGHT:
+    compute_half_preright(dim);
+    break;
+  case CT_RIGHT:
+    compute_half_right(dim);
+    break;
+  default:
+    break;
+  }
 }
 void Cell::computeValue(unsigned int dim) {
-	switch(m_vType[dim]) {
-		case CT_UNDEFINED:
-		//std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
-		break;
-//		case CT_LEFT:
-//		computeValue_Left(dim);
-//		break;
-		case CT_NORMAL:
-		compute_value_normal(dim);
-		break;
-		case CT_PRERIGHT:
+  switch (m_vType[dim]) {
+  case CT_UNDEFINED:
+    //std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;
+    break;
+    //		case CT_LEFT:
+    //		computeValue_Left(dim);
+    //		break;
+  case CT_NORMAL:
     compute_value_normal(dim);
-		break;
-//		case CT_RIGHT:
-//		computeValue_Right(dim);
-//		break;
-		default:
-		break;
-	}
+    break;
+  case CT_PRERIGHT:
+    compute_value_normal(dim);
+    break;
+    //		case CT_RIGHT:
+    //		computeValue_Right(dim);
+    //		break;
+  default:
+    break;
+  }
 }
 void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
   ci::iter(m_vValue[gi0], m_vValue[gi1]);
@@ -197,8 +190,8 @@ bool Cell::testInnerValuesRange() {
 
   bool result = true;
 
-  for(unsigned int gi=0;gi<gasv.size();gi++) {
-    for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+    for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
       if (m_vValue[gi][ii] < 0) {
         // wrong values
         result = false;
@@ -227,27 +220,31 @@ bool Cell::testInnerValuesRange() {
 
 // help methods
 void Cell::compute_type(unsigned int dim) {
-	if( m_vPrev[dim].empty() ) {
-		if ( !m_vNext[dim].empty() ) {
-			m_vType[dim] = CT_LEFT;
-		} else {
-			//std::cout << "Cell has no neighbors in dim = " << dim << std::endl;
-		}
-	} else {
-		if( m_vNext[dim].empty() ) {
-			m_vType[dim] = CT_RIGHT;
-		} else {
-			if( m_vNext[dim][0]->m_vNext[dim].empty() ) {
-				m_vType[dim] = CT_PRERIGHT;
-			} else {
-				m_vType[dim] = CT_NORMAL;
-			}
-		}
-	}
+  if (m_vPrev[dim].empty()) {
+    if (!m_vNext[dim].empty()) {
+      m_vType[dim] = CT_LEFT;
+    }
+    else {
+      //std::cout << "Cell has no neighbors in dim = " << dim << std::endl;
+    }
+  }
+  else {
+    if (m_vNext[dim].empty()) {
+      m_vType[dim] = CT_RIGHT;
+    }
+    else {
+      if (m_vNext[dim][0]->m_vNext[dim].empty()) {
+        m_vType[dim] = CT_PRERIGHT;
+      }
+      else {
+        m_vType[dim] = CT_NORMAL;
+      }
+    }
+  }
 
-	if( m_vType[dim] == CT_UNDEFINED) {
-		//std::cout << "Cannot find this cell type, maybe cells are not linked, or linked wrong." << std::endl;
-	}
+  if (m_vType[dim] == CT_UNDEFINED) {
+    //std::cout << "Cannot find this cell type, maybe cells are not linked, or linked wrong." << std::endl;
+  }
 }
 
 void Cell::compute_half_left(unsigned int dim) {
@@ -263,6 +260,9 @@ void Cell::compute_half_left(unsigned int dim) {
     case sep::BT_STREAM:
       compute_half_stream_left(dim, gi);
       break;
+    case sep::BT_MIRROR:
+      compute_half_mirror_left(dim, gi);
+      break;
     default:
       break;
     }
@@ -271,25 +271,27 @@ void Cell::compute_half_left(unsigned int dim) {
 
 void Cell::compute_half_normal(unsigned int dim) {
   GasVector& gasv = Config::vGas;
-	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
+  Impulse* pImpulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = pImpulse->getVector();
 
-	for(unsigned int gi=0;gi<gasv.size();gi++) {
-		for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+    for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
       double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
+
       if (impulsev[ii][dim] > 0) {
         m_vHalf[gi][ii] = m_vValue[gi][ii] + (1 - y) / 2 * limiter(
-          compute_av(dim, gi, ii, AD_PREV),
+          compute_av(dim, gi, ii, AD_PREV), // requires reverse MT_BEGIN
           m_vValue[gi][ii],
-          compute_av(dim, gi, ii, AD_NEXT));
+          compute_av(dim, gi, ii, AD_NEXT)); // requires reverse MT_END
       }
       else {
         m_vHalf[gi][ii] = compute_av(dim, gi, ii, AD_NEXT) - (1 - y) / 2 * limiter(
           m_vValue[gi][ii],
-          compute_av(dim, gi, ii, AD_NEXT),
-          compute_av(dim, gi, ii, AD_NEXTNEXT));
+          compute_av(dim, gi, ii, AD_NEXT), // requires reverse MT_END
+          compute_av(dim, gi, ii, AD_NEXTNEXT)); // requires reverse MT_END
       }
-		}
-	}
+    }
+  }
 }
 
 void Cell::compute_half_preright(unsigned int dim) {
@@ -309,6 +311,9 @@ void Cell::compute_half_right(unsigned int dim) {
     case sep::BT_STREAM:
       compute_half_stream_right(dim, gi);
       break;
+    case sep::BT_MIRROR:
+      compute_half_mirror_right(dim, gi);
+      break;
     default:
       break;
     }
@@ -317,20 +322,19 @@ void Cell::compute_half_right(unsigned int dim) {
 
 void Cell::compute_value_normal(unsigned int dim) {
   GasVector& gasv = Config::vGas;
-	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
+  Impulse* pImpulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = pImpulse->getVector();
 
-  for(unsigned int gi=0;gi<gasv.size();gi++) {
-    for(unsigned int ii=0;ii<impulsev.size();ii++) {
-      double y = Config::dTimestep / gasv[gi]->getMass()*impulsev[ii][dim] / m_vAreastep[dim];
-        // compute_ah(dim, gi, ii, AD_PREV)
-        m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_ah(dim, gi, ii, AD_PREV));
-        //if (m_vValue[gi][ii] < 0) {
-        //  std::cout << m_vValue[gi][ii] << ":" << ii << std::endl;
-        //}
+  for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+    for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+      double y = Config::dTimestep / gasv[gi]->getMass()*impulsev[ii][dim] / m_vAreastep[dim]; // requires reverse MT_BEGIN
+
+      m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_ah(dim, gi, ii, AD_PREV)); // requires reverse MT_BEGIN
     }
   }
 }
 
+/* Diffuse boundary type. */
 void Cell::compute_half_diffuse_left(unsigned int dim, int gi)
 {
   GasVector& gasv = Config::vGas;
@@ -415,6 +419,7 @@ void Cell::compute_half_diffuse_right(unsigned int dim, int gi)
   }
 }
 
+/* Setting stream boundary type. */
 void Cell::compute_half_stream_left(unsigned int dim, int gi)
 {
   GasVector& gasv = Config::vGas;
@@ -517,6 +522,7 @@ void Cell::compute_half_stream_right(unsigned int dim, int gi)
   }
 }
 
+/* Setting pressure boundary type. */
 void Cell::compute_half_pressure_left(unsigned int dim, int gi)
 {
   GasVector& gasv = Config::vGas;
@@ -619,58 +625,131 @@ void Cell::compute_half_pressure_right(unsigned int dim, int gi)
   }
 }
 
+/* Setting mirror boundary type. */
+void Cell::compute_half_mirror_left(unsigned int dim, int gi)
+{
+  GasVector& gasv = Config::vGas;
+  Impulse* impulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = impulse->getVector();
+
+  for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
+    double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
+
+    if (impulsev[ii][dim] > 0) {
+      int ri = impulse->reverseIndex(ii, static_cast<sep::Axis>(dim));
+      
+      m_vHalf[gi][ii] = m_vValue[gi][ii] + (1 - y) / 2 * limiter(
+        m_vValue[gi][ri], // reversed for left
+        m_vValue[gi][ii],
+        compute_av(dim, gi, ii, AD_NEXT)); // requires reverse MT_END
+    }
+    else {
+      m_vHalf[gi][ii] = compute_av(dim, gi, ii, AD_NEXT) - (1 - y) / 2 * limiter(
+        m_vValue[gi][ii],
+        compute_av(dim, gi, ii, AD_NEXT), // requires reverse MT_END
+        compute_av(dim, gi, ii, AD_NEXTNEXT)); // requires reverse MT_END
+    }
+  }
+
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    double y = Config::dTimestep / gasv[gi]->getMass()*impulsev[ii][dim] / m_vAreastep[dim];
+
+    int ri = impulse->reverseIndex(ii, static_cast<sep::Axis>(dim));
+    //std::cout << "Boundary type = " << dim << std::endl;
+
+    m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - m_vHalf[gi][ri]); // requires reverse MT_BEGIN
+  }
+}
+
+void Cell::compute_half_mirror_right(unsigned int dim, int gi)
+{
+  GasVector& gasv = Config::vGas;
+  Impulse* pImpulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = pImpulse->getVector();
+
+  for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
+    double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
+
+    int ri = pImpulse->reverseIndex(ii, static_cast<sep::Axis>(dim));
+      
+    if (impulsev[ii][dim] > 0) {
+      // PREV
+      for (auto& item : m_vPrev[dim]) {
+        item->m_vHalf[gi][ii] = item->m_vValue[gi][ii] + (1 - y) / 2 * limiter(
+          item->compute_av(dim, gi, ii, AD_PREV),
+          item->m_vValue[gi][ii],
+          item->compute_av(dim, gi, ii, AD_NEXT));
+      }
+
+      // CURRENT
+      m_vHalf[gi][ii] = m_vValue[gi][ii] + (1 - y) / 2 * limiter(
+        compute_av(dim, gi, ii, AD_PREV), // requires reverse MT_BEGIN
+        m_vValue[gi][ii],
+        m_vValue[gi][ri]); // reversed for right
+    }
+    else {
+      // PREV
+      for (auto& item : m_vPrev[dim]) {
+        item->m_vHalf[gi][ii] = item->compute_av(dim, gi, ii, AD_NEXT) - (1 - y) / 2 * limiter(
+          item->m_vValue[gi][ii],
+          item->compute_av(dim, gi, ii, AD_NEXT), // requires reverse MT_END
+          item->compute_av(dim, gi, ri, AD_NEXT)); // requires reverse MT_END
+      }
+
+      // CURRENT
+      m_vHalf[gi][ii] = m_vValue[gi][ri] - (1 - y) / 2 * limiter(
+        m_vValue[gi][ii],
+        m_vValue[gi][ri], // requires reverse MT_END
+        compute_av(dim, gi, ri, AD_PREV)); // requires reverse MT_END
+    }
+  }
+
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    double y = Config::dTimestep / gasv[gi]->getMass()*impulsev[ii][dim] / m_vAreastep[dim]; // requires reverse MT_BEGIN
+
+    m_vValue[gi][ii] = m_vValue[gi][ii] - y*(m_vHalf[gi][ii] - compute_ah(dim, gi, ii, AD_PREV)); // requires reverse MT_BEGIN
+  }
+}
 // HELP METHODS
+inline void Cell::cycleValue(double& result, unsigned int& count, const unsigned int& gi,
+  const unsigned int& ii, const Cell::CellVector& cellVector)
+{
+  for (auto& item : cellVector) {
+    result += item->m_vValue[gi][ii];
+    count++;
+  }
+}
+
+inline void Cell::cycleHalf(double& result, unsigned int& count, const unsigned int& gi,
+  const unsigned int& ii, const Cell::CellVector& cellVector)
+{
+  for (auto& item : cellVector) {
+    result += item->m_vHalf[gi][ii];
+    count++;
+  }
+}
+
 double Cell::compute_av(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth) {
   double result = 0.0;
   unsigned int count = 0;
   switch (eAverageDepth) {
   case AD_NEXT:
-    for (auto& item : m_vNext[dim]) {
-      result += item->m_vValue[gi][ii];
-      count++;
-    }
+    cycleValue(result, count, gi, ii, m_vNext[dim]);
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_END) {
-        for (auto& item2 : item1->m_vPrev[dim]) {
-          result += item2->m_vValue[gi][ii];
-          count++;
-        }
-      } else {
-        for (auto& item2 : item1->m_vNext[dim]) {
-          result += item2->m_vValue[gi][ii];
-          count++;
-        }
-      }
+      cycleValue(result, count, gi, ii, item1->m_vNext[dim]);
     }
     break;
   case AD_PREV:
-    for (auto& item : m_vPrev[dim]) {
-      result += item->m_vValue[gi][ii];
-      count++;
-    }
+    cycleValue(result, count, gi, ii, m_vPrev[dim]);
     break;
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_BEGIN) {
-        for (auto& item2 : item1->m_vNext[dim]) {
-          result += item2->m_vValue[gi][ii];
-          count++;
-        }
-      } else {
-        for (auto& item2 : item1->m_vPrev[dim]) {
-          result += item2->m_vValue[gi][ii];
-          count++;
-        }
-      }
+      cycleValue(result, count, gi, ii, item1->m_vPrev[dim]);
     }
     break;
   }
-  //if (count == 2) {
-  //  std::cout << "Value" << eAverageDepth << " : " << count << " Type = " << m_vType[dim] << " result = " << result << std::endl;
-  //  std::cout << ":" << m_vNext[dim].size() << ":" << m_vPrev[dim].size() << std::endl;
-  //}
 
   if (count == 0 || count > 4)
     std::cout << "Value" << eAverageDepth << " : " << count << " Type = " << m_vType[dim] << std::endl;
@@ -683,45 +762,19 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
   unsigned int count = 0;
   switch (eAverageDepth) {
   case AD_NEXT:
-    for (auto& item : m_vNext[dim]) {
-      result += item->m_vHalf[gi][ii];
-      count++;
-    }
+    cycleHalf(result, count, gi, ii, m_vNext[dim]);
     break;
   case AD_NEXTNEXT:
     for (auto& item1 : m_vNext[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_END) {
-        for (auto& item2 : item1->m_vPrev[dim]) {
-          result += item2->m_vHalf[gi][ii];
-          count++;
-        }
-      } else {
-        for (auto& item2 : item1->m_vNext[dim]) {
-          result += item2->m_vHalf[gi][ii];
-          count++;
-        }
-      }
+      cycleHalf(result, count, gi, ii, item1->m_vNext[dim]);
     }
     break;
   case AD_PREV:
-    for (auto& item : m_vPrev[dim]) {
-      result += item->m_vHalf[gi][ii];
-      count++;
-    }
+    cycleHalf(result, count, gi, ii, m_vPrev[dim]);
     break;
   case AD_PREVPREV:
     for (auto& item1 : m_vPrev[dim]) {
-      if (m_vMirrorType[dim] == sep::MT_BEGIN) {
-        for (auto& item2 : item1->m_vNext[dim]) {
-          result += item2->m_vHalf[gi][ii];
-          count++;
-        }
-      } else {
-        for (auto& item2 : item1->m_vPrev[dim]) {
-          result += item2->m_vHalf[gi][ii];
-          count++;
-        }
-      }
+      cycleHalf(result, count, gi, ii, item1->m_vPrev[dim]);
     }
     break;
   }
@@ -732,23 +785,23 @@ double Cell::compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, Aver
 }
 
 double Cell::fast_exp(const double& mass, const double& temp, const Vector3d& impulse) {
-	return std::exp(-impulse.mod2()/mass/2/temp);
+  return std::exp(-impulse.mod2() / mass / 2 / temp);
 }
 
 double Cell::limiter_superbee(const double& x, const double& y, const double& z) {
-  if( (z-y)*(y-x) <= 0 ) return 0.0;
-  else return std::max(0.0, std::min(2*std::abs(y-x), std::min(std::abs(z-y), std::min(std::abs(y-x), 2*std::abs(z-y)))))*sgn(z-y);
+  if ((z - y)*(y - x) <= 0) return 0.0;
+  else return std::max(0.0, std::min(2 * std::abs(y - x), std::min(std::abs(z - y), std::min(std::abs(y - x), 2 * std::abs(z - y)))))*sgn(z - y);
 }
 
 /* Macro Data */
 
 double Cell::compute_concentration(unsigned int gi) {
-	Impulse* impulse = m_pSolver->GetImpulse();
-	ImpulseVector& impulsev = impulse->getVector();
+  Impulse* impulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = impulse->getVector();
 
   double concentration = 0.0;
-  for(unsigned int ii=0;ii<impulsev.size();ii++) {
-  	concentration += m_vValue[gi][ii];
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    concentration += m_vValue[gi][ii];
   }
   concentration *= impulse->getDeltaImpulseQube();
   return concentration;
@@ -756,15 +809,15 @@ double Cell::compute_concentration(unsigned int gi) {
 
 double Cell::compute_temperature(unsigned int gi) {
   GasVector& gasv = Config::vGas;
-	Impulse* impulse = m_pSolver->GetImpulse();
-	ImpulseVector& impulsev = impulse->getVector();
+  Impulse* impulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = impulse->getVector();
 
-	double concentration = m_vMacroData[gi].C;
+  double concentration = m_vMacroData[gi].C;
   double temperature = 0.0;
   Vector3d vAverageSpeed = m_vMacroData[gi].Stream;
   vAverageSpeed /= concentration;
 
-  for(unsigned int ii=0;ii<impulsev.size();ii++) {
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
     Vector3d tempvec;
     for (unsigned int vi = 0; vi < vAverageSpeed.getMass().size(); vi++) {
       tempvec[vi] = impulsev[ii][vi] / gasv[gi]->getMass() - vAverageSpeed[vi];
@@ -785,11 +838,11 @@ double Cell::compute_pressure(unsigned int gi)
 
 Vector3d Cell::compute_stream(unsigned int gi) {
   GasVector& gasv = Config::vGas;
-	Impulse* impulse = m_pSolver->GetImpulse();
+  Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
 
   Vector3d vStream;
-  for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
     for (unsigned int vi = 0; vi < vStream.getMass().size(); vi++) {
       vStream[vi] += impulsev[ii][vi] * m_vValue[gi][ii];
     }
@@ -800,5 +853,5 @@ Vector3d Cell::compute_stream(unsigned int gi) {
 }
 
 Vector3d Cell::compute_heatstream(unsigned int gi) {
-	return Vector3d();
+  return Vector3d();
 }

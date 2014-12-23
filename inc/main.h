@@ -45,7 +45,8 @@ namespace sep {
   {
     BT_DIFFUSE,
     BT_STREAM,
-    BT_PRESSURE
+    BT_PRESSURE,
+    BT_MIRROR
   };
 
   enum MirrorType

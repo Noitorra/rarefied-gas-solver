@@ -125,17 +125,23 @@ double T1, T2, P_sat;
 
 void GridConstructor::ConfigureGPRT() {
 
-    PushTemperature(0.5);
+    PushTemperature(1.0);
     SetBox(Vector2d(0.0, 0.0), Vector2d(10.0, 10.0),
         [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
             if (y == size.y() - 1) {
-                configs[0].boundary_T = 1.0;
+                configs[0].boundary_T = 2.0;
             }
+            
             if (x == 0) {
-                configs[0].mirror_type = sep::MT_BEGIN;
-                configs[0].mirror_axis = sep::X;
+              //configs[0].boundary_cond = sep::BT_MIRROR;
             }
+
+            if (x == size.x() - 1)
+            {
+              configs[0].boundary_cond = sep::BT_MIRROR;
+            }
+            
         });
 }
 

@@ -46,8 +46,6 @@ private:
   std::vector<Vector3d> m_vBoundaryStream;
   std::vector<double> m_vBoundaryPressure;
 
-  std::vector<sep::MirrorType> m_vMirrorType;
-
 	std::vector<MacroData> m_vMacroData;
 
 public:
@@ -61,7 +59,6 @@ public:
 	/* set all necessary parameters */
   void setParameters(double _Pressure, double _Temperature, Vector3d _Areastep, int _GasIndex = 0);
   void setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure, int iGasIndex = 0);
-  void setMirrorType(sep::MirrorType eMirrorType, sep::Axis eAxis);
 	/* creates cells inner values, takes long time */
 	void Init(GridManager* pGridManager);
 
@@ -95,6 +92,9 @@ private:
   void compute_half_pressure_left(unsigned int dim, int gi);
   void compute_half_pressure_right(unsigned int dim, int gi);
 
+  void compute_half_mirror_left(unsigned int dim, int gi);
+  void compute_half_mirror_right(unsigned int dim, int gi);
+
 //	void computeValue_Left(unsigned int dim);
 	void compute_value_normal(unsigned int dim);
 //	void computeValue_PreRight(unsigned int dim);
@@ -108,6 +108,11 @@ private:
     AD_PREV,
     AD_PREVPREV
   };
+
+  inline void cycleValue(double& result, unsigned int& count, const unsigned int& gi,
+    const unsigned int& ii, const Cell::CellVector& cellVector);
+  inline void cycleHalf(double& result, unsigned int& count, const unsigned int& gi,
+    const unsigned int& ii, const Cell::CellVector& cellVector);
 
   double compute_av(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth);
   double compute_ah(unsigned int dim, unsigned int gi, unsigned int ii, AverageDepth eAverageDepth);

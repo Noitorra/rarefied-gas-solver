@@ -62,7 +62,7 @@ void OutResults::OutAll(int iIteration) {
   std::cout << "Out results " << iIteration << " ..." << std::endl;
 
   LoadParameters();
-  for (int iGas = 0; iGas < 2; iGas++) {
+  for (int iGas = 0; iGas < Config::iGasesNumber; iGas++) {
     OutParameterSingletone(sep::T_PARAM, iGas, iIteration);
     OutParameterSingletone(sep::C_PARAM, iGas, iIteration);
     OutParameterSingletone(sep::P_PARAM, iGas, iIteration);
@@ -239,7 +239,7 @@ void OutResults::OutAverageStream(int iIteration) {
 
     namespace fs = boost::filesystem;
     fs::path full_path( fs::current_path() );
-    std::cout << "Current path is : " << full_path << std::endl;
+    //std::cout << "Current path is : " << full_path << std::endl;
 
 
 

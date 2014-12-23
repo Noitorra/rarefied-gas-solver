@@ -385,7 +385,7 @@ void GridManager::InitCells() {
                   cond.boundary_pressure,
                   gas_number
           );
-          p_cell->setMirrorType(cond.mirror_type, cond.mirror_axis);
+          //p_cell->setMirrorType(cond.mirror_type, cond.mirror_axis);
         }
         p_cell->Init(this);
       }
@@ -421,11 +421,11 @@ void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
   if (coord < 2) {
     if (!cell->m_vPrev[mirror_axis].empty())
       throw("Next is already not emty");
-    cell->m_vPrev[mirror_axis].push_back(cell);
+    cell->m_vPrev[mirror_axis].push_back(cell); // cell->m_vNext[mirror_axis][0]
   } else {
     if (!cell->m_vNext[mirror_axis].empty())
       throw("Next is already not emty");
-    cell->m_vNext[mirror_axis].push_back(cell);
+    cell->m_vNext[mirror_axis].push_back(cell); // cell->m_vPrev[mirror_axis][0]
   }
 }
 
