@@ -13,21 +13,18 @@ std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
     case sep::T_PARAM:
       return "temp";
-          break;
     case sep::C_PARAM:
       return "conc";
-          break;
     case sep::P_PARAM:
       return "pressure";
-          break;
     default:
       return "no_param";
   }
 }
 
-void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
-  m_pGrid = pGrid;
-  m_pGridManager = pGridManager;
+void OutResults::Init(Grid* grid, GridManager* grid_manager) {
+  grid_ = grid;
+  grid_manager_ = grid_manager;
 
 
   // check if needed to create directories
@@ -54,204 +51,113 @@ void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
   }
 }
 
-void OutResults::OutAll(int iIteration) {
-  if (!m_pGrid || !m_pGridManager) {
+void OutResults::OutAll(int iteration) {
+  if (!grid_ || !grid_manager_) {
     std::cout << "Error: member OutResults is not initialized yet" << std::endl;
     return;
   }
-  std::cout << "Out results " << iIteration << " ..." << std::endl;
+  std::cout << "Out results " << iteration << " ..." << std::endl;
 
   LoadParameters();
-  for (int iGas = 0; iGas < Config::iGasesNumber; iGas++) {
-    OutParameterSingletone(sep::T_PARAM, iGas, iIteration);
-    OutParameterSingletone(sep::C_PARAM, iGas, iIteration);
-    OutParameterSingletone(sep::P_PARAM, iGas, iIteration);
+  for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+    OutParameter(sep::T_PARAM, gas, iteration);
+    OutParameter(sep::C_PARAM, gas, iteration);
+    OutParameter(sep::P_PARAM, gas, iteration);
   }
-  OutAverageStream(iIteration);
+  OutAverageStream(iteration);
 }
 
 // prepare parameters to be printed out
 void OutResults::LoadParameters() {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>&cells = grid_->GetInitCells();
   
-  const Vector3i& vSize = m_pGrid->GetSize();
+  const Vector3i& vSize = grid_->GetSize();
   for (int x = 0; x < vSize.x(); x++) {
     for (int y = 0; y < vSize.y(); y++) {
-      int z = iZLayer;
-      if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL)
+      const int z = 0;
+      if (cells[x][y][z]->m_eType != sep::NORMAL_CELL)
         continue;
-      Cell* cell = m_vCells[x][y][z].get()->m_pCell;
+      Cell* cell = cells[x][y][z].get()->m_pCell;
       cell->computeMacroData();
-      const std::vector<MacroData>& vMacroData = cell->getMacroData();
-      m_vCells[x][y][z]->m_vMacroData = vMacroData;
     }
   }
   
-  const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGrid->GetVessels();
+  const std::vector<std::shared_ptr<VesselGrid>>& vVessels = grid_->GetVessels();
   
   for (auto& pVessel : vVessels) {
     pVessel->computeMacroData();
   }
-
 }
 
-void OutResults::OutParameterSingletone(sep::MacroParamType eType, int iGas, int iIndex) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
-  
-  std::string filename;
-  const std::string& sOutputPrefix = Config::sOutputPrefix;
+void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>&cells = grid_->GetInitCells();
 
-  filename = sOutputPrefix + "out/gas" + std::to_string(iGas) +
-          "/" + param_to_str(eType) + "/data/" + std::to_string(iIndex) + ".bin";
+  std::string filename;
+  const std::string& output_prefix = Config::sOutputPrefix;
+
+  filename = output_prefix + "out/gas" + std::to_string(gas) +
+          "/" + param_to_str(type) + "/data/" + std::to_string(index) + ".bin";
 
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
-  
-  const Vector3i& vGridSize = Config::vGridSize;
+
+  const Vector3i& grid_size = Config::vGridSize;
 
   // writing additional info
-  double tmp = (double)vGridSize.x();
+  double tmp = (double)grid_size.x();
   fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
-  tmp = (double)vGridSize.y();
+  tmp = (double)grid_size.y();
   fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
-  
-  for (int y = 0; y < vGridSize.y(); y++) {
-    for (int x = 0; x < vGridSize.x(); x++) {
+
+  for (int y = 0; y < grid_size.y(); y++) {
+    for (int x = 0; x < grid_size.x(); x++) {
       int z = 0;
-      double dParam = 0.0;
+      double param = 0.0;
 
-      // Edge cells are faked
-      int iEdge = 0;
-      // Out grid
-      if (x >= 0 + iEdge && y >= 0 + iEdge && z >= 0 + iEdge &&
-          x < vGridSize.x() - iEdge && y < vGridSize.y() - iEdge && z < vGridSize.z() - iEdge) {
-        
-        Cell* cell = m_vCells[x][y][z]->m_pCell;
-        if (!cell) {
-          dParam = 0.0;
-        } else {
-          if (m_vCells[x][y][z]->m_eType != sep::NORMAL_CELL) {
-            dParam = 0.0;
-          } else {
-            switch (eType) {
-              case sep::T_PARAM:
-                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].T;
-                break;
-              case sep::C_PARAM:
-                dParam = m_vCells[x][y][z]->m_vMacroData[iGas].C;
-                break;
-              case sep::P_PARAM:
-                dParam = cell->m_vMacroData[iGas].C * cell->m_vMacroData[iGas].T;
-                goto next_cell_label;
-              default:
-                return;
-            }
-          }
+      Cell* cell = cells[x][y][z]->m_pCell;
+      if (cell && cells[x][y][z]->m_eType == sep::NORMAL_CELL) {
+        switch (type) {
+          case sep::T_PARAM:
+            param = cell->m_vMacroData[gas].T;
+            break;
+          case sep::C_PARAM:
+            param = cell->m_vMacroData[gas].C;
+            break;
+          case sep::P_PARAM:
+            param = cell->m_vMacroData[gas].C * cell->m_vMacroData[gas].T;
+            break;
+          default:
+            return;
         }
-      } else {
-        // Looking for vessels
-        
-        // For all vessels
-        const std::vector<std::shared_ptr<VesselGrid>>& vVessels = m_pGrid->GetVessels();
-          
-        for (auto& pVessel : vVessels) {
-
-          const std::vector< std::vector<Cell*> >& vVessCells = pVessel->GetPrintVector();
-          const Vector2i& vVesselSize2D = pVessel->GetPrintVectorSize();
-          Vector3i vVesselSize(vVesselSize2D.x(), vVesselSize2D.y(), 1);
-          Vector3i vVesselStart = pVessel->getVesselGridInfo()->vStart;
-//          if (iLeftVess)
-//            vVesselStart.x() = vStartOutGrid.x() - vVesselSize.x();
-//          else
-//            vVesselStart.x() = vStartOutGrid.x() + vGridSize.x();
-          
-          int v_x = x - vVesselStart.x();
-          int v_y = y - vVesselStart.y();
-          int v_z = z - vVesselStart.z();
-          
-          iEdge = 0;
-          if (v_x >= 0 + iEdge && v_y >= 0 + iEdge && v_z >= 0 + iEdge &&
-              v_x < vVesselSize.x() - iEdge && v_y < vVesselSize.y() - iEdge && v_z < vVesselSize.z() - iEdge) {
-            
-            Cell* cell = nullptr;
-//            if (!iLeftVess)
-//              cell = vVessCells[vVesselSize.x() - v_x - 1][v_y];
-//            else
-//              cell = vVessCells[v_x][v_y];
-
-            if (!cell) {
-              dParam = 0.0;
-              goto next_cell_label;
-            }
-            else {
-              if ((cell->m_vType[sep::X] == Cell::CT_NORMAL ||
-                   cell->m_vType[sep::X] == Cell::CT_PRERIGHT) &&
-                  (cell->m_vType[sep::Y] == Cell::CT_NORMAL ||
-                   cell->m_vType[sep::Y] == Cell::CT_PRERIGHT)) {
-//                if (true) {
-                switch (eType) {
-                  case sep::T_PARAM:
-                    dParam = cell->m_vMacroData[iGas].T;
-                    goto next_cell_label;
-                    break;
-                  case sep::C_PARAM:
-                    dParam = cell->m_vMacroData[iGas].C;
-                    goto next_cell_label;
-                    break;
-                  case sep::P_PARAM:
-                    dParam = cell->m_vMacroData[iGas].C * cell->m_vMacroData[iGas].T;
-                    goto next_cell_label;
-                    break;
-                  default:
-                    return;
-                }
-              } else {
-                dParam = 0.0;
-              }
-            }
-          }
-        }
-        dParam = 0.0;
       }
-      next_cell_label:
-      fs.write(reinterpret_cast<const char*>(&dParam), sizeof(double));
+
+      fs.write(reinterpret_cast<const char*>(&param), sizeof(double));
     }
   }
   fs.close();
 }
 
-void OutResults::OutParameterMPI(sep::MacroParamType eType) {
-  // TODO: To implement
-}
-
-void OutResults::OutAverageStream(int iIteration) {
+void OutResults::OutAverageStream(int iteration) {
   GasVector& gasv = Config::vGas;
 
-  const std::string& sOutputPrefix = Config::sOutputPrefix;
-  std::string sASFilenameBase = sOutputPrefix + "out/gas";
+  const std::string& output_prefix = Config::sOutputPrefix;
+  std::string as_filename_base = output_prefix + "out/gas";
   for (unsigned int gi = 0; gi < gasv.size(); gi++) {
-    std::string sASFilename = sASFilenameBase + std::to_string(gi);
-    sASFilename += "/";
-    sASFilename += "average_stream.bin";
+    std::string as_filename = as_filename_base + std::to_string(gi);
+    as_filename += "/";
+    as_filename += "average_stream.bin";
 
     std::fstream test;
     test.open("test.bin", std::ios::out | std::ios::binary);
     test.close();
 
-    namespace fs = boost::filesystem;
-    fs::path full_path( fs::current_path() );
-    //std::cout << "Current path is : " << full_path << std::endl;
-
-
-
     std::fstream filestream;
     std::ios::openmode openmode;
-    if (iIteration == 0) {
+    if (iteration == 0) {
       openmode = std::ios::out | std::ios::binary;
-    }
-    else {
+    } else {
       openmode = std::ios::app | std::ios::binary;
     }
-    filestream.open(sASFilename, openmode);
+    filestream.open(as_filename, openmode);
     if (filestream.is_open()) {
 
       switch (Config::eGridGeometryType) {
@@ -267,33 +173,33 @@ void OutResults::OutAverageStream(int iIteration) {
       filestream.close();
     }
     else {
-      std::cout << "OutResults::OutAverageStream() : Cannot open file - " << sASFilename << std::endl;
+      std::cout << "OutResults::OutAverageStream() : Cannot open file - " << as_filename << std::endl;
     }
   }
 }
 
-void OutResults::OutAverageStreamComb(std::fstream& filestream, int iGasN) {
-  const Vector3i& vSize = m_pGrid->GetSize();
-  double dLeftAverageStream = ComputeAverageColumnStream(1, iGasN, 0, vSize.y());
-  double dRightAverageStream = ComputeAverageColumnStream(vSize.x() - 2, iGasN, 0, vSize.y());
+void OutResults::OutAverageStreamComb(std::fstream& filestream, int gas_n) {
+  const Vector3i& grid_size = grid_->GetSize();
+  double left_average_stream = ComputeAverageColumnStream(1, gas_n, 0, grid_size.y());
+  double right_average_stream = ComputeAverageColumnStream(grid_size.x() - 2, gas_n, 0, grid_size.y());
   
-  filestream.write(reinterpret_cast<const char*>(&dLeftAverageStream), sizeof(double));
-  filestream.write(reinterpret_cast<const char*>(&dRightAverageStream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&left_average_stream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&right_average_stream), sizeof(double));
   
-  std::cout << dLeftAverageStream << " : " << dRightAverageStream << std::endl;
+  std::cout << left_average_stream << " : " << right_average_stream << std::endl;
 }
 
-void OutResults::OutAverageStreamHType(std::fstream& filestream, int iGasN) {
-  const Vector3i& vSize = m_pGrid->GetSize();
-  HTypeGridConfig* pHTypeConfig = Config::pHTypeGridConfig.get();
+void OutResults::OutAverageStreamHType(std::fstream& filestream, int gas_n) {
+  const Vector3i& grid_size = grid_->GetSize();
+  HTypeGridConfig* h_type_config = Config::pHTypeGridConfig.get();
   int iShiftX = 5;
-  int D = pHTypeConfig->D;
-  int l = pHTypeConfig->l;
+  int D = h_type_config->D;
+  int l = h_type_config->l;
   
-  double dLeftUpStream = ComputeAverageColumnStream(iShiftX, iGasN, 1, D - 2);
-  double dRightUpStream = ComputeAverageColumnStream(vSize.x() - 1 - iShiftX, iGasN, 1, D - 2);
-  double dLeftDownStream = ComputeAverageColumnStream(iShiftX, iGasN, D + l + 1, D - 2);
-  double dRightDownStream = ComputeAverageColumnStream(vSize.x() - 1 - iShiftX, iGasN, D + l + 1, D - 2);
+  double dLeftUpStream = ComputeAverageColumnStream(iShiftX, gas_n, 1, D - 2);
+  double dRightUpStream = ComputeAverageColumnStream(grid_size.x() - 1 - iShiftX, gas_n, 1, D - 2);
+  double dLeftDownStream = ComputeAverageColumnStream(iShiftX, gas_n, D + l + 1, D - 2);
+  double dRightDownStream = ComputeAverageColumnStream(grid_size.x() - 1 - iShiftX, gas_n, D + l + 1, D - 2);
   
   filestream.write(reinterpret_cast<const char*>(&dLeftUpStream), sizeof(double));
   filestream.write(reinterpret_cast<const char*>(&dRightUpStream), sizeof(double));
@@ -304,15 +210,15 @@ void OutResults::OutAverageStreamHType(std::fstream& filestream, int iGasN) {
   dLeftDownStream << " : " << dRightDownStream << std::endl;
 }
 
-double OutResults::ComputeAverageColumnStream(int iIndexX, unsigned int gi, int iStartY, int iSizeY) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = m_pGrid->GetInitCells();
+double OutResults::ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y) {
+  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = grid_->GetInitCells();
 
-  double dAverageStream = 0.0;
-  for (int y = iStartY; y < iStartY + iSizeY; y++) {
-    dAverageStream += m_vCells[iIndexX][y][0]->m_vMacroData[gi].Stream.x();
+  double average_stream = 0.0;
+  for (int y = start_y; y < start_y + size_y; y++) {
+    average_stream += m_vCells[index_x][y][0]->m_vMacroData[gi].Stream.x();
   }
 
-  dAverageStream /= iSizeY;
+  average_stream /= size_y;
  
-  return dAverageStream;
+  return average_stream;
 }
