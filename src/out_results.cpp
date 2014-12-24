@@ -26,7 +26,6 @@ void OutResults::Init(Grid* grid, GridManager* grid_manager) {
   grid_ = grid;
   grid_manager_ = grid_manager;
 
-
   // check if needed to create directories
   namespace fs = boost::filesystem;
 
@@ -64,7 +63,7 @@ void OutResults::OutAll(int iteration) {
     OutParameter(sep::C_PARAM, gas, iteration);
     OutParameter(sep::P_PARAM, gas, iteration);
   }
-  OutAverageStream(iteration);
+//  OutAverageStream(iteration);
 }
 
 // prepare parameters to be printed out
@@ -146,10 +145,6 @@ void OutResults::OutAverageStream(int iteration) {
     as_filename += "/";
     as_filename += "average_stream.bin";
 
-    std::fstream test;
-    test.open("test.bin", std::ios::out | std::ios::binary);
-    test.close();
-
     std::fstream filestream;
     std::ios::openmode openmode;
     if (iteration == 0) {
@@ -165,7 +160,7 @@ void OutResults::OutAverageStream(int iteration) {
           OutAverageStreamComb(filestream, gi);
           break;
         case sep::H_GRID_GEOMTRY:
-          OutAverageStreamHType(filestream, gi);
+          OutAverageStreamGPRT(filestream, gi);
           break;
         default:
           return;
@@ -189,25 +184,25 @@ void OutResults::OutAverageStreamComb(std::fstream& filestream, int gas_n) {
   std::cout << left_average_stream << " : " << right_average_stream << std::endl;
 }
 
-void OutResults::OutAverageStreamHType(std::fstream& filestream, int gas_n) {
+void OutResults::OutAverageStreamGPRT(std::fstream &filestream, int gas_n) {
   const Vector3i& grid_size = grid_->GetSize();
   HTypeGridConfig* h_type_config = Config::pHTypeGridConfig.get();
-  int iShiftX = 5;
+  int shift_x = 5;
   int D = h_type_config->D;
   int l = h_type_config->l;
   
-  double dLeftUpStream = ComputeAverageColumnStream(iShiftX, gas_n, 1, D - 2);
-  double dRightUpStream = ComputeAverageColumnStream(grid_size.x() - 1 - iShiftX, gas_n, 1, D - 2);
-  double dLeftDownStream = ComputeAverageColumnStream(iShiftX, gas_n, D + l + 1, D - 2);
-  double dRightDownStream = ComputeAverageColumnStream(grid_size.x() - 1 - iShiftX, gas_n, D + l + 1, D - 2);
+  double left_up_stream = ComputeAverageColumnStream(shift_x, gas_n, 1, D - 2);
+  double right_up_stream = ComputeAverageColumnStream(grid_size.x() - 1 - shift_x, gas_n, 1, D - 2);
+  double left_down_stream = ComputeAverageColumnStream(shift_x, gas_n, D + l + 1, D - 2);
+  double right_down_stream = ComputeAverageColumnStream(grid_size.x() - 1 - shift_x, gas_n, D + l + 1, D - 2);
   
-  filestream.write(reinterpret_cast<const char*>(&dLeftUpStream), sizeof(double));
-  filestream.write(reinterpret_cast<const char*>(&dRightUpStream), sizeof(double));
-  filestream.write(reinterpret_cast<const char*>(&dLeftDownStream), sizeof(double));
-  filestream.write(reinterpret_cast<const char*>(&dRightDownStream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&left_up_stream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&right_up_stream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&left_down_stream), sizeof(double));
+  filestream.write(reinterpret_cast<const char*>(&right_down_stream), sizeof(double));
   
-  std::cout << dLeftUpStream << " : " << dRightUpStream << " : " <<
-  dLeftDownStream << " : " << dRightDownStream << std::endl;
+  std::cout << left_up_stream << " : " << right_up_stream << " : " <<
+          left_down_stream << " : " << right_down_stream << std::endl;
 }
 
 double OutResults::ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y) {

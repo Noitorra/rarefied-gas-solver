@@ -25,7 +25,7 @@ private:
   double ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y);
   
   void OutAverageStreamComb(std::fstream& filestream, int gas_n);
-  void OutAverageStreamHType(std::fstream& filestream, int gas_n);
+  void OutAverageStreamGPRT(std::fstream &filestream, int gas_n);
   
   Grid* grid_;
   GridManager* grid_manager_;
