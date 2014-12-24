@@ -6,10 +6,6 @@
 
 
 int main(int argc, char * argv[]) {
-  tbb::parallel_for(0, 20, [&](int i) {
-      std::cout << "it " << i << std::endl;
-  } );
-
   // This is very important. DO NOT COMMENT OR DELETE.
   Config::Init();
 
