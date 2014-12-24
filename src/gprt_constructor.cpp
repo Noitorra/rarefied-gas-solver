@@ -2,7 +2,7 @@
 #include "config.h"
 
 // TODO: solve this problem of lambdas
-double T1, T2, P_sat;
+double T1, T2, P_sat_T1, P_sat_T2;
 
 void GridConstructor::ConfigureGPRT() {
     //    Config::vCellSize = Vector2d(8.0, 0.25);
@@ -17,10 +17,12 @@ void GridConstructor::ConfigureGPRT() {
     T1 /= 600.0;    // TODO: precise normalization
     T2 /= 600.0;
     PushTemperature(T1);
-    P_sat = 1.0; // TODO: set saturated pressure
-    // debug
-    T1 = 1.0;
-    T2 = 0.5;
+    P_sat_T1 = 1.0; // TODO: set saturated pressure
+    P_sat_T2 = 0.5;
+
+//    // debug
+//    T1 = 1.0;
+//    T2 = 0.5;
 
     auto global_temp = [&] (Vector2i p_abs, double& temperature) {
         Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
@@ -42,24 +44,27 @@ void GridConstructor::ConfigureGPRT() {
     };
     auto global_pressure = [=] (Vector2i p_abs, double& pressure) {
         Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
-        pressure = (1.0 - (p.x() - 30.0) / 400.0) * P_sat;
+        pressure = (1.0 - (p.x() - 30.0) / 400.0) * P_sat_T1;
         std::cout << "P = " << pressure << std::endl;
     };
 
     // boxes ========================================================================
     // box 1
 //    PushPressure(1.0);
-    PushPressure(P_sat);
+    PushPressure(P_sat_T1);
     SetBox(Vector2d(-20.0, 0.0), Vector2d(150.0 - sp_delta.x(), 4.0),
             [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
+                configs[1].pressure = 0.0;
+
                 if (x == 0) {
                     configs[0].boundary_cond = sep::BT_PRESSURE;
-                    configs[0].boundary_pressure = P_sat;
+                    configs[0].boundary_pressure = P_sat_T1;
+                    configs[0].boundary_T = T1;
 
                     configs[1].boundary_cond = sep::BT_STREAM;
                     configs[1].boundary_T = T1;
-                    configs[1].boundary_stream = Vector3d(0.01, 0.0, 0.0);
+                    configs[1].boundary_stream = Vector3d(0.01 * 1e-6, 0.0, 0.0);
                 }
 
                 if (y == 0) {
@@ -73,6 +78,9 @@ void GridConstructor::ConfigureGPRT() {
 //    PushPressure(0.95);
     SetBox(Vector2d(100.0, 0.0), Vector2d(30.0, 12.5),
             [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+                configs[1].pressure = 0.0;
+
                 if (y == 0) {
                     for (int gas = 0; gas < Config::iGasesNumber; gas++) {
                         configs[gas].boundary_cond = sep::BT_MIRROR;
@@ -85,14 +93,21 @@ void GridConstructor::ConfigureGPRT() {
     SetBox(Vector2d(30.0, 11.25), Vector2d(100.0, 1.25),
             [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
+            configs[1].pressure = 0.0;
+
             if (x == 0) {
-                configs[0].boundary_cond = sep::BT_STREAM;    // should be gas <-> fluid bound
-                configs[0].boundary_stream = Vector3d(0.01, 0.0, 0.0);
+                configs[0].boundary_cond = sep::BT_PRESSURE;    // should be gas <-> fluid bound
+                configs[0].boundary_pressure = P_sat_T1;
+                configs[0].boundary_T = T1;
+
+                configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
+                configs[1].boundary_pressure = P_sat_T1 * 1e-6;
+                configs[1].boundary_T = T1;
             }
     });
 
     // box 4
-    PushPressure(0.85);
+//    PushPressure(0.85);
     SetBox(Vector2d(30.0, 15.5), Vector2d(100.0 + walls.x(), 2.5),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
@@ -100,10 +115,22 @@ void GridConstructor::ConfigureGPRT() {
             global_temp(abs_p, configs[0].T);
             global_temp(abs_p, configs[0].boundary_T);
             global_pressure(abs_p, configs[0].pressure);
+
+            configs[1].pressure = 0.0;
+
+            if (x == 0) {
+                configs[0].boundary_cond = sep::BT_PRESSURE;    // should be fluid <-> gas bound
+                configs[0].boundary_pressure = P_sat_T1;
+                configs[0].boundary_T = T1;
+
+                configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
+                configs[1].boundary_pressure = P_sat_T1 * 1e-6;
+                configs[1].boundary_T = T1;
+            }
     });
 
     // box 5
-    PushPressure(0.8);
+//    PushPressure(0.8);
     SetBox(Vector2d(130.0 + walls.x() - sp_delta.x(), 0.0), Vector2d(200.0 - walls.x(), 18.0 - sp_delta.y()),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
@@ -111,6 +138,8 @@ void GridConstructor::ConfigureGPRT() {
             global_temp(abs_p, configs[0].T);
             global_temp(abs_p, configs[0].boundary_T);
             global_pressure(abs_p, configs[0].pressure);
+
+            configs[1].pressure = 0.0;
 
             if (y == 0) {
                 for (int gas = 0; gas < Config::iGasesNumber; gas++) {
@@ -120,7 +149,7 @@ void GridConstructor::ConfigureGPRT() {
     });
 
     // box 6
-    PushPressure(0.75);
+//    PushPressure(0.75);
     SetBox(Vector2d(330.0 - sp_delta.x(), 0.0), Vector2d(100.0, 8.0),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
@@ -128,6 +157,8 @@ void GridConstructor::ConfigureGPRT() {
                 global_temp(abs_p, configs[0].T);
                 global_temp(abs_p, configs[0].boundary_T);
                 global_pressure(abs_p, configs[0].pressure);
+
+                configs[1].pressure = 0.0;
 
                 if (x == size.x() - 1) {
                     for (int gas = 0; gas < Config::iGasesNumber; gas++) {
@@ -142,12 +173,26 @@ void GridConstructor::ConfigureGPRT() {
                         configs[gas].boundary_cond = sep::BT_MIRROR;
                     }
                 }
+
+                // gas <-> fluid
+                if (y == size.y() - 1 && x > 350.0 / Config::vCellSize.x()) {
+                    configs[0].boundary_cond = sep::BT_PRESSURE;
+                    configs[0].boundary_pressure = P_sat_T2;
+                    configs[0].boundary_T = T2;
+                }
             });
 
     // box 7
-    PushPressure(0.7);
-    SetBox(Vector2d(130.0 - sp_delta.x(), 0.0), Vector2d(walls.x(), Config::vCellSize.y() * 4),
-            [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+//    PushPressure(0.7);
+    SetBox(Vector2d(130.0 - sp_delta.x(), 0.0), Vector2d(walls.x(), Config::vCellSize.y() * 2),
+            [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+                configs[0].pressure = (1.0 - (double)x / size.x() * 0.38) * P_sat_T1;
+                Vector2i abs_p(x + start.x(), y + start.y());
+                global_temp(abs_p, configs[0].T);
+                global_temp(abs_p, configs[0].boundary_T);
+
+                configs[1].pressure = 0.0;
 
                 if (y == 0) {
                     for (int gas = 0; gas < Config::iGasesNumber; gas++) {
