@@ -2,6 +2,7 @@
 #define SOLVER_H_
 
 #include "main.h"
+#include "timer.h"
 #include <memory>
 
 class Parallel;
@@ -28,12 +29,14 @@ private:
   void MakeStep(sep::Axis axis);
   void MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
   void PreRun();
+  void PrintElapsedTime(int it, Timer& iter_timer);
   
   std::shared_ptr<Parallel> m_pParallel;
 	std::shared_ptr<Impulse> m_pImpulse;
   
   GridManager* m_pGridManager;
   Grid* m_pGrid;
+  Timer timer_;
 };
 
 #endif /* SOLVER_H_ */

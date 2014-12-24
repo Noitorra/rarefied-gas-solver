@@ -10,6 +10,8 @@
 #include "types.h"
 #include <functional>
 
+#include <tbb/tbb.h>
+
 namespace sep {
   enum GridGeometry {
     COMB_GRID_GEOMETRY = 0,
@@ -32,7 +34,7 @@ namespace sep {
     T_PARAM = 0, // Temperature
     C_PARAM, // Concentration
     P_PARAM, // Pressure
-//    FLOW_PARAM, // Flow
+    FLOW_PARAM, // Flow
     LAST_PARAM
   };
 

@@ -1,16 +1,15 @@
 #include "main.h"
 #include "config.h"
 #include "solver.h"
-#include "grid.h"
 #include "grid_manager.h"
-#include "parallel.h"
 #include "out_results.h"
 
-#include <memory>
-// Simple main function to debug some demo functionality
 
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]) {
+  tbb::parallel_for(0, 20, [&](int i) {
+      std::cout << "it " << i << std::endl;
+  } );
+
   // This is very important. DO NOT COMMENT OR DELETE.
   Config::Init();
 
@@ -21,8 +20,6 @@ int main(int argc, char * argv[])
   pGridManager->ConfigureGrid();
   
   pGridManager->GetSolver()->Run();
-
-
 
   return 0;
 }

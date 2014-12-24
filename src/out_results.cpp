@@ -8,6 +8,7 @@
 #include "solver.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include "timer.h"
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
@@ -17,6 +18,8 @@ std::string param_to_str(sep::MacroParamType param) {
       return "conc";
     case sep::P_PARAM:
       return "pressure";
+    case sep::FLOW_PARAM:
+      return "flow";
     default:
       return "no_param";
   }
@@ -55,14 +58,20 @@ void OutResults::OutAll(int iteration) {
     std::cout << "Error: member OutResults is not initialized yet" << std::endl;
     return;
   }
-  std::cout << "Out results " << iteration << " ..." << std::endl;
+  std::cout << "Out results " << iteration;
 
   LoadParameters();
-  for (int gas = 0; gas < Config::iGasesNumber; gas++) {
-    OutParameter(sep::T_PARAM, gas, iteration);
-    OutParameter(sep::C_PARAM, gas, iteration);
-    OutParameter(sep::P_PARAM, gas, iteration);
-  }
+
+  tbb::parallel_for(tbb::blocked_range<int>(0, sep::LAST_PARAM), [&](const tbb::blocked_range<int>& r) {
+      for (int param = r.begin(); param != r.end(); ++param) {
+        for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+          OutParameter((sep::MacroParamType) param, gas, iteration);
+        }
+      }
+      std::cout << ".";
+  });
+
+  std::cout << std::endl;
 //  OutAverageStream(iteration);
 }
 
@@ -71,15 +80,17 @@ void OutResults::LoadParameters() {
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>&cells = grid_->GetInitCells();
   
   const Vector3i& vSize = grid_->GetSize();
-  for (int x = 0; x < vSize.x(); x++) {
-    for (int y = 0; y < vSize.y(); y++) {
-      const int z = 0;
-      if (cells[x][y][z]->m_eType != sep::NORMAL_CELL)
-        continue;
-      Cell* cell = cells[x][y][z].get()->m_pCell;
-      cell->computeMacroData();
-    }
-  }
+  tbb::parallel_for(tbb::blocked_range<int>(0, vSize.x()), [&](const tbb::blocked_range<int>& r) {
+      for (int x = r.begin(); x != r.end(); ++x) {
+        for (int y = 0; y < vSize.y(); y++) {
+          const int z = 0;
+          if (cells[x][y][z]->m_eType != sep::NORMAL_CELL)
+            continue;
+          Cell *cell = cells[x][y][z].get()->m_pCell;
+          cell->computeMacroData();
+        }
+      }
+  });
   
   const std::vector<std::shared_ptr<VesselGrid>>& vVessels = grid_->GetVessels();
   

@@ -66,3 +66,13 @@ endif()
 # include_directories(${MPI_INCLUDE_PATH})
 # MESSAGE(STATUS MPI_LIBRARIES=${MPI_LIBRARIES})
 # target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES})
+
+
+# TBB
+# Add FindTBB directory to CMake's module path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../CMake/")
+find_package(TBB REQUIRED)
+if(TBB_FOUND)
+	include_directories(${TBB_INCLUDE_DIRS})
+	target_link_libraries(${TARGET_NAME} ${TBB_LIBRARIES})
+endif()
