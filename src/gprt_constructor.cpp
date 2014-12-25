@@ -130,16 +130,18 @@ void GridConstructor::ConfigureGPRT() {
         [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
             if (y == size.y() - 1) {
-                configs[0].boundary_T = 2.0;
+                //configs[0].boundary_T = 2.0;
             }
             
             if (x == 0) {
-              //configs[0].boundary_cond = sep::BT_MIRROR;
+              configs[0].boundary_cond = sep::BT_PRESSURE;
+              configs[0].boundary_pressure = 2.0;
+              configs[0].boundary_T = 1.0;
             }
 
             if (x == size.x() - 1)
             {
-              configs[0].boundary_cond = sep::BT_MIRROR;
+              //configs[0].boundary_cond = sep::BT_MIRROR;
             }
             
         });
