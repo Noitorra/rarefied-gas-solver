@@ -10,6 +10,8 @@
 #include "types.h"
 #include <functional>
 
+#include <tbb/tbb.h>
+
 namespace sep {
   enum GridGeometry {
     COMB_GRID_GEOMETRY = 0,
@@ -32,7 +34,7 @@ namespace sep {
     T_PARAM = 0, // Temperature
     C_PARAM, // Concentration
     P_PARAM, // Pressure
-//    FLOW_PARAM, // Flow
+    FLOW_PARAM, // Flow
     LAST_PARAM
   };
 
@@ -47,13 +49,6 @@ namespace sep {
     BT_STREAM,
     BT_PRESSURE,
     BT_MIRROR
-  };
-
-  enum MirrorType
-  {
-    MT_DISABLED,
-    MT_BEGIN,
-    MT_END
   };
 }
 
@@ -80,9 +75,7 @@ public:
   T(1.0),
   boundary_cond(sep::BT_DIFFUSE),
   boundary_T(1.0),
-  boundary_pressure(1.0),
-  mirror_type(sep::MT_DISABLED),
-  mirror_axis(sep::X)
+  boundary_pressure(1.0)
   {};
 
   double pressure; // initial pressure
@@ -91,8 +84,6 @@ public:
   double boundary_T;  // wall temperature
   Vector3d boundary_stream;
   double boundary_pressure;
-  sep::MirrorType mirror_type;
-  sep::Axis mirror_axis;
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;

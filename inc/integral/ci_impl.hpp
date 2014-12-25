@@ -223,9 +223,9 @@ namespace ci {
 		}
 
 //		std::cout << "n_calc = " << nc.size() << " N_nu = " << N_nu << std::endl;
-		for (int j = 0; j < 9; j++) 
-			std::cout << ss[j] << ' ';
-		std::cout << std::endl;
+//		for (int j = 0; j < 9; j++)
+//			std::cout << ss[j] << ' ';
+//		std::cout << std::endl;
 
 		double B = (1/sqrt(2.)/M_PI) * 2*M_PI * 0.5*sqr(potential->bMax(p1, p2)) * nk1 * nk2 * std::pow(a, 3) * a / N_nu / 4 * tt;
 /*

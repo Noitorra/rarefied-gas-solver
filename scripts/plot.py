@@ -5,9 +5,10 @@ import numpy
 from numpy import *
 import config
 
-max_files = 100
-each = 5
-gas_num = 1
+max_files = 5
+each = 1
+gas_num = 2
+
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
 
@@ -45,7 +46,7 @@ for param in params:
             min_val = min(min_val, v)
 
       has_min_max = math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
-                              (max_val - min_val) < 1e-6
+                              (max_val - min_val) < 1e-300
 
       if has_min_max:
         print('warning: max = min')

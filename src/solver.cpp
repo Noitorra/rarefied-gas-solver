@@ -10,7 +10,7 @@
 #include "gas.h"
 #include "vessel_grid.h"
 #include "integral/ci.hpp"
-#include "parallel.h"
+#include "timer.h"
 
 Solver::Solver() :
 m_pParallel(new Parallel),
@@ -36,12 +36,13 @@ void Solver::Run() {
     ci::init(&potential, ci::NO_SYMM);
   }
 
-  // debug
   std::shared_ptr<OutResults> out_results(new OutResults());
   out_results->Init(m_pGrid, m_pGridManager);
 
+  timer_.restart();
   for(int it = 0; it < Config::iMaxIteration; it++) {
-    // debug
+
+    Timer iter_timer;
     out_results->OutAll(it);
 
     MakeStep(sep::X);
@@ -49,31 +50,29 @@ void Solver::Run() {
     MakeStep(sep::Z);
 
     if (Config::bUseIntegral) {
-      if (Config::iGasesNumber == 3)
-      {
+      if (Config::iGasesNumber == 3) {
         MakeIntegral(0, 0, Config::dTimestep);
         MakeIntegral(0, 1, Config::dTimestep);
         MakeIntegral(0, 2, Config::dTimestep);
-      }
-      if (Config::iGasesNumber == 2) {
+      } else if (Config::iGasesNumber == 2) {
         MakeIntegral(0, 0, Config::dTimestep);
         MakeIntegral(0, 1, 2 * Config::dTimestep);
         MakeIntegral(1, 1, Config::dTimestep);
-      }
-      else {
+      } else {
         MakeIntegral(0, 0, Config::dTimestep);
       }
     }
 
     // here we can test data, if needed...
-    for( auto& item : vCellVector ) {
+    tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
       item->testInnerValuesRange();
-    }
+    });
 
     std::cout << "Run() : " << it << "/" << Config::iMaxIteration << std::endl;
+    PrintElapsedTime(it, iter_timer);
+    std::cout << std::endl;
   }
 
-  // debug
   out_results->OutAll(Config::iMaxIteration);
 
   std::cout << "Done..." << std::endl;
@@ -106,24 +105,25 @@ void Solver::InitCellType(sep::Axis axis) {
 
 void Solver::MakeStep(sep::Axis axis) {
   std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+
   // Make half
-  for( auto& item : cellVector ) {
+  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
       item->computeHalf(axis);
-  }
-  
+  });
+
   // Vessels
   const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
   m_pGrid->GetVessels();
-  
+
   for (auto& item : vVessels) {
     item->computeHalf(axis);
   }
-  
+
   // Make value
-  for( auto& item : cellVector ) {
+  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
       item->computeValue(axis);
-  }
-  
+  });
+
   // Vessels
   for (auto& item : vVessels) {
     item->computeValue(axis);
@@ -143,9 +143,9 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
 
   std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
 
-  for( auto& item : cellVector ) {
-  	item->computeIntegral(gi0, gi1);
-  }
+  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+    item->computeIntegral(gi0, gi1);
+  });
   
   // Vessels
   const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
@@ -154,4 +154,12 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
   for (auto& item : vVessels) {
     item->computeIntegral(gi0, gi1);
   }
+}
+
+void Solver::PrintElapsedTime(int it, Timer& iter_timer) {
+  std::cout << "Iteration time: " << iter_timer.elapsed_time() << " ms" << std::endl;
+  const double elapsed_time = timer_.elapsed_time() / 1e3;  // s
+  std::cout << "Elapsed time: " <<  (int)elapsed_time << " s. " <<
+          Config::iMaxIteration << " iteration will be done in " <<
+          (int)(elapsed_time / ((double)(it+1) / Config::iMaxIteration) / 60.0)  << " min." << std::endl;
 }

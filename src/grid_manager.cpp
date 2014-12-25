@@ -6,7 +6,7 @@
 #include "cell.h"
 #include <algorithm>  // for visual studio compilator
 
-extern double T1, T2, P_sat;
+extern double T1, T2, P_sat_T1, P_sat_T2;
 
 GridManager::GridManager() :
   grid_(new Grid),
@@ -133,32 +133,6 @@ void GridManager::AdoptInitialCells() {
         FindNeighbour(v_p, sep::NORMAL_CELL, e_ax, e_neighbor, i_q);
         if (!i_q)
           init_cell->m_eType = sep::EMPTY_CELL;
-      }
-    }
-  }
-
-  // Check for mirror condition
-  for (int x = 0; x < grid_size.x(); x++) {
-    for (int y = 0; y < grid_size.y(); y++) {
-      for (int z = 0; z < grid_size.z(); z++) {
-        Vector2i v_p(x, y);
-        InitCellData* init_cell = grid_->GetInitCell(v_p);
-        GasesConfigsMap& init_conds = init_cell->m_mInitConds;
-
-        sep::NeighborType e_neighbor;
-        sep::Axis e_ax;
-        int i_q;
-        if (init_conds[0].mirror_type == sep::MT_DISABLED)
-          continue;
-
-        if (init_cell->m_eType == sep::EMPTY_CELL) {
-          init_cell->m_eType = sep::FAKE_CELL;
-          continue;
-        }
-        if (init_cell->m_eType == sep::FAKE_CELL) {
-          init_cell->m_eType = sep::NORMAL_CELL;
-          continue;
-        }
       }
     }
   }
@@ -319,16 +293,11 @@ void GridManager::LinkCells() {
         }
 
         if (p_init_cell->m_eType != sep::FAKE_CELL) {
-
             // Link to fake
             FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
             for (int i = 0; i < q; i++) {
               FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
               LinkNeighbors(v_p, ax, neighbor);
-            }
-            if (init_conds.at(0).mirror_type != sep::MT_DISABLED) {
-              // Link to myself (mirror)
-              LinkToMyself(v_p, init_conds.at(0).mirror_axis);
             }
         }
       }
@@ -385,7 +354,6 @@ void GridManager::InitCells() {
                   cond.boundary_pressure,
                   gas_number
           );
-          //p_cell->setMirrorType(cond.mirror_type, cond.mirror_axis);
         }
         p_cell->Init(this);
       }
