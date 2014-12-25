@@ -6,7 +6,7 @@ from numpy import *
 import config
 
 max_files = 100
-each = 1
+each = 5
 gas_num = 1
 params = ["conc", "temp", "pressure"]
 #params = ["conc"]
