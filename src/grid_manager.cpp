@@ -340,6 +340,8 @@ void GridManager::InitCells() {
         const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
         for (auto val : init_conds) {
           const int& gas_number = val.first;
+          if (gas_number >= Config::iGasesNumber)
+            continue;
           const CellConfig& cond = val.second;
           p_cell->setParameters(
                   cond.pressure,
