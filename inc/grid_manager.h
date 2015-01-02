@@ -48,6 +48,7 @@ private:
     void LinkNeighbors(Vector2i p, sep::Axis axis,
           sep::NeighborType eNeighbor);
     void LinkToMyself(Vector2i p, sep::Axis mirror_axis);
+    void PrintInfo();
 
     std::vector<double> temperature_stack_;
     std::vector<double> pressure_stack_;

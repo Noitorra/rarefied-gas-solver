@@ -210,11 +210,12 @@ void GridConstructor::ConfigureGPRT() {
 //
 //            if (y == size.y() - 1) {
 //                configs[0].boundary_T = 1.0;
+//                configs[1].boundary_T = 1.0;
 //            }
-////            if (x == 0) {
-////                configs[0].boundary_cond = sep::BT_MIRROR;
-////                configs[1].boundary_cond = sep::BT_MIRROR;
-////            }
+//            if (x == 0) {
+//                configs[0].boundary_cond = sep::BT_MIRROR;
+//                configs[1].boundary_cond = sep::BT_MIRROR;
+//            }
 //        });
 //}
 

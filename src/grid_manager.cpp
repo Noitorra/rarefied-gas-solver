@@ -65,6 +65,7 @@ void GridManager::ConfigureGrid() {
   FillInGrid();
   LinkCells();
   InitCells();
+  PrintInfo();
 }
 
 void GridManager::GridGeometryToInitialCells() {
@@ -397,6 +398,11 @@ void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
       throw("Next is already not emty");
     cell->m_vNext[mirror_axis].push_back(cell); // cell->m_vPrev[mirror_axis][0]
   }
+}
+
+void GridManager::PrintInfo() {
+  const Vector3i& grid_size = Config::vGridSize;
+  std::cout << "Grid size: " << Config::vGridSize.x() << " x " << Config::vGridSize.y() << std::endl;
 }
 
 

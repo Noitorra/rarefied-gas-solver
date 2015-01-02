@@ -65,7 +65,7 @@ void OutResults::OutAll(int iteration) {
   tbb::parallel_for(tbb::blocked_range<int>(0, sep::LAST_PARAM), [&](const tbb::blocked_range<int>& r) {
       for (int param = r.begin(); param != r.end(); ++param) {
         for (int gas = 0; gas < Config::iGasesNumber; gas++) {
-          OutParameter((sep::MacroParamType) param, gas, iteration);
+          OutParameter((sep::MacroParamType)param, gas, iteration);
         }
       }
       std::cout << ".";
@@ -118,29 +118,36 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
   tmp = (double)grid_size.y();
   fs.write(reinterpret_cast<const char*>(&tmp), sizeof(double));
 
+  int params_num = type == sep::FLOW_PARAM ? 2 : 1;
+  std::vector<double> params(params_num);
   for (int y = 0; y < grid_size.y(); y++) {
     for (int x = 0; x < grid_size.x(); x++) {
       int z = 0;
-      double param = 0.0;
 
       Cell* cell = cells[x][y][z]->m_pCell;
       if (cell && cells[x][y][z]->m_eType == sep::NORMAL_CELL) {
         switch (type) {
           case sep::T_PARAM:
-            param = cell->m_vMacroData[gas].T;
+            params[0] = cell->m_vMacroData[gas].T;
             break;
           case sep::C_PARAM:
-            param = cell->m_vMacroData[gas].C;
+            params[0] = cell->m_vMacroData[gas].C;
             break;
           case sep::P_PARAM:
-            param = cell->m_vMacroData[gas].C * cell->m_vMacroData[gas].T;
+            params[0] = cell->m_vMacroData[gas].C * cell->m_vMacroData[gas].T;
+            break;
+          case sep::FLOW_PARAM:
+            params[0] = cell->m_vMacroData[gas].Stream.x();
+            params[1] = cell->m_vMacroData[gas].Stream.y();
             break;
           default:
             return;
         }
+      } else {
+        std::fill(params.begin(), params.end(), 0.0);
       }
 
-      fs.write(reinterpret_cast<const char*>(&param), sizeof(double));
+      fs.write(reinterpret_cast<const char*>(&params[0]), sizeof(double) * params.size());
     }
   }
   fs.close();
