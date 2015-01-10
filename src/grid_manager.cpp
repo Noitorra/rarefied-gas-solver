@@ -403,7 +403,28 @@ void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
 void GridManager::PrintInfo() {
   const Vector3i& grid_size = Config::vGridSize;
   std::cout << "Grid size: " << Config::vGridSize.x() << " x " << Config::vGridSize.y() << std::endl;
-  std::cout << "Timestep: " << Config::dTimestep << std::endl;
+
+  // normalization base
+  std::cout << std::endl << "Normalization base:" << std::endl;
+  std::cout << "T_normalize: " << Config::T_normalize << " K" << std::endl;
+  std::cout << "n_normalize: " << Config::n_normalize << " 1/m^3" << std::endl;
+  std::cout << "m_normalize: " << Config::m_normalize << " kg" << std::endl;
+  std::cout << "e_cut_normalize: " << Config::e_cut_normalize << " m/s" << std::endl;
+  std::cout << "l_normalize: " << Config::l_normalize << " m" << std::endl;
+  std::cout << "tau_normalize: " << Config::tau_normalize << " s" << std::endl;
+  std::cout << std::endl;
+
+  const double task_size = 0.3; // m
+  const double one_travel_time = task_size / Config::e_cut_normalize;  // s
+  const double one_iteration_time = Config::tau_normalize * Config::dTimestep;
+  const int for_one_travel = one_travel_time / one_iteration_time;
+  std::cout << "approximate task size: " << task_size << " m" << std::endl;
+  std::cout << "one travel: " << one_travel_time << " s" << std::endl;
+  std::cout << "one iteration: " << one_iteration_time << " s" << std::endl;
+  std::cout << "to one travel one travel: " << for_one_travel << " iterations" << std::endl;
+  if (for_one_travel < Config::iMaxIteration)
+    std::cout << "WARNING: too few iterations for one travel" << std::endl;
+  std::cout << std::endl;
 }
 
 

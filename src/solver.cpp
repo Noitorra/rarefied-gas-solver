@@ -83,8 +83,8 @@ void Solver::PreRun() {
   InitCellType(sep::Y);
   InitCellType(sep::Z);
   
-  m_pGridManager->PrintLinkage(sep::X);
-  m_pGridManager->PrintLinkage(sep::Y);
+//  m_pGridManager->PrintLinkage(sep::X);
+//  m_pGridManager->PrintLinkage(sep::Y);
 }
 
 void Solver::InitCellType(sep::Axis axis) {
@@ -157,6 +157,7 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
 }
 
 void Solver::PrintElapsedTime(int it, Timer& iter_timer) {
+  std::cout << "Compiuted time in task: " << it * Config::tau_normalize * Config::dTimestep << " s" << std::endl;
   std::cout << "Iteration time: " << iter_timer.elapsed_time() << " ms" << std::endl;
   const double elapsed_time = timer_.elapsed_time() / 1e3;  // s
   std::cout << "Elapsed time: " <<  (int)elapsed_time << " s. " <<
