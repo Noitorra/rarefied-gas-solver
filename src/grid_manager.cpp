@@ -421,7 +421,7 @@ void GridManager::PrintInfo() {
   std::cout << "approximate task size: " << task_size << " m" << std::endl;
   std::cout << "one travel: " << one_travel_time << " s" << std::endl;
   std::cout << "one iteration: " << one_iteration_time << " s" << std::endl;
-  std::cout << "to one travel one travel: " << for_one_travel << " iterations" << std::endl;
+  std::cout << "for one travel need: " << for_one_travel << " iterations" << std::endl;
   if (for_one_travel < Config::iMaxIteration)
     std::cout << "WARNING: too few iterations for one travel" << std::endl;
   std::cout << std::endl;
