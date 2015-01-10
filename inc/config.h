@@ -31,6 +31,13 @@ struct Config {
   static int iGasesNumber;
   static GasVector vGas;
   static bool bGPRTGrid;
+  static int iOutEach;
+  static double n_normalize;
+  static double T_normalize;
+  static double tau_normalize;
+  static double m_normalize;
+  static double e_cut_normalize;
+  static double l_normalize; // the mean free path of a molecule
 
   static void Init();
   static void PrintMe();

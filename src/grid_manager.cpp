@@ -6,7 +6,7 @@
 #include "cell.h"
 #include <algorithm>  // for visual studio compilator
 
-extern double T1, T2, P_sat_T1, P_sat_T2;
+extern double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
 
 GridManager::GridManager() :
   grid_(new Grid),
@@ -403,6 +403,7 @@ void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
 void GridManager::PrintInfo() {
   const Vector3i& grid_size = Config::vGridSize;
   std::cout << "Grid size: " << Config::vGridSize.x() << " x " << Config::vGridSize.y() << std::endl;
+  std::cout << "Timestep: " << Config::dTimestep << std::endl;
 }
 
 

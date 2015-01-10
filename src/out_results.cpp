@@ -58,6 +58,8 @@ void OutResults::OutAll(int iteration) {
     std::cout << "Error: member OutResults is not initialized yet" << std::endl;
     return;
   }
+  if (iteration % Config::iOutEach)
+    return;
   std::cout << "Out results " << iteration;
 
   LoadParameters();
@@ -126,19 +128,27 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
 
       Cell* cell = cells[x][y][z]->m_pCell;
       if (cell && cells[x][y][z]->m_eType == sep::NORMAL_CELL) {
+
+        // from normalized values back to normal
+        const double t = cell->m_vMacroData[gas].T * Config::T_normalize;
+        const double n = cell->m_vMacroData[gas].C * Config::n_normalize;
+        const double p = n * sep::k * t;
+        const double stream_x = cell->m_vMacroData[gas].Stream.x() * Config::n_normalize * Config::e_cut_normalize;
+        const double stream_y = cell->m_vMacroData[gas].Stream.y() * Config::n_normalize * Config::e_cut_normalize;
+
         switch (type) {
           case sep::T_PARAM:
-            params[0] = cell->m_vMacroData[gas].T;
+            params[0] = t;
             break;
           case sep::C_PARAM:
-            params[0] = cell->m_vMacroData[gas].C;
+            params[0] = n;
             break;
           case sep::P_PARAM:
-            params[0] = cell->m_vMacroData[gas].C * cell->m_vMacroData[gas].T;
+            params[0] = p;
             break;
           case sep::FLOW_PARAM:
-            params[0] = cell->m_vMacroData[gas].Stream.x();
-            params[1] = cell->m_vMacroData[gas].Stream.y();
+            params[0] = stream_x;
+            params[1] = stream_y;
             break;
           default:
             return;

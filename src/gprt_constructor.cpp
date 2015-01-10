@@ -2,7 +2,7 @@
 #include "config.h"
 
 // TODO: solve this problem of lambdas
-double T1, T2, P_sat_T1, P_sat_T2;
+double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
 
 void GridConstructor::ConfigureGPRT() {
     //    Config::vCellSize = Vector2d(8.0, 0.25);
@@ -14,15 +14,23 @@ void GridConstructor::ConfigureGPRT() {
     Vector2d sp_delta(Config::vCellSize);
 //    sp_delta /= 2.0;
     walls *= 2.0;
-    T1 /= 600.0;    // TODO: precise normalization
-    T2 /= 600.0;
-    PushTemperature(T1);
-    P_sat_T1 = 1.0; // TODO: set saturated pressure
-    P_sat_T2 = 0.5;
 
-//    // debug
-//    T1 = 1.0;
-//    T2 = 0.5;
+    // normalization base
+    Config::T_normalize = 600.0;  // K
+    Config::n_normalize = 1.81e22;  // 1 / m^3
+    Config::m_normalize = 133 * 1.66e-27;   // kg
+    Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
+    Config::l_normalize = 2.78e-5; // m
+    Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
+
+    T1 /= Config::T_normalize;
+    T2 /= Config::T_normalize;
+    PushTemperature(T1);
+    P_sat_T1 = 1.0; // k inside P! 150Pa, T = T0, n = n0
+    P_sat_T2 = P_sat_T1 / 2.0;
+    Q_Xe_in = 6.16e-11;
+    P_sat_Xe = P_sat_T1 * 3 * 1e-7;
+
 
     auto global_temp = [&] (Vector2i p_abs, double& temperature) {
         Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
@@ -64,7 +72,7 @@ void GridConstructor::ConfigureGPRT() {
 
                     configs[1].boundary_cond = sep::BT_STREAM;
                     configs[1].boundary_T = T1;
-                    configs[1].boundary_stream = Vector3d(0.01 * 1e-6, 0.0, 0.0);
+                    configs[1].boundary_stream = Vector3d(Q_Xe_in, 0.0, 0.0);
                 }
 
 //                if (y == 0) {
@@ -101,7 +109,7 @@ void GridConstructor::ConfigureGPRT() {
                 configs[0].boundary_T = T1;
 
                 configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
-                configs[1].boundary_pressure = P_sat_T1 * 1e-6;
+                configs[1].boundary_pressure = P_sat_Xe;
                 configs[1].boundary_T = T1;
             }
     });
@@ -116,6 +124,7 @@ void GridConstructor::ConfigureGPRT() {
             global_temp(abs_p, configs[0].boundary_T);
             global_pressure(abs_p, configs[0].pressure);
 
+            global_temp(abs_p, configs[1].boundary_T);
             configs[1].pressure = 0.0;
 
             if (x == 0) {
@@ -139,6 +148,7 @@ void GridConstructor::ConfigureGPRT() {
             global_temp(abs_p, configs[0].boundary_T);
             global_pressure(abs_p, configs[0].pressure);
 
+            global_temp(abs_p, configs[1].boundary_T);
             configs[1].pressure = 0.0;
 
 //            if (y == 0) {
@@ -158,6 +168,7 @@ void GridConstructor::ConfigureGPRT() {
                 global_temp(abs_p, configs[0].boundary_T);
                 global_pressure(abs_p, configs[0].pressure);
 
+                global_temp(abs_p, configs[1].boundary_T);
                 configs[1].pressure = 0.0;
 
                 if (x == size.x() - 1) {
@@ -192,6 +203,7 @@ void GridConstructor::ConfigureGPRT() {
                 global_temp(abs_p, configs[0].T);
                 global_temp(abs_p, configs[0].boundary_T);
 
+                global_temp(abs_p, configs[1].boundary_T);
                 configs[1].pressure = 0.0;
 
 //                if (y == 0) {

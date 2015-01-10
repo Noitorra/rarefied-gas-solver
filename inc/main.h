@@ -50,6 +50,8 @@ namespace sep {
     BT_PRESSURE,
     BT_MIRROR
   };
+
+  const double k = 1.38e-23;  // Bolzman const
 }
 
 class MacroData {
