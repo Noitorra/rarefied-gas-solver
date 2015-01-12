@@ -32,8 +32,8 @@ void Solver::Run() {
   PreRun();
   
   if (Config::bUseIntegral) {
-    ci::HSPotential potential;
-    ci::init(&potential, ci::NO_SYMM);
+    ci::Potential* potential = new ci::HSPotential;
+    ci::init(potential, ci::NO_SYMM);
   }
 
   std::shared_ptr<OutResults> out_results(new OutResults());

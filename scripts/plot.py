@@ -5,7 +5,7 @@ import numpy
 from numpy import *
 import config
 
-max_files = 5
+max_files = 1000
 each = 1
 gas_num = 2
 
@@ -33,8 +33,8 @@ for param in params:
       NX = NY
       NY = a
 
-      max_val = float(-1e6)
-      min_val = float(1e6)
+      max_val = -float("inf")
+      min_val = float("inf")
       D = input.reshape(NX, NY)
       for x in range(NX):
         for y in range(NY):

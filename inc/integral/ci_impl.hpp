@@ -77,7 +77,10 @@ namespace ci {
 		V3d g = rxi2 - m2*u;
 			
 		// (I) счет разлетных скоростей
-		double b = std::sqrt(b2) * potential->bMax(p1, p2);
+		//double b = std::sqrt(b2) * potential->bMax(p1, p2);
+		double b = 1.0;
+		b *= std::sqrt(b2);
+		b *= potential->bMax(p1, p2);
 
 		double root = m1 * m2 / (m1 + m2) * std::sqrt(sqr(rxi1/m1 - rxi2/m2));
 		double teta = potential->theta(p1, p2, b, root); 
