@@ -7,10 +7,10 @@
 #include "impulse.h"
 #include "config.h"
 
+#include "integral/ci.hpp"
+
 #include <iostream>
 #include <algorithm>
-
-#include "integral/ci.hpp"
 
 Cell::Cell() :
 m_pGridManager(nullptr),

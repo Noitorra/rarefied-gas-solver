@@ -73,28 +73,28 @@ void GridManager::GridGeometryToInitialCells() {
     throw("no grid boxes");
 
   // determine grid size
-  Vector2i min(boxes_stack_[0].p), max;
+  Vector2i vMin(boxes_stack_[0].p), vMax;
   std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
-    if (box.p.x() < min.x())
-      min.x() = box.p.x();
-    if (box.p.y() < min.y())
-      min.y() = box.p.y();
+    if (box.p.x() < vMin.x())
+      vMin.x() = box.p.x();
+    if (box.p.y() < vMin.y())
+      vMin.y() = box.p.y();
 
-    if (box.p.x() + box.size.x() > max.x())
-      max.x() = box.p.x() + box.size.x();
-    if (box.p.y() + box.size.y() > max.y())
-      max.y() = box.p.y() + box.size.y();
+    if (box.p.x() + box.size.x() > vMax.x())
+      vMax.x() = box.p.x() + box.size.x();
+    if (box.p.y() + box.size.y() > vMax.y())
+      vMax.y() = box.p.y() + box.size.y();
   });
-  Vector2i size = max - min + Vector2i(2, 2); // size += 2 for fake cells
+  Vector2i size = vMax - vMin + Vector2i(2, 2); // size += 2 for fake cells
   Config::vGridSize = Vector3i(size.x(), size.y(), 1);
-  min -= Vector2i(1, 1);  // min_p -= 1 for fake cells
+  vMin -= Vector2i(1, 1);  // min_p -= 1 for fake cells
 
   grid_->AllocateInitData();
 
   std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
     for (int x = 0; x < box.size.x(); x++) {
       for (int y = 0; y < box.size.y(); y++) {
-        Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
+        Vector2i tmp_pos = box.p + Vector2i(x, y) - vMin;
         InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         init_cell->m_eType = sep::NORMAL_CELL;
       }
@@ -102,7 +102,7 @@ void GridManager::GridGeometryToInitialCells() {
 
     for (int x = -1; x < box.size.x() + 1; x++) {
       for (int y = -1; y < box.size.y() + 1; y++) {
-        Vector2i tmp_pos = box.p + Vector2i(x, y) - min;
+        Vector2i tmp_pos = box.p + Vector2i(x, y) - vMin;
         InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         GasesConfigsMap& init_conds = init_cell->m_mInitConds;
         for (int gas = 0; gas < Config::iGasesNumber; gas++) {

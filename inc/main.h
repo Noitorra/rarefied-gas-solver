@@ -10,6 +10,7 @@
 #include "types.h"
 #include <functional>
 
+#define NOMINMAX
 #include <tbb/tbb.h>
 
 namespace sep {
