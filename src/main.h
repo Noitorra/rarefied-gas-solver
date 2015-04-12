@@ -6,9 +6,9 @@
 #include <map>
 #include <memory>
 #include <string>
-
-#include "types.h"
 #include <functional>
+
+#include "utilities/types.h"
 
 #define NOMINMAX
 #include <tbb/tbb.h>

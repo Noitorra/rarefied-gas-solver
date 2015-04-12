@@ -1,5 +1,5 @@
 #include "config.h"
-#include "gas.h"
+#include "parameters/gas.h"
 
 using namespace std;
 

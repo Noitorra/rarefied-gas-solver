@@ -1,7 +1,5 @@
 #include "grid.h"
 #include "grid_manager.h"
-#include "solver.h"
-#include "out_results.h"
 #include "cell.h"
 #include "config.h"
 

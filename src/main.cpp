@@ -1,8 +1,7 @@
 #include "main.h"
 #include "config.h"
 #include "solver.h"
-#include "grid_manager.h"
-#include "out_results.h"
+#include "grid/grid_manager.h"
 
 
 int main(int argc, char * argv[]) {

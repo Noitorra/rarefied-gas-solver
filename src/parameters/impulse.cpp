@@ -1,11 +1,7 @@
 #include "impulse.h"
-
-#include "grid_manager.h"
-#include "solver.h"
-#include "gas.h"
+#include "grid/grid_manager.h"
 
 #include <iostream>
-#include <algorithm>
 
 Impulse::Impulse() :
 m_pGridManager(nullptr),

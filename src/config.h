@@ -2,7 +2,6 @@
 #define CONFIG_H_
 
 #include "main.h"
-#include "types.h"
 
 class Gas;
 

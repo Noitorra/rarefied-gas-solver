@@ -1,14 +1,11 @@
 #include "out_results.h"
-#include "grid.h"
-#include "grid_manager.h"
-#include "cell.h"
+#include "grid/grid.h"
+#include "grid/grid_manager.h"
+#include "grid/cell.h"
 #include "config.h"
-#include "vessel_grid.h"
-#include "gas.h"
-#include "solver.h"
+#include "grid/vessel_grid.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "timer.h"
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {

@@ -2,8 +2,6 @@
 #define GRID_H_
 
 #include "main.h"
-#include <memory>
-#include "types.h"
 
 class Cell;
 class VesselGrid;

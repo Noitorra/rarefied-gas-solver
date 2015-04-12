@@ -1,10 +1,9 @@
 #include "cell.h"
 
-#include "grid.h"
 #include "grid_manager.h"
 #include "solver.h"
-#include "gas.h"
-#include "impulse.h"
+#include "parameters/gas.h"
+#include "parameters/impulse.h"
 #include "config.h"
 
 #include "integral/ci.hpp"

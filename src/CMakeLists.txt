@@ -27,5 +27,6 @@ endif()
 # TBB
 if(TBB_FOUND)
 	include_directories(${TBB_INCLUDE_DIRS})
-	target_link_libraries(${TARGET_NAME} ${TBB_LIBRARIES})
+	target_link_libraries(${TARGET_NAME} debug ${TBB_DEBUG_LIBRARIES})
+	target_link_libraries(${TARGET_NAME} optimized ${TBB_LIBRARIES})
 endif()
