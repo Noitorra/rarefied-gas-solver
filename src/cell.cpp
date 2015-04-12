@@ -177,10 +177,10 @@ void Cell::computeMacroData() {
 
 bool Cell::isValid()
 {
-  bool isX = m_vType[sep::X] == CT_NORMAL || m_vType[sep::X] == CT_PRERIGHT || m_vType[sep::X] == CT_UNDEFINED;
-  bool isY = m_vType[sep::Y] == CT_NORMAL || m_vType[sep::Y] == CT_PRERIGHT || m_vType[sep::Y] == CT_UNDEFINED;
-  bool isZ = m_vType[sep::Z] == CT_NORMAL || m_vType[sep::Z] == CT_PRERIGHT || m_vType[sep::Z] == CT_UNDEFINED;
-  return isX && isY && isZ;
+  bool notX = m_vType[sep::X] == CT_LEFT || m_vType[sep::X] == CT_RIGHT;
+  bool notY = m_vType[sep::Y] == CT_LEFT || m_vType[sep::Y] == CT_RIGHT;
+  bool notZ = m_vType[sep::Z] == CT_LEFT || m_vType[sep::Z] == CT_RIGHT;
+  return !notX && !notY && !notZ;
 }
 
 /* Tests */

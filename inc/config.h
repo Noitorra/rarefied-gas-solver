@@ -32,8 +32,10 @@ struct Config {
   static GasVector vGas;
   static bool bGPRTGrid;
   static int iOutEach;
+
   static double n_normalize;
   static double T_normalize;
+  static double P_normalize; // real normilize operation
   static double tau_normalize;
   static double m_normalize;
   static double e_cut_normalize;

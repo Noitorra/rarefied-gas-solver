@@ -7,27 +7,33 @@ void GridConstructor::ConfigureStandartGrid() {
 
     // Main configuration part
     // normalization base
-    Config::T_normalize = 1500.0;  // K // Maximum temperature in system
+    Config::T_normalize = 1800.0;  // K // Maximum temperature in system
     Config::n_normalize = 1.207e22;  // 1 / m^3 // P/(kT) P = 150Pa T = 900K
+    Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 0.1e-4; // m
     Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
+    
+
     PushTemperature(1.0);
     PushPressure(1.0);
 
-    Vector2d vPhysSize = Vector2d(520.0, 0.4);
-    Vector2i vNumSize = Vector2i(88, 30);
-    Config::vCellSize = Vector2d(vPhysSize.x()/vNumSize.x(), vPhysSize.y()/vNumSize.y());
+    //Vector2d vPhysSize = Vector2d(520.0, 0.4);
+    //Vector2i vNumSize = Vector2i(88, 30);
+    //Config::vCellSize = Vector2d(vPhysSize.x()/vNumSize.x(), vPhysSize.y()/vNumSize.y());
 
-    SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
+    //vPhysSize
+
+    SetBox(Vector2d(0.0, 0.0), Vector2d(100.0, 30.0), [](int x, int y, GasesConfigsMap& configs,
             const Vector2i& size, const Vector2i& start) {
-      double dT1 = 1500.0 / Config::T_normalize;
+      
+      double dT1 = 1800.0 / Config::T_normalize;
       double dT2 = 900.0 / Config::T_normalize;
-
+      
       int iNumHoles = 9;
-      double dSummaryStream = 6.16e-11;
+      double dSummaryStream = 0.000009; // 5.22e18
 
 
       configs[0].pressure = 1.0;
@@ -64,7 +70,7 @@ void GridConstructor::ConfigureStandartGrid() {
         }
         if (isAHole)
         {
-          configs[0].boundary_cond = sep::BT_PRESSURE;
+          configs[0].boundary_cond = sep::BT_DIFFUSE;
           configs[0].boundary_pressure = 1.0;
           configs[0].boundary_T = dT1;
 
