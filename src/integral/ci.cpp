@@ -1,4 +1,4 @@
-#include "integral/ci.hpp"
+#include "ci.hpp"
 
 namespace ci {
 

@@ -1,16 +1,16 @@
 #include "solver.h"
 
 #include "parallel.h"
-#include "grid.h"
-#include "grid_manager.h"
-#include "cell.h"
+#include "grid/grid.h"
+#include "grid/grid_manager.h"
+#include "grid/cell.h"
 #include "out_results.h"
 #include "config.h"
-#include "impulse.h"
-#include "gas.h"
-#include "vessel_grid.h"
+#include "parameters/impulse.h"
+#include "parameters/gas.h"
+#include "grid/vessel_grid.h"
 #include "integral/ci.hpp"
-#include "timer.h"
+#include "utilities/timer.h"
 
 Solver::Solver() :
 m_pParallel(new Parallel),
@@ -32,8 +32,8 @@ void Solver::Run() {
   PreRun();
 
   if (Config::bUseIntegral) {
-    ci::HSPotential potential;
-    ci::init(&potential, ci::NO_SYMM);
+    ci::Potential* potential = new ci::HSPotential;
+    ci::init(potential, ci::NO_SYMM);
   }
 
   std::shared_ptr<OutResults> out_results(new OutResults());

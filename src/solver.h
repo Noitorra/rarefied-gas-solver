@@ -2,8 +2,7 @@
 #define SOLVER_H_
 
 #include "main.h"
-#include "timer.h"
-#include <memory>
+#include "utilities/timer.h"
 
 class Parallel;
 class Grid;

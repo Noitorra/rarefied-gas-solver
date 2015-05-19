@@ -1,7 +1,6 @@
 #pragma once
 
 #include "main.h"
-#include "types.h"
 
 class Grid;
 class GridManager;

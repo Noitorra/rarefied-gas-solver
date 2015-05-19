@@ -1,14 +1,11 @@
 #include "out_results.h"
-#include "grid.h"
-#include "grid_manager.h"
-#include "cell.h"
+#include "grid/grid.h"
+#include "grid/grid_manager.h"
+#include "grid/cell.h"
 #include "config.h"
-#include "vessel_grid.h"
-#include "gas.h"
-#include "solver.h"
+#include "grid/vessel_grid.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "timer.h"
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
@@ -132,7 +129,7 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
         // from normalized values back to normal
         const double t = cell->m_vMacroData[gas].T * Config::T_normalize;
         const double n = cell->m_vMacroData[gas].C * Config::n_normalize;
-        const double p = n * sep::k * t;
+        const double p = cell->m_vMacroData[gas].P * Config::P_normalize;
         const double stream_x = cell->m_vMacroData[gas].Stream.x() * Config::n_normalize * Config::e_cut_normalize;
         const double stream_y = cell->m_vMacroData[gas].Stream.y() * Config::n_normalize * Config::e_cut_normalize;
 

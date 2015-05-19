@@ -2,7 +2,6 @@
 #define GRID_CONSTRUCTOR_H_
 
 #include "main.h"
-#include <functional>
 
 // GridManager interface
 class GridConstructor {

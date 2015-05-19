@@ -1,7 +1,6 @@
 #ifndef IMPULSE_H_
 #define IMPULSE_H_
 
-#include "types.h"
 #include "main.h"
 
 class GridManager;

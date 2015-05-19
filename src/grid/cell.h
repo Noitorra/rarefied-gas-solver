@@ -1,8 +1,8 @@
 #ifndef CELL_H_
 #define CELL_H_
 
-#include "types.h"
 #include "main.h"
+#include "utilities/types.h"
 
 class VesselGrid;
 class Solver;
