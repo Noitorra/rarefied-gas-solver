@@ -423,6 +423,7 @@ void GridManager::PrintInfo() {
   std::cout << "e_cut_normalize: " << Config::e_cut_normalize << " m/s" << std::endl;
   std::cout << "l_normalize: " << Config::l_normalize << " m" << std::endl;
   std::cout << "tau_normalize: " << Config::tau_normalize << " s" << std::endl;
+  std::cout << "P_normalize: " << Config::P_normalize << " Pa" << std::endl;
   std::cout << std::endl;
 
   const double task_size = 0.3; // m

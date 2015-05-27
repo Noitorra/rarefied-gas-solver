@@ -18,6 +18,7 @@ void GridConstructor::ConfigureGPRT() {
     // normalization base
     Config::T_normalize = 600.0;  // K
     Config::n_normalize = 1.81e22;  // 1 / m^3
+	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 2.78e-5; // m
@@ -26,9 +27,9 @@ void GridConstructor::ConfigureGPRT() {
     T1 /= Config::T_normalize;
     T2 /= Config::T_normalize;
     PushTemperature(T1);
-    P_sat_T1 = 1.0; // k inside P! 150Pa, T = T0, n = n0
+    P_sat_T1 = 1.0; // 150Pa, T = T0, n = n0
     P_sat_T2 = P_sat_T1 / 2.0;
-    Q_Xe_in = 6.16e-11;
+    Q_Xe_in = 6.18e-11;
     P_sat_Xe = P_sat_T1 * 3 * 1e-7;
 
 
