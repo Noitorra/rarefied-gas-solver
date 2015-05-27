@@ -56,9 +56,9 @@ void GridManager::PrintLinkage(sep::Axis axis) {
 
 void GridManager::ConfigureGrid() {
   if (Config::bGPRTGrid) {
-    ConfigureGPRT();
+    //ConfigureGPRT();
 	//ConfigureGPRT2();
-	//ConfigureGPRT3();
+	BoundaryConditionTest();
 	//ConfigureGPRT4();
 	//ConfigureGPRT5();
   } else {

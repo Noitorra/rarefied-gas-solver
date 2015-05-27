@@ -98,11 +98,11 @@ def plot_flow(binpath, pngpath, title, value):
     # title
     plt.title(title)
 
-    Q = plt.quiver(U, V)
-    #qk = plt.quiverkey(Q, 0.5, 0.92, 2, r'$2 \frac{m}{s}$', labelpos='W', fontproperties={'weight': 'bold'})
-    #l,r,b,t = plt.axis()
-    #dx, dy = r-l, t-b
-    #plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
+    Q = plt.quiver(U, V, color='r', scale=1e14)
+    qk = plt.quiverkey(Q, 0.9, 0.92, 1e15, r'$2 \frac{m}{s}$', labelpos='E', fontproperties={'weight': 'bold'})
+    l,r,b,t = plt.axis()
+    dx, dy = r-l, t-b
+    plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -110,8 +110,8 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 2000
-each = 100
+max_files = 10
+each = 1
 gas_num = 1
 
 params = ["conc", "temp", "pressure", "flow"]

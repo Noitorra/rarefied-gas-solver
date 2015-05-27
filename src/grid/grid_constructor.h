@@ -9,7 +9,7 @@ protected:
     void ConfigureStandartGrid();
     void ConfigureGPRT();
 	void ConfigureGPRT2();
-	void ConfigureGPRT3();
+	void BoundaryConditionTest();
 	void ConfigureGPRT4();
 	void ConfigureGPRT5();
   
