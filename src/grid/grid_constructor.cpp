@@ -1,5 +1,6 @@
 #include "grid_constructor.h"
 #include "config.h"
+#include "parameters/beta_chain.h"
 
 // This method being invoked while grid configuration
 // Feel free to edit this method
@@ -15,6 +16,11 @@ void GridConstructor::ConfigureStandartGrid() {
     Config::l_normalize = 0.1e-4; // m
     Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
+		// Some beta chain hack. Makes lambda without data type.
+		for (auto& item : Config::vBetaChains) {
+			item->dLambda1 *= Config::tau_normalize;
+			item->dLambda2 *= Config::tau_normalize;
+		}
     
 
     PushTemperature(1.0);
@@ -39,104 +45,61 @@ void GridConstructor::ConfigureStandartGrid() {
       configs[0].pressure = 1.0;
       configs[0].T = dT1 - (dT1 - dT2) * y / size.y();
 
-      configs[1].pressure = 0.0;
+			for (int i = 1; i < Config::iGasesNumber; i++) {
+				configs[i].pressure = 0.0; // no gas
+			}
       
-      if (x == 0)
+      if (x == 0) // left border
       {
-        configs[0].boundary_cond = sep::BT_DIFFUSE;
-        configs[0].boundary_pressure = 1.0;
+        configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 1.0;
         configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
 
-        configs[1].boundary_cond = sep::BT_PRESSURE;
-        configs[1].boundary_pressure = 0.0;
-        configs[1].boundary_T = 1.0;
+        //configs[1].boundary_cond = sep::BT_STREAM;
+				//configs[1].boundary_stream = Vector3d(0.0, 0.0, 0.0);
+				//configs[1].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
       }
-      if (x == size.x() - 1)
+      if (x == size.x() - 1) // right border
       {
-        configs[0].boundary_cond = sep::BT_DIFFUSE;
-        configs[0].boundary_pressure = 1.0;
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 1.0;
         configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
 
-        configs[1].boundary_cond = sep::BT_STREAM;
-        configs[1].boundary_stream = Vector3d(dSummaryStream, 0.0, 0.0);
-        configs[1].boundary_T = 1.0;
+        //configs[1].boundary_cond = sep::BT_STREAM;
+        //configs[1].boundary_stream = Vector3d(dSummaryStream, 0.0, 0.0);
+        //configs[1].boundary_T = 1.0;
       }
-      if (y == 0)
+      if (y == 0) // bottom border
       {
         bool isAHole = false;
         for (int i = 0; i < iNumHoles; i++)
         {
           isAHole = isAHole || x == int(size.x() * double(i + 1) / (iNumHoles + 1));
         }
-        if (isAHole)
+        if (isAHole) // a hole
         {
-          configs[0].boundary_cond = sep::BT_DIFFUSE;
+          configs[0].boundary_cond = sep::BT_DIFFUSE; // maybe stream with 0, which is exactly the same
           configs[0].boundary_pressure = 1.0;
           configs[0].boundary_T = dT1;
 
-          configs[1].boundary_cond = sep::BT_STREAM;
-          configs[1].boundary_stream = Vector3d(0.0, dSummaryStream / iNumHoles, 0.0);
-          configs[1].boundary_T = dT1;
+          //configs[1].boundary_cond = sep::BT_STREAM;
+          //configs[1].boundary_stream = Vector3d(0.0, dSummaryStream / iNumHoles, 0.0);
+          //configs[1].boundary_T = dT1;
         }
         else {
           configs[0].boundary_cond = sep::BT_DIFFUSE;
           configs[0].boundary_T = dT1;
 
-          configs[1].boundary_cond = sep::BT_DIFFUSE;
-          configs[1].boundary_T = dT1;
+          //configs[1].boundary_cond = sep::BT_DIFFUSE;
+          //configs[1].boundary_T = dT1;
         }
       }
-      if (y == size.y() - 1) {
+      if (y == size.y() - 1) { // top border
           configs[0].boundary_cond = sep::BT_DIFFUSE;
           configs[0].boundary_T = dT2;
 
-          configs[1].boundary_cond = sep::BT_DIFFUSE;
-          configs[1].boundary_T = dT2;
+          //configs[1].boundary_cond = sep::BT_DIFFUSE;
+          //configs[1].boundary_T = dT2;
       }
     });
-    /*
-    SetBox(Vector2d(10, 10), Vector2d(15, 15), [] (int x, int y, CellConfig* config, GridBox* box) {
-=======
-    SetBox(Vector2d(10, 10), Vector2d(15, 15), [] (int x, int y, GasesConfigsMap& configs, struct GridBox* box) {
->>>>>>> origin/master
-//        config->wall_T = (x == 0 || x == 24) ? 2.0 : 1.0;
-         if (x == box->size.x() - 1) {
-            configs[0].boundary_cond = sep::BT_STREAM;
-            configs[0].boundary_stream = Vector3d(-1.0, 0.0, 0.0);
-        }
-    });
-    */
-    // ==============================================================================
-
-//    // test 3 =======================================================================
-//    //Config::vCellSize = Vector2d(8.0, 0.25);
-//    Config::vCellSize = Vector2d(2.0, 0.25);
-//    double T1 = 325.0 + 273.0;
-//    double T2 = 60.0 + 273.0;
-//    T1 /= 350.0;    // TODO: precise normalization
-//    T2 /= 350.0;
-//    PushTemperature(T1);
-//    // box 1
-//    PushPressure(1.1);
-//    SetBox(Vector2d(-20, 0), Vector2d(150, 4), [] (int x, int y, CellConfig* config, GridBox* box) {
-//        if (x == 0) {
-//            config->boundary_cond = sep::BT_PRESSURE;
-//            config->boundary_pressure = 1.3;
-//        }
-//    });
-//    // box 2
-//    PushPressure(1.05);
-//    SetBox(Vector2d(100, 0), Vector2d(30, 12.5), [] (int x, int y, CellConfig* config, GridBox* box) {});
-//    // box 3
-//    PushPressure(0.5);
-//    SetBox(Vector2d(30, 11.25), Vector2d(100, 1.25), [] (int x, int y, CellConfig* config, GridBox* box) {
-//        if (x == 0) {
-//            config->boundary_cond = sep::BT_STREAM;    // should be gas <-> fluid bound
-//            config->boundary_stream = Vector3d(1.0, 0.0, 0.0);
-//        }
-//    });
-//    // ==============================================================================
-
-
-    // add here your configuration
 }

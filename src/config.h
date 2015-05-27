@@ -4,8 +4,10 @@
 #include "main.h"
 
 class Gas;
+class BetaChain;
 
 typedef std::vector<std::shared_ptr<Gas>> GasVector;
+typedef std::vector<std::shared_ptr<BetaChain>> BetaChainVector;
 
 struct HTypeGridConfig {
   int D;
@@ -18,18 +20,27 @@ struct HTypeGridConfig {
 };
 
 struct Config {
+
   static std::string sName;
+
+	// Grid Related
   static Vector3i vGridSize;
   static sep::GridGeometry eGridGeometryType;
+	static std::shared_ptr<HTypeGridConfig> pHTypeGridConfig;
+	static bool bGPRTGrid;
+	static Vector2d vCellSize;  // default cell size in mm
+
+	// Gas Related
+	static GasVector vGas;
+	static int iGasesNumber;
+	static BetaChainVector vBetaChains;
+	static int iBetaChainsNumber;
+
   static double dTimestep;
   static int iMaxIteration;
   static bool bUseIntegral;
-  static std::shared_ptr<HTypeGridConfig> pHTypeGridConfig;
   static std::string sOutputPrefix;
-  static Vector2d vCellSize;  // default cell size in mm
-  static int iGasesNumber;
-  static GasVector vGas;
-  static bool bGPRTGrid;
+	static bool bUseBetaChain;
   static int iOutEach;
 
   static double n_normalize;

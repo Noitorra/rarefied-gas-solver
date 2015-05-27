@@ -1,20 +1,31 @@
 #include "config.h"
 #include "parameters/gas.h"
+#include "parameters/beta_chain.h"
 
 using namespace std;
 
 std::string Config::sName = "default";
-Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
-sep::GridGeometry Config::eGridGeometryType = sep::COMB_GRID_GEOMETRY;
 double Config::dTimestep = 0.1;  // if needed may decrease automatically later
 int Config::iMaxIteration = 2000;
 bool Config::bUseIntegral = true;
-std::shared_ptr<HTypeGridConfig> Config::pHTypeGridConfig = std::shared_ptr<HTypeGridConfig>(new HTypeGridConfig);
+bool Config::bUseBetaChain = true;
 std::string Config::sOutputPrefix = "../";
+int Config::iOutEach = 1;
+
+// Grid Related
+Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
+sep::GridGeometry Config::eGridGeometryType = sep::COMB_GRID_GEOMETRY;
+std::shared_ptr<HTypeGridConfig> Config::pHTypeGridConfig = std::shared_ptr<HTypeGridConfig>(new HTypeGridConfig);
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size
 bool Config::bGPRTGrid = false;
 int Config::iOutEach = 1;
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size in mm!
+
+GasVector Config::vGas;
+int Config::iGasesNumber = 1;
+BetaChainVector Config::vBetaChains;
+int Config::iBetaChainsNumber = 0;
+
 
 double Config::n_normalize = 1.0; // not assigned
 double Config::T_normalize = 1.0; // not assigned
@@ -24,35 +35,24 @@ double Config::m_normalize = 1.0; // not assigned
 double Config::e_cut_normalize = 1.0; // not assigned
 double Config::l_normalize = 1.0; // not assigned
 
-int Config::iGasesNumber = 2;
-GasVector Config::vGas;
 
 
 void Config::Init()
 {
-  // Handle Gas Info ...
-  vGas.resize(iGasesNumber);
-  if (iGasesNumber == 1)
-  {
-    vGas[0] = std::shared_ptr<Gas>(new Gas(1.0));
-  }
-  else if (iGasesNumber == 2)
-  {
-    vGas[0] = std::shared_ptr<Gas>(new Gas(1.0));
-    vGas[1] = std::shared_ptr<Gas>(new Gas(1.0));
-  }
-  else if (iGasesNumber == 3)
-  {
-    vGas[0] = std::shared_ptr<Gas>(new Gas(1.0));
-    vGas[1] = std::shared_ptr<Gas>(new Gas(0.5));
-    vGas[2] = std::shared_ptr<Gas>(new Gas(0.5));
-  } else
-  {
-    for (int i = 0; i < iGasesNumber; i++)
-    {
-      vGas[i] = std::shared_ptr<Gas>(new Gas(1.0));
-    }
-  }
+	// Fill gases. Use only iNumGases first gases.
+	vGas.push_back(std::make_shared<Gas>(1.0)); //Cs
+	vGas.push_back(std::make_shared<Gas>(1.0)); //Kr -> Rb -> Sr
+	//vGas.push_back(std::make_shared<Gas>(1.0)); //Xe -> Cs -> Ba
+	vGas.push_back(std::make_shared<Gas>(1.0)); //Rb
+	vGas.push_back(std::make_shared<Gas>(1.0)); //Sr
+	//vGas.push_back(std::make_shared<Gas>(1.0)); //Cs
+	//vGas.push_back(std::make_shared<Gas>(1.0)); //Ba
+
+	// Fill beta chains, use only iBetaChains first.
+	vBetaChains.push_back(std::make_shared<BetaChain>(1, 2, 3, 6.78e-5, 6.49e-4)); // test!!!
+
+	vBetaChains.push_back(std::make_shared<BetaChain>(1, 3, 4, 6.78e-5, 6.49e-4));
+	vBetaChains.push_back(std::make_shared<BetaChain>(2, 5, 6, 6.78e-5, 6.49e-4));
 }
 
 void Config::PrintMe() {
