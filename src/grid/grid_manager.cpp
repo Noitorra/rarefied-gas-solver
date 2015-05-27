@@ -227,7 +227,13 @@ void GridManager::SetBox(Vector2d p, Vector2d size, ConfigFunction config_func) 
   Vector2i cells_p(p.x() / cell_size.x(), p.y() / cell_size.y());
   Vector2i cells_size(size.x() / cell_size.x(), size.y() / cell_size.y());
 
-  boxes_stack_.push_back({cells_p, cells_size, def_config, config_func});
+  GridBox box;
+  box.p = cells_p;
+  box.size = cells_size;
+  box.def_config = def_config;
+  box.config_func = config_func;
+  //boxes_stack_.push_back({cells_p, cells_size, def_config, config_func});
+  boxes_stack_.push_back(box);
 }
 
 void GridManager::PushTemperature(double t) {

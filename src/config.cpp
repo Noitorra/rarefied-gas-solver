@@ -14,6 +14,7 @@ std::string Config::sOutputPrefix = "../";
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size
 bool Config::bGPRTGrid = false;
 int Config::iOutEach = 1;
+Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size in mm!
 
 double Config::n_normalize = 1.0; // not assigned
 double Config::T_normalize = 1.0; // not assigned

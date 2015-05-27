@@ -48,7 +48,8 @@ public:
 	Vector2() {
 		this->m_vMass.resize(2, T(0));
 	}
-	Vector2(const T& x, const T& y) : Vector2() {
+	Vector2(const T& x, const T& y) {
+		this->m_vMass.resize(2, T(0));
 		set(x, y);
 	}
 
@@ -120,7 +121,8 @@ public:
 	Vector3() {
 		this->m_vMass.resize(3, T(0));
 	}
-	Vector3(const T& x, const T& y, const T& z) : Vector3() {
+	Vector3(const T& x, const T& y, const T& z) {
+		this->m_vMass.resize(3, T(0));
 		set(x, y, z);
 	}
 
