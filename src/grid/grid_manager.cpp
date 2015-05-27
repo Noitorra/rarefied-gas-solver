@@ -4,6 +4,7 @@
 #include "solver.h"
 #include "config.h"
 #include "cell.h"
+#include "parameters/impulse.h"
 #include <algorithm>  // for visual studio compilator
 
 extern double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
@@ -54,10 +55,15 @@ void GridManager::PrintLinkage(sep::Axis axis) {
 }
 
 void GridManager::ConfigureGrid() {
-  if (Config::bGPRTGrid)
+  if (Config::bGPRTGrid) {
     ConfigureGPRT();
-  else
+	//ConfigureGPRT2();
+	//ConfigureGPRT3();
+	//ConfigureGPRT4();
+	//ConfigureGPRT5();
+  } else {
     ConfigureStandartGrid();
+  }
   GridGeometryToInitialCells();
   AdoptInitialCells();
 //  PrintGrid();
@@ -315,7 +321,7 @@ void GridManager::InitCells() {
       min_mass = std::min(m, min_mass);
       max_mass = std::max(m, max_mass);
   });
-  double max_impulse = 4.8 * max_mass;
+  double max_impulse = GetSolver()->GetImpulse()->getMaxImpulse();
 
   const Vector3i& grid_size = Config::vGridSize;
   for (int x = 0; x < grid_size.x(); x++) {
@@ -328,14 +334,13 @@ void GridManager::InitCells() {
         Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
         // Set parameters
-        Vector2d cell_size = Config::vCellSize;
-        // normalize cell size to free path of molecule
-        const double free_path_of_molecule = 80.0; // TODO: set precise number
-        cell_size /= free_path_of_molecule;
+        Vector2d cell_size = Config::vCellSize;	// in mm
+		cell_size /= 1e3;	// in m
+		cell_size /= Config::l_normalize;	// normalized
         Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
 
         // decreasing time step if needed
-        double time_step = std::min(area_step.x(), area_step.y()) / (max_impulse / min_mass);
+        double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
         Config::dTimestep = std::min(Config::dTimestep, time_step);
 
         const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;

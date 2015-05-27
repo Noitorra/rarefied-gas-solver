@@ -8,6 +8,10 @@ class GridConstructor {
 protected:
     void ConfigureStandartGrid();
     void ConfigureGPRT();
+	void ConfigureGPRT2();
+	void ConfigureGPRT3();
+	void ConfigureGPRT4();
+	void ConfigureGPRT5();
   
 private:
     virtual void PushTemperature(double dT) = 0;

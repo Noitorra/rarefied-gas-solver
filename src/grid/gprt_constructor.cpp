@@ -6,8 +6,8 @@ double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
 
 void GridConstructor::ConfigureGPRT() {
     //    Config::vCellSize = Vector2d(8.0, 0.25);
-//    Config::vCellSize = Vector2d(3.0, 0.4);
-    Config::vCellSize = Vector2d(8.0, 0.4);
+    //Config::vCellSize = Vector2d(3.0, 0.4);
+    Config::vCellSize = Vector2d(8.0, 0.4);	// mm
     T1 = 325.0 + 273.0;
     T2 = 60.0 + 273.0;
     Vector2d walls(Config::vCellSize);
@@ -47,13 +47,13 @@ void GridConstructor::ConfigureGPRT() {
             return;
         }
         temperature = (p.x() - temp_start) / (temp_finish - temp_start) * (T2 - T1) + T1;
-//        std::cout << "T = " << temperature << std::endl;
+        //std::cout << "T = " << temperature << std::endl;
 
     };
     auto global_pressure = [=] (Vector2i p_abs, double& pressure) {
         Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
         pressure = (1.0 - (p.x() - 30.0) / 400.0) * P_sat_T1;
-//        std::cout << "P = " << pressure << std::endl;
+        //std::cout << "P = " << pressure << std::endl;
     };
 
     // boxes ========================================================================
@@ -214,20 +214,32 @@ void GridConstructor::ConfigureGPRT() {
             });
 }
 
-//void GridConstructor::ConfigureGPRT() {
-//
-//    PushTemperature(0.5);
-//    SetBox(Vector2d(0.0, 0.0), Vector2d(10.0, 10.0),
-//        [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
-//
-//            if (y == size.y() - 1) {
-//                configs[0].boundary_T = 1.0;
-//                configs[1].boundary_T = 1.0;
-//            }
-//            if (x == 0) {
-//                configs[0].boundary_cond = sep::BT_MIRROR;
-//                configs[1].boundary_cond = sep::BT_MIRROR;
-//            }
-//        });
-//}
+void GridConstructor::ConfigureGPRT2() {
+
+    PushTemperature(0.5);
+    SetBox(Vector2d(0.0, 0.0), Vector2d(10.0, 10.0),
+        [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+            if (y == size.y() - 1) {
+                configs[0].boundary_T = 1.0;
+                configs[1].boundary_T = 1.0;
+            }
+            if (x == 0) {
+                configs[0].boundary_cond = sep::BT_MIRROR;
+                configs[1].boundary_cond = sep::BT_MIRROR;
+            }
+        });
+}
+
+void GridConstructor::ConfigureGPRT3() {
+
+}
+
+void GridConstructor::ConfigureGPRT4() {
+
+}
+
+void GridConstructor::ConfigureGPRT5() {
+
+}
 
