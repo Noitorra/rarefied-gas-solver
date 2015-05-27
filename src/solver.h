@@ -27,6 +27,7 @@ private:
   void InitCellType(sep::Axis axis);
   void MakeStep(sep::Axis axis);
   void MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
+	void MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
   void PreRun();
   void PrintElapsedTime(int it, Timer& iter_timer);
   

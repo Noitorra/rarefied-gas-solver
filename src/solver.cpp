@@ -8,6 +8,7 @@
 #include "config.h"
 #include "parameters/impulse.h"
 #include "parameters/gas.h"
+#include "parameters/beta_chain.h"
 #include "grid/vessel_grid.h"
 #include "integral/ci.hpp"
 #include "utilities/timer.h"
@@ -49,7 +50,7 @@ void Solver::Run() {
     MakeStep(sep::Y);
     MakeStep(sep::Z);
 
-    if (Config::bUseIntegral) {
+		if (Config::bUseIntegral) {
       if (Config::iGasesNumber == 3) {
         MakeIntegral(0, 0, Config::dTimestep);
         MakeIntegral(0, 1, Config::dTimestep);
@@ -62,6 +63,15 @@ void Solver::Run() {
         MakeIntegral(0, 0, Config::dTimestep);
       }
     }
+
+		// beta
+		if (Config::bUseBetaChain) {
+			for (int i = 0; i < Config::iBetaChainsNumber; i++) {
+				auto& item = Config::vBetaChains[i];
+				MakeBetaDecay(item->iGasIndex1, item->iGasIndex2, item->dLambda1);
+				MakeBetaDecay(item->iGasIndex2, item->iGasIndex3, item->dLambda2);
+			}
+		}
 
     // here we can test data, if needed...
     tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
@@ -113,7 +123,7 @@ void Solver::MakeStep(sep::Axis axis) {
 
   // Vessels
   const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
-  m_pGrid->GetVessels();
+		m_pGrid->GetVessels();
 
   for (auto& item : vVessels) {
     item->computeHalf(axis);
@@ -154,6 +164,14 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
   for (auto& item : vVessels) {
     item->computeIntegral(gi0, gi1);
   }
+}
+
+void Solver::MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
+	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+
+	tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+		item->computeBetaDecay(gi0, gi1, lambda);
+	});
 }
 
 void Solver::PrintElapsedTime(int it, Timer& iter_timer) {

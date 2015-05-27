@@ -66,6 +66,7 @@ public:
 	void computeValue(unsigned int dim);
 	void computeHalf(unsigned int dim);
   void computeIntegral(unsigned int gi0, unsigned int gi1);
+	void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
 
 	// tests
 	bool testInnerValuesRange();
@@ -95,10 +96,10 @@ private:
   void compute_half_mirror_left(unsigned int dim, int gi);
   void compute_half_mirror_right(unsigned int dim, int gi);
 
-//	void computeValue_Left(unsigned int dim);
+	void compute_half_vacuum_left(unsigned int dim, int gi);
+	void compute_half_vacuum_right(unsigned int dim, int gi);
+
 	void compute_value_normal(unsigned int dim);
-//	void computeValue_PreRight(unsigned int dim);
-//	void computeValue_Right(unsigned int dim);
 
 	// help methods
   // help enum, not to fail this shit

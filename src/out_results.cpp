@@ -165,7 +165,7 @@ void OutResults::OutAverageStream(int iteration) {
 
   const std::string& output_prefix = Config::sOutputPrefix;
   std::string as_filename_base = output_prefix + "out/gas";
-  for (unsigned int gi = 0; gi < gasv.size(); gi++) {
+  for (unsigned int gi = 0; gi < Config::iGasesNumber; gi++) {
     std::string as_filename = as_filename_base + std::to_string(gi);
     as_filename += "/";
     as_filename += "average_stream.bin";
