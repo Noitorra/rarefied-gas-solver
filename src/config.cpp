@@ -16,16 +16,14 @@ int Config::iOutEach = 1;
 Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
 sep::GridGeometry Config::eGridGeometryType = sep::COMB_GRID_GEOMETRY;
 std::shared_ptr<HTypeGridConfig> Config::pHTypeGridConfig = std::shared_ptr<HTypeGridConfig>(new HTypeGridConfig);
-Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size
-bool Config::bGPRTGrid = false;
-int Config::iOutEach = 1;
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size in mm!
+bool Config::bGPRTGrid = false;
 
+// Gases Related
 GasVector Config::vGas;
 int Config::iGasesNumber = 1;
 BetaChainVector Config::vBetaChains;
 int Config::iBetaChainsNumber = 0;
-
 
 double Config::n_normalize = 1.0; // not assigned
 double Config::T_normalize = 1.0; // not assigned
