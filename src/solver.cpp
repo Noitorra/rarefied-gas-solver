@@ -23,7 +23,7 @@ m_pGrid(nullptr)
 void Solver::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
   m_pGrid = pGridManager->GetGrid();
-  
+
   m_pImpulse->Init(pGridManager);
 }
 
@@ -31,7 +31,7 @@ void Solver::Run() {
   std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 
   PreRun();
-  
+
   if (Config::bUseIntegral) {
     ci::Potential* potential = new ci::HSPotential;
     ci::init(potential, ci::NO_SYMM);
@@ -92,7 +92,7 @@ void Solver::PreRun() {
   InitCellType(sep::X);
   InitCellType(sep::Y);
   InitCellType(sep::Z);
-  
+
 //  m_pGridManager->PrintLinkage(sep::X);
 //  m_pGridManager->PrintLinkage(sep::Y);
 }
@@ -180,5 +180,5 @@ void Solver::PrintElapsedTime(int it, Timer& iter_timer) {
   const double elapsed_time = timer_.elapsed_time() / 1e3;  // s
   std::cout << "Elapsed time: " <<  (int)elapsed_time << " s. " <<
           Config::iMaxIteration << " iteration will be done in " <<
-          (int)(elapsed_time / ((double)(it+1) / Config::iMaxIteration) / 60.0)  << " min." << std::endl;
+          (int)(elapsed_time * (1.0 / ((double)(it+1) / Config::iMaxIteration) - 1.0) / 60.0)  << " min." << std::endl;
 }
