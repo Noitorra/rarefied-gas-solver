@@ -18,6 +18,7 @@ void GridConstructor::ConfigureGPRT() {
     // normalization base
     Config::T_normalize = 600.0;  // K
     Config::n_normalize = 1.81e22;  // 1 / m^3
+	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 2.78e-5; // m
@@ -26,10 +27,10 @@ void GridConstructor::ConfigureGPRT() {
     T1 /= Config::T_normalize;
     T2 /= Config::T_normalize;
     PushTemperature(T1);
-    P_sat_T1 = 1.0; // k inside P! 150Pa, T = T0, n = n0
+    P_sat_T1 = 1.0; // 150Pa, T = T0, n = n0
     P_sat_T2 = P_sat_T1 / 2.0;
-    Q_Xe_in = 6.16e-11;
-    P_sat_Xe = P_sat_T1 * 3 * 1e-7;
+    Q_Xe_in = 2.46e-9;
+    P_sat_Xe = P_sat_T1 * 3 * 1e-7;	//	P_sat_T1 * атом. доля (растворимость Xe в жидком Cs)
 
 
     auto global_temp = [&] (Vector2i p_abs, double& temperature) {
@@ -133,7 +134,7 @@ void GridConstructor::ConfigureGPRT() {
                 configs[0].boundary_T = T1;
 
                 configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
-                configs[1].boundary_pressure = P_sat_T1 * 1e-6;
+                configs[1].boundary_pressure = P_sat_T1 * 1e-6;	// ???
                 configs[1].boundary_T = T1;
             }
     });
@@ -231,8 +232,57 @@ void GridConstructor::ConfigureGPRT2() {
         });
 }
 
-void GridConstructor::ConfigureGPRT3() {
+void GridConstructor::BoundaryConditionTest() {
 
+	/*
+	*	Boundary conditions test
+	*/
+
+	// normalization base
+	Config::T_normalize = 600.0;  // K
+	Config::n_normalize = 1.81e22;  // 1 / m^3
+	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
+	Config::m_normalize = 133 * 1.66e-27;   // kg
+	Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
+	Config::l_normalize = 2.78e-5; // m
+	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
+
+	double test_stream = 1.0e15 / (Config::n_normalize * Config::e_cut_normalize);	// 1e15 1/(m^2 * s)
+	double test_pressure = 100.0 / Config::P_normalize;	// 100 Pa
+
+	PushTemperature(1.0);
+	PushPressure(1.0);
+	// Lef box for testing stream
+	SetBox(Vector2d(0.0, 0.0), Vector2d(10.0, 10.0),
+		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+			
+			configs[0].pressure = 0.0;
+
+			if (x == 0) {
+				configs[0].boundary_cond = sep::BT_STREAM;
+				configs[0].boundary_stream = Vector3d(test_stream, 0.0, 0.0);
+				configs[0].boundary_T = 1.0;
+			}
+
+			if (x == size.x() - 1) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 0.0;
+				configs[0].boundary_T = 1.0;
+			}
+	});
+
+	// Right box for testing pressure
+	SetBox(Vector2d(12.0, 0.0), Vector2d(10.0, 10.0),
+		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+			configs[0].pressure = test_pressure / 2.0;
+
+			if (x == 0) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = test_pressure;
+				configs[0].boundary_T = 1.0;
+			}
+	});
 }
 
 void GridConstructor::ConfigureGPRT4() {

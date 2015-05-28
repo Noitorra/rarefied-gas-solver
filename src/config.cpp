@@ -6,10 +6,9 @@ using namespace std;
 
 std::string Config::sName = "default";
 double Config::dTimestep = 0.1;  // if needed may decrease automatically later
-int Config::iMaxIteration = 2000;
+int Config::iMaxIteration = 10;
 bool Config::bUseIntegral = true;
-bool Config::bUseBetaChain = true;
-std::string Config::sOutputPrefix = "../";
+bool Config::bUseBetaChain = false;
 int Config::iOutEach = 1;
 
 // Grid Related
@@ -17,7 +16,7 @@ Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the 
 sep::GridGeometry Config::eGridGeometryType = sep::COMB_GRID_GEOMETRY;
 std::shared_ptr<HTypeGridConfig> Config::pHTypeGridConfig = std::shared_ptr<HTypeGridConfig>(new HTypeGridConfig);
 Vector2d Config::vCellSize = Vector2d(1.0, 1.0);  // default cell size in mm!
-bool Config::bGPRTGrid = false;
+bool Config::bGPRTGrid = true;
 
 // Gases Related
 GasVector Config::vGas;

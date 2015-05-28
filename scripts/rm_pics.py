@@ -5,7 +5,7 @@ import shutil
 import config
 
 gas_num = 2
-params = ["conc", "temp", "pressure"]
+params = ["conc", "temp", "pressure", "flow"]
 #params = ["conc"]
 
 out_dir = config.read_cfg_path("config.txt")
