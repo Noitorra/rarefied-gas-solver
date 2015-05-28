@@ -134,7 +134,7 @@ void GridConstructor::ConfigureGPRT() {
                 configs[0].boundary_T = T1;
 
                 configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
-                configs[1].boundary_pressure = P_sat_T1 * 1e-6;
+                configs[1].boundary_pressure = P_sat_T1 * 1e-6;	// ???
                 configs[1].boundary_T = T1;
             }
     });
@@ -260,8 +260,14 @@ void GridConstructor::BoundaryConditionTest() {
 
 			if (x == 0) {
 				configs[0].boundary_cond = sep::BT_STREAM;
-				configs[0].boundary_T = 1.0;
 				configs[0].boundary_stream = Vector3d(test_stream, 0.0, 0.0);
+				configs[0].boundary_T = 1.0;
+			}
+
+			if (x == size.x() - 1) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 0.0;
+				configs[0].boundary_T = 1.0;
 			}
 	});
 
@@ -269,12 +275,12 @@ void GridConstructor::BoundaryConditionTest() {
 	SetBox(Vector2d(12.0, 0.0), Vector2d(10.0, 10.0),
 		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-			configs[0].pressure = 0.0;
+			configs[0].pressure = test_pressure / 2.0;
 
 			if (x == 0) {
 				configs[0].boundary_cond = sep::BT_PRESSURE;
-				configs[0].boundary_T = 1.0;
 				configs[0].boundary_pressure = test_pressure;
+				configs[0].boundary_T = 1.0;
 			}
 	});
 }
