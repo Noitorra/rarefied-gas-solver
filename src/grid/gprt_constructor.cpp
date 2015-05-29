@@ -147,7 +147,7 @@ void GridConstructor::ConfigureGPRT() {
 			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
             global_temp(p, configs[0].T);
             global_temp(p, configs[0].boundary_T);
-            global_pressure(abs_p, configs[0].pressure);
+            global_pressure(p, configs[0].pressure);
 
             global_temp(p, configs[1].boundary_T);
             configs[1].pressure = 0.0;
