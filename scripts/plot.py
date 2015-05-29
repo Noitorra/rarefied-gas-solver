@@ -6,13 +6,13 @@ import numpy
 from numpy import *
 import config
 
-max_files = 1000
-each = 100
-gas_num = 2
+max_files = 100
+each = 10
+gas_num = 4
 
 params = ["conc", "temp", "pressure"]
 cb_text = [r'n, m^-3', r'T, K', r'P, Pa']
-#params = ["conc"]
+# params = ["conc"]
 
 out_dir = config.read_cfg_path("config.txt")
 
@@ -42,17 +42,14 @@ for index in range(0, len(params)):
         for y in range(NY):
           v = D[x][y]
           if v == 0.0:
-            D[x][y] = nan;
+            D[x][y] = nan
           else:
             max_val = max(max_val, v)
             min_val = min(min_val, v)
 
       has_min_max = math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
-                              (max_val - min_val) < 1e-300
+                    (max_val - min_val) < 1e-300
 
-
-
-      
       s_inter = 'none'
       if has_min_max:
         print('warning: max = min')
@@ -64,14 +61,13 @@ for index in range(0, len(params)):
       plt.figure()
       plt.title(params[index] + ' ' + s)
 
-      im = plt.imshow(D, origin='lower', vmin = min_val, vmax= max_val,
-          interpolation=s_inter)
+      im = plt.imshow(D, origin='lower', vmin=min_val, vmax=max_val, interpolation=s_inter)
 
-      orientation='vertical'
+      orientation = 'vertical'
       if NY > NX:
-        orientation='horizontal'
+        orientation = 'horizontal'
       else:
-        orientation='vertical'
+        orientation = 'vertical'
       
       cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
       cb_formatter.set_powerlimits((-4,4))
@@ -80,7 +76,6 @@ for index in range(0, len(params)):
       cb.update_ticks()
       
       cb.set_label(cb_text[index])
-      
 
       if not has_min_max:
         plt.contour(D, colors='black')
