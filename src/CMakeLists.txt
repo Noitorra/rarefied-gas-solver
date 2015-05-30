@@ -3,6 +3,7 @@ SET(TARGET_NAME ${PROJECT_NAME})
 
 file(GLOB_RECURSE PROJECT_SOURCES
     "*.h"
+    "*.hpp"
     "*.cpp"
 )
 

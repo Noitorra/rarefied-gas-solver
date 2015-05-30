@@ -5,8 +5,8 @@
 using namespace std;
 
 std::string Config::sName = "default";
-double Config::dTimestep = 1000.0;  // if needed may decrease automatically later
-int Config::iMaxIteration = 10;
+double Config::dTimestep = 0.0;  // sets automaticaly in grid_manager.cpp
+int Config::iMaxIteration = 1000;
 std::string Config::sOutputPrefix = "../";
 bool Config::bUseIntegral = true;
 bool Config::bUseBetaChain = false;

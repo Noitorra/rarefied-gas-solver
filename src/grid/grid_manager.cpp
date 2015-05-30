@@ -347,7 +347,7 @@ void GridManager::InitCells() {
 
         // decreasing time step if needed
         double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
-        Config::dTimestep = std::min(Config::dTimestep, time_step);
+				Config::dTimestep = time_step * 0.9; // super hack for more stability cause for occilations near y == 1.0, need y == 0.9.
 
         const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
         for (auto val : init_conds) {
