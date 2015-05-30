@@ -58,9 +58,9 @@ void GridManager::ConfigureGrid() {
   if (Config::bGPRTGrid) {
     //ConfigureGPRT();
 	//ConfigureGPRT2();
-	BoundaryConditionTest();
-	//ConfigureGPRT4();
-	//ConfigureGPRT5();
+	//BoundaryConditionTest();
+	//PressureBoundaryConditionTestSmallArea();
+	PressureBoundaryConditionTestBigArea();
   } else {
     ConfigureStandartGrid();
   }

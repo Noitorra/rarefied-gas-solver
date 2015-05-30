@@ -33,8 +33,7 @@ void GridConstructor::ConfigureGPRT() {
     P_sat_Xe = P_sat_T1 * 3 * 1e-7;	//	P_sat_T1 * атом. доля (растворимость Xe в жидком Cs)
 
 
-    auto global_temp = [&] (Vector2i p_abs, double& temperature) {
-        Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+    auto global_temp = [&] (Vector2d p, double& temperature) {        
 //        std::cout << "T1 = " << T1 << " " << T2 << std::endl;
         const double sp_delta_wall = 30.0;
         const double temp_start = 100.0 + sp_delta_wall;
@@ -51,8 +50,7 @@ void GridConstructor::ConfigureGPRT() {
         //std::cout << "T = " << temperature << std::endl;
 
     };
-    auto global_pressure = [=] (Vector2i p_abs, double& pressure) {
-        Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+    auto global_pressure = [=] (Vector2d p, double& pressure) {
         pressure = (1.0 - (p.x() - 30.0) / 400.0) * P_sat_T1;
         //std::cout << "P = " << pressure << std::endl;
     };
@@ -120,12 +118,13 @@ void GridConstructor::ConfigureGPRT() {
     SetBox(Vector2d(30.0, 15.5), Vector2d(100.0 + walls.x(), 2.5),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-            Vector2i abs_p(x + start.x(), y + start.y());
-            global_temp(abs_p, configs[0].T);
-            global_temp(abs_p, configs[0].boundary_T);
-            global_pressure(abs_p, configs[0].pressure);
+            Vector2i p_abs(x + start.x(), y + start.y());
+			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+            global_temp(p, configs[0].T);
+            global_temp(p, configs[0].boundary_T);
+            global_pressure(p, configs[0].pressure);
 
-            global_temp(abs_p, configs[1].boundary_T);
+            global_temp(p, configs[1].boundary_T);
             configs[1].pressure = 0.0;
 
             if (x == 0) {
@@ -144,12 +143,13 @@ void GridConstructor::ConfigureGPRT() {
     SetBox(Vector2d(130.0 + walls.x() - sp_delta.x(), 0.0), Vector2d(200.0 - walls.x(), 18.0 - sp_delta.y()),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-            Vector2i abs_p(x + start.x(), y + start.y());
-            global_temp(abs_p, configs[0].T);
-            global_temp(abs_p, configs[0].boundary_T);
-            global_pressure(abs_p, configs[0].pressure);
+			Vector2i p_abs(x + start.x(), y + start.y());
+			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+            global_temp(p, configs[0].T);
+            global_temp(p, configs[0].boundary_T);
+            global_pressure(p, configs[0].pressure);
 
-            global_temp(abs_p, configs[1].boundary_T);
+            global_temp(p, configs[1].boundary_T);
             configs[1].pressure = 0.0;
 
 //            if (y == 0) {
@@ -164,12 +164,13 @@ void GridConstructor::ConfigureGPRT() {
     SetBox(Vector2d(330.0 - sp_delta.x(), 0.0), Vector2d(100.0, 8.0),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-                Vector2i abs_p(x + start.x(), y + start.y());
-                global_temp(abs_p, configs[0].T);
-                global_temp(abs_p, configs[0].boundary_T);
-                global_pressure(abs_p, configs[0].pressure);
+				Vector2i p_abs(x + start.x(), y + start.y());
+				Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+                global_temp(p, configs[0].T);
+                global_temp(p, configs[0].boundary_T);
+                global_pressure(p, configs[0].pressure);
 
-                global_temp(abs_p, configs[1].boundary_T);
+                global_temp(p, configs[1].boundary_T);
                 configs[1].pressure = 0.0;
 
                 if (x == size.x() - 1) {
@@ -187,7 +188,7 @@ void GridConstructor::ConfigureGPRT() {
 //                }
 
                 // gas <-> fluid
-                if (y == size.y() - 1 && x > 350.0 / Config::vCellSize.x()) {
+                if (y == size.y() - 1 && p.x() > 350.0 / Config::vCellSize.x()) {
                     configs[0].boundary_cond = sep::BT_PRESSURE;
                     configs[0].boundary_pressure = P_sat_T2;
                     configs[0].boundary_T = T2;
@@ -200,11 +201,14 @@ void GridConstructor::ConfigureGPRT() {
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
                 configs[0].pressure = (1.0 - (double)x / size.x() * 0.38) * P_sat_T1;
-                Vector2i abs_p(x + start.x(), y + start.y());
-                global_temp(abs_p, configs[0].T);
-                global_temp(abs_p, configs[0].boundary_T);
+				
+				Vector2i p_abs(x + start.x(), y + start.y());
+				Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+                
+				global_temp(p, configs[0].T);
+                global_temp(p, configs[0].boundary_T);
 
-                global_temp(abs_p, configs[1].boundary_T);
+                global_temp(p, configs[1].boundary_T);
                 configs[1].pressure = 0.0;
 
 //                if (y == 0) {
@@ -285,11 +289,152 @@ void GridConstructor::BoundaryConditionTest() {
 	});
 }
 
-void GridConstructor::ConfigureGPRT4() {
+void GridConstructor::PressureBoundaryConditionTestSmallArea() {
 
+	/*
+	*	Pressure boundary conditions test small area
+	*/
+
+	Config::vCellSize = Vector2d(0.1, 0.002);	// mm
+
+	// normalization base
+	Config::T_normalize = 600.0;  // K
+	Config::n_normalize = 1.81e22;  // 1 / m^3
+	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
+	Config::m_normalize = 133 * 1.66e-27;   // kg
+	Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
+	Config::l_normalize = 1.0e-3; // m
+	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
+
+	PushTemperature(1.0);
+	PushPressure(1.0);
+
+	// Left simple box
+	SetBox(Vector2d(0.0, 0.0), Vector2d(5.0, 0.1),
+		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+			auto temp = [&] (int x, int y, double& temperature) {
+				temperature = ((double)y) / size.y() * (2.0 - 1.0) + 1.0;
+			};
+
+			if (x == 0) {
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (x == size.x() - 1) {
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (y == 0) {
+				configs[0].boundary_T = 1.0;
+			}
+
+			if (y == size.y() - 1) {
+				configs[0].boundary_T = 2.0;
+			}
+	});
+
+	// Right box with pressure
+	SetBox(Vector2d(5.5, 0.0), Vector2d(5.0, 0.1),
+		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+			auto temp = [&] (int x, int y, double& temperature) {
+				temperature = ((double)y) / size.y() * (2.0 - 1.0) + 1.0;
+			};
+
+			if (x == 0) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 1.0;
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (x == size.x() - 1) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 1.0;
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (y == 0) {
+				configs[0].boundary_T = 1.0;
+			}
+
+			if (y == size.y() - 1) {
+				configs[0].boundary_T = 2.0;
+			}
+	});
 }
 
-void GridConstructor::ConfigureGPRT5() {
+void GridConstructor::PressureBoundaryConditionTestBigArea() {
+	/*
+	*	Pressure boundary conditions large area
+	*/
 
+	Config::vCellSize = Vector2d(0.5, 0.01);	// mm
+
+	// normalization base
+	Config::T_normalize = 600.0;  // K
+	Config::n_normalize = 1.81e22;  // 1 / m^3
+	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
+	Config::m_normalize = 133 * 1.66e-27;   // kg
+	Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
+	Config::l_normalize = 1.0e-6; // m	!!!
+	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
+
+	PushTemperature(1.0);
+	PushPressure(1.0);
+
+	// Left simple box
+	SetBox(Vector2d(0.0, 0.0), Vector2d(5.0, 0.1),
+		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+			auto temp = [&] (int x, int y, double& temperature) {
+				temperature = ((double)y) / size.y() * (2.0 - 1.0) + 1.0;
+			};
+
+			if (x == 0) {
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (x == size.x() - 1) {
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (y == 0) {
+				configs[0].boundary_T = 1.0;
+			}
+
+			if (y == size.y() - 1) {
+				configs[0].boundary_T = 2.0;
+			}
+	});
+
+	// Right box with pressure
+	SetBox(Vector2d(5.5, 0.0), Vector2d(5.0, 0.1),
+		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+			auto temp = [&] (int x, int y, double& temperature) {
+				temperature = ((double)y) / size.y() * (2.0 - 1.0) + 1.0;
+			};
+
+			if (x == 0) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 1.0;
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (x == size.x() - 1) {
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 1.0;
+				temp(x, y, configs[0].boundary_T);
+			}
+
+			if (y == 0) {
+				configs[0].boundary_T = 1.0;
+			}
+
+			if (y == size.y() - 1) {
+				configs[0].boundary_T = 2.0;
+			}
+	});
 }
 

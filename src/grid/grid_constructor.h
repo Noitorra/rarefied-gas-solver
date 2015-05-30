@@ -10,8 +10,8 @@ protected:
     void ConfigureGPRT();
 	void ConfigureGPRT2();
 	void BoundaryConditionTest();
-	void ConfigureGPRT4();
-	void ConfigureGPRT5();
+	void PressureBoundaryConditionTestSmallArea();
+	void PressureBoundaryConditionTestBigArea();
   
 private:
     virtual void PushTemperature(double dT) = 0;
