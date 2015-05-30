@@ -374,7 +374,8 @@ void GridManager::InitCells() {
     }
   }
 
-  std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
+  //std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
+  std::cout << "Time step: " << Config::dTimestep * Config::tau_normalize << " s" << std::endl;
 }
 
 void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
