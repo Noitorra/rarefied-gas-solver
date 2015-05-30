@@ -339,15 +339,6 @@ void GridManager::InitCells() {
         
         Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
-        // Set parameters
-        Vector2d cell_size = Config::vCellSize;	// in mm
-		cell_size /= 1e3;	// in m
-		cell_size /= Config::l_normalize;	// normalized
-        Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
-
-        // decreasing time step if needed
-        double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
-        Config::dTimestep = std::min(Config::dTimestep, time_step);
 
         const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
         for (auto val : init_conds) {
@@ -373,6 +364,16 @@ void GridManager::InitCells() {
       }
     }
   }
+
+  // Set parameters
+  Vector2d cell_size = Config::vCellSize;	// in mm
+  cell_size /= 1e3;	// in m
+  cell_size /= Config::l_normalize;	// normalized
+  Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
+
+  // decreasing time step if needed
+  double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
+  Config::dTimestep = std::min(Config::dTimestep, time_step);
 
   //std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
   std::cout << "Time step: " << Config::dTimestep * Config::tau_normalize << " s" << std::endl;
