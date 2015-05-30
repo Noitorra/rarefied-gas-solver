@@ -11,7 +11,6 @@ int Config::iMaxIteration = 2000;
 bool Config::bUseIntegral = true;
 bool Config::bUseBetaChain = false;
 int Config::iOutEach = 1;
-std::string Config::sOutputPrefix = "../";
 
 // Grid Related
 Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
