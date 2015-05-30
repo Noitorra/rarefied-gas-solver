@@ -5,7 +5,7 @@
 using namespace std;
 
 std::string Config::sName = "default";
-double Config::dTimestep = 0.1;  // if needed may decrease automatically later
+double Config::dTimestep = 1000.0;  // if needed may decrease automatically later
 int Config::iMaxIteration = 10;
 bool Config::bUseIntegral = true;
 bool Config::bUseBetaChain = false;

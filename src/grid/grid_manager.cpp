@@ -56,11 +56,11 @@ void GridManager::PrintLinkage(sep::Axis axis) {
 
 void GridManager::ConfigureGrid() {
   if (Config::bGPRTGrid) {
-    //ConfigureGPRT();
+    ConfigureGPRT();
 	//ConfigureGPRT2();
 	//BoundaryConditionTest();
 	//PressureBoundaryConditionTestSmallArea();
-	PressureBoundaryConditionTestBigArea();
+	//PressureBoundaryConditionTestBigArea();
   } else {
     ConfigureStandartGrid();
   }
@@ -373,6 +373,8 @@ void GridManager::InitCells() {
       }
     }
   }
+
+  std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
 }
 
 void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
