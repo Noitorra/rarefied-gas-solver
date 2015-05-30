@@ -329,6 +329,21 @@ void GridManager::InitCells() {
   });
   double max_impulse = GetSolver()->GetImpulse()->getMaxImpulse();
 
+  // Set parameters
+  Vector2d cell_size = Config::vCellSize;	// in mm
+  cell_size /= 1e3;	// in m
+  cell_size /= Config::l_normalize;	// normalized
+  Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
+
+  // decreasing time step if needed
+  double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
+  //Config::dTimestep = std::min(Config::dTimestep, time_step);
+  Config::dTimestep = time_step * 0.9; // super hack for more stability cause for occilations near y == 1.0, need y == 0.9.
+
+  //std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
+  std::cout << "Time step: " << Config::dTimestep * Config::tau_normalize << " s" << std::endl;
+
+
   const Vector3i& grid_size = Config::vGridSize;
   for (int x = 0; x < grid_size.x(); x++) {
     for (int y = 0; y < grid_size.y(); y++) {
@@ -364,19 +379,6 @@ void GridManager::InitCells() {
       }
     }
   }
-
-  // Set parameters
-  Vector2d cell_size = Config::vCellSize;	// in mm
-  cell_size /= 1e3;	// in m
-  cell_size /= Config::l_normalize;	// normalized
-  Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
-
-  // decreasing time step if needed
-  double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
-  Config::dTimestep = std::min(Config::dTimestep, time_step);
-
-  //std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
-  std::cout << "Time step: " << Config::dTimestep * Config::tau_normalize << " s" << std::endl;
 }
 
 void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
