@@ -25,20 +25,25 @@ def plot_plain(binpath, pngpath, title, value):
     NX = NY
     NY = a
 
-    max_val = -float("inf")
-    min_val = float("inf")
+    # sets all 0.0 elements to nan
+    input[input == 0.0] = nan
+    # searching for max and min with numpy builtin functions
+    max_val = numpy.amax(input)
+    min_val = numpy.amin(input)
+
+    #if abs(max_val) > 1e10 or abs(min_val) > 1e10:
+    #    input = input / 1e10
+
     D = input.reshape(NX, NY)
-    for x in range(NX):
-        for y in range(NY):
-          v = D[x][y]
-          if v == 0.0:
-            D[x][y] = nan
-          else:
-            max_val = max(max_val, v)
-            min_val = min(min_val, v)
 
     has_min_max = math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
         (max_val - min_val) < 1e-300
+
+    """
+    print('min_val = ', min_val)
+    print('max_val = ', max_val)
+    print('max_val - min_val = ', max_val - min_val)
+    """
 
     s_inter = 'none'
     if has_min_max:
@@ -52,23 +57,24 @@ def plot_plain(binpath, pngpath, title, value):
     # title
     plt.title(title)
 
-    im = plt.imshow(D, origin='lower', vmin=min_val, vmax=max_val, interpolation=s_inter)
+    im = plt.imshow(D, origin='lower', interpolation=s_inter)
 
     orientation = 'vertical'
     if NY > NX:
         orientation = 'horizontal'
 
-    cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
-    cb_formatter.set_powerlimits((-4,4))
-    cb = plt.colorbar(im, orientation=orientation)
-    cb.formatter = cb_formatter
-    cb.update_ticks()
-
-    # label
-    cb.set_label(value)
+    if not has_min_max:
+        cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
+        cb_formatter.set_powerlimits((-4,4))
+        cb = plt.colorbar(im, orientation=orientation)
+        cb.formatter = cb_formatter
+        cb.update_ticks()
+        # label
+        cb.set_label(value)
 
     if not has_min_max:
         plt.contour(D, colors='black')
+
     plt.savefig(pngpath, dpi=100)
     plt.close()
     return 0
@@ -98,11 +104,11 @@ def plot_flow(binpath, pngpath, title, value):
     # title
     plt.title(title)
 
-    Q = plt.quiver(U, V, color='r', scale=1e14)
-    qk = plt.quiverkey(Q, 0.9, 0.92, 1e15, r'$2 \frac{m}{s}$', labelpos='E', fontproperties={'weight': 'bold'})
-    l,r,b,t = plt.axis()
-    dx, dy = r-l, t-b
-    plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
+    Q = plt.quiver(U, V, color='r') #, scale=1e14
+    #qk = plt.quiverkey(Q, 0.9, 0.92, 1e15, r'$2 \frac{m}{s}$', labelpos='E', fontproperties={'weight': 'bold'})
+    #l,r,b,t = plt.axis()
+    #dx, dy = r-l, t-b
+    #plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -110,8 +116,8 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 10
-each = 1
+max_files = 2000
+each = 100
 gas_num = 1
 
 params = ["conc", "temp", "pressure", "flow"]

@@ -9,8 +9,8 @@ void GridConstructor::ConfigureStandartGrid() {
     // Main configuration part
     // normalization base
     Config::T_normalize = 1800.0;  // K // Maximum temperature in system
-    Config::n_normalize = 1.207e22;  // 1 / m^3 // P/(kT) P = 150Pa T = 900K
-    Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
+		Config::P_normalize = 150.0;
+		Config::n_normalize = Config::P_normalize / sep::k / Config::T_normalize;
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 0.1e-4; // m
@@ -27,79 +27,42 @@ void GridConstructor::ConfigureStandartGrid() {
     PushPressure(1.0);
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
-    //Vector2i vNumSize = Vector2i(88, 30);
-    //Config::vCellSize = Vector2d(vPhysSize.x()/vNumSize.x(), vPhysSize.y()/vNumSize.y());
+		Vector2d vPhysSize = Vector2d(300.0, 300.0);
+    Vector2i vNumSize = Vector2i(30, 30);
+    Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
-    //vPhysSize
+		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
+			const Vector2i& size, const Vector2i& start) 
+		{
+			// Task parameters
+			double T1 = 1800.0 / Config::T_normalize;
+			double T2 = 900.0 / Config::T_normalize;
 
-    SetBox(Vector2d(0.0, 0.0), Vector2d(100.0, 30.0), [](int x, int y, GasesConfigsMap& configs,
-            const Vector2i& size, const Vector2i& start) {
-      
-      double dT1 = 1800.0 / Config::T_normalize;
-      double dT2 = 900.0 / Config::T_normalize;
-      
-      int iNumHoles = 9;
-      double dSummaryStream = 0.000009; // 5.22e18
+			configs[0].pressure = 1.0;
+			//configs[0].T = T1 - (T1 - T2) * y / size.y();
+			configs[0].T = T1;
 
-
-      configs[0].pressure = 1.0;
-      configs[0].T = dT1 - (dT1 - dT2) * y / size.y();
-
-			for (int i = 1; i < Config::iGasesNumber; i++) {
-				configs[i].pressure = 0.0; // no gas
-			}
-      
-      if (x == 0) // left border
-      {
-        configs[0].boundary_cond = sep::BT_PRESSURE;
-				configs[0].boundary_pressure = 1.0;
-        configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
-
-        //configs[1].boundary_cond = sep::BT_STREAM;
-				//configs[1].boundary_stream = Vector3d(0.0, 0.0, 0.0);
-				//configs[1].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
-      }
-      if (x == size.x() - 1) // right border
-      {
+			if (x == 0) { // left border
 				configs[0].boundary_cond = sep::BT_PRESSURE;
-				configs[0].boundary_pressure = 1.0;
-        configs[0].boundary_T = dT1 - (dT1 - dT2) * y / size.y();
-
-        //configs[1].boundary_cond = sep::BT_STREAM;
-        //configs[1].boundary_stream = Vector3d(dSummaryStream, 0.0, 0.0);
-        //configs[1].boundary_T = 1.0;
-      }
-      if (y == 0) // bottom border
-      {
-        bool isAHole = false;
-        for (int i = 0; i < iNumHoles; i++)
-        {
-          isAHole = isAHole || x == int(size.x() * double(i + 1) / (iNumHoles + 1));
-        }
-        if (isAHole) // a hole
-        {
-          configs[0].boundary_cond = sep::BT_DIFFUSE; // maybe stream with 0, which is exactly the same
-          configs[0].boundary_pressure = 1.0;
-          configs[0].boundary_T = dT1;
-
-          //configs[1].boundary_cond = sep::BT_STREAM;
-          //configs[1].boundary_stream = Vector3d(0.0, dSummaryStream / iNumHoles, 0.0);
-          //configs[1].boundary_T = dT1;
-        }
-        else {
-          configs[0].boundary_cond = sep::BT_DIFFUSE;
-          configs[0].boundary_T = dT1;
-
-          //configs[1].boundary_cond = sep::BT_DIFFUSE;
-          //configs[1].boundary_T = dT1;
-        }
-      }
-      if (y == size.y() - 1) { // top border
-          configs[0].boundary_cond = sep::BT_DIFFUSE;
-          configs[0].boundary_T = dT2;
-
-          //configs[1].boundary_cond = sep::BT_DIFFUSE;
-          //configs[1].boundary_T = dT2;
-      }
-    });
+				configs[0].boundary_pressure = 3.0;
+				//configs[0].boundary_stream = Vector3d(1.0, 0.0, 0.0);
+				//configs[0].boundary_T = std::sqrt(T1 * T2);
+				configs[0].boundary_T = T1;
+			}
+			if (x == size.x() - 1) { // right border
+				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_pressure = 0.0;
+				//configs[0].boundary_T = std::sqrt(T1 * T2);
+				configs[0].boundary_T = T1;
+			}
+			if (y == 0) { // bottom border
+				configs[0].boundary_cond = sep::BT_DIFFUSE;
+				configs[0].boundary_T = T1;
+			}
+			if (y == size.y() - 1) { // top border
+				configs[0].boundary_cond = sep::BT_DIFFUSE;
+				configs[0].boundary_T = T1;
+			}
+			
+		});
 }
