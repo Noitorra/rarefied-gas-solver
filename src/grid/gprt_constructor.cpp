@@ -22,7 +22,8 @@ void GridConstructor::ConfigureGPRT() {
 	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
-    Config::l_normalize = 2.78e-5; // m
+    //Config::l_normalize = 2.78e-5; // m
+	Config::l_normalize = 0.44; // m
     Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
     T1 /= Config::T_normalize;
