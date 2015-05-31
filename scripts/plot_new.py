@@ -96,6 +96,21 @@ def plot_flow(binpath, pngpath, title, value):
     U = input[0:len(input):2]
     V = input[1:len(input):2]
 
+    # get max and min vector
+    UV = numpy.vstack((U, V))
+    UV_max = numpy.amax(UV, axis=1)
+    UV_min = numpy.amin(UV, axis=1)
+    # get sqrt(x^x + y^y)
+    UV_max = numpy.square(UV_max)
+    UV_max = numpy.sum(UV_max)
+    UV_max = numpy.sqrt(UV_max)
+
+    UV_min = numpy.square(UV_min)
+    UV_min = numpy.sum(UV_min)
+    UV_min = numpy.sqrt(UV_min)
+
+    UV_average = (UV_max + UV_min) / 2
+
     U = U.reshape(NX, NY)
     V = V.reshape(NX, NY)
 
@@ -104,11 +119,12 @@ def plot_flow(binpath, pngpath, title, value):
     # title
     plt.title(title)
 
-    Q = plt.quiver(U, V, color='r') #, scale=1e14
-    #qk = plt.quiverkey(Q, 0.9, 0.92, 1e15, r'$2 \frac{m}{s}$', labelpos='E', fontproperties={'weight': 'bold'})
-    #l,r,b,t = plt.axis()
-    #dx, dy = r-l, t-b
-    #plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
+    Q = plt.quiver(U, V, color='r', pivot='mid', units='inches')
+    plt.quiverkey(Q, 0.5, 0.92, UV_average, '{}'.format(UV_average), labelpos='E',
+                  fontproperties={'weight': 'bold'})
+    l,r,b,t = plt.axis()
+    dx, dy = r-l, t-b
+    plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -116,8 +132,8 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 2000
-each = 100
+max_files = 20000
+each = 1000
 gas_num = 1
 
 params = ["conc", "temp", "pressure", "flow"]
