@@ -28,52 +28,48 @@ def plot_plain(binpath, pngpath, title, value):
     # sets all 0.0 elements to nan
     input[input == 0.0] = nan
     # searching for max and min with numpy builtin functions
-    max_val = numpy.amax(input)
-    min_val = numpy.amin(input)
+    max_val = numpy.nanmax(input)
+    min_val = numpy.nanmin(input)
+    avr_val = (max_val + min_val) / 2
+    delta_val = (max_val - min_val) / 2
+    print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
-    #if abs(max_val) > 1e10 or abs(min_val) > 1e10:
-    #    input = input / 1e10
+    # compare delta with some const
+    koeff_val = 0.1
+    if avr_val == 0.0 and delta_val == 0.0:
+        delta_val = koeff_val
+        max_val = avr_val + delta_val
+        min_val = avr_val - delta_val
+    else:
+        if delta_val / avr_val < koeff_val:
+            delta_val = koeff_val * avr_val
+            max_val = avr_val + delta_val
+            min_val = avr_val - delta_val
+
+    print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
     D = input.reshape(NX, NY)
-
-    has_min_max = math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
-        (max_val - min_val) < 1e-300
-
-    """
-    print('min_val = ', min_val)
-    print('max_val = ', max_val)
-    print('max_val - min_val = ', max_val - min_val)
-    """
-
-    s_inter = 'none'
-    if has_min_max:
-        print('warning: max = min')
-        min_val -= 0.1
-        max_val += 0.1
-        s_inter = 'nearest'
 
     # create figure
     plt.figure()
     # title
     plt.title(title)
 
-    im = plt.imshow(D, origin='lower', interpolation=s_inter)
+    im = plt.imshow(D, origin='lower', interpolation='none', vmin=min_val, vmax=max_val)
 
     orientation = 'vertical'
     if NY > NX:
         orientation = 'horizontal'
 
-    if not has_min_max:
-        cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
-        cb_formatter.set_powerlimits((-4,4))
-        cb = plt.colorbar(im, orientation=orientation)
-        cb.formatter = cb_formatter
-        cb.update_ticks()
-        # label
-        cb.set_label(value)
+    cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
+    cb_formatter.set_powerlimits((-4,4))
+    cb = plt.colorbar(im, orientation=orientation)
+    cb.formatter = cb_formatter
+    cb.update_ticks()
+    # label
+    cb.set_label(value)
 
-    if not has_min_max:
-        plt.contour(D, colors='black')
+    plt.contour(D, colors='black')
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -132,13 +128,13 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 20000
-each = 1000
+max_files = 1000
+each = 100
 gas_num = 1
 
-params = ["flow"] #"conc", "temp", "pressure",
-cb_text = [r'$(m^2s)^-1$', r'n, m^-3', r'T, K', r'P, Pa', r'$\frac{1}{m^2}$']
-# params = ["conc"]
+params = ["conc", "temp", "pressure", "flow"]
+#params = ["pressure"]
+cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'$(m^2s)^-1$']
 
 out_dir = config.read_cfg_path("config.txt")
 
