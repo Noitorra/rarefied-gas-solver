@@ -115,18 +115,18 @@ def plot_flow(binpath, pngpath, title, value):
     V = V.reshape(NX, NY)
 
     # create figure
-    plt.figure()
+    plt.figure(figsize=(6 * NY / NX, 6))
     # title
     plt.title(title)
 
-    Q = plt.quiver(U, V, color='r', pivot='mid', units='inches')
-    plt.quiverkey(Q, 0.5, 0.92, UV_average, '{}'.format(UV_average), labelpos='E',
-                  fontproperties={'weight': 'bold'})
+    Q = plt.quiver(U, V, color='r', pivot='mid', units='xy')
+    plt.quiverkey(Q, 0.5, 0.92, UV_average, '{0:.3e} {1}'.format(UV_average, value), labelpos='W')
     l,r,b,t = plt.axis()
+    l,r,b,t = 0.0, NY, 0.0, NX
     dx, dy = r-l, t-b
     plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
 
-    plt.savefig(pngpath, dpi=100)
+    plt.savefig(pngpath, dpi=150)
     plt.close()
     return 0
 
@@ -136,8 +136,8 @@ max_files = 20000
 each = 1000
 gas_num = 1
 
-params = ["conc", "temp", "pressure", "flow"]
-cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'FLOW']
+params = ["flow"] #"conc", "temp", "pressure",
+cb_text = [r'$(m^2s)^-1$', r'n, m^-3', r'T, K', r'P, Pa', r'$\frac{1}{m^2}$']
 # params = ["conc"]
 
 out_dir = config.read_cfg_path("config.txt")
