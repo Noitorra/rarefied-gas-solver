@@ -5,6 +5,8 @@ import matplotlib.ticker
 import numpy
 from numpy import *
 import config
+import os
+import shutil
 
 """
     file structure:
@@ -25,25 +27,20 @@ def plot_plain(binpath, pngpath, title, value):
     NX = NY
     NY = a
 
-    # sets all 0.0 elements to nan
-    input[input == 0.0] = nan
-    # searching for max and min with numpy builtin functions
-    max_val = numpy.amax(input)
-    min_val = numpy.amin(input)
-
-    #if abs(max_val) > 1e10 or abs(min_val) > 1e10:
-    #    input = input / 1e10
-
+    max_val = -float("inf")
+    min_val = float("inf")
     D = input.reshape(NX, NY)
+    for x in range(NX):
+        for y in range(NY):
+          v = D[x][y]
+          if v == 0.0:
+            D[x][y] = nan
+          else:
+            max_val = max(max_val, v)
+            min_val = min(min_val, v)
 
     has_min_max = math.isnan(min_val) == nan or math.isnan(max_val) == nan or \
         (max_val - min_val) < 1e-300
-
-    """
-    print('min_val = ', min_val)
-    print('max_val = ', max_val)
-    print('max_val - min_val = ', max_val - min_val)
-    """
 
     s_inter = 'none'
     if has_min_max:
@@ -53,33 +50,36 @@ def plot_plain(binpath, pngpath, title, value):
         s_inter = 'nearest'
 
     # create figure
-    plt.figure()
+    if not long_plot:
+        plt.figure()
+    else:
+        plt.figure(figsize = (20, 8))
+        
     # title
     plt.title(title)
 
-    im = plt.imshow(D, origin='lower', interpolation=s_inter)
+    im = plt.imshow(D, origin='lower', vmin=min_val, vmax=max_val, interpolation=s_inter, aspect='auto')
 
     orientation = 'vertical'
     if NY > NX:
         orientation = 'horizontal'
 
-    if not has_min_max:
-        cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
-        cb_formatter.set_powerlimits((-4,4))
-        cb = plt.colorbar(im, orientation=orientation)
-        cb.formatter = cb_formatter
-        cb.update_ticks()
-        # label
-        cb.set_label(value)
+    cb_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
+    cb_formatter.set_powerlimits((-4,4))
+    cb = plt.colorbar(im, orientation=orientation)
+    cb.formatter = cb_formatter
+    cb.update_ticks()
+
+    # label
+    cb.set_label(value)
 
     if not has_min_max:
         plt.contour(D, colors='black')
-
     plt.savefig(pngpath, dpi=100)
     plt.close()
     return 0
 
-def plot_flow(binpath, pngpath, title, value):
+def plot_flow(binpath, pngpath, title, value, gas):
     input = numpy.fromfile(binpath, dtype=float)
 
     # reading additional info
@@ -87,6 +87,8 @@ def plot_flow(binpath, pngpath, title, value):
     NY = int(input[1])
 
     input = input[2:]
+    #for numb in range(0, len(input)):
+    #    print(input[numb])
 
     # hack
     a = NX
@@ -100,15 +102,28 @@ def plot_flow(binpath, pngpath, title, value):
     V = V.reshape(NX, NY)
 
     # create figure
-    plt.figure()
+    if not long_plot:
+        plt.figure()
+    else:
+        plt.figure(figsize = (20, 8))
+        
     # title
     plt.title(title)
 
-    Q = plt.quiver(U, V, color='r') #, scale=1e14
-    #qk = plt.quiverkey(Q, 0.9, 0.92, 1e15, r'$2 \frac{m}{s}$', labelpos='E', fontproperties={'weight': 'bold'})
-    #l,r,b,t = plt.axis()
-    #dx, dy = r-l, t-b
-    #plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
+    if gas == 0:
+        scale_v = 5e24
+        sample_v = 1e23
+        sample_t = r'$1 \times 10^{23} \frac{1}{m^2 s}$'
+    else:
+        scale_v = 1e18
+        sample_v = 5e16
+        sample_t = r'$5 \times 10^{15} \frac{1}{m^2 s}$'
+
+    Q = plt.quiver(U, V, color='r', scale=scale_v, width=0.001)
+    qk = plt.quiverkey(Q, 0.9, 0.92, sample_v, sample_t, labelpos='E', fontproperties={'weight': 'bold'})
+    l,r,b,t = plt.axis()
+    dx, dy = r-l, t-b
+    plt.axis([l-0.05*dx, r+0.05*dx, b-0.05*dy, t+0.05*dy])
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -117,14 +132,31 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 max_files = 2000
-each = 100
-gas_num = 1
+each = 400
+gas_num = 2
+long_plot = True
 
 params = ["conc", "temp", "pressure", "flow"]
 cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'FLOW']
-# params = ["conc"]
+#params = ["flow"]
 
 out_dir = config.read_cfg_path("config.txt")
+
+# clear directories
+
+for param in params:
+  for gas in range(gas_num):
+    data_folder = out_dir + 'gas' + '%i' % gas + '/' + param
+    folder = data_folder + '/pic'
+
+    for the_file in os.listdir(folder):
+      file_path = os.path.join(folder, the_file)
+      try:
+          if os.path.isfile(file_path):
+              os.unlink(file_path)
+          elif os.path.isdir(file_path): shutil.rmtree(file_path)
+      except Exception(e):
+          print(e)
 
 for index in range(0, len(params)):
     for gas in range(gas_num):
@@ -137,7 +169,7 @@ for index in range(0, len(params)):
                 # FLOW
                 plot_flow(data_folder + params[index] + '/data/'+s+'.bin',
                            data_folder + params[index] + '/pic/' + params[index] + s + '.png',
-                           params[index] + ' ' + s, cb_text[index])
+                           params[index] + ' ' + s, cb_text[index], gas)
             else:
                 # CONC PRESSSURE TEMP
                 plot_plain(data_folder + params[index] + '/data/'+s+'.bin',

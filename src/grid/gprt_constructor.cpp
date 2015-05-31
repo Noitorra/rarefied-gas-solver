@@ -8,7 +8,8 @@ double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
 void GridConstructor::ConfigureGPRT() {
     //    Config::vCellSize = Vector2d(8.0, 0.25);
     //Config::vCellSize = Vector2d(3.0, 0.4);
-    Config::vCellSize = Vector2d(8.0, 0.4);	// mm
+    //Config::vCellSize = Vector2d(8.0, 0.4);	// mm
+	Config::vCellSize = Vector2d(8.0, 0.2);	// mm
     T1 = 325.0 + 273.0;
     T2 = 60.0 + 273.0;
     Vector2d walls(Config::vCellSize);
@@ -216,7 +217,7 @@ void GridConstructor::ConfigureGPRT() {
 
     // box 7
 //    PushPressure(0.7);
-    SetBox(Vector2d(130.0 - sp_delta.x(), 0.0), Vector2d(walls.x(), Config::vCellSize.y() * 4),
+    SetBox(Vector2d(130.0 - sp_delta.x(), 0.0), Vector2d(walls.x(), Config::vCellSize.y() * 3),
             [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
                 configs[0].pressure = (1.0 - (double)x / size.x() * 0.38) * P_sat_T1;
