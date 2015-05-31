@@ -2,7 +2,7 @@ __author__ = 'Dmitry Sherbakov'
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker
-import numpy
+import numpy as np
 from numpy import *
 import config
 
@@ -12,13 +12,13 @@ import config
 """
 
 def plot_plain(binpath, pngpath, title, value):
-    input = numpy.fromfile(binpath, dtype=float)
+    data = np.fromfile(binpath, dtype=float)
 
     # reading additional info
-    NX = int(input[0])
-    NY = int(input[1])
+    NX = int(data[0])
+    NY = int(data[1])
 
-    input = input[2:]
+    data = data[2:]
 
     # hack
     a = NX
@@ -26,20 +26,23 @@ def plot_plain(binpath, pngpath, title, value):
     NY = a
 
     # sets all 0.0 elements to nan
-    input[input == 0.0] = nan
+    data[data == 0.0] = nan
     # searching for max and min with numpy builtin functions
-    max_val = numpy.nanmax(input)
-    min_val = numpy.nanmin(input)
+    max_val = np.nanmax(data)
+    min_val = np.nanmin(data)
     avr_val = (max_val + min_val) / 2
     delta_val = (max_val - min_val) / 2
     print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
     # compare delta with some const
     koeff_val = 0.1
-    if avr_val == 0.0 and delta_val == 0.0:
+    data_isnan = False
+    if (avr_val == 0.0 or isnan(avr_val)) and (delta_val == 0.0 or isnan(delta_val)):
         delta_val = koeff_val
+        avr_val = 0.0
         max_val = avr_val + delta_val
         min_val = avr_val - delta_val
+        data_isnan = True
     else:
         if delta_val / avr_val < koeff_val:
             delta_val = koeff_val * avr_val
@@ -48,7 +51,7 @@ def plot_plain(binpath, pngpath, title, value):
 
     print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
-    D = input.reshape(NX, NY)
+    D = data.reshape(NX, NY)
 
     # create figure
     plt.figure()
@@ -69,41 +72,42 @@ def plot_plain(binpath, pngpath, title, value):
     # label
     cb.set_label(value)
 
-    plt.contour(D, colors='black')
+    if not data_isnan:
+        plt.contour(D, colors='black')
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
     return 0
 
 def plot_flow(binpath, pngpath, title, value):
-    input = numpy.fromfile(binpath, dtype=float)
+    data = np.fromfile(binpath, dtype=float)
 
     # reading additional info
-    NX = int(input[0])
-    NY = int(input[1])
+    NX = int(data[0])
+    NY = int(data[1])
 
-    input = input[2:]
+    data = data[2:]
 
     # hack
     a = NX
     NX = NY
     NY = a
 
-    U = input[0:len(input):2]
-    V = input[1:len(input):2]
+    U = data[0:len(data):2]
+    V = data[1:len(data):2]
 
     # get max and min vector
-    UV = numpy.vstack((U, V))
-    UV_max = numpy.amax(UV, axis=1)
-    UV_min = numpy.amin(UV, axis=1)
+    UV = np.vstack((U, V))
+    UV_max = np.amax(UV, axis=1)
+    UV_min = np.amin(UV, axis=1)
     # get sqrt(x^x + y^y)
-    UV_max = numpy.square(UV_max)
-    UV_max = numpy.sum(UV_max)
-    UV_max = numpy.sqrt(UV_max)
+    UV_max = np.square(UV_max)
+    UV_max = np.sum(UV_max)
+    UV_max = np.sqrt(UV_max)
 
-    UV_min = numpy.square(UV_min)
-    UV_min = numpy.sum(UV_min)
-    UV_min = numpy.sqrt(UV_min)
+    UV_min = np.square(UV_min)
+    UV_min = np.sum(UV_min)
+    UV_min = np.sqrt(UV_min)
 
     UV_average = (UV_max + UV_min) / 2
 
