@@ -124,7 +124,7 @@ def plot_flow(binpath, pngpath, title, value):
     plt.title(title)
 
     Q = plt.quiver(U, V, color='r', pivot='mid', units='xy')
-    plt.quiverkey(Q, 0.5, 0.92, UV_average, '{0:.3e} {1}'.format(UV_average, value), labelpos='W')
+    plt.quiverkey(Q, 0.5, 0.95, UV_average, '{0:.3e} {1}'.format(UV_average, value), labelpos='W')
     l,r,b,t = plt.axis()
     l,r,b,t = 0.0, NY, 0.0, NX
     dx, dy = r-l, t-b
@@ -136,9 +136,9 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 200000
+max_files = 5000
 each = 1000
-gas_num = 2
+gas_num = 1
 
 params = ["conc", "temp", "pressure", "flow"]
 #params = ["pressure"]

@@ -27,8 +27,8 @@ void GridConstructor::ConfigureStandartGrid() {
     PushPressure(1.0);
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
-		Vector2d vPhysSize = Vector2d(52.0, 0.4);
-    Vector2i vNumSize = Vector2i(50, 10);
+		Vector2d vPhysSize = Vector2d(0.4, 0.4);
+    Vector2i vNumSize = Vector2i(30, 30);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
@@ -38,8 +38,8 @@ void GridConstructor::ConfigureStandartGrid() {
 			double T1 = 1800.0 / Config::T_normalize;
 			double T2 = 900.0 / Config::T_normalize;
 
-			double dQKr = 0.000001;
-			double dQXe = 0.000001;
+			double dQKr = 2.46e-9; // from prohor
+			double dQXe = 2.46e-9; // from prohor
 			int iNumHoles = 9;
 
 			configs[0].pressure = 1.0;
@@ -52,11 +52,11 @@ void GridConstructor::ConfigureStandartGrid() {
 			}
 
 			if (x == 0) { // left border
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_DIFFUSE;
 				configs[0].boundary_pressure = 3.0;
 				//configs[0].boundary_stream = Vector3d(1.0, 0.0, 0.0);
-				configs[0].boundary_T = std::sqrt(T1 * T2);
-				//configs[0].boundary_T = T1 - (T1 - T2) * y / (size.y() - 1);
+				//configs[0].boundary_T = std::sqrt(T1 * T2);
+				configs[0].boundary_T = T1 - (T1 - T2) * y / (size.y() - 1);
 
 				for (int i = 1; i < Config::iGasesNumber; i++) {
 					configs[i].boundary_cond = sep::BT_DIFFUSE;
@@ -64,10 +64,10 @@ void GridConstructor::ConfigureStandartGrid() {
 				}
 			}
 			if (x == size.x() - 1) { // right border
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_DIFFUSE;
 				configs[0].boundary_pressure = 1.0;
-				configs[0].boundary_T = std::sqrt(T1 * T2);
-				//configs[0].boundary_T = T1 - (T1 - T2) * y / (size.y() - 1);
+				//configs[0].boundary_T = std::sqrt(T1 * T2);
+				configs[0].boundary_T = T1 - (T1 - T2) * y / (size.y() - 1);
 
 				for (int i = 1; i < Config::iGasesNumber; i++) {
 					configs[i].boundary_cond = sep::BT_PRESSURE;
