@@ -32,7 +32,7 @@ def plot_plain(binpath, pngpath, title, value):
     min_val = np.nanmin(data)
     avr_val = (max_val + min_val) / 2
     delta_val = (max_val - min_val) / 2
-    print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
+    #print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
     # compare delta with some const
     koeff_val = 0.1
@@ -49,7 +49,7 @@ def plot_plain(binpath, pngpath, title, value):
             max_val = avr_val + delta_val
             min_val = avr_val - delta_val
 
-    print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
+    #print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
     # if all data is nan, then it is actually 0.0
     if data_isnan:
@@ -136,9 +136,9 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 1000
-each = 100
-gas_num = 1
+max_files = 200000
+each = 1000
+gas_num = 2
 
 params = ["conc", "temp", "pressure", "flow"]
 #params = ["pressure"]
