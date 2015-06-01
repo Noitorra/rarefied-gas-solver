@@ -51,6 +51,10 @@ def plot_plain(binpath, pngpath, title, value):
 
     print('max = {0} min = {1} avr = {2} delta = {3}'.format(max_val, min_val, avr_val, delta_val))
 
+    # if all data is nan, then it is actually 0.0
+    if data_isnan:
+        data[isnan(data)] = 0.0
+
     D = data.reshape(NX, NY)
 
     # create figure
