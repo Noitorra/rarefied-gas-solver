@@ -9,7 +9,7 @@ void GridConstructor::ConfigureGPRT() {
     //    Config::vCellSize = Vector2d(8.0, 0.25);
     //Config::vCellSize = Vector2d(3.0, 0.4);
     //Config::vCellSize = Vector2d(8.0, 0.4);	// mm
-	Config::vCellSize = Vector2d(8.0, 0.2);	// mm
+	Config::vCellSize = Vector2d(8.0, 0.07);	// mm
     T1 = 325.0 + 273.0;
     T2 = 60.0 + 273.0;
     Vector2d walls(Config::vCellSize);
@@ -34,7 +34,7 @@ void GridConstructor::ConfigureGPRT() {
     PushTemperature(T1);
     P_sat_T1 = 1.0; // 150Pa, T = T0, n = n0
     P_sat_T2 = 2.7e-4 / Config::P_normalize;	// 2.7 x 10^-4 Pa при 320 K
-    Q_Xe_in = 2.46e-9;
+    Q_Xe_in = 8.6e15 / (Config::n_normalize * Config::e_cut_normalize);	// 8.6 x 10^15 1/(m^2 * s)
     P_sat_Xe = P_sat_T1 * 3 * 1e-7;	//	P_sat_T1 * атом. доля (растворимость Xe в жидком Cs)
 
 	

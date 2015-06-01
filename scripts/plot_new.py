@@ -119,7 +119,10 @@ def plot_flow(binpath, pngpath, title, value, gas):
         sample_v = 5e16
         sample_t = r'$5 \times 10^{15} \frac{1}{m^2 s}$'
 
-    Q = plt.quiver(U, V, color='r', scale=scale_v, width=0.001)
+    each_x = 1
+    each_y = 8
+
+    Q = plt.quiver(U[::each_y, ::each_x], V[::each_y, ::each_x], color='r', scale=scale_v, width=0.001)
     qk = plt.quiverkey(Q, 0.9, 0.92, sample_v, sample_t, labelpos='E', fontproperties={'weight': 'bold'})
     l,r,b,t = plt.axis()
     dx, dy = r-l, t-b
@@ -131,8 +134,8 @@ def plot_flow(binpath, pngpath, title, value, gas):
 
 # main program
 
-max_files = 2000
-each = 400
+max_files = 13200
+each = 13200
 gas_num = 2
 long_plot = True
 
