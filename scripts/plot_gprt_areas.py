@@ -70,8 +70,8 @@ def add_point(U, V, area, test_plot):
 
 def create_test_plot(U, V, NX, NY):
     test_plot = numpy.zeros((NX, NY))
-    for x in xrange(NX):
-        for y in xrange(NY):
+    for x in range(NX):
+        for y in range(NY):
             if abs(U[x][y]) > 100.0 and abs(V[x][y]) > 100.0:
                 test_plot[x][y] = 200
     return test_plot
@@ -98,7 +98,7 @@ def save_img(png_path, area, gas):
     plt.ylabel('Average Flow')
 
     time = []
-    i = 13000
+    i = 0
     while i < max_files + 1:
         time.append(i)
         i += each
@@ -134,8 +134,8 @@ class Area:
 # main program
 
 max_files = 13000
-each = 13000
-gas_num = 1
+each = 200
+gas_num = 2
 gases = ["Cs", "Xe"]
 
 out_dir = config.read_cfg_path("config.txt")
@@ -143,7 +143,7 @@ out_dir = config.read_cfg_path("config.txt")
 areas = []
 area_tmp = Area("out", array([-1, 0]), array([1, 150]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("in", array([0, 0]), array([1, 150]), 'x')
+area_tmp = Area("in", array([1, 0]), array([1, 150]), 'x')
 areas.append(area_tmp)
 area_tmp = Area("liquid top", array([6, -1]), array([1, 55]), 'x')
 areas.append(area_tmp)
@@ -156,7 +156,7 @@ areas.append(area_tmp)
 for gas in range(gas_num):
     data_folder = out_dir + 'gas' + '%i' % gas + '/'
     save_folder = out_dir + 'gas' + '%i' % 0 + '/'  # save all pictures to one folder
-    i = 13000
+    i = 0
 
     for area in areas:
         area.reset()
@@ -189,7 +189,7 @@ for gas in range(gas_num):
         scale_v = 1e18
 
     # Q = plt.quiver(U, V, color='r', scale=scale_v, width=0.001)
-    # im = plt.imshow(test_plot,  origin='lower', aspect='auto', interpolation='nearest')
-    plt.show()
+    im = plt.imshow(test_plot,  origin='lower', aspect='auto', interpolation='nearest')
+    # plt.show()
     plt.savefig(save_folder + 'flow' + '/area_pic/' + 'areas_pos' + '.png', dpi=100)
     plt.close()
