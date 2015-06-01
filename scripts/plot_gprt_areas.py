@@ -24,10 +24,10 @@ def load_file(binpath):
     #for numb in range(0, len(input)):
     #    print(input[numb])
 
-    ## hack
-    #a = NX
-    #NX = NY
-    #NY = a
+    # hack
+    a = NX
+    NX = NY
+    NY = a
 
     U = input[0:len(input):2]
     V = input[1:len(input):2]
@@ -51,27 +51,30 @@ def find_range(p, size):
 
     return range(start, end)
 
-def add_point(U, V, area):
+def add_point(U, V, area, test_plot):
     area.points.append(0.0)
 
-    size
-    start_x = min(area.p[0], area.p[0] + area.size[0])
-
     n = 0
-    for x in find_range(area.p[0], area.size[0]):
-        for y in find_range(area.p[1], area.size[1]):
+    for y in find_range(area.p[0], area.size[0]):   # hack
+        for x in find_range(area.p[1], area.size[1]):
             #print(x, y)
-            U[x][y] = 0.0
-            V[x][y] = 0.0
             if area.axes == 'x':
                 area.points[-1] += U[x][y]
-                U[x][y] = 1e23
+                test_plot[x][y] = 100
             else:
                 area.points[-1] += V[x][y]
-                V[x][y] = 1e23
+                test_plot[x][y] = 100
             n += 1
 
     area.points[-1] /= n
+
+def create_test_plot(U, V, NX, NY):
+    test_plot = numpy.zeros((NX, NY))
+    for x in xrange(NX):
+        for y in xrange(NY):
+            if abs(U[x][y]) > 100.0 and abs(V[x][y]) > 100.0:
+                test_plot[x][y] = 200
+    return test_plot
 
 def find_rounded_delta(list):
     v = max(list)
@@ -95,7 +98,7 @@ def save_img(png_path, area, gas):
     plt.ylabel('Average Flow')
 
     time = []
-    i = 0
+    i = 13000
     while i < max_files + 1:
         time.append(i)
         i += each
@@ -130,9 +133,9 @@ class Area:
 
 # main program
 
-max_files = 12000
-each = 200
-gas_num = 2
+max_files = 13000
+each = 13000
+gas_num = 1
 gases = ["Cs", "Xe"]
 
 out_dir = config.read_cfg_path("config.txt")
@@ -153,7 +156,7 @@ areas.append(area_tmp)
 for gas in range(gas_num):
     data_folder = out_dir + 'gas' + '%i' % gas + '/'
     save_folder = out_dir + 'gas' + '%i' % 0 + '/'  # save all pictures to one folder
-    i = 0
+    i = 13000
 
     for area in areas:
         area.reset()
@@ -162,9 +165,11 @@ for gas in range(gas_num):
         s = "%i" % i
 
         U, V, NX, NY = load_file(data_folder + 'flow' + '/data/' + s + '.bin')
+        test_plot = create_test_plot(U, V, NX, NY)
+
 
         for area in areas:
-            add_point(U, V, area)
+            add_point(U, V, area, test_plot)
 
 
         #print("%i of %i" % (i, max_files))
@@ -173,20 +178,18 @@ for gas in range(gas_num):
     for area in areas:
         save_img(save_folder + 'flow' + '/area_pic/' + area.name + " " + gases[gas] + '.png', area, gas)
 
+
     # plot flow to check areas
 
-    # hack
-    a = NX
-    NX = NY
-    NY = a
-
-    U = U.reshape(NX, NY)
-    V = V.reshape(NX, NY)
+    test_plot = test_plot.reshape(NX, NY)
     
     if gas == 0:
         scale_v = 5e24
     else:
         scale_v = 1e18
 
-    Q = plt.quiver(U, V, color='r', scale=scale_v, width=0.001)
+    # Q = plt.quiver(U, V, color='r', scale=scale_v, width=0.001)
+    # im = plt.imshow(test_plot,  origin='lower', aspect='auto', interpolation='nearest')
     plt.show()
+    plt.savefig(save_folder + 'flow' + '/area_pic/' + 'areas_pos' + '.png', dpi=100)
+    plt.close()
