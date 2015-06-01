@@ -43,8 +43,8 @@ private:
 
   std::vector<sep::BoundaryType> m_vBoundaryType;
   std::vector<double> m_vBoundaryTemperature;
-  std::vector<Vector3d> m_vBoundaryStream;
   std::vector<double> m_vBoundaryPressure;
+	std::vector<Vector3d> m_vBoundaryStream;
 
 	std::vector<MacroData> m_vMacroData;
 
@@ -87,11 +87,8 @@ private:
   void compute_half_diffuse_left(unsigned int dim, int gi);
   void compute_half_diffuse_right(unsigned int dim, int gi);
 
-  void compute_half_stream_left(unsigned int dim, int gi);
-  void compute_half_stream_right(unsigned int dim, int gi);
-
-  void compute_half_pressure_left(unsigned int dim, int gi);
-  void compute_half_pressure_right(unsigned int dim, int gi);
+	void compute_half_gase_left(unsigned int dim, int gi);
+	void compute_half_gase_right(unsigned int dim, int gi);
 
   void compute_half_mirror_left(unsigned int dim, int gi);
   void compute_half_mirror_right(unsigned int dim, int gi);

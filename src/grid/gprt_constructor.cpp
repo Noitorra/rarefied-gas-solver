@@ -75,13 +75,14 @@ void GridConstructor::ConfigureGPRT() {
                 configs[1].pressure = P_sat_Xe;
 
                 if (x == 0) {
-                    configs[0].boundary_cond = sep::BT_PRESSURE;
+                    configs[0].boundary_cond = sep::BT_GASE;
                     configs[0].boundary_pressure = P_sat_T1;
                     configs[0].boundary_T = T1;
 
-                    configs[1].boundary_cond = sep::BT_STREAM;
+                    configs[1].boundary_cond = sep::BT_GASE;
                     configs[1].boundary_T = T1;
                     configs[1].boundary_stream = Vector3d(Q_Xe_in, 0.0, 0.0);
+										configs[1].boundary_pressure = P_sat_Xe; // TODO: NOT SURE!
                 }
 
 //                if (y == 0) {
@@ -113,11 +114,11 @@ void GridConstructor::ConfigureGPRT() {
             configs[1].pressure = P_sat_Xe;
 
             if (x == 0) {
-                configs[0].boundary_cond = sep::BT_PRESSURE;    // should be gas <-> fluid bound
+                configs[0].boundary_cond = sep::BT_GASE;    // should be gas <-> fluid bound
                 configs[0].boundary_pressure = P_sat_T1;
                 configs[0].boundary_T = T1;
 
-                configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
+                configs[1].boundary_cond = sep::BT_GASE;    // should be adsorption
                 configs[1].boundary_pressure = P_sat_Xe;
                 configs[1].boundary_T = T1;
             }
@@ -140,11 +141,11 @@ void GridConstructor::ConfigureGPRT() {
             global_pressure_Xe(p, configs[1].pressure);
 
             if (x == 0) {
-                configs[0].boundary_cond = sep::BT_PRESSURE;    // should be fluid <-> gas bound
+                configs[0].boundary_cond = sep::BT_GASE;    // should be fluid <-> gas bound
                 configs[0].boundary_pressure = P_sat_T1;
                 configs[0].boundary_T = T1;
 
-                configs[1].boundary_cond = sep::BT_PRESSURE;    // should be adsorption
+                configs[1].boundary_cond = sep::BT_GASE;    // should be adsorption
                 configs[1].boundary_pressure = P_sat_Xe;
                 configs[1].boundary_T = T1;
             }
@@ -191,7 +192,7 @@ void GridConstructor::ConfigureGPRT() {
 
                 if (x == size.x() - 1) {
                     for (int gas = 0; gas < Config::iGasesNumber; gas++) {
-                        configs[gas].boundary_cond = sep::BT_PRESSURE;
+                        configs[gas].boundary_cond = sep::BT_GASE;
                         configs[gas].boundary_pressure = 0.0;
                         configs[gas].boundary_T = T2;
                     }
@@ -205,7 +206,7 @@ void GridConstructor::ConfigureGPRT() {
 
                 // gas <-> fluid
                 if (y == size.y() - 1 && p.x() > 380.0) {
-                    configs[0].boundary_cond = sep::BT_PRESSURE;
+                    configs[0].boundary_cond = sep::BT_GASE;
                     configs[0].boundary_pressure = P_sat_T2;
                     configs[0].boundary_T = T2;
                 }
@@ -280,13 +281,14 @@ void GridConstructor::BoundaryConditionTest() {
 			configs[0].pressure = 0.0;
 
 			if (x == 0) {
-				configs[0].boundary_cond = sep::BT_STREAM;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_stream = Vector3d(test_stream, 0.0, 0.0);
+				configs[0].boundary_pressure = 1.0; // TODO: NOT SURE!
 				configs[0].boundary_T = 1.0;
 			}
 
 			if (x == size.x() - 1) {
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = 0.0;
 				configs[0].boundary_T = 1.0;
 			}
@@ -299,7 +301,7 @@ void GridConstructor::BoundaryConditionTest() {
 			configs[0].pressure = test_pressure / 2.0;
 
 			if (x == 0) {
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = test_pressure;
 				configs[0].boundary_T = 1.0;
 			}
@@ -360,13 +362,13 @@ void GridConstructor::PressureBoundaryConditionTestSmallArea() {
 			};
 
 			if (x == 0) {
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = 1.0;
 				temp(x, y, configs[0].boundary_T);
 			}
 
 			if (x == size.x() - 1) {
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = 1.0;
 				temp(x, y, configs[0].boundary_T);
 			}
@@ -434,13 +436,13 @@ void GridConstructor::PressureBoundaryConditionTestBigArea() {
 			};
 
 			if (x == 0) {
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = 1.0;
 				temp(x, y, configs[0].boundary_T);
 			}
 
 			if (x == size.x() - 1) {
-				configs[0].boundary_cond = sep::BT_PRESSURE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = 1.0;
 				temp(x, y, configs[0].boundary_T);
 			}

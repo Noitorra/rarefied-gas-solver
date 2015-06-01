@@ -47,8 +47,7 @@ namespace sep {
   enum BoundaryType
   {
     BT_DIFFUSE,
-    BT_STREAM,
-    BT_PRESSURE,
+    BT_GASE,
     BT_MIRROR
   };
 
@@ -85,8 +84,8 @@ public:
   double T; // initial temperature
   sep::BoundaryType boundary_cond;
   double boundary_T;  // wall temperature
-  Vector3d boundary_stream;
   double boundary_pressure;
+	Vector3d boundary_stream;
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
