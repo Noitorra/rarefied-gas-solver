@@ -77,7 +77,8 @@ def plot_plain(binpath, pngpath, title, value):
     cb.set_label(value)
 
     if not data_isnan:
-        plt.contour(D, colors='black')
+        CS = plt.contour(D, colors='black')
+        plt.clabel(CS, inline=1, fontsize=10, fmt='%g')
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -136,8 +137,8 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 5000
-each = 1000
+max_files = 1000
+each = 100
 gas_num = 1
 
 params = ["conc", "temp", "pressure", "flow"]

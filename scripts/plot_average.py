@@ -9,3 +9,5 @@ params = ["conc", "temp", "pressure", "flow"]
 
 out_dir = config.read_cfg_path("config.txt")
 
+
+def plot_average(param, )
