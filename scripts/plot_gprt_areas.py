@@ -133,7 +133,7 @@ class Area:
 
 # main program
 
-max_files = 13000
+max_files = 11000
 each = 200
 gas_num = 2
 gases = ["Cs", "Xe"]

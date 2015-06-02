@@ -134,8 +134,8 @@ def plot_flow(binpath, pngpath, title, value, gas):
 
 # main program
 
-max_files = 13200
-each = 13200
+max_files = 10
+each = 1
 gas_num = 2
 long_plot = True
 

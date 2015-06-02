@@ -275,7 +275,6 @@ void GridConstructor::BoundaryConditionTest() {
 	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
 	double test_stream = 1.0e15 / (Config::n_normalize * Config::e_cut_normalize);	// 1e15 1/(m^2 * s)
-	double test_pressure = 100.0 / Config::P_normalize;	// 100 Pa
 
 	PushTemperature(1.0);
 	PushPressure(1.0);
@@ -283,18 +282,18 @@ void GridConstructor::BoundaryConditionTest() {
 	SetBox(Vector2d(0.0, 0.0), Vector2d(10.0, 10.0),
 		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 			
-			configs[0].pressure = 0.0;
+			configs[0].pressure = 1.0;
 
 			if (x == 0) {
 				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_stream = Vector3d(test_stream, 0.0, 0.0);
-				configs[0].boundary_pressure = 1.0; // TODO: NOT SURE!
+				configs[0].boundary_pressure = 1.0;
 				configs[0].boundary_T = 1.0;
 			}
 
 			if (x == size.x() - 1) {
 				configs[0].boundary_cond = sep::BT_GASE;
-				configs[0].boundary_pressure = 0.0;
+				configs[0].boundary_pressure = 1.0;
 				configs[0].boundary_T = 1.0;
 			}
 	});
@@ -303,11 +302,11 @@ void GridConstructor::BoundaryConditionTest() {
 	SetBox(Vector2d(12.0, 0.0), Vector2d(10.0, 10.0),
 		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-			configs[0].pressure = test_pressure / 2.0;
+			configs[0].pressure = 0.5;
 
 			if (x == 0) {
 				configs[0].boundary_cond = sep::BT_GASE;
-				configs[0].boundary_pressure = test_pressure;
+				configs[0].boundary_pressure = 1.0;
 				configs[0].boundary_T = 1.0;
 			}
 	});
