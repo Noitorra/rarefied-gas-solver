@@ -431,6 +431,12 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
 	double C1_up = 0.0;
 	double C1_down = 0.0;
 	double C2_up = 0.0;
+
+	Vector3d v3Speed = Vector3d();
+	if (m_vBoundaryPressure[gi] > 0.0) {
+		v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
+	}
+
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] < 0) {
 			double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
@@ -447,7 +453,6 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
 			C2_up += (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_NEXT)) / 2;
 		}
 		else {
-			Vector3d v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
 			C1_down += fast_exp(
 				gasv[gi]->getMass(), 
 				m_vBoundaryTemperature[gi], 
@@ -470,8 +475,6 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
 
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] > 0) {
-			Vector3d v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
-
 			m_vHalf[gi][ii] = C1_up / C1_down * fast_exp(
 				gasv[gi]->getMass(), 
 				m_vBoundaryTemperature[gi], 
@@ -494,6 +497,12 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
 	double C1_up = 0.0;
 	double C1_down = 0.0;
 	double C2_up = 0.0;
+
+	Vector3d v3Speed = Vector3d();
+	if (m_vBoundaryPressure[gi] > 0.0) {
+		v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
+	}
+
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] > 0) {
 			double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
@@ -512,14 +521,20 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
 			C2_up += (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_PREV)) / 2;
 		}
 		else {
-			Vector3d v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
-
 			C1_down += fast_exp(
 				gasv[gi]->getMass(), 
 				m_vBoundaryTemperature[gi], 
 				impulsev[ii] - v3Speed * gasv[gi]->getMass());
 		}
 	}
+
+	/*
+	std::cout << "Data start ..." << std::endl;
+	std::cout << m_vBoundaryPressure[gi] << " : " << m_vBoundaryTemperature[gi] << std::endl;
+	std::cout << C1_up << " : " << C2_up << " : " << C1_down << std::endl;
+	std::cout << v3Speed.x() << " : " << v3Speed.y() << " : " << v3Speed.z() << std::endl;
+	std::cout << "Data end ..." << std::endl;
+	*/
 
 	// Vacuum
 	if (m_vBoundaryPressure[gi] == 0.0) {
@@ -536,8 +551,6 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
 
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] < 0) {
-			Vector3d v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
-
 			for (auto& item : m_vPrev[dim]) {
 				item->m_vHalf[gi][ii] = C1_up / C1_down * fast_exp(
 					gasv[gi]->getMass(), 

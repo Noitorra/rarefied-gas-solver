@@ -164,7 +164,7 @@ public:
 
 	const Vector3& operator-=(const Vector3& right) {
 		for(unsigned int i=0;i<this->m_vMass.size();i++) {
-			this->m_vMass[i] += right.m_vMass[i];
+			this->m_vMass[i] -= right.m_vMass[i];
 		}
 		return *this;
 	}
