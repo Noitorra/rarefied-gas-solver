@@ -29,8 +29,8 @@ void GridConstructor::ConfigureStandartGrid() {
     PushPressure(1.0);
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
-		Vector2d vPhysSize = Vector2d(520.0, 0.4);
-    Vector2i vNumSize = Vector2i(10, 10);
+		Vector2d vPhysSize = Vector2d(5.0, 0.4);
+    Vector2i vNumSize = Vector2i(20, 20);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
@@ -51,7 +51,7 @@ void GridConstructor::ConfigureStandartGrid() {
 
 			int iNumHoles = 9;
 
-			configs[0].pressure = dPCsLeft + (dPCsLeft - dPCsRight) * x / (size.x() - 1);
+			configs[0].pressure = dPCsLeft - (dPCsLeft - dPCsRight) * x / (size.x() - 1);
 			configs[0].T = T1 - (T1 - T2) * y / (size.y() - 1);
 
 			for (int i = 1; i < Config::iGasesNumber; i++) {
