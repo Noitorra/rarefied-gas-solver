@@ -80,13 +80,14 @@ void GridConstructor::ConfigureGPRT() {
 
                 if (x == 0) {
                     configs[0].boundary_cond = sep::BT_GASE;
+					configs[0].boundary_stream = Vector3d();
                     configs[0].boundary_pressure = P_sat_T1;
                     configs[0].boundary_T = T1;
 
                     configs[1].boundary_cond = sep::BT_GASE;
-                    configs[1].boundary_T = T1;
                     configs[1].boundary_stream = Vector3d(Q_Xe_in, 0.0, 0.0);
-										configs[1].boundary_pressure = P_sat_Xe; // TODO: NOT SURE!
+					configs[1].boundary_pressure = P_sat_Xe; // TODO: NOT SURE!
+					configs[1].boundary_T = T1;
                 }
 
 //                if (y == 0) {
