@@ -137,9 +137,9 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 1000
-each = 100
-gas_num = 1
+max_files = 5000
+each = 1000
+gas_num = 2
 
 params = ["conc", "temp", "pressure", "flow"]
 #params = ["pressure"]
