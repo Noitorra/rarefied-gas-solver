@@ -12,6 +12,8 @@ int main(int argc, char * argv[]) {
   // This is very important. DO NOT COMMENT OR DELETE.
   Config::Init();
 
+  tbb::task_scheduler_init init(1);
+
   std::shared_ptr<GridManager> pGridManager(new GridManager());
 
   pGridManager->Init();

@@ -29,7 +29,7 @@ void GridConstructor::ConfigureStandartGrid() {
     PushPressure(1.0);
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
-		Vector2d vPhysSize = Vector2d(5.0, 0.4);
+		Vector2d vPhysSize = Vector2d(0.4, 0.4);
     Vector2i vNumSize = Vector2i(20, 20);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
@@ -51,7 +51,8 @@ void GridConstructor::ConfigureStandartGrid() {
 
 			int iNumHoles = 9;
 
-			configs[0].pressure = dPCsLeft - (dPCsLeft - dPCsRight) * x / (size.x() - 1);
+			configs[0].pressure = dPCsLeft;
+			//configs[0].pressure = dPCsLeft - (dPCsLeft - dPCsRight) * x / (size.x() - 1);
 			configs[0].T = T1 - (T1 - T2) * y / (size.y() - 1);
 
 			for (int i = 1; i < Config::iGasesNumber; i++) {
@@ -60,7 +61,7 @@ void GridConstructor::ConfigureStandartGrid() {
 			}
 
 			if (x == 0) { // left border
-				configs[0].boundary_cond = sep::BT_DIFFUSE;
+				configs[0].boundary_cond = sep::BT_GASE;
 				configs[0].boundary_pressure = dPCsLeft;
 				configs[0].boundary_T = T1 - (T1 - T2) * y / (size.y() - 1);
 
@@ -70,8 +71,8 @@ void GridConstructor::ConfigureStandartGrid() {
 				}
 			}
 			if (x == size.x() - 1) { // right border
-				configs[0].boundary_cond = sep::BT_DIFFUSE;
-				configs[0].boundary_pressure = dPCsRight;
+				configs[0].boundary_cond = sep::BT_GASE;
+				configs[0].boundary_pressure = 0.0; // dPCsRight
 				configs[0].boundary_T = T1 - (T1 - T2) * y / (size.y() - 1);
 
 				for (int i = 1; i < Config::iGasesNumber; i++) {
