@@ -149,7 +149,7 @@ void GridConstructor::ConfigureStandartGrid() {
 			double T1 = 1500.0 / Config::T_normalize;
 			double T2 = 900.0 / Config::T_normalize;
 
-			double dPCsLeft = 450.0 / Config::P_normalize;
+			double dPCsLeft = 150.0 / Config::P_normalize;
 			double dPCsRight = 150.0 / Config::P_normalize;
 
 			double dPKr = 7e-7;
@@ -170,6 +170,12 @@ void GridConstructor::ConfigureStandartGrid() {
 			//configs[0].pressure = dPCsLeft;
 			configs[0].pressure = dPgrad;
 			configs[0].T = dTgrad;
+
+			configs[1].pressure = dPKr / 2; // hack
+			configs[1].T = dTgrad;
+
+			configs[2].pressure = dPXe / 2; // hack
+			configs[2].T = dTgrad;
 
 			for (int i = 1; i < Config::iGasesNumber; i++) {
 				configs[i].pressure = 0.0;

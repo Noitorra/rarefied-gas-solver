@@ -6,11 +6,11 @@ using namespace std;
 
 std::string Config::sName = "default";
 double Config::dTimestep = 0.0;  // sets automaticaly in grid_manager.cpp
-int Config::iMaxIteration = 100;
+int Config::iMaxIteration = 15000;
 std::string Config::sOutputPrefix = "../";
 bool Config::bUseIntegral = true;
 bool Config::bUseBetaChain = true;
-int Config::iOutEach = 1;
+int Config::iOutEach = 1000;
 
 // Grid Related
 Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
