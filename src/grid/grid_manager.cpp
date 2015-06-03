@@ -7,7 +7,6 @@
 #include "parameters/impulse.h"
 #include <algorithm>  // for visual studio compilator
 
-extern double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
 
 GridManager::GridManager() :
   grid_(new Grid),

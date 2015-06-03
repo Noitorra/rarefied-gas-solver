@@ -2,16 +2,14 @@
 #include "config.h"
 #include "parameters/beta_chain.h"
 
-// TODO: solve this problem of lambdas
-double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
-
 void GridConstructor::ConfigureGPRT() {
+
     //    Config::vCellSize = Vector2d(8.0, 0.25);
     //Config::vCellSize = Vector2d(3.0, 0.4);
     //Config::vCellSize = Vector2d(8.0, 0.4);	// mm
 	Config::vCellSize = Vector2d(8.0, 0.07);	// mm
-    T1 = 325.0 + 273.0;
-    T2 = 60.0 + 273.0;
+    double T1 = 325.0 + 273.0;
+    double T2 = 60.0 + 273.0;
     Vector2d walls(Config::vCellSize);
     Vector2d sp_delta(Config::vCellSize);
 //    sp_delta /= 2.0;
@@ -32,10 +30,12 @@ void GridConstructor::ConfigureGPRT() {
     T1 /= Config::T_normalize;
     T2 /= Config::T_normalize;
     PushTemperature(T1);
-    P_sat_T1 = 1.0; // 150Pa, T = T0, n = n0
-    P_sat_T2 = 2.7e-4 / Config::P_normalize;	// 2.7 x 10^-4 Pa при 320 K
-    Q_Xe_in = 8.6e15 / (Config::n_normalize * Config::e_cut_normalize);	// 8.6 x 10^15 1/(m^2 * s)
-    P_sat_Xe = P_sat_T1 * 3 * 1e-7;	//	P_sat_T1 * атом. доля (растворимость Xe в жидком Cs)
+    double P_sat_T1 = 1.0; // 150Pa, T = T0, n = n0
+    double P_sat_T2 = 2.7e-4 / Config::P_normalize;	// 2.7 x 10^-4 Pa при 320 K
+    double Q_Xe_in = 8.6e15 / (Config::n_normalize * Config::e_cut_normalize);	// 8.6 x 10^15 1/(m^2 * s)
+	double P_Xe_in = 1.2e-6 / Config::P_normalize;	// 1.2 X 10^-6 Pa
+    //double P_sat_Xe = P_sat_T1 * 3 * 1e-7;	//	P_sat_T1 * атом. доля (растворимость Xe в жидком Cs) 4.5 x 10^-5 Pa
+	double P_sat_Xe = P_Xe_in * 0.5;	// TODO:
 
 	
 	// Some beta chain hack. Makes lambda without data type.
@@ -44,7 +44,7 @@ void GridConstructor::ConfigureGPRT() {
 		item->dLambda2 *= Config::tau_normalize;
 	}
 
-    auto global_temp = [&] (Vector2d p, double& temperature) {        
+    auto global_temp = [=] (Vector2d p, double& temperature) {        
 //        std::cout << "T1 = " << T1 << " " << T2 << std::endl;
         const double sp_delta_wall = 30.0;
         const double temp_start = 100.0 + sp_delta_wall;
@@ -74,9 +74,9 @@ void GridConstructor::ConfigureGPRT() {
 //    PushPressure(1.0);
     PushPressure(P_sat_T1);
     SetBox(Vector2d(-20.0, 0.0), Vector2d(150.0 - sp_delta.x(), 4.0),
-            [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-                configs[1].pressure = P_sat_Xe;
+                configs[1].pressure = P_Xe_in;
 
                 if (x == 0) {
                     configs[0].boundary_cond = sep::BT_GASE;
@@ -86,7 +86,7 @@ void GridConstructor::ConfigureGPRT() {
 
                     configs[1].boundary_cond = sep::BT_GASE;
                     configs[1].boundary_stream = Vector3d(Q_Xe_in, 0.0, 0.0);
-					configs[1].boundary_pressure = P_sat_Xe; // TODO: NOT SURE!
+					configs[1].boundary_pressure = P_Xe_in;
 					configs[1].boundary_T = T1;
                 }
 
@@ -100,9 +100,9 @@ void GridConstructor::ConfigureGPRT() {
     // box 2
 //    PushPressure(0.95);
     SetBox(Vector2d(100.0, 0.0), Vector2d(30.0, 12.5),
-            [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-                configs[1].pressure = P_sat_Xe;
+                configs[1].pressure = P_Xe_in + ((double)y) / (size.y() - 1) * (P_sat_Xe - P_Xe_in);
 
 //                if (y == 0) {
 //                    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
@@ -114,7 +114,7 @@ void GridConstructor::ConfigureGPRT() {
     // box 3
 //    PushPressure(0.9);
     SetBox(Vector2d(30.0, 11.25), Vector2d(100.0, 1.25),
-            [] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
             configs[1].pressure = P_sat_Xe;
 
@@ -132,7 +132,7 @@ void GridConstructor::ConfigureGPRT() {
     // box 4
 //    PushPressure(0.85);
     SetBox(Vector2d(30.0, 15.5), Vector2d(100.0 + walls.x(), 2.5),
-            [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
             Vector2i p_abs(x + start.x(), y + start.y());
 			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
@@ -159,7 +159,7 @@ void GridConstructor::ConfigureGPRT() {
     // box 5
 //    PushPressure(0.8);
     SetBox(Vector2d(130.0 + walls.x() - sp_delta.x(), 0.0), Vector2d(200.0 - walls.x(), 18.0 - sp_delta.y()),
-            [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
 			Vector2i p_abs(x + start.x(), y + start.y());
 			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
@@ -182,7 +182,7 @@ void GridConstructor::ConfigureGPRT() {
     // box 6
 //    PushPressure(0.75);
     SetBox(Vector2d(330.0 - sp_delta.x(), 0.0), Vector2d(100.0, 8.0),
-            [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
 				Vector2i p_abs(x + start.x(), y + start.y());
 				Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
@@ -220,7 +220,7 @@ void GridConstructor::ConfigureGPRT() {
     // box 7
 //    PushPressure(0.7);
     SetBox(Vector2d(130.0 - sp_delta.x(), 0.0), Vector2d(walls.x(), Config::vCellSize.y() * 3),
-            [&] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+            [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
                 configs[0].pressure = (1.0 - (double)x / size.x() * 0.38) * P_sat_T1;
 				configs[1].pressure = (1.0 - (double)x / size.x() * 0.38) * P_sat_Xe;
@@ -271,14 +271,14 @@ void GridConstructor::BoundaryConditionTest() {
 	Config::P_normalize = Config::n_normalize * sep::k * Config::T_normalize;
 	Config::m_normalize = 133 * 1.66e-27;   // kg
 	Config::e_cut_normalize = sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
-	Config::l_normalize = 2.78e-5; // m
+	Config::l_normalize = 1.0 * 6e-4; // m +
 	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
-	double test_stream = 1.0e15 / (Config::n_normalize * Config::e_cut_normalize);	// 1e15 1/(m^2 * s)
+	double test_stream = 1.0e23 / (Config::n_normalize * Config::e_cut_normalize);	// 1e23 1/(m^2 * s)
 
 	PushTemperature(1.0);
 	PushPressure(1.0);
-	// Lef box for testing stream
+	// Left box for testing stream
 	SetBox(Vector2d(0.0, 0.0), Vector2d(10.0, 10.0),
 		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 			
@@ -302,7 +302,7 @@ void GridConstructor::BoundaryConditionTest() {
 	SetBox(Vector2d(12.0, 0.0), Vector2d(10.0, 10.0),
 		[=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-			configs[0].pressure = 0.5;
+			//configs[0].pressure = 0.5;
 
 			if (x == 0) {
 				configs[0].boundary_cond = sep::BT_GASE;

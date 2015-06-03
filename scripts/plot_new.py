@@ -113,10 +113,14 @@ def plot_flow(binpath, pngpath, title, value, gas):
     if gas == 0:
         scale_v = 5e24
         sample_v = 1e23
+        #scale_v = 1e24
+        #sample_v = 1e23
         sample_t = r'$1 \times 10^{23} \frac{1}{m^2 s}$'
     else:
-        scale_v = 1e18
-        sample_v = 5e16
+        #scale_v = 1e18
+        #sample_v = 5e16
+        scale_v = 1e16
+        sample_v = 8.6e15
         sample_t = r'$5 \times 10^{15} \frac{1}{m^2 s}$'
 
     each_x = 1
@@ -134,8 +138,8 @@ def plot_flow(binpath, pngpath, title, value, gas):
 
 # main program
 
-max_files = 10
-each = 1
+max_files = 13000
+each = 13000
 gas_num = 2
 long_plot = True
 
