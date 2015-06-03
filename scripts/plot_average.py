@@ -2,7 +2,7 @@ __author__ = 'Kisame'
 
 import numpy as np
 import matplotlib.pyplot as plt
-import os, config
+import os, config, math
 
 params = ["conc", "temp", "pressure", "flow"]
 
@@ -26,6 +26,24 @@ def calculate_average(data, area):
     # find average value
     aver_val = np.nanmean(aver_data)
     return aver_val
+
+def calc_scale(x):
+    l = np.floor((math.log10(x)))
+    return int(l)
+
+def reduce_array(a):
+    # find min and max
+    min_a = np.nanmin(a)
+    max_a = np.nanmax(a)
+    # get their abs value
+    min_a = np.abs(min_a)
+    max_a = np.abs(max_a)
+    # find the biggest one
+    red_a = max(min_a, max_a)
+    red_a = calc_scale(red_a)
+    for i in range(0, len(a)):
+        a[i] /= 10 ** red_a
+
 
 def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_step):
     # construct file names
@@ -75,6 +93,8 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
     plt.figure()
     plt.title('Gas: {0} Parameter: {1}'.format(gas, param))
     if not param_flow:
+        #Y = np.divide(Y, np.amin(Y))
+        #reduce_array(Y)
         plt.plot(X, Y, label=param)
     else:
         plt.plot(X, U, label='flow_x')
@@ -98,11 +118,11 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
 """
 
 iter_start = 0
-iter_end = 10000
+iter_end = 100000
 iter_step = 1000
 
 params = ['conc', 'temp', 'pressure', 'flow']
-areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
+areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.9, 0.0]]
 areas_end   = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
 num_gases = 2
 

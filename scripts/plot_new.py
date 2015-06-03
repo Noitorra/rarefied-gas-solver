@@ -137,7 +137,7 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 5000
+max_files = 100000
 each = 1000
 gas_num = 2
 

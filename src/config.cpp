@@ -6,7 +6,7 @@ using namespace std;
 
 std::string Config::sName = "default";
 double Config::dTimestep = 0.0;  // sets automaticaly in grid_manager.cpp
-int Config::iMaxIteration = 100000;
+int Config::iMaxIteration = 15000;
 std::string Config::sOutputPrefix = "../";
 bool Config::bUseIntegral = true;
 bool Config::bUseBetaChain = false;
