@@ -57,6 +57,8 @@ def add_point(U, V, area, test_plot):
     n = 0
     for y in find_range(area.p[0], area.size[0]):   # hack
         for x in find_range(area.p[1], area.size[1]):
+            if abs(U[x][y]) < 0.1 and abs(V[x][y]) < 0.1:
+                continue
             #print(x, y)
             if area.axes == 'x':
                 area.points[-1] += U[x][y]
@@ -66,13 +68,14 @@ def add_point(U, V, area, test_plot):
                 test_plot[x][y] = 100
             n += 1
 
-    area.points[-1] /= n
+    if n > 0:
+        area.points[-1] /= n
 
 def create_test_plot(U, V, NX, NY):
     test_plot = numpy.zeros((NX, NY))
     for x in range(NX):
         for y in range(NY):
-            if abs(U[x][y]) > 100.0 and abs(V[x][y]) > 100.0:
+            if abs(U[x][y]) > 0.1 and abs(V[x][y]) > 0.1:
                 test_plot[x][y] = 200
     return test_plot
 
@@ -133,8 +136,8 @@ class Area:
 
 # main program
 
-max_files = 11000
-each = 200
+max_files = 13000
+each = 250
 gas_num = 2
 gases = ["Cs", "Xe"]
 
@@ -149,7 +152,9 @@ area_tmp = Area("liquid top", array([6, -1]), array([1, 55]), 'x')
 areas.append(area_tmp)
 area_tmp = Area("liquid bottom", array([6, 150]), array([1, 50]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid out", array([-1, 110]), array([6, 1]), 'y')
+area_tmp = Area("liquid out", array([-1, 114]), array([6, 1]), 'y')
+areas.append(area_tmp)
+area_tmp = Area("gap", array([18, 0]), array([1, 5]), 'x')
 areas.append(area_tmp)
 
 
