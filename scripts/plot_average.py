@@ -27,22 +27,20 @@ def calculate_average(data, area):
     aver_val = np.nanmean(aver_data)
     return aver_val
 
-def calc_scale(x):
-    l = np.floor((math.log10(x)))
-    return int(l)
-
-def reduce_array(a):
+def calc_arr_bounds(a):
     # find min and max
     min_a = np.nanmin(a)
     max_a = np.nanmax(a)
-    # get their abs value
-    min_a = np.abs(min_a)
-    max_a = np.abs(max_a)
-    # find the biggest one
-    red_a = max(min_a, max_a)
-    red_a = calc_scale(red_a)
-    for i in range(0, len(a)):
-        a[i] /= 10 ** red_a
+    avr_a = (max_a + min_a) / 2
+    dlt_a = (max_a - min_a) / 2
+    # coeff
+    cef_a = 0.01
+    if avr_a != 0.0:
+        if dlt_a / avr_a < cef_a:
+            dlt_a = avr_a * cef_a
+            min_a = avr_a - dlt_a
+            max_a = avr_a + dlt_a
+    return min_a, max_a
 
 
 def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_step):
@@ -93,9 +91,9 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
     plt.figure()
     plt.title('Gas: {0} Parameter: {1}'.format(gas, param))
     if not param_flow:
-        #Y = np.divide(Y, np.amin(Y))
-        #reduce_array(Y)
+        min_y, max_y = calc_arr_bounds(Y)
         plt.plot(X, Y, label=param)
+        plt.axis([iter_start, iter_end, min_y, max_y])
     else:
         plt.plot(X, U, label='flow_x')
         plt.plot(X, V, label='flow_y')
@@ -118,13 +116,13 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
 """
 
 iter_start = 0
-iter_end = 100000
-iter_step = 1000
+iter_end = 100
+iter_step = 1
 
 params = ['conc', 'temp', 'pressure', 'flow']
 areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.9, 0.0]]
 areas_end   = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-num_gases = 2
+num_gases = 7
 
 params_len = len(params)
 for gas in range(0, num_gases):
