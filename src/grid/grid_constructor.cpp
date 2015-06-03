@@ -139,7 +139,7 @@ void GridConstructor::ConfigureStandartGrid() {
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
 		Vector2d vPhysSize = Vector2d(5.2, 0.4);
-    Vector2i vNumSize = Vector2i(50, 20);
+    Vector2i vNumSize = Vector2i(50, 10);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
@@ -149,7 +149,7 @@ void GridConstructor::ConfigureStandartGrid() {
 			double T1 = 1500.0 / Config::T_normalize;
 			double T2 = 900.0 / Config::T_normalize;
 
-			double dPCsLeft = 450.0 / Config::P_normalize;
+			double dPCsLeft = 150.0 / Config::P_normalize;
 			double dPCsRight = 150.0 / Config::P_normalize;
 
 			double dPKr = 7e-7;
@@ -160,8 +160,8 @@ void GridConstructor::ConfigureStandartGrid() {
 			double dSpeedKr = 2.1e-9 / (dPKr * dS) / Config::e_cut_normalize; // Q/(P*S) S = pi * D^2 / 4
 			double dSpeedXe = 3.6e-9 / (dPXe * dS) / Config::e_cut_normalize; // Q/(P*S) S = pi * D^2 / 4
 
-			dSpeedKr *= 10; // 5 10
-			dSpeedXe *= 10; // 5 10
+			//dSpeedKr *= 10; // 5 10
+			//dSpeedXe *= 10; // 5 10
 
 			dPKr = dPKr / Config::P_normalize;
 			dPXe = dPXe / Config::P_normalize;
@@ -216,13 +216,13 @@ void GridConstructor::ConfigureStandartGrid() {
 					configs[0].boundary_T = e->temp;
 
 					// Kr
-					configs[1].boundary_cond = sep::BT_GASE;
+					configs[1].boundary_cond = sep::BT_FLOW;
 					configs[1].boundary_pressure = dPKr;
 					configs[1].boundary_stream = Vector3d(0.0, dSpeedKr * dPKr / e->temp, 0.0);
 					configs[1].boundary_T = e->temp;
 
 					// Xe
-					configs[2].boundary_cond = sep::BT_GASE;
+					configs[2].boundary_cond = sep::BT_FLOW;
 					configs[2].boundary_pressure = dPXe;
 					configs[2].boundary_stream = Vector3d(0.0, dSpeedXe* dPKr / e->temp, 0.0);
 					configs[2].boundary_T = e->temp;

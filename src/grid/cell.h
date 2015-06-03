@@ -90,11 +90,11 @@ private:
 	void compute_half_gase_left(unsigned int dim, int gi);
 	void compute_half_gase_right(unsigned int dim, int gi);
 
+	void compute_half_flow_left(unsigned int dim, int gi);
+	void compute_half_flow_right(unsigned int dim, int gi);
+
   void compute_half_mirror_left(unsigned int dim, int gi);
   void compute_half_mirror_right(unsigned int dim, int gi);
-
-	void compute_half_vacuum_left(unsigned int dim, int gi);
-	void compute_half_vacuum_right(unsigned int dim, int gi);
 
 	void compute_value_normal(unsigned int dim);
 

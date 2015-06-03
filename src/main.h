@@ -48,7 +48,8 @@ namespace sep {
   {
     BT_DIFFUSE,
     BT_GASE,
-    BT_MIRROR
+    BT_MIRROR,
+		BT_FLOW
   };
 
   const double k = 1.38e-23;  // Bolzman const
