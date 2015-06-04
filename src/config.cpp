@@ -6,11 +6,11 @@ using namespace std;
 
 std::string Config::sName = "default";
 double Config::dTimestep = 0.0;  // sets automaticaly in grid_manager.cpp
-int Config::iMaxIteration = 20000;
-std::string Config::sOutputPrefix = "../../";
+int Config::iMaxIteration = 1;
+std::string Config::sOutputPrefix = "../";
 bool Config::bUseIntegral = true;
 bool Config::bUseBetaChain = false;
-int Config::iOutEach = 250;
+int Config::iOutEach = 1;
 
 // Grid Related
 Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
@@ -21,7 +21,7 @@ bool Config::bGPRTGrid = true;
 
 // Gases Related
 GasVector Config::vGas;
-int Config::iGasesNumber = 2;
+int Config::iGasesNumber = 3;
 BetaChainVector Config::vBetaChains;
 int Config::iBetaChainsNumber = 0;
 

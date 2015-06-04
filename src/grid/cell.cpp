@@ -14,7 +14,8 @@
 Cell::Cell() :
 m_pGridManager(nullptr),
 m_pSolver(nullptr),
-m_pGrid(nullptr)
+m_pGrid(nullptr),
+m_iLockedAxes(-1)
 {
 	// TODO Auto-generated constructor stub
 	m_vType.resize(3, CT_UNDEFINED);
@@ -45,10 +46,11 @@ Cell::~Cell() {
 /* public */
 
 // main methods
-void Cell::setParameters(double _Pressure, double _Temperature, Vector3d _Areastep, int _GasIndex) {
+void Cell::setParameters(double _Pressure, double _Temperature, Vector3d _Areastep, int _GasIndex, int locked_axes) {
   m_vStartPressure[_GasIndex] = _Pressure;
 	m_vStartTemperature[_GasIndex] = _Temperature;
 	m_vAreastep = _Areastep;
+    m_iLockedAxes = locked_axes;
 }
 
 void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure, int iGasIndex) {
@@ -105,6 +107,9 @@ void Cell::computeType(unsigned int dim) {
 }
 
 void Cell::computeHalf(unsigned int dim) {
+  if (dim == m_iLockedAxes)
+    return;
+
   //std::cout << "Type: " << m_vType[dim] << std::endl;
   switch (m_vType[dim]) {
   case CT_UNDEFINED:
@@ -127,6 +132,9 @@ void Cell::computeHalf(unsigned int dim) {
   }
 }
 void Cell::computeValue(unsigned int dim) {
+  if (dim == m_iLockedAxes)
+    return;
+
   switch (m_vType[dim]) {
   case CT_UNDEFINED:
     //std::cout << "Cell::computeValue() CT_UNDEFINED" << std::endl;

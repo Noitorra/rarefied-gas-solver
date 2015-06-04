@@ -364,7 +364,8 @@ void GridManager::InitCells() {
                   cond.pressure,
                   cond.T,
                   area_step,
-                  gas_number
+                  gas_number,
+                  cond.locked_axes
           );
           p_cell->setBoundaryType(
                   cond.boundary_cond,

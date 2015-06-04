@@ -77,7 +77,8 @@ public:
   T(1.0),
   boundary_cond(sep::BT_DIFFUSE),
   boundary_T(1.0),
-  boundary_pressure(1.0)
+  boundary_pressure(1.0),
+  locked_axes(-1)
   {};
 
   double pressure; // initial pressure
@@ -86,6 +87,7 @@ public:
   double boundary_T;  // wall temperature
   double boundary_pressure;
 	Vector3d boundary_stream;
+  int locked_axes;
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
