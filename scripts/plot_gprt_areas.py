@@ -136,27 +136,40 @@ class Area:
 
 # main program
 
-max_files = 13000
-each = 250
+max_files = 40000
+each = 500
 gas_num = 2
 gases = ["Cs", "Xe"]
 
 out_dir = config.read_cfg_path("config.txt")
 
+##areas = []
+##area_tmp = Area("out", array([-1, 0]), array([1, 150]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("in", array([1, 0]), array([1, 150]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid top", array([6, -1]), array([1, 55]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid bottom", array([6, 150]), array([1, 50]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid out", array([-1, 114]), array([6, 1]), 'y')
+##areas.append(area_tmp)
+##area_tmp = Area("gap", array([18, 0]), array([1, 5]), 'x')
+##areas.append(area_tmp)
+
 areas = []
-area_tmp = Area("out", array([-1, 0]), array([1, 150]), 'x')
+area_tmp = Area("out", array([-1, 0]), array([1, 75]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("in", array([1, 0]), array([1, 150]), 'x')
+area_tmp = Area("in", array([1, 0]), array([1, 75]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid top", array([6, -1]), array([1, 55]), 'x')
+area_tmp = Area("liquid top", array([6, -1]), array([1, 18]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid bottom", array([6, 150]), array([1, 50]), 'x')
+area_tmp = Area("liquid bottom", array([6, 75]), array([1, 18]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid out", array([-1, 114]), array([6, 1]), 'y')
+area_tmp = Area("liquid out", array([-1, 57]), array([6, 1]), 'y')
 areas.append(area_tmp)
 area_tmp = Area("gap", array([18, 0]), array([1, 5]), 'x')
 areas.append(area_tmp)
-
 
 for gas in range(gas_num):
     data_folder = out_dir + 'gas' + '%i' % gas + '/'
