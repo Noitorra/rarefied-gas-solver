@@ -7,6 +7,8 @@
 class GridConstructor {
 protected:
     void ConfigureStandartGrid();
+	void ConfigureTestGrid();
+
     void ConfigureGPRT();
 	void ConfigureGPRT2();
 	void BoundaryConditionTest();

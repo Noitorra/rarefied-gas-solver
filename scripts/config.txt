@@ -1,1 +1,1 @@
-path="../build/out/"
+path="../out/"

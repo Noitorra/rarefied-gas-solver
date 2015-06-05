@@ -575,11 +575,6 @@ void Cell::compute_half_flow_left(unsigned int dim, int gi) {
 	double C1_down = 0.0;
 	double C2_up = 0.0;
 
-	Vector3d v3Speed = Vector3d();
-	if (m_vBoundaryPressure[gi] > 0.0) {
-		v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
-	}
-
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] < 0) {
 			double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
@@ -592,41 +587,34 @@ void Cell::compute_half_flow_left(unsigned int dim, int gi) {
 				compute_av(dim, gi, ii, AD_NEXT),
 				compute_av(dim, gi, ii, AD_NEXTNEXT));
 
-			C1_up += std::abs(impulsev[ii][dim]) * m_vHalf[gi][ii];
-			C2_up += std::abs(impulsev[ii][dim]) * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_NEXT)) / 2;
+			C1_up += impulsev[ii][dim] * m_vHalf[gi][ii];
+			C2_up += impulsev[ii][dim] * (m_vValue[gi][ii] + compute_av(dim, gi, ii, AD_NEXT)) / 2;
 		}
 		else {
-			C1_down += std::abs(impulsev[ii][dim]) * fast_exp(
+			C1_down += impulsev[ii][dim] * fast_exp(
 				gasv[gi]->getMass(),
 				m_vBoundaryTemperature[gi],
-				impulsev[ii] - v3Speed * gasv[gi]->getMass());
+				impulsev[ii]);
 		}
 	}
 
-	// Vacuum
-	if (m_vBoundaryPressure[gi] == 0.0) {
-		C1_up = 0.0;
-		C2_up = 0.0;
-	}
-	else {
-		C1_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C1_up;
-		C2_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C2_up;
+	C1_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C1_up;
+	C2_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C2_up;
 
-		if (C1_up < 0.0) C1_up = 0.0;
-		if (C2_up < 0.0) C2_up = 0.0;
-	}
-
+	if (C1_up / C1_down < 0.0) C1_up = 0.0;
+	if (C2_up / C1_down < 0.0) C2_up = 0.0;
+	
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] > 0) {
 			m_vHalf[gi][ii] = C1_up / C1_down * fast_exp(
 				gasv[gi]->getMass(),
 				m_vBoundaryTemperature[gi],
-				impulsev[ii] - v3Speed * gasv[gi]->getMass());
+				impulsev[ii]);
 
 			m_vValue[gi][ii] = 2 * C2_up / C1_down * fast_exp(
 				gasv[gi]->getMass(),
 				m_vBoundaryTemperature[gi],
-				impulsev[ii] - v3Speed * gasv[gi]->getMass()) - compute_av(dim, gi, ii, AD_NEXT);
+				impulsev[ii]) - compute_av(dim, gi, ii, AD_NEXT);
 			if (m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
 		}
 	}
@@ -640,11 +628,6 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
 	double C1_up = 0.0;
 	double C1_down = 0.0;
 	double C2_up = 0.0;
-
-	Vector3d v3Speed = Vector3d();
-	if (m_vBoundaryPressure[gi] > 0.0) {
-		v3Speed = m_vBoundaryStream[gi] / (m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi]);
-	}
 
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] > 0) {
@@ -667,22 +650,15 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
 			C1_down += std::abs(impulsev[ii][dim]) * fast_exp(
 				gasv[gi]->getMass(),
 				m_vBoundaryTemperature[gi],
-				impulsev[ii] - v3Speed * gasv[gi]->getMass());
+				impulsev[ii]);
 		}
 	}
 
-	// Vacuum
-	if (m_vBoundaryPressure[gi] == 0.0) {
-		C1_up = 0.0;
-		C2_up = 0.0;
-	}
-	else {
-		C1_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C1_up;
-		C2_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C2_up;
+	C1_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C1_up;
+	C2_up = m_vBoundaryStream[gi][dim] / pImpulse->getDeltaImpulseQube() - C2_up;
 
-		if (C1_up < 0.0) C1_up = 0.0;
-		if (C2_up < 0.0) C2_up = 0.0;
-	}
+	if (C1_up / C1_down < 0.0) C1_up = 0.0;
+	if (C2_up / C1_down < 0.0) C2_up = 0.0;
 
 	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
 		if (impulsev[ii][dim] < 0) {
@@ -690,13 +666,13 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
 				item->m_vHalf[gi][ii] = C1_up / C1_down * fast_exp(
 					gasv[gi]->getMass(),
 					m_vBoundaryTemperature[gi],
-					impulsev[ii] - v3Speed * gasv[gi]->getMass());
+					impulsev[ii]);
 			}
 
 			m_vValue[gi][ii] = 2 * C2_up / C1_down * fast_exp(
 				gasv[gi]->getMass(),
 				m_vBoundaryTemperature[gi],
-				impulsev[ii] - v3Speed * gasv[gi]->getMass()) - compute_av(dim, gi, ii, AD_PREV);
+				impulsev[ii]) - compute_av(dim, gi, ii, AD_PREV);
 			if (m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
 		}
 	}
