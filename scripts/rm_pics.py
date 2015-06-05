@@ -4,7 +4,7 @@ import os
 import shutil
 import config
 
-gas_num = 1
+gas_num = 2
 params = ["conc", "temp", "pressure", "flow"]
 #params = ["conc"]
 

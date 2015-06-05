@@ -169,8 +169,8 @@ public:
 		}
 
 		// if it is not a hole we need to average temperature.
-		m_pEmitterPart->temp = 0.0;
 		if (!m_pEmitterPart->isAHole) {
+			m_pEmitterPart->temp = 0.0;
 			for (auto& item : parts) {
 				m_pEmitterPart->temp += item->temp;
 			}
@@ -205,8 +205,8 @@ void GridConstructor::ConfigureStandartGrid() {
     // Main configuration part
     // normalization base
     Config::T_normalize = 1500.0;  // K // Maximum temperature in system
-	Config::P_normalize = 150.0;
-	Config::n_normalize = Config::P_normalize / sep::k / Config::T_normalize;
+		Config::P_normalize = 150.0;
+		Config::n_normalize = Config::P_normalize / sep::k / Config::T_normalize;
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 6.07e-5; // эффективная длинна свободного пробега
@@ -227,7 +227,7 @@ void GridConstructor::ConfigureStandartGrid() {
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
 		Vector2d vPhysSize = Vector2d(5.2, 0.4);
-    Vector2i vNumSize = Vector2i(50, 20);
+    Vector2i vNumSize = Vector2i(50, 10);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,

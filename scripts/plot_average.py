@@ -116,13 +116,13 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
 """
 
 iter_start = 0
-iter_end = 2000
-iter_step = 100
+iter_end = 25000
+iter_step = 1000
 
 params = ['conc', 'temp', 'pressure', 'flow']
 areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
 areas_end   = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-num_gases = 1
+num_gases = 2
 
 params_len = len(params)
 for gas in range(0, num_gases):
