@@ -137,33 +137,40 @@ def plot_flow(binpath, pngpath, title, value):
 
 # main program
 
-max_files = 10000
-each = 1000
-gas_num = 2
+iter_start = 0
+iter_end = 15000
+iter_step = 1000
+gas_num = 7
 
 params = ["conc", "temp", "pressure", "flow"]
-#params = ["pressure"]
 cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'$(m^2s)^-1$']
 
-out_dir = config.read_cfg_path("config.txt")
+out_dirs = config.read_cfg_path("config.txt")
 
-for index in range(0, len(params)):
-    for gas in range(gas_num):
-        data_folder = out_dir + 'gas' + '%i' % gas + '/'
-        i = 0
-        while i < max_files + 1:
-            s = "%i" % i
+out_num = len(out_dirs)
+par_num = len(params)
+itr_num = (iter_end - iter_start)
 
-            if params[index] == "flow":
-                # FLOW
-                plot_flow(data_folder + params[index] + '/data/'+s+'.bin',
-                           data_folder + params[index] + '/pic/' + params[index] + s + '.png',
-                           params[index] + ' ' + s, cb_text[index])
-            else:
-                # CONC PRESSSURE TEMP
-                plot_plain(data_folder + params[index] + '/data/'+s+'.bin',
-                           data_folder + params[index] + '/pic/' + params[index] + s + '.png',
-                           params[index] + ' ' + s, cb_text[index])
+for out_i in range(0, out_num):
+    for par_i in range(0, par_num):
+        for gas_i in range(gas_num):
+            data_folder = out_dirs[out_i] + 'gas' + '%i' % gas_i + '/'
+            for i in range(iter_start, iter_end + 1, iter_step):
+                s = "%i" % i
 
-            print("%i of %i" % (i, max_files))
-            i += each
+                if params[par_i] == "flow":
+                    # FLOW
+                    plot_flow(data_folder + params[par_i] + '/data/'+s+'.bin',
+                               data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
+                               params[par_i] + ' ' + s, cb_text[par_i])
+                else:
+                    # CONC PRESSSURE TEMP
+                    plot_plain(data_folder + params[par_i] + '/data/'+s+'.bin',
+                               data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
+                               params[par_i] + ' ' + s, cb_text[par_i])
+                # we have here 4 values: out_i, par_i, gas_i, i
+                max_done = out_num * par_num * gas_num * itr_num
+                cur_done = ((out_i * par_num + par_i) * gas_num + gas_i) * itr_num + i
+                percent = cur_done / max_done * 100
+                print("Progress: [{} / {}][{} / {}][{} / {}][{} / {}][{:.2f}%]"
+                      .format(out_i + 1, out_num, par_i + 1, par_num, gas_i + 1, gas_num, i, itr_num, percent))

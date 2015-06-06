@@ -210,6 +210,7 @@ void GridConstructor::ConfigureStandartGrid() {
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 6.07e-5; // эффективная длинна свободного пробега
+		//Config::l_normalize = 6.07e-4; // эффективная длинна свободного пробега
     Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
 		// Some beta chain hack. Makes lambda without data type.
@@ -249,8 +250,11 @@ void GridConstructor::ConfigureStandartGrid() {
 
 			double dS = 2 * M_PI * dR * (10.8 * 7 + 11.8) * 1e-3;
 
-			double dFlowKr = dQKr / dTFlow / dS;
-			double dFlowXe = dQXe / dTFlow / dS;
+			double dFlowKr = dQKr / dTFlow / dS / (Config::n_normalize * Config::e_cut_normalize);
+			double dFlowXe = dQXe / dTFlow / dS / (Config::n_normalize * Config::e_cut_normalize);
+
+			std::cout << "FlowKr = " << dFlowKr << std::endl;
+			std::cout << "FlowXe = " << dFlowXe << std::endl;
 
 			//dFlowKr *= 10; // 5 10
 			//dFlowXe *= 10; // 5 10

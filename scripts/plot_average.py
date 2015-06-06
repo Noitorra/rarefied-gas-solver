@@ -4,10 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os, config, math
 
-params = ["conc", "temp", "pressure", "flow"]
-
-out_dir = config.read_cfg_path("config.txt")
-
 """
     some concepts of this script:
     1) need average data in area
@@ -43,7 +39,7 @@ def calc_arr_bounds(a):
     return min_a, max_a
 
 
-def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_step):
+def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end, iter_step):
     # construct file names
     dir_name = '{0}gas{1}/{2}/data'.format(out_dir, gas, param)
     # special condition for streams
@@ -103,7 +99,7 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     save_file = '{0}{1}{2}.png'.format(save_dir, param, gas)
-    #print(save_dir, save_file)
+    # print(save_dir, save_file)
     plt.savefig(save_file, dpi=100)
     plt.close()
 
@@ -114,21 +110,27 @@ def plot_average(gas, param, area_start, area_end, iter_start, iter_end, iter_st
     so we need only X, Y and sqrt(X*X + Y*Y) maybe on same graph need to think twice
     same principe with zeroing naning! and other shit
 """
+out_dirs = config.read_cfg_path("config.txt")
 
 iter_start = 0
-iter_end = 25000
+iter_end = 15000
 iter_step = 1000
+gas_num = 2
 
 params = ['conc', 'temp', 'pressure', 'flow']
 areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
 areas_end   = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-num_gases = 2
 
-params_len = len(params)
-for gas in range(0, num_gases):
-    for param_index in range(0, params_len):
-        plot_average(gas, params[param_index], areas_start[param_index],
-                     areas_end[param_index], iter_start, iter_end, iter_step)
-        percent = (gas * params_len + param_index + 1) / (num_gases * params_len) * 100
-        print('Progress: [{0} / {1}][{2} / {3}][{4}%]'.format(gas + 1, num_gases, param_index + 1,
-                                                              params_len, percent))
+out_num = len(out_dirs)
+par_num = len(params)
+
+for out_i in range(0, out_num):
+    for gas_i in range(0, gas_num):
+        for par_i in range(0, par_num):
+            plot_average(out_dirs[out_i], gas_i, params[par_i], areas_start[par_i],
+                         areas_end[par_i], iter_start, iter_end, iter_step)
+            max_done = out_num * gas_num * par_num
+            cur_done = (out_i * gas_num + gas_i) * par_num + par_i + 1
+            percent = cur_done / max_done * 100
+            print('Progress: [{}/{}][{}/{}][{}/{}][{:.2f}%]'
+                  .format(out_i + 1, out_num, gas_i + 1, gas_num, par_i + 1, par_num, percent))

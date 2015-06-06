@@ -130,8 +130,8 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
         const double t = cell->m_vMacroData[gas].T * Config::T_normalize;
 				const double n = cell->m_vMacroData[gas].C * Config::n_normalize;
         const double p = cell->m_vMacroData[gas].P * Config::P_normalize;
-				const double stream_x = cell->m_vMacroData[gas].Stream.x(); //  * Config::n_normalize * Config::e_cut_normalize
-				const double stream_y = cell->m_vMacroData[gas].Stream.y(); //  * Config::n_normalize * Config::e_cut_normalize;
+				const double stream_x = cell->m_vMacroData[gas].Stream.x() * Config::n_normalize * Config::e_cut_normalize;
+				const double stream_y = cell->m_vMacroData[gas].Stream.y() * Config::n_normalize * Config::e_cut_normalize;
 
         switch (type) {
           case sep::T_PARAM:
