@@ -113,11 +113,14 @@ def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end
 out_dirs = config.read_cfg_path("config.txt")
 
 iter_start = 0
-iter_end = 15000
+iter_end = 63000
 iter_step = 1000
-gas_num = 2
+gas_num = 7
 
 params = ['conc', 'temp', 'pressure', 'flow']
+# areas_start = [[0.0, 0.0], [0.0, 0.0], [0.2, 0.8], [0.9, 0.0]]
+# areas_end   = [[1.0, 1.0], [1.0, 1.0], [0.8, 0.9], [1.0, 1.0]]
+
 areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
 areas_end   = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
 
