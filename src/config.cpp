@@ -6,10 +6,10 @@ using namespace std;
 
 std::string Config::sName = "default";
 double Config::dTimestep = 0.0;  // sets automaticaly in grid_manager.cpp
-int Config::iMaxIteration = 100000;
+int Config::iMaxIteration = 200000;
 std::string Config::sOutputPrefix = "../";
 bool Config::bUseIntegral = true;
-bool Config::bUseBetaChain = false;
+bool Config::bUseBetaChain = true;
 int Config::iOutEach = 1000;
 
 // Grid Related
@@ -21,7 +21,7 @@ bool Config::bGPRTGrid = false;
 
 // Gases Related
 GasVector Config::vGas;
-int Config::iGasesNumber = 2;
+int Config::iGasesNumber = 7;
 BetaChainVector Config::vBetaChains;
 int Config::iBetaChainsNumber = 2;
 

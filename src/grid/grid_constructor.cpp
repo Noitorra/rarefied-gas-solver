@@ -206,11 +206,10 @@ void GridConstructor::ConfigureStandartGrid() {
     // normalization base
     Config::T_normalize = 1500.0;  // K // Maximum temperature in system
 		Config::P_normalize = 150.0;
-		Config::n_normalize = Config::P_normalize / sep::k / Config::T_normalize;
+		Config::n_normalize = Config::P_normalize / (sep::k * Config::T_normalize);
     Config::m_normalize = 133 * 1.66e-27;   // kg
     Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
     Config::l_normalize = 6.07e-5; // эффективная длинна свободного пробега
-		//Config::l_normalize = 6.07e-4; // эффективная длинна свободного пробега
     Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize;  // s
 
 		// Some beta chain hack. Makes lambda without data type.
@@ -228,7 +227,7 @@ void GridConstructor::ConfigureStandartGrid() {
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
 		Vector2d vPhysSize = Vector2d(5.2, 0.4);
-    Vector2i vNumSize = Vector2i(50, 10);
+    Vector2i vNumSize = Vector2i(50, 5);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
@@ -241,6 +240,9 @@ void GridConstructor::ConfigureStandartGrid() {
 			double dPCsLeft = 150.0 / Config::P_normalize;
 			double dPCsRight = 150.0 / Config::P_normalize;
 
+			double dKrStart = 7e-7 / Config::P_normalize;
+			double dXeStart = 1.2e-6 / Config::P_normalize;
+
 			double dQKr = 2.1e-9;
 			double dQXe = 3.6e-9;
 
@@ -250,11 +252,17 @@ void GridConstructor::ConfigureStandartGrid() {
 
 			double dS = 2 * M_PI * dR * (10.8 * 7 + 11.8) * 1e-3;
 
-			double dFlowKr = dQKr / dTFlow / dS / (Config::n_normalize * Config::e_cut_normalize);
-			double dFlowXe = dQXe / dTFlow / dS / (Config::n_normalize * Config::e_cut_normalize);
+			double dFlowKr = dQKr / (dTFlow * sep::k * dS);
+			double dFlowXe = dQXe / (dTFlow * sep::k * dS);
 
-			std::cout << "FlowKr = " << dFlowKr << std::endl;
-			std::cout << "FlowXe = " << dFlowXe << std::endl;
+			//std::cout << "FlowKr = " << dFlowKr << std::endl;
+			//std::cout << "FlowXe = " << dFlowXe << std::endl;
+
+			dFlowKr /= Config::n_normalize * Config::e_cut_normalize;
+			dFlowXe /= Config::n_normalize * Config::e_cut_normalize;
+
+			//std::cout << "FlowKr = " << dFlowKr << std::endl;
+			//std::cout << "FlowXe = " << dFlowXe << std::endl;
 
 			//dFlowKr *= 10; // 5 10
 			//dFlowXe *= 10; // 5 10
@@ -267,13 +275,13 @@ void GridConstructor::ConfigureStandartGrid() {
 			configs[0].pressure = dPgrad;
 			configs[0].T = dTgrad;
 
-			configs[1].pressure = 0.0; // hack
+			configs[1].pressure = dKrStart; // hack dKrStart
 			configs[1].T = dTgrad;
 
-			configs[2].pressure = 0.0; // hack
+			configs[2].pressure = dXeStart; // hack
 			configs[2].T = dTgrad;
 
-			for (int i = 1; i < Config::iGasesNumber; i++) {
+			for (int i = 3; i < Config::iGasesNumber; i++) {
 				configs[i].pressure = 0.0;
 				configs[i].T = dTgrad;
 			}
