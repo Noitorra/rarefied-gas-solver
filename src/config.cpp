@@ -38,13 +38,13 @@ double Config::l_normalize = 1.0; // not assigned
 void Config::Init()
 {
 	// Fill gases. Use only iNumGases first gases.
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Cs
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Kr -> Rb -> Sr
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Xe -> Cs -> Ba
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Rb
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Sr
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Cs
-	vGas.push_back(std::make_shared<Gas>(1.0)); //Ba
+	vGas.push_back(std::make_shared<Gas>(1.0)); //133 Cs
+	vGas.push_back(std::make_shared<Gas>(88.0 / 133.0)); //88 Kr -> Rb -> Sr
+	vGas.push_back(std::make_shared<Gas>(138.0 / 133.0)); //138 Xe -> Cs -> Ba
+	vGas.push_back(std::make_shared<Gas>(88.0 / 133.0)); //88 Rb
+	vGas.push_back(std::make_shared<Gas>(88.0 / 133.0)); //88 Sr
+	vGas.push_back(std::make_shared<Gas>(138.0 / 133.0)); //138 Cs
+	vGas.push_back(std::make_shared<Gas>(138.0 / 133.0)); //138 Ba
 
 	// Fill beta chains, use only iBetaChains first.
 	//vBetaChains.push_back(std::make_shared<BetaChain>(1, 2, 3, 6.78e-5, 6.49e-4)); // test!!!

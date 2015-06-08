@@ -89,7 +89,7 @@ def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end
     if not param_flow:
         min_y, max_y = calc_arr_bounds(Y)
         plt.plot(X, Y, label=param)
-        plt.axis([iter_start, iter_end, min_y, max_y])
+        #plt.axis([iter_start, iter_end, min_y, max_y])
     else:
         plt.plot(X, U, label='flow_x')
         plt.plot(X, V, label='flow_y')
