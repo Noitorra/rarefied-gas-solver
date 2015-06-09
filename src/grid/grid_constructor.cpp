@@ -237,7 +237,7 @@ void GridConstructor::ConfigureStandartGrid() {
 			double T1 = 1500.0 / Config::T_normalize;
 			double T2 = 900.0 / Config::T_normalize;
 
-			double dPCsLeft = 450.0 / Config::P_normalize;
+			double dPCsLeft = 150.0 / Config::P_normalize;
 			double dPCsRight = 150.0 / Config::P_normalize;
 
 			double dKrStart = 7e-7 / Config::P_normalize;
@@ -264,8 +264,8 @@ void GridConstructor::ConfigureStandartGrid() {
 			//std::cout << "FlowKr = " << dFlowKr << std::endl;
 			//std::cout << "FlowXe = " << dFlowXe << std::endl;
 
-			dFlowKr *= 10; // 5 10
-			dFlowXe *= 10; // 5 10
+			dFlowKr *= 1; // 5 10
+			dFlowXe *= 1; // 5 10
 
 			// support variables
 			double dTgrad = T1 - (T1 - T2) * (2 * (y - 1) + 1) / 2 / (size.y() - 2);
@@ -292,8 +292,8 @@ void GridConstructor::ConfigureStandartGrid() {
 				configs[0].boundary_T = dTgrad;
 
 				for (int i = 1; i < Config::iGasesNumber; i++) {
-					//configs[i].boundary_cond = sep::BT_DIFFUSE;
-					configs[i].boundary_cond = sep::BT_GASE;
+					configs[i].boundary_cond = sep::BT_DIFFUSE;
+					//configs[i].boundary_cond = sep::BT_GASE;
 					configs[i].boundary_pressure = 0.0;
 					configs[i].boundary_stream = Vector3d();
 					configs[i].boundary_T = dTgrad;
