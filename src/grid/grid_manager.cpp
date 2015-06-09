@@ -63,7 +63,7 @@ void GridManager::ConfigureGrid() {
 	//PressureBoundaryConditionTestBigArea();
   } else {
     ConfigureStandartGrid();
-	//ConfigureTestGrid();
+		//ConfigureTestGrid();
   }
   GridGeometryToInitialCells();
   AdoptInitialCells();

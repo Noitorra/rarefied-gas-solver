@@ -89,7 +89,9 @@ def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end
     if not param_flow:
         min_y, max_y = calc_arr_bounds(Y)
         plt.plot(X, Y, label=param)
-        #plt.axis([iter_start, iter_end, min_y, max_y])
+	#delta_y = max_y - min_y
+	#koef = 0.1
+        plt.axis([iter_start, iter_end, min_y, max_y])
     else:
         plt.plot(X, U, label='flow_x')
         plt.plot(X, V, label='flow_y')
@@ -113,7 +115,7 @@ def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end
 out_dirs = config.read_cfg_path("config.txt")
 
 iter_start = 0
-iter_end = 63000
+iter_end = 100000
 iter_step = 1000
 gas_num = 7
 
