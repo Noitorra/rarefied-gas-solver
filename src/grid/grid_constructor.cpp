@@ -237,7 +237,7 @@ void GridConstructor::ConfigureStandartGrid() {
 			double T1 = 1500.0 / Config::T_normalize;
 			double T2 = 900.0 / Config::T_normalize;
 
-			double dPCsLeft = 150.0 / Config::P_normalize;
+			double dPCsLeft = 300.0 / Config::P_normalize;
 			double dPCsRight = 150.0 / Config::P_normalize;
 
 			double dKrStart = 7e-7 / Config::P_normalize;
