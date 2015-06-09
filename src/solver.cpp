@@ -95,8 +95,8 @@ void Solver::PreRun() {
   InitCellType(sep::Y);
   InitCellType(sep::Z);
 
-//  m_pGridManager->PrintLinkage(sep::X);
-//  m_pGridManager->PrintLinkage(sep::Y);
+  m_pGridManager->PrintLinkage(sep::X);
+  m_pGridManager->PrintLinkage(sep::Y);
 }
 
 void Solver::InitCellType(sep::Axis axis) {

@@ -80,14 +80,15 @@ def create_test_plot(U, V, NX, NY):
     return test_plot
 
 def find_rounded_delta(list):
-    v = max(list)
-    # print("max = " + str(v))
+    v = abs(max(list) - min(list))
+    #print("max = " + str(v))
     digit_q = int(math.log(v, 10))
-    # print("digit_q = " + str(digit_q))
+    #print("digit_q = " + str(digit_q))
     ret = round(v, -digit_q + 1)
     # ret = pow(10, digit_q)
-    # print("ret = " + str(ret))
-    return ret / 10
+    ret = ret / 10
+    #print("ret = " + str(ret))
+    return ret
 
 
 def save_img(png_path, area, gas):
@@ -97,8 +98,9 @@ def save_img(png_path, area, gas):
 
     # title
     plt.title(area.name.title() + " " + gas_name)
+    print(area.name.title() + " " + gas_name)
     plt.xlabel('Iterations')
-    plt.ylabel('Average Flow')
+    plt.ylabel('Average Flow, ' + r'$\frac{1}{m^2 s}$')
 
     time = []
     i = 0
@@ -107,10 +109,10 @@ def save_img(png_path, area, gas):
         i += each
 
 
-    #ax = plt.gca()
-    #ax.set_xticks(numpy.arange(min(time), max(time), find_rounded_delta(time)))
-    #ax.set_yticks(numpy.arange(min(area.points), max(area.points), find_rounded_delta(area.points)))
-    #plt.grid()
+    ax = plt.gca()
+    ax.set_xticks(numpy.arange(min(time), max(time), find_rounded_delta(time)))
+    ax.set_yticks(numpy.arange(min(area.points), max(area.points), find_rounded_delta(area.points)))
+    plt.grid()
 
     im = plt.plot(time, area.points, marker='+', color='b')
 
@@ -136,10 +138,10 @@ class Area:
 
 # main program
 
-max_files = 40000
-each = 500
-gas_num = 2
-gases = ["Cs", "Xe"]
+max_files = 54000
+each = 2000
+gas_num = 3
+gases = ["Cs", "Xe", "Kr"]
 
 out_dir = config.read_cfg_path("config.txt")
 
@@ -157,19 +159,51 @@ out_dir = config.read_cfg_path("config.txt")
 ##area_tmp = Area("gap", array([18, 0]), array([1, 5]), 'x')
 ##areas.append(area_tmp)
 
+##areas = []
+##area_tmp = Area("out", array([-1, 0]), array([1, 75]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("in", array([1, 0]), array([1, 75]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid top", array([6, -1]), array([1, 18]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid bottom", array([6, 75]), array([1, 18]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid out", array([-1, 57]), array([6, 1]), 'y')
+##areas.append(area_tmp)
+##area_tmp = Area("gap", array([18, 0]), array([1, 5]), 'x')
+##areas.append(area_tmp)
+
+##areas = []
+##area_tmp = Area("out", array([-1, 0]), array([1, 45]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("in", array([1, 0]), array([1, 45]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid top", array([4, -1]), array([1, 18]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid bottom", array([4, 45]), array([1, 18]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("liquid out", array([-1, 40]), array([3, 1]), 'y')
+##areas.append(area_tmp)
+##area_tmp = Area("gap", array([12, 0]), array([1, 2]), 'x')
+##areas.append(area_tmp)
+##area_tmp = Area("all", array([0, 0]), array([35, 90]), 'x')
+##areas.append(area_tmp)
+
 areas = []
-area_tmp = Area("out", array([-1, 0]), array([1, 75]), 'x')
+area_tmp = Area("out", array([-1, 0]), array([1, 22]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("in", array([1, 0]), array([1, 75]), 'x')
+area_tmp = Area("in", array([1, 0]), array([1, 22]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid top", array([6, -1]), array([1, 18]), 'x')
+area_tmp = Area("liquid top", array([4, -1]), array([1, 9]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid bottom", array([6, 75]), array([1, 18]), 'x')
+area_tmp = Area("liquid bottom", array([4, 22]), array([1, 11]), 'x')
 areas.append(area_tmp)
-area_tmp = Area("liquid out", array([-1, 57]), array([6, 1]), 'y')
+area_tmp = Area("liquid out", array([-1, 20]), array([3, 1]), 'y')
 areas.append(area_tmp)
-area_tmp = Area("gap", array([18, 0]), array([1, 5]), 'x')
+area_tmp = Area("gap", array([12, 0]), array([1, 2]), 'x')
 areas.append(area_tmp)
+##area_tmp = Area("all", array([0, 0]), array([35, 45]), 'x')
+##areas.append(area_tmp)
 
 for gas in range(gas_num):
     data_folder = out_dir + 'gas' + '%i' % gas + '/'

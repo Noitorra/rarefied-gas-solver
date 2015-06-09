@@ -8,7 +8,7 @@ void GridConstructor::ConfigureGPRT() {
     //Config::vCellSize = Vector2d(3.0, 0.4);
     //Config::vCellSize = Vector2d(8.0, 0.4);	// mm
 //	Config::vCellSize = Vector2d(8.0, 0.07);	// mm
-	Config::vCellSize = Vector2d(12.0, 0.2);	// mm
+	Config::vCellSize = Vector2d(12.0, 0.4);	// mm
     double T1 = 325.0 + 273.0;
     double T2 = 60.0 + 273.0;
     Vector2d walls(Config::vCellSize);
@@ -191,7 +191,7 @@ void GridConstructor::ConfigureGPRT() {
 
     // box 5
 //    PushPressure(0.8);
-    SetBox(Vector2d(130.0 + walls.x() - sp_delta.x(), 0.0), Vector2d(200.0 - walls.x(), 18.0 - sp_delta.y()),
+    SetBox(Vector2d(130.0 + walls.x()/* - sp_delta.x()*/, 0.0), Vector2d(200.0 - walls.x(), 18.0 - sp_delta.y()),
             [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
 			Vector2i p_abs(x + start.x(), y + start.y());
@@ -260,12 +260,14 @@ void GridConstructor::ConfigureGPRT() {
 
     // box 7
 //    PushPressure(0.7);
-    SetBox(Vector2d(130.0 - sp_delta.x(), 0.0), Vector2d(walls.x(), Config::vCellSize.y()),
+    SetBox(Vector2d(130.0/* - sp_delta.x()*/, 0.0), Vector2d(walls.x(), Config::vCellSize.y()),
             [=] (int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 
-				configs[0].locked_axes = sep::Y;
-				configs[1].locked_axes = sep::Y;
- 				configs[2].locked_axes = sep::Y;
+				if (x != 0 && x != size.x() - 1) {
+					configs[0].locked_axes = sep::Y;
+					configs[1].locked_axes = sep::Y;
+ 					configs[2].locked_axes = sep::Y;
+				}
 
                 configs[0].pressure = gradient(x, size.x() - 1, P_sat_T1, P_sat_T1 * 0.65);
 				configs[1].pressure = gradient(x, size.x() - 1, P_Xe_in + (P_sat_Xe - P_Xe_in) * 0.3, P_sat_Xe * 0.65);

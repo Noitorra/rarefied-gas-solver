@@ -111,7 +111,7 @@ def plot_flow(binpath, pngpath, title, value, gas):
     plt.title(title)
 
     if gas == 0:
-        scale_v = 5e24
+        scale_v = 3e24
         sample_v = 1e23
         #scale_v = 1e24
         #sample_v = 1e23
@@ -120,11 +120,11 @@ def plot_flow(binpath, pngpath, title, value, gas):
         #scale_v = 1e18
         #sample_v = 5e16
         scale_v = 1e16
-        sample_v = 8.6e15
-        sample_t = r'$5 \times 10^{15} \frac{1}{m^2 s}$'
+        sample_v = 4e14
+        sample_t = r'$4 \times 10^{14} \frac{1}{m^2 s}$'
 
     each_x = 1
-    each_y = 8
+    each_y = 1
 
     Q = plt.quiver(U[::each_y, ::each_x], V[::each_y, ::each_x], color='r', scale=scale_v, width=0.001)
     qk = plt.quiverkey(Q, 0.9, 0.92, sample_v, sample_t, labelpos='E', fontproperties={'weight': 'bold'})
@@ -138,9 +138,9 @@ def plot_flow(binpath, pngpath, title, value, gas):
 
 # main program
 
-max_files = 13000
-each = 13000
-gas_num = 2
+max_files = 500
+each = 500
+gas_num = 3
 long_plot = True
 
 params = ["conc", "temp", "pressure", "flow"]
