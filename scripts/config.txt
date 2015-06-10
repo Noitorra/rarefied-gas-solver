@@ -1,1 +1,1 @@
-path="c:\Users\Dmitry\Dropbox\!Diploma\result-02-open-150-150-1\out\"
+path="c:\Users\Dmitry\Dropbox\!Diploma\result-06-open-150-150-10\out\"

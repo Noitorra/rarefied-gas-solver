@@ -1,7 +1,8 @@
 __author__ = 'Kisame'
 
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+import matplotlib.ticker
 import os, config, math
 
 """
@@ -38,8 +39,10 @@ def calc_arr_bounds(a):
             max_a = avr_a + dlt_a
     return min_a, max_a
 
+def calc_lin_average(y):
+    return np.nanmean(y)
 
-def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end, iter_step):
+def plot_average(out_dir, gas, param, cb_text, area_start, area_end, iter_start, iter_end, iter_step):
     # construct file names
     dir_name = '{0}gas{1}/{2}/data'.format(out_dir, gas, param)
     # special condition for streams
@@ -86,17 +89,33 @@ def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end
 
     plt.figure()
     plt.title('Gas: {0} Parameter: {1}'.format(gas, param))
+    plt.ylabel(cb_text)
+
+    y_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
+    y_formatter.set_powerlimits((-4,4))
+    plt.axes().yaxis.set_major_formatter(y_formatter)
+
     if not param_flow:
         min_y, max_y = calc_arr_bounds(Y)
         plt.plot(X, Y, label=param)
-	#delta_y = max_y - min_y
-	#koef = 0.1
         plt.axis([iter_start, iter_end, min_y, max_y])
+
+        # average
+        y_inx = int(4.0/5.0*len(Y))
+        y_avr = calc_lin_average(Y[y_inx:len(Y)])
+        plt.axhline(y=y_avr, xmin=0, xmax=1, hold=None)
+        plt.text((iter_end - iter_start)*0.1, y_avr, '{:.2e}'.format(y_avr))
     else:
-        plt.plot(X, U, label='flow_x')
-        plt.plot(X, V, label='flow_y')
-        plt.plot(X, M, label='flow_m')
-    plt.legend()
+        plt.plot(X, U, '.', label='flow_x')
+        #plt.plot(X, V, label='flow_y')
+        #plt.plot(X, M, label='flow_m')
+
+        # average
+        y_inx = int(4.0/5.0*len(U))
+        y_avr = calc_lin_average(U[y_inx:len(U)])
+        plt.axhline(y=y_avr, xmin=0, xmax=1, hold=None)
+        plt.text((iter_end - iter_start)*0.01, y_avr, '{:.2e}'.format(y_avr))
+    #plt.legend()
     save_dir = '{0}globals/'.format(out_dir)
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
@@ -115,16 +134,28 @@ def plot_average(out_dir, gas, param, area_start, area_end, iter_start, iter_end
 out_dirs = config.read_cfg_path("config.txt")
 
 iter_start = 0
-iter_end = 100000
+iter_end = 30000
 iter_step = 1000
 gas_num = 7
 
-params = ['conc', 'temp', 'pressure', 'flow']
-# areas_start = [[0.0, 0.0], [0.0, 0.0], [0.2, 0.8], [0.9, 0.0]]
-# areas_end   = [[1.0, 1.0], [1.0, 1.0], [0.8, 0.9], [1.0, 1.0]]
+#params = ['conc', 'temp', 'pressure', 'flow']
+#params = ['flow']
+#cb_texts = [r'n, m^-3', r'T, K', r'P, Pa', r'$(m^2s)^-1$']
+#cb_texts = [r'$(m^2s)^-1$']
+#areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.2], [0.8, 0.0]]
+#areas_end   = [[1.0, 1.0], [1.0, 1.0], [0.5, 0.9], [1.0, 1.0]]
 
-areas_start = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
-areas_end   = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
+#areas_start = [[0.0, 0.0], [0.0, 0.0], [0.3, 0.2], [0.8, 0.0]]
+#areas_end   = [[1.0, 1.0], [1.0, 1.0], [0.7, 0.8], [1.0, 1.0]]
+
+# close
+params = ['pressure', 'flow']
+cb_texts = [r'P, Pa', r'$(m^2s)^-1$']
+
+areas_start = [[0.3, 0.5], [0.0, 0.0]]
+areas_end   = [[0.7, 1.0], [1.0, 1.0]]
+
+
 
 out_num = len(out_dirs)
 par_num = len(params)
@@ -132,7 +163,7 @@ par_num = len(params)
 for out_i in range(0, out_num):
     for gas_i in range(0, gas_num):
         for par_i in range(0, par_num):
-            plot_average(out_dirs[out_i], gas_i, params[par_i], areas_start[par_i],
+            plot_average(out_dirs[out_i], gas_i, params[par_i], cb_texts[par_i], areas_start[par_i],
                          areas_end[par_i], iter_start, iter_end, iter_step)
             max_done = out_num * gas_num * par_num
             cur_done = (out_i * gas_num + gas_i) * par_num + par_i + 1
