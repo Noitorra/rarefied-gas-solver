@@ -4,14 +4,14 @@
 #include <iostream>
 
 Impulse::Impulse() :
-m_pGridManager(nullptr),
-m_pGrid(nullptr),
-m_pSolver(nullptr) {
-	m_dMaxImpulse = 4.8;
-	m_uResolution = 20;
+  m_pGridManager(nullptr),
+  m_pGrid(nullptr),
+  m_pSolver(nullptr) {
+  m_dMaxImpulse = 4.8;
+  m_uResolution = 20;
 
-	m_dDeltaImpulse = 0.0;
-	m_dDeltaImpulseQube = 0.0;
+  m_dDeltaImpulse = 0.0;
+  m_dDeltaImpulseQube = 0.0;
 
   m_pxyz2i = nullptr;
 }
@@ -55,7 +55,7 @@ void Impulse::Init(GridManager* pGridManager) {
   std::vector<double> line;
   for (unsigned int i = 0; i < m_uResolution; i++) {
     line.push_back(m_dDeltaImpulse*(i + 0.5) - m_dMaxImpulse);
-//    std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
+    //    std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
   }
 
   // xyz2i
@@ -75,8 +75,7 @@ void Impulse::Init(GridManager* pGridManager) {
           m_pi2xyz.push_back(Vector3i(x, y, z));
           // save impulse value for index
           m_vImpulse.push_back(vec);
-        }
-        else {
+        } else {
           // TODO: the fuck should i do here ... ?
           m_pxyz2i[x][y][z] = -1;
         }
@@ -86,40 +85,38 @@ void Impulse::Init(GridManager* pGridManager) {
 }
 
 void Impulse::setMaxImpulse(double max_impulse) {
-	m_dMaxImpulse = max_impulse;
+  m_dMaxImpulse = max_impulse;
 }
 void Impulse::setResolution(unsigned int resolution) {
-	m_uResolution = resolution;
+  m_uResolution = resolution;
 }
 
 unsigned int Impulse::getResolution() {
-	return m_uResolution;
+  return m_uResolution;
 }
 
 double Impulse::getMaxImpulse() {
-	return m_dMaxImpulse;
+  return m_dMaxImpulse;
 }
 
 double Impulse::getDeltaImpulse() {
-	return m_dDeltaImpulse;
+  return m_dDeltaImpulse;
 }
 
 double Impulse::getDeltaImpulseQube() {
-	return m_dDeltaImpulseQube;
+  return m_dDeltaImpulseQube;
 }
 
 std::vector< Vector3d >& Impulse::getVector() {
-	return m_vImpulse;
+  return m_vImpulse;
 }
 
-int Impulse::reverseIndex(int ii, sep::Axis eAxis)
-{
+int Impulse::reverseIndex(int ii, sep::Axis eAxis) {
   // ii -> xyz
   // xyz -> reverse xyz -> rii
   Vector3i v3i = m_pi2xyz[ii];
   int ri = 0;
-  switch (eAxis)
-  {
+  switch (eAxis) {
   case sep::X:
     ri = m_pxyz2i[m_uResolution - 1 - v3i.x()][v3i.y()][v3i.z()];
     break;
@@ -132,8 +129,7 @@ int Impulse::reverseIndex(int ii, sep::Axis eAxis)
   default:
     break;
   }
-  if (ri == -1)
-  {
+  if (ri == -1) {
     std::cout << "Impulse::reverseIndex() bad reverse, index = -1." << std::endl;
     return ii;
   }

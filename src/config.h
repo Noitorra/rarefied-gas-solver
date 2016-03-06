@@ -23,24 +23,24 @@ struct Config {
 
   static std::string sName;
 
-	// Grid Related
+  // Grid Related
   static Vector3i vGridSize;
   static sep::GridGeometry eGridGeometryType;
-	static std::shared_ptr<HTypeGridConfig> pHTypeGridConfig;
-	static bool bGPRTGrid;
-	static Vector2d vCellSize;  // default cell size in mm
+  static std::shared_ptr<HTypeGridConfig> pHTypeGridConfig;
+  static bool bGPRTGrid;
+  static Vector2d vCellSize;  // default cell size in mm
 
-	// Gas Related
-	static GasVector vGas;
-	static int iGasesNumber;
-	static BetaChainVector vBetaChains;
-	static int iBetaChainsNumber;
+  // Gas Related
+  static GasVector vGas;
+  static int iGasesNumber;
+  static BetaChainVector vBetaChains;
+  static int iBetaChainsNumber;
 
   static double dTimestep;
   static int iMaxIteration;
   static bool bUseIntegral;
   static std::string sOutputPrefix;
-	static bool bUseBetaChain;
+  static bool bUseBetaChain;
   static int iOutEach;
 
   static double n_normalize;

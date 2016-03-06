@@ -100,6 +100,8 @@ private:
 
   std::vector<MacroData> m_vMacroData;
 
+  int m_iLockedAxes;
+
   GridManager* m_pGridManager;
   Solver* m_pSolver;
   Grid* m_pGrid;

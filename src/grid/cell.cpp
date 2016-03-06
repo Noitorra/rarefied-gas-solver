@@ -12,15 +12,15 @@
 #include <algorithm>
 
 Cell::Cell() :
-m_pGridManager(nullptr),
-m_pSolver(nullptr),
-m_pGrid(nullptr),
-m_iLockedAxes(-1) {
-	m_vType.resize(3, CT_UNDEFINED);
+  m_pGridManager(nullptr),
+  m_pSolver(nullptr),
+  m_pGrid(nullptr),
+  m_iLockedAxes(-1) {
+  m_vType.resize(3, CT_UNDEFINED);
 
-	// Create 3 std::vector< Cell* > for dimentions
-	m_pNext.resize(3, nullptr);
-	m_pPrev.resize(3, nullptr);
+  // Create 3 std::vector< Cell* > for dimentions
+  m_pNext.resize(3, nullptr);
+  m_pPrev.resize(3, nullptr);
 
   m_vStartTemperature.resize(Config::iGasesNumber);
   m_vStartPressure.resize(Config::iGasesNumber);
@@ -35,10 +35,10 @@ void Cell::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
   m_pSolver = pGridManager->GetSolver();
   m_pGrid = pGridManager->GetGrid();
-  
+
   GasVector& gasv = Config::vGas;
-	Impulse* impulse = m_pSolver->GetImpulse();
-	ImpulseVector& impulsev = impulse->getVector();
+  Impulse* impulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = impulse->getVector();
 
   for (unsigned int gi = 0; gi < Config::iGasesNumber; gi++) {
     // Allocating space for values and half's
@@ -49,40 +49,40 @@ void Cell::Init(GridManager* pGridManager) {
     m_vHalf[gi].resize(impulsev.size(), 0.0);
     m_vValue[gi].resize(impulsev.size(), 0.0);
 
-  GasVector& gasv = Config::vGas;
-  Impulse* impulse = m_pSolver->GetImpulse();
-  ImpulseVector& impulsev = impulse->getVector();
+    GasVector& gasv = Config::vGas;
+    Impulse* impulse = m_pSolver->GetImpulse();
+    ImpulseVector& impulsev = impulse->getVector();
 
-  double C = 0.0;
-  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    double C = 0.0;
+    for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
       C += compute_exp(gasv[gi]->getMass(), m_vStartTemperature[gi], impulsev[ii]);
-  }
+    }
 
-  C *= impulse->getDeltaImpulseQube();
+    C *= impulse->getDeltaImpulseQube();
     C = m_vStartPressure[gi] / m_vStartTemperature[gi] / C;
 
-  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
       m_vValue[gi][ii] = C*compute_exp(gasv[gi]->getMass(), m_vStartTemperature[gi], impulsev[ii]);
+    }
   }
-}
 }
 
 void Cell::setParameters(double dPressure, double dTemperature, Vector3d dAreastep, int iGasIndex, int iLockedAxes) {
   m_vStartPressure[iGasIndex] = dPressure;
-	m_vStartTemperature[iGasIndex] = dTemperature;
-	m_vAreastep = dAreastep;
+  m_vStartTemperature[iGasIndex] = dTemperature;
+  m_vAreastep = dAreastep;
   m_iLockedAxes = iLockedAxes;
 }
 
 void Cell::setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure, int iGasIndex) {
   m_vBoundaryType[iGasIndex] = eBoundaryType;
   m_vBoundaryTemperature[iGasIndex] = dTemperature;
-	m_vBoundaryStream[iGasIndex] = dStream;
+  m_vBoundaryStream[iGasIndex] = dStream;
   m_vBoundaryPressure[iGasIndex] = dPressure;
 }
 
 void Cell::computeType(unsigned int dim) {
-	compute_type(dim);
+  compute_type(dim);
 }
 
 void Cell::computeHalf(unsigned int dim) {
@@ -129,14 +129,14 @@ void Cell::computeIntegral(unsigned int gi0, unsigned int gi1) {
 }
 
 void Cell::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
-	ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
+  ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
-	double dTempValue = 0.0;
-	for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
-		dTempValue = m_vValue[gi0][ii] * lambda * Config::dTimestep; // TODO: check lambda * Config::dTimestep < 1 !!!
-		m_vValue[gi0][ii] -= dTempValue;
-		m_vValue[gi1][ii] += dTempValue;
-	}
+  double dTempValue = 0.0;
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    dTempValue = m_vValue[gi0][ii] * lambda * Config::dTimestep; // TODO: check lambda * Config::dTimestep < 1 !!!
+    m_vValue[gi0][ii] -= dTempValue;
+    m_vValue[gi1][ii] += dTempValue;
+  }
 }
 
 void Cell::computeMacroData() {
@@ -150,8 +150,7 @@ void Cell::computeMacroData() {
       m_vMacroData[gi].P = 0.0;
       m_vMacroData[gi].HeatStream = Vector3d();
     }
-  }
-  else {
+  } else {
     for (unsigned int gi = 0; gi < Config::iGasesNumber; gi++) {
       m_vMacroData[gi].C = compute_concentration(gi);
       m_vMacroData[gi].Stream = compute_stream(gi);
@@ -209,20 +208,16 @@ void Cell::compute_type(unsigned int dim) {
   if (m_pPrev[dim] == nullptr) {
     if (m_pNext[dim] != nullptr) {
       m_vType[dim] = CT_LEFT;
-    }
-    else {
+    } else {
       //std::cout << "Cell has no neighbors in dim = " << dim << std::endl;
     }
-  }
-  else {
+  } else {
     if (m_pNext[dim] == nullptr) {
       m_vType[dim] = CT_RIGHT;
-    }
-    else {
+    } else {
       if (m_pNext[dim]->m_pNext[dim] == nullptr) {
         m_vType[dim] = CT_PRERIGHT;
-      }
-      else {
+      } else {
         m_vType[dim] = CT_NORMAL;
       }
     }
@@ -240,7 +235,7 @@ void Cell::compute_half_left(unsigned int dim) {
       compute_half_diffuse_left(dim, gi);
       break;
     case sep::BT_GASE:
-			compute_half_gase_left(dim, gi);
+      compute_half_gase_left(dim, gi);
       break;
     case sep::BT_MIRROR:
       compute_half_mirror_left(dim, gi);
@@ -268,8 +263,7 @@ void Cell::compute_half_normal(unsigned int dim) {
           m_pPrev[dim]->m_vValue[gi][ii],
           m_vValue[gi][ii],
           m_pNext[dim]->m_vValue[gi][ii]);
-      }
-      else {
+      } else {
         m_vHalf[gi][ii] = m_pNext[dim]->m_vValue[gi][ii] - (1 - y) / 2 * limiter(
           m_vValue[gi][ii],
           m_pNext[dim]->m_vValue[gi][ii],
@@ -285,13 +279,12 @@ void Cell::compute_half_preright(unsigned int dim) {
 
 void Cell::compute_half_right(unsigned int dim) {
   for (int gi = 0; gi < Config::iGasesNumber; gi++) {
-    switch (m_vBoundaryType[gi])
-    {
+    switch (m_vBoundaryType[gi]) {
     case sep::BT_DIFFUSE:
       compute_half_diffuse_right(dim, gi);
       break;
-		case sep::BT_GASE:
-			compute_half_gase_right(dim, gi);
+    case sep::BT_GASE:
+      compute_half_gase_right(dim, gi);
       break;
     case sep::BT_MIRROR:
       compute_half_mirror_right(dim, gi);
@@ -320,8 +313,7 @@ void Cell::compute_value_normal(unsigned int dim) {
 }
 
 /* Diffuse boundary type. */
-void Cell::compute_half_diffuse_left(unsigned int dim, int gi)
-{
+void Cell::compute_half_diffuse_left(unsigned int dim, int gi) {
   GasVector& gasv = Config::vGas;
   ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
@@ -342,8 +334,7 @@ void Cell::compute_half_diffuse_left(unsigned int dim, int gi)
 
       C1_up += std::abs(impulsev[ii][dim] * m_vHalf[gi][ii]);
       C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + m_pNext[dim]->m_vValue[gi][ii]) / 2);
-    }
-    else {
+    } else {
       C1_down += std::abs(impulsev[ii][dim] * compute_exp(gasv[gi]->getMass(), m_vBoundaryTemperature[gi], impulsev[ii]));
     }
   }
@@ -357,8 +348,7 @@ void Cell::compute_half_diffuse_left(unsigned int dim, int gi)
   }
 }
 
-void Cell::compute_half_diffuse_right(unsigned int dim, int gi)
-{
+void Cell::compute_half_diffuse_right(unsigned int dim, int gi) {
   GasVector& gasv = Config::vGas;
   ImpulseVector& impulsev = m_pSolver->GetImpulse()->getVector();
 
@@ -379,8 +369,7 @@ void Cell::compute_half_diffuse_right(unsigned int dim, int gi)
 
       C1_up += std::abs(impulsev[ii][dim] * m_pPrev[dim]->m_vHalf[gi][ii]);
       C2_up += std::abs(impulsev[ii][dim] * (m_vValue[gi][ii] + m_pPrev[dim]->m_vValue[gi][ii]) / 2);
-      }
-    else {
+    } else {
       C1_down += std::abs(impulsev[ii][dim] * compute_exp(gasv[gi]->getMass(), m_vBoundaryTemperature[gi], impulsev[ii]));
     }
   }
@@ -397,8 +386,8 @@ void Cell::compute_half_diffuse_right(unsigned int dim, int gi)
 /* Setting gases boundary type. */
 void Cell::compute_half_gase_left(unsigned int dim, int gi) {
   GasVector& gasv = Config::vGas;
-	Impulse* pImpulse = m_pSolver->GetImpulse();
-	ImpulseVector& impulsev = pImpulse->getVector();
+  Impulse* pImpulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = pImpulse->getVector();
 
   double C1_up = 0.0;
   double C1_down = 0.0;
@@ -423,8 +412,7 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
 
       C1_up += m_vHalf[gi][ii];
       C2_up += (m_vValue[gi][ii] + m_pNext[dim]->m_vValue[gi][ii]) / 2;
-    }
-    else {
+    } else {
       C1_down += compute_exp(
         gasv[gi]->getMass(),
         m_vBoundaryTemperature[gi],
@@ -436,8 +424,7 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
   if (m_vBoundaryPressure[gi] == 0.0) {
     C1_up = 0.0;
     C2_up = 0.0;
-  }
-  else {
+  } else {
     C1_up = m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi] / pImpulse->getDeltaImpulseQube() - C1_up;
     C2_up = m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi] / pImpulse->getDeltaImpulseQube() - C2_up;
 
@@ -489,8 +476,7 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
 
       C1_up += m_pPrev[dim]->m_vHalf[gi][ii];
       C2_up += (m_vValue[gi][ii] + m_pPrev[dim]->m_vValue[gi][ii]) / 2;
-    }
-    else {
+    } else {
       C1_down += compute_exp(
         gasv[gi]->getMass(),
         m_vBoundaryTemperature[gi],
@@ -502,8 +488,7 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
   if (m_vBoundaryPressure[gi] == 0.0) {
     C1_up = 0.0;
     C2_up = 0.0;
-  }
-  else {
+  } else {
     C1_up = m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi] / pImpulse->getDeltaImpulseQube() - C1_up;
     C2_up = m_vBoundaryPressure[gi] / m_vBoundaryTemperature[gi] / pImpulse->getDeltaImpulseQube() - C2_up;
 
@@ -551,8 +536,7 @@ void Cell::compute_half_flow_left(unsigned int dim, int gi) {
 
       C1_up += impulsev[ii][dim] * m_vHalf[gi][ii];
       C2_up += impulsev[ii][dim] * (m_vValue[gi][ii] + m_pNext[dim]->m_vValue[gi][ii]) / 2;
-    }
-    else {
+    } else {
       C1_down += impulsev[ii][dim] * compute_exp(
         gasv[gi]->getMass(),
         m_vBoundaryTemperature[gi],
@@ -584,8 +568,8 @@ void Cell::compute_half_flow_left(unsigned int dim, int gi) {
 
 void Cell::compute_half_flow_right(unsigned int dim, int gi) {
   GasVector& gasv = Config::vGas;
-	Impulse* pImpulse = m_pSolver->GetImpulse();
-	ImpulseVector& impulsev = pImpulse->getVector();
+  Impulse* pImpulse = m_pSolver->GetImpulse();
+  ImpulseVector& impulsev = pImpulse->getVector();
 
   double C1_up = 0.0;
   double C1_down = 0.0;
@@ -605,8 +589,7 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
 
       C1_up += std::abs(impulsev[ii][dim]) * m_pPrev[dim]->m_vHalf[gi][ii];
       C2_up += std::abs(impulsev[ii][dim]) * (m_vValue[gi][ii] + m_pPrev[dim]->m_vValue[gi][ii]) / 2;
-    }
-    else {
+    } else {
       C1_down += std::abs(impulsev[ii][dim]) * compute_exp(
         gasv[gi]->getMass(),
         m_vBoundaryTemperature[gi],
@@ -620,8 +603,8 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
   if (C1_up / C1_down < 0.0) C1_up = 0.0;
   if (C2_up / C1_down < 0.0) C2_up = 0.0;
 
-	for (unsigned int ii = 0; ii<impulsev.size(); ii++) {
-		if (impulsev[ii][dim] < 0) {
+  for (unsigned int ii = 0; ii < impulsev.size(); ii++) {
+    if (impulsev[ii][dim] < 0) {
       m_pPrev[dim]->m_vHalf[gi][ii] = C1_up / C1_down * compute_exp(
         gasv[gi]->getMass(),
         m_vBoundaryTemperature[gi],
@@ -631,14 +614,13 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
         gasv[gi]->getMass(),
         m_vBoundaryTemperature[gi],
         impulsev[ii]) - m_pPrev[dim]->m_vValue[gi][ii];
-			if (m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
-		}
-	}
+      if (m_vValue[gi][ii] < 0.0) m_vValue[gi][ii] = 0.0;
+    }
+  }
 }
 
 /* Setting mirror boundary type. */
-void Cell::compute_half_mirror_left(unsigned int dim, int gi)
-{
+void Cell::compute_half_mirror_left(unsigned int dim, int gi) {
   GasVector& gasv = Config::vGas;
   Impulse* impulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = impulse->getVector();
@@ -648,13 +630,12 @@ void Cell::compute_half_mirror_left(unsigned int dim, int gi)
 
     if (impulsev[ii][dim] > 0) {
       int ri = impulse->reverseIndex(ii, static_cast<sep::Axis>(dim));
-      
+
       m_vHalf[gi][ii] = m_vValue[gi][ii] + (1 - y) / 2 * limiter(
         m_vValue[gi][ri], // reversed for left
         m_vValue[gi][ii],
         m_pNext[dim]->m_vValue[gi][ii]);
-    }
-    else {
+    } else {
       m_vHalf[gi][ii] = m_pNext[dim]->m_vValue[gi][ii] - (1 - y) / 2 * limiter(
         m_vValue[gi][ii],
         m_pNext[dim]->m_vValue[gi][ii],
@@ -669,8 +650,7 @@ void Cell::compute_half_mirror_left(unsigned int dim, int gi)
   }
 }
 
-void Cell::compute_half_mirror_right(unsigned int dim, int gi)
-{
+void Cell::compute_half_mirror_right(unsigned int dim, int gi) {
   GasVector& gasv = Config::vGas;
   Impulse* pImpulse = m_pSolver->GetImpulse();
   ImpulseVector& impulsev = pImpulse->getVector();
@@ -679,7 +659,7 @@ void Cell::compute_half_mirror_right(unsigned int dim, int gi)
     double y = Config::dTimestep / gasv[gi]->getMass()*std::abs(impulsev[ii][dim] / m_vAreastep[dim]);
 
     int ri = pImpulse->reverseIndex(ii, static_cast<sep::Axis>(dim));
-      
+
     if (impulsev[ii][dim] > 0) {
       // PREV
       m_pPrev[dim]->m_vHalf[gi][ii] = m_pPrev[dim]->m_vValue[gi][ii] + (1 - y) / 2 * limiter(
@@ -692,8 +672,7 @@ void Cell::compute_half_mirror_right(unsigned int dim, int gi)
         m_pPrev[dim]->m_vValue[gi][ii],
         m_vValue[gi][ii],
         m_vValue[gi][ri]); // reversed for right
-    }
-    else {
+    } else {
       // PREV
       m_pPrev[dim]->m_vHalf[gi][ii] = m_vValue[gi][ii] - (1 - y) / 2 * limiter(
         m_pPrev[dim]->m_vValue[gi][ii],
@@ -721,8 +700,7 @@ double Cell::compute_exp(const double& mass, const double& temp, const Vector3d&
 double Cell::limiter_superbee(const double& x, const double& y, const double& z) {
   if ((z - y)*(y - x) <= 0) {
     return 0.0;
-  }
-  else {
+  } else {
     return std::max(0.0, std::min(2 * std::abs(y - x), std::min(std::abs(z - y), std::min(std::abs(y - x), 2 * std::abs(z - y)))))*sgn(z - y);
   }
 }

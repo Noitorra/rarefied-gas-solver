@@ -5,9 +5,9 @@
 
 
 int main(int argc, char * argv[]) {
-	//std::ofstream out("log.txt");
-	//std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
-	//std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
+  //std::ofstream out("log.txt");
+  //std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
+  //std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
 
   Config::Init();
 

@@ -11,11 +11,11 @@ class InitCellData {
   friend class OutResults;
 protected:
   InitCellData(sep::CellType eType) :
-  m_eType(eType),
-  m_pCell(nullptr) {
+    m_eType(eType),
+    m_pCell(nullptr) {
     m_vMacroData.resize(2);
   };
-  
+
   sep::CellType m_eType;
   Cell* m_pCell;
   std::vector<MacroData> m_vMacroData;
@@ -37,11 +37,11 @@ public:
 private:
   void AddCell(std::shared_ptr<Cell> pCell);
   void AllocateInitData();
-  
+
   Vector3i m_vSize;
 
   GridManager* m_pGridManager;
-  
+
   std::vector<std::shared_ptr<Cell>> m_vCells;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vInitCells;
 };

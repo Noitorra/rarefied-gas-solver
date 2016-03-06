@@ -13,9 +13,10 @@
 #include <chrono>
 
 Solver::Solver() :
-m_pImpulse(new Impulse),
-m_pGridManager(nullptr),
-  m_pGrid(nullptr) {}
+  m_pImpulse(new Impulse),
+  m_pGridManager(nullptr),
+  m_pGrid(nullptr) {
+}
 
 void Solver::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
@@ -43,35 +44,33 @@ void Solver::Run() {
   auto startTimestamp = std::chrono::steady_clock::now();
   auto timestamp = startTimestamp;
 
-  for(int it = 0; it < Config::iMaxIteration; it++) {
+  for (int it = 0; it < Config::iMaxIteration; it++) {
     outResults->OutAll(it);
 
     MakeStep(sep::X);
     MakeStep(sep::Y);
     MakeStep(sep::Z);
 
-		if (Config::bUseIntegral) {
-			if (Config::iGasesNumber == 1) {
+    if (Config::bUseIntegral) {
+      if (Config::iGasesNumber == 1) {
         MakeIntegral(0, 0, Config::dTimestep);
-			}
-			else if (Config::iGasesNumber == 2) {
-				MakeIntegral(0, 0, Config::dTimestep);
+      } else if (Config::iGasesNumber == 2) {
+        MakeIntegral(0, 0, Config::dTimestep);
         MakeIntegral(0, 1, Config::dTimestep);
-			}
-			else if (Config::iGasesNumber >= 3) {
+      } else if (Config::iGasesNumber >= 3) {
         MakeIntegral(0, 0, Config::dTimestep);
-				MakeIntegral(0, 1, Config::dTimestep);
-				MakeIntegral(0, 2, Config::dTimestep);
+        MakeIntegral(0, 1, Config::dTimestep);
+        MakeIntegral(0, 2, Config::dTimestep);
       }
     }
 
-		if (Config::bUseBetaChain) {
-			for (int i = 0; i < Config::iBetaChainsNumber; i++) {
-				auto& item = Config::vBetaChains[i];
-				MakeBetaDecay(item->iGasIndex1, item->iGasIndex2, item->dLambda1);
-				MakeBetaDecay(item->iGasIndex2, item->iGasIndex3, item->dLambda2);
-			}
-		}
+    if (Config::bUseBetaChain) {
+      for (int i = 0; i < Config::iBetaChainsNumber; i++) {
+        auto& item = Config::vBetaChains[i];
+        MakeBetaDecay(item->iGasIndex1, item->iGasIndex2, item->dLambda1);
+        MakeBetaDecay(item->iGasIndex2, item->iGasIndex3, item->dLambda2);
+      }
+    }
 
     CheckCells();
 
@@ -86,8 +85,7 @@ void Solver::Run() {
     std::cout << "Remaining time: ";
     if (it == 0) {
       std::cout << "Unknown";
-    }
-    else {
+    } else {
       std::cout << wholeTime * (Config::iMaxIteration - it) / it / 60 << " m";
     }
     std::cout << std::endl;
@@ -100,11 +98,11 @@ void Solver::Run() {
 }
 
 void Solver::InitCellType(sep::Axis axis) {
-	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
-	// make type
-	for( auto& item : vCellVector ) {
-		item->computeType(axis);
-	}
+  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  // make type
+  for (auto& item : vCellVector) {
+    item->computeType(axis);
+  }
 }
 
 void Solver::MakeStep(sep::Axis axis) {
@@ -112,12 +110,12 @@ void Solver::MakeStep(sep::Axis axis) {
 
   // Make half
   tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
-      item->computeHalf(axis);
+    item->computeHalf(axis);
   });
 
   // Make value
   tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
-      item->computeValue(axis);
+    item->computeValue(axis);
   });
 }
 
@@ -140,11 +138,11 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
 }
 
 void Solver::MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
-	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 
-	tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
-		item->computeBetaDecay(gi0, gi1, lambda);
-	});
+  tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+    item->computeBetaDecay(gi0, gi1, lambda);
+  });
 }
 
 void Solver::CheckCells() {

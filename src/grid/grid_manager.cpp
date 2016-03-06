@@ -56,17 +56,17 @@ void GridManager::PrintLinkage(sep::Axis axis) {
 void GridManager::ConfigureGrid() {
   if (Config::bGPRTGrid) {
     ConfigureGPRT();
-	//ConfigureGPRT2();
-	//BoundaryConditionTest();
-	//PressureBoundaryConditionTestSmallArea();
-	//PressureBoundaryConditionTestBigArea();
+    //ConfigureGPRT2();
+    //BoundaryConditionTest();
+    //PressureBoundaryConditionTestSmallArea();
+    //PressureBoundaryConditionTestBigArea();
   } else {
     ConfigureStandartGrid();
-		//ConfigureTestGrid();
+    //ConfigureTestGrid();
   }
   GridGeometryToInitialCells();
   AdoptInitialCells();
-//  PrintGrid();
+  //  PrintGrid();
 
   FillInGrid();
   LinkCells();
@@ -80,7 +80,7 @@ void GridManager::GridGeometryToInitialCells() {
 
   // determine grid size
   Vector2i vMin(boxes_stack_[0].p), vMax;
-  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
+  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&](GridBox& box) {
     if (box.p.x() < vMin.x())
       vMin.x() = box.p.x();
     if (box.p.y() < vMin.y())
@@ -97,7 +97,7 @@ void GridManager::GridGeometryToInitialCells() {
 
   grid_->AllocateInitData();
 
-  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&] (GridBox& box) {
+  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&](GridBox& box) {
     for (int x = 0; x < box.size.x(); x++) {
       for (int y = 0; y < box.size.y(); y++) {
         Vector2i tmp_pos = box.p + Vector2i(x, y) - vMin;
@@ -132,7 +132,7 @@ void GridManager::AdoptInitialCells() {
         GasesConfigsMap& init_conds = init_cell->m_mInitConds;
         if (init_cell->m_eType != sep::FAKE_CELL)
           continue;
-        
+
         sep::NeighborType e_neighbor;
         sep::Axis e_ax;
         int i_q;
@@ -148,9 +148,9 @@ void GridManager::AdoptInitialCells() {
 // Find the position of first neighbour with given type
 // and whole quantity of such neighbours
 void GridManager::FindNeighbour(Vector2i p, sep::CellType type,
-        sep::Axis&axis,
-        sep::NeighborType &neighbor,
-        int& quant) {
+  sep::Axis&axis,
+  sep::NeighborType &neighbor,
+  int& quant) {
   int tmp_quant = 0;
   sep::CellType e_type;
   for (int ax = 0; ax <= sep::Y; ax++) {
@@ -170,8 +170,8 @@ void GridManager::FindNeighbour(Vector2i p, sep::CellType type,
 }
 
 bool GridManager::FindNeighbourWithIndex(Vector2i p, sep::CellType type,
-                                int index, sep::Axis&axis,
-                                sep::NeighborType &neighbor) {
+  int index, sep::Axis&axis,
+  sep::NeighborType &neighbor) {
   int quant = 0;
   sep::CellType tmp_type;
   for (int ax = 0; ax <= sep::Y; ax++) {
@@ -192,14 +192,14 @@ bool GridManager::FindNeighbourWithIndex(Vector2i p, sep::CellType type,
 }
 
 bool GridManager::GetNeighbour(Vector2i p, sep::Axis axis,
-                               sep::NeighborType neighbor, sep::CellType&type) {
+  sep::NeighborType neighbor, sep::CellType&type) {
   Vector2i slash;
   slash[axis] = GetSlash(neighbor);
   p += slash;
   sep::CellType e_type;
   try {
     e_type = grid_->GetInitCell(p)->m_eType;
-  } catch(const char* cStr) {
+  } catch (const char* cStr) {
     return false;
   }
   type = e_type;
@@ -208,12 +208,12 @@ bool GridManager::GetNeighbour(Vector2i p, sep::Axis axis,
 
 int GridManager::GetSlash(sep::NeighborType type) const {
   switch (type) {
-    case sep::PREV:
-      return -1;
-    case sep::NEXT:
-      return +1;
-      default:
-      return 0;
+  case sep::PREV:
+    return -1;
+  case sep::NEXT:
+    return +1;
+  default:
+    return 0;
   }
 }
 
@@ -306,12 +306,12 @@ void GridManager::LinkCells() {
         }
 
         if (p_init_cell->m_eType != sep::FAKE_CELL) {
-            // Link to fake
-            FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
-            for (int i = 0; i < q; i++) {
-              FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
-              LinkNeighbors(v_p, ax, neighbor);
-            }
+          // Link to fake
+          FindNeighbour(v_p, sep::FAKE_CELL, ax, neighbor, q);
+          for (int i = 0; i < q; i++) {
+            FindNeighbourWithIndex(v_p, sep::FAKE_CELL, i, ax, neighbor);
+            LinkNeighbors(v_p, ax, neighbor);
+          }
         }
       }
     }
@@ -322,10 +322,10 @@ void GridManager::InitCells() {
   GasVector& gases = Config::vGas;
   double min_mass = 100.0;
   double max_mass = 0.0;
-  std::for_each(gases.begin(), gases.end(), [&] (std::shared_ptr<Gas>& gas) {
-      const double& m = gas->getMass();
-      min_mass = std::min(m, min_mass);
-      max_mass = std::max(m, max_mass);
+  std::for_each(gases.begin(), gases.end(), [&](std::shared_ptr<Gas>& gas) {
+    const double& m = gas->getMass();
+    min_mass = std::min(m, min_mass);
+    max_mass = std::max(m, max_mass);
   });
   double max_impulse = GetSolver()->GetImpulse()->getMaxImpulse();
 
@@ -351,7 +351,7 @@ void GridManager::InitCells() {
         Vector2i v_p(x, y);
         if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
           continue;
-        
+
         Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
 
@@ -362,19 +362,19 @@ void GridManager::InitCells() {
             continue;
           const CellConfig& cond = val.second;
           p_cell->setParameters(
-                  cond.pressure,
-                  cond.T,
-                  area_step,
-                  gas_number,
-                  cond.locked_axes
-          );
+            cond.pressure,
+            cond.T,
+            area_step,
+            gas_number,
+            cond.locked_axes
+            );
           p_cell->setBoundaryType(
-                  cond.boundary_cond,
-                  cond.boundary_T,
-                  cond.boundary_stream,
-                  cond.boundary_pressure,
-                  gas_number
-          );
+            cond.boundary_cond,
+            cond.boundary_T,
+            cond.boundary_stream,
+            cond.boundary_pressure,
+            gas_number
+            );
         }
         p_cell->Init(this);
       }
@@ -383,23 +383,23 @@ void GridManager::InitCells() {
 }
 
 void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
-        sep::NeighborType eNeighbor) {
+  sep::NeighborType eNeighbor) {
   Vector2i v_slash;
   v_slash[axis] = GetSlash(eNeighbor);
   Vector2i target_pos = p + v_slash;
   Cell* target = grid_->GetInitCell(target_pos)->m_pCell;
   Cell* cell = grid_->GetInitCell(p)->m_pCell;
   switch (eNeighbor) {
-    case sep::PREV:
-      if (cell->m_pPrev[axis] != nullptr)
-        throw("Prev is already not emty");
-      cell->m_pPrev[axis] = target;
-      break;
-    case sep::NEXT:
-      if (cell->m_pNext[axis] != nullptr)
-        throw("Next is already not emty");
-      cell->m_pNext[axis] = target;
-      break;
+  case sep::PREV:
+    if (cell->m_pPrev[axis] != nullptr)
+      throw("Prev is already not emty");
+    cell->m_pPrev[axis] = target;
+    break;
+  case sep::NEXT:
+    if (cell->m_pNext[axis] != nullptr)
+      throw("Next is already not emty");
+    cell->m_pNext[axis] = target;
+    break;
   }
 }
 

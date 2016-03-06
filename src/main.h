@@ -48,7 +48,7 @@ namespace sep {
     BT_DIFFUSE,
     BT_GASE,
     BT_MIRROR,
-		BT_FLOW
+    BT_FLOW
   };
 
   const double k = 1.38e-23;  // Bolzman const
@@ -57,10 +57,10 @@ namespace sep {
 class MacroData {
 public:
   MacroData() :
-          C(1.0),
-          T(1.0),
-          P(1.0)
-  {};
+    C(1.0),
+    T(1.0),
+    P(1.0) {
+  };
 
   double C; // concentration
   double T; // temperature
@@ -73,13 +73,13 @@ public:
 class CellConfig {
 public:
   CellConfig() :
-  pressure(1.0),
-  T(1.0),
-  boundary_cond(sep::BT_DIFFUSE),
-  boundary_T(1.0),
-  boundary_pressure(1.0),
-  locked_axes(-1)
-  {};
+    pressure(1.0),
+    T(1.0),
+    boundary_cond(sep::BT_DIFFUSE),
+    boundary_T(1.0),
+    boundary_pressure(1.0),
+    locked_axes(-1) {
+  };
 
   double pressure; // initial pressure
   double T; // initial temperature
@@ -92,7 +92,7 @@ public:
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
 typedef std::function<void(int x, int y, GasesConfigsMap& configs,
-        const Vector2i& size, const Vector2i& start)> ConfigFunction;
+  const Vector2i& size, const Vector2i& start)> ConfigFunction;
 
 struct GridBox {
   Vector2i p;     // in cells
