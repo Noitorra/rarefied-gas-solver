@@ -16,10 +16,10 @@ class Cell {
   friend class OutResults;
 public:
 	Cell();
-  
+
 	// initialize
-  void Init(GridManager* pGridManager);
-  void setParameters(double dPressure, double dTemperature, Vector3d dAreastep, int iGasIndex = 0);
+	void Init(GridManager* pGridManager);
+  void setParameters(double dPressure, double dTemperature, Vector3d dAreastep, int iGasIndex = 0, int iLockedAxes = -1);
   void setBoundaryType(sep::BoundaryType eBoundaryType, double dTemperature, Vector3d dStream, double dPressure, int iGasIndex = 0);
 
 	void computeType(unsigned int dim);
@@ -64,9 +64,9 @@ private:
   void compute_half_mirror_right(unsigned int dim, int gi);
 
 	void compute_value_normal(unsigned int dim);
-    
-	double compute_exp(const double& mass, const double& temp, const Vector3d& impulse);
 
+	double compute_exp(const double& mass, const double& temp, const Vector3d& impulse);
+  
   bool is_normal();
 
 	inline double limiter(const double& x, const double& y, const double& z) {

@@ -13,8 +13,8 @@
 #include <chrono>
 
 Solver::Solver() :
-  m_pImpulse(new Impulse),
-  m_pGridManager(nullptr),
+m_pImpulse(new Impulse),
+m_pGridManager(nullptr),
   m_pGrid(nullptr) {}
 
 void Solver::Init(GridManager* pGridManager) {
@@ -52,17 +52,17 @@ void Solver::Run() {
 
 		if (Config::bUseIntegral) {
 			if (Config::iGasesNumber == 1) {
-				MakeIntegral(0, 0, Config::dTimestep);
+        MakeIntegral(0, 0, Config::dTimestep);
 			}
 			else if (Config::iGasesNumber == 2) {
 				MakeIntegral(0, 0, Config::dTimestep);
-				MakeIntegral(0, 1, Config::dTimestep);
+        MakeIntegral(0, 1, Config::dTimestep);
 			}
 			else if (Config::iGasesNumber >= 3) {
-				MakeIntegral(0, 0, Config::dTimestep);
+        MakeIntegral(0, 0, Config::dTimestep);
 				MakeIntegral(0, 1, Config::dTimestep);
 				MakeIntegral(0, 2, Config::dTimestep);
-			}
+      }
     }
 
 		if (Config::bUseBetaChain) {

@@ -7,7 +7,6 @@
 #include "parameters/impulse.h"
 #include <algorithm>  // for visual studio compilator
 
-extern double T1, T2, P_sat_T1, P_sat_T2, Q_Xe_in, P_sat_Xe;
 
 GridManager::GridManager() :
   grid_(new Grid),
@@ -330,6 +329,21 @@ void GridManager::InitCells() {
   });
   double max_impulse = GetSolver()->GetImpulse()->getMaxImpulse();
 
+  // Set parameters
+  Vector2d cell_size = Config::vCellSize;	// in mm
+  cell_size /= 1e3;	// in m
+  cell_size /= Config::l_normalize;	// normalized
+  Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
+
+  // decreasing time step if needed
+  double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
+  //Config::dTimestep = std::min(Config::dTimestep, time_step);
+  Config::dTimestep = time_step;
+
+  //std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
+  std::cout << "Time step: " << Config::dTimestep * Config::tau_normalize << " s" << std::endl;
+
+
   const Vector3i& grid_size = Config::vGridSize;
   for (int x = 0; x < grid_size.x(); x++) {
     for (int y = 0; y < grid_size.y(); y++) {
@@ -340,15 +354,6 @@ void GridManager::InitCells() {
         
         Cell* p_cell = grid_->GetInitCell(v_p)->m_pCell;
         InitCellData* p_init_cell = grid_->GetInitCell(v_p);
-        // Set parameters
-        Vector2d cell_size = Config::vCellSize;	// in mm
-		cell_size /= 1e3;	// in m
-		cell_size /= Config::l_normalize;	// normalized
-        Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
-
-        // decreasing time step if needed
-        double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
-				Config::dTimestep = time_step * 0.9; // super hack for more stability cause for occilations near y == 1.0, need y == 0.9.
 
         const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
         for (auto val : init_conds) {
@@ -360,7 +365,8 @@ void GridManager::InitCells() {
                   cond.pressure,
                   cond.T,
                   area_step,
-                  gas_number
+                  gas_number,
+                  cond.locked_axes
           );
           p_cell->setBoundaryType(
                   cond.boundary_cond,
@@ -374,8 +380,6 @@ void GridManager::InitCells() {
       }
     }
   }
-
-  std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
 }
 
 void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
