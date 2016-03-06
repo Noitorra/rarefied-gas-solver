@@ -13,12 +13,12 @@ protected:
   InitCellData(sep::CellType eType) :
   m_eType(eType),
   m_pCell(nullptr) {
-    //m_vMacroData.resize(2);
+    m_vMacroData.resize(2);
   };
   
   sep::CellType m_eType;
   Cell* m_pCell;
-  //std::vector<MacroData> m_vMacroData;
+  std::vector<MacroData> m_vMacroData;
   GasesConfigsMap m_mInitConds;  // initial configs for several gases
 };
 
