@@ -44,8 +44,7 @@ namespace sep {
     NEXT = 1
   };
 
-  enum BoundaryType
-  {
+  enum BoundaryType {
     BT_DIFFUSE,
     BT_GASE,
     BT_MIRROR,
@@ -74,19 +73,18 @@ public:
 class CellConfig {
 public:
   CellConfig() :
-  pressure(1.0),
-  T(1.0),
-  boundary_cond(sep::BT_DIFFUSE),
-  boundary_T(1.0),
-  boundary_pressure(1.0)
-  {};
+    pressure(1.0),
+    T(1.0),
+    boundary_cond(sep::BT_DIFFUSE),
+    boundary_T(1.0),
+    boundary_pressure(1.0) {};
 
   double pressure; // initial pressure
   double T; // initial temperature
   sep::BoundaryType boundary_cond;
   double boundary_T;  // wall temperature
   double boundary_pressure;
-	Vector3d boundary_stream;
+  Vector3d boundary_stream;
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
@@ -100,3 +98,8 @@ struct GridBox {
 
   ConfigFunction config_func;
 };
+
+template <typename T>
+inline int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}

@@ -138,9 +138,9 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 iter_start = 0
-iter_end = 3000
+iter_end = 1000
 iter_step = 100
-gas_num = 1
+gas_num = 2
 
 params = ["conc", "temp", "pressure", "flow"]
 cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'$(m^2s)^-1$']

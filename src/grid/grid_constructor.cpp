@@ -227,7 +227,7 @@ void GridConstructor::ConfigureStandartGrid() {
 
     //Vector2d vPhysSize = Vector2d(520.0, 0.4);
 		Vector2d vPhysSize = Vector2d(5.2, 0.4);
-    Vector2i vNumSize = Vector2i(50, 5);
+    Vector2i vNumSize = Vector2i(100, 30);
     Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 		SetBox(Vector2d(0.0, 0.0), vPhysSize, [](int x, int y, GasesConfigsMap& configs,
