@@ -4,7 +4,6 @@
 #include "main.h"
 
 class Cell;
-class VesselGrid;
 
 class InitCellData {
   friend class GridManager;
@@ -14,12 +13,12 @@ protected:
   InitCellData(sep::CellType eType) :
   m_eType(eType),
   m_pCell(nullptr) {
-    m_vMacroData.resize(2);
+    //m_vMacroData.resize(2);
   };
   
   sep::CellType m_eType;
   Cell* m_pCell;
-  std::vector<MacroData> m_vMacroData;
+  //std::vector<MacroData> m_vMacroData;
   GasesConfigsMap m_mInitConds;  // initial configs for several gases
 };
 
@@ -34,7 +33,6 @@ public:
   std::vector<std::shared_ptr<Cell>>& GetCells();
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& GetInitCells();
   InitCellData* GetInitCell(Vector2i vP);
-  std::vector<std::shared_ptr<VesselGrid>>& GetVessels();
 
 private:
   void AddCell(std::shared_ptr<Cell> pCell);
@@ -46,7 +44,6 @@ private:
   
   std::vector<std::shared_ptr<Cell>> m_vCells;
   std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vInitCells;
-  std::vector<std::shared_ptr<VesselGrid>> m_vVessels;
 };
 
 #endif // GRID_H_

@@ -3,7 +3,6 @@
 #include "grid/grid_manager.h"
 #include "grid/cell.h"
 #include "config.h"
-#include "grid/vessel_grid.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -90,12 +89,6 @@ void OutResults::LoadParameters() {
         }
       }
   });
-  
-  const std::vector<std::shared_ptr<VesselGrid>>& vVessels = grid_->GetVessels();
-  
-  for (auto& pVessel : vVessels) {
-    pVessel->computeMacroData();
-  }
 }
 
 void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {

@@ -5,7 +5,6 @@
 class Grid;
 class GridManager;
 
-
 class OutResults {
 public:
   OutResults() :

@@ -1,6 +1,5 @@
 #include "solver.h"
 
-#include "parallel.h"
 #include "grid/grid.h"
 #include "grid/grid_manager.h"
 #include "grid/cell.h"
@@ -9,42 +8,43 @@
 #include "parameters/impulse.h"
 #include "parameters/gas.h"
 #include "parameters/beta_chain.h"
-#include "grid/vessel_grid.h"
 #include "integral/ci.hpp"
-#include "utilities/timer.h"
+
+#include <chrono>
 
 Solver::Solver() :
-m_pParallel(new Parallel),
-m_pImpulse(new Impulse),
-m_pGridManager(nullptr),
-m_pGrid(nullptr)
-{}
+  m_pImpulse(new Impulse),
+  m_pGridManager(nullptr),
+  m_pGrid(nullptr) {}
 
 void Solver::Init(GridManager* pGridManager) {
   m_pGridManager = pGridManager;
   m_pGrid = pGridManager->GetGrid();
-
   m_pImpulse->Init(pGridManager);
 }
 
 void Solver::Run() {
-  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  // Compute cell type for each axis
+  InitCellType(sep::X);
+  InitCellType(sep::Y);
+  InitCellType(sep::Z);
 
-  PreRun();
+  //  m_pGridManager->PrintLinkage(sep::X);
+  //  m_pGridManager->PrintLinkage(sep::Y);
 
   if (Config::bUseIntegral) {
     ci::Potential* potential = new ci::HSPotential;
     ci::init(potential, ci::NO_SYMM);
   }
 
-  std::shared_ptr<OutResults> out_results(new OutResults());
-  out_results->Init(m_pGrid, m_pGridManager);
+  std::shared_ptr<OutResults> outResults(new OutResults());
+  outResults->Init(m_pGrid, m_pGridManager);
 
-  timer_.restart();
+  auto startTimestamp = std::chrono::steady_clock::now();
+  auto timestamp = startTimestamp;
+
   for(int it = 0; it < Config::iMaxIteration; it++) {
-
-    Timer iter_timer;
-    out_results->OutAll(it);
+    outResults->OutAll(it);
 
     MakeStep(sep::X);
     MakeStep(sep::Y);
@@ -65,7 +65,6 @@ void Solver::Run() {
 			}
     }
 
-		// beta
 		if (Config::bUseBetaChain) {
 			for (int i = 0; i < Config::iBetaChainsNumber; i++) {
 				auto& item = Config::vBetaChains[i];
@@ -74,28 +73,30 @@ void Solver::Run() {
 			}
 		}
 
-    // here we can test data, if needed...
-    tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
-      item->testInnerValuesRange();
-    });
+    CheckCells();
+
+    auto now = std::chrono::steady_clock::now();
+    auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTimestamp).count();
+    auto iterationTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - timestamp).count();
 
     std::cout << "Run() : " << it << "/" << Config::iMaxIteration << std::endl;
-    PrintElapsedTime(it, iter_timer);
+    std::cout << "Iteration time: " << iterationTime << " ms" << std::endl;
+    std::cout << "Inner time: " << it * Config::tau_normalize * Config::dTimestep << " s" << std::endl;
+    std::cout << "Real time: " << wholeTime << " s" << std::endl;
+    std::cout << "Remaining time: ";
+    if (it == 0) {
+      std::cout << "Unknown";
+    }
+    else {
+      std::cout << wholeTime * (Config::iMaxIteration - it) / it / 60 << " m";
+    }
+    std::cout << std::endl;
     std::cout << std::endl;
   }
 
-  out_results->OutAll(Config::iMaxIteration);
+  outResults->OutAll(Config::iMaxIteration);
 
-  std::cout << "Done..." << std::endl;
-}
-
-void Solver::PreRun() {
-  InitCellType(sep::X);
-  InitCellType(sep::Y);
-  InitCellType(sep::Z);
-
-//  m_pGridManager->PrintLinkage(sep::X);
-//  m_pGridManager->PrintLinkage(sep::Y);
+  std::cout << "Done" << std::endl;
 }
 
 void Solver::InitCellType(sep::Axis axis) {
@@ -104,14 +105,6 @@ void Solver::InitCellType(sep::Axis axis) {
 	for( auto& item : vCellVector ) {
 		item->computeType(axis);
 	}
-  
-  // Vessels
-  const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
-  m_pGrid->GetVessels();
-  
-  for (auto& item : vVessels) {
-    item->computeType(axis);
-  }
 }
 
 void Solver::MakeStep(sep::Axis axis) {
@@ -122,23 +115,10 @@ void Solver::MakeStep(sep::Axis axis) {
       item->computeHalf(axis);
   });
 
-  // Vessels
-  const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
-		m_pGrid->GetVessels();
-
-  for (auto& item : vVessels) {
-    item->computeHalf(axis);
-  }
-
   // Make value
   tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
       item->computeValue(axis);
   });
-
-  // Vessels
-  for (auto& item : vVessels) {
-    item->computeValue(axis);
-  }
 }
 
 void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
@@ -157,29 +137,20 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
   tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
     item->computeIntegral(gi0, gi1);
   });
-  
-  // Vessels
-  const std::vector<std::shared_ptr<VesselGrid>>& vVessels =
-  m_pGrid->GetVessels();
-  
-  for (auto& item : vVessels) {
-    item->computeIntegral(gi0, gi1);
-  }
 }
 
 void Solver::MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
-	std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+	std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
 
-	tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+	tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
 		item->computeBetaDecay(gi0, gi1, lambda);
 	});
 }
 
-void Solver::PrintElapsedTime(int it, Timer& iter_timer) {
-  std::cout << "Compiuted time in task: " << it * Config::tau_normalize * Config::dTimestep << " s" << std::endl;
-  std::cout << "Iteration time: " << iter_timer.elapsed_time() << " ms" << std::endl;
-  const double elapsed_time = timer_.elapsed_time() / 1e3;  // s
-  std::cout << "Elapsed time: " <<  (int)elapsed_time << " s. " <<
-          Config::iMaxIteration << " iteration will be done in " <<
-          (int)(elapsed_time * (1.0 / ((double)(it+1) / Config::iMaxIteration) - 1.0) / 60.0)  << " min." << std::endl;
+void Solver::CheckCells() {
+  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+    item->checkInnerValuesRange();
+  });
+
 }

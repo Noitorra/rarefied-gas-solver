@@ -29,10 +29,6 @@ InitCellData* Grid::GetInitCell(Vector2i vP) {
   return m_vInitCells[vP.x()][vP.y()][0].get();
 }
 
-std::vector<std::shared_ptr<VesselGrid>>& Grid::GetVessels() {
-  return m_vVessels;
-}
-
 void Grid::AllocateInitData() {
   m_vSize = Config::vGridSize;
 

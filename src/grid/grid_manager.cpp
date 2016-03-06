@@ -387,14 +387,14 @@ void GridManager::LinkNeighbors(Vector2i p, sep::Axis axis,
   Cell* cell = grid_->GetInitCell(p)->m_pCell;
   switch (eNeighbor) {
     case sep::PREV:
-      if (!cell->m_vPrev[axis].empty())
+      if (cell->m_pPrev[axis] != nullptr)
         throw("Prev is already not emty");
-      cell->m_vPrev[axis].push_back(target);
+      cell->m_pPrev[axis] = target;
       break;
     case sep::NEXT:
-      if (!cell->m_vNext[axis].empty())
+      if (cell->m_pNext[axis] != nullptr)
         throw("Next is already not emty");
-      cell->m_vNext[axis].push_back(target);
+      cell->m_pNext[axis] = target;
       break;
   }
 }
@@ -404,13 +404,13 @@ void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
 
   int coord = mirror_axis == sep::X ? p.x() : p.y();
   if (coord < 2) {
-    if (!cell->m_vPrev[mirror_axis].empty())
+    if (cell->m_pPrev[mirror_axis] != nullptr)
       throw("Next is already not emty");
-    cell->m_vPrev[mirror_axis].push_back(cell); // cell->m_vNext[mirror_axis][0]
+    cell->m_pPrev[mirror_axis] = cell; // cell->m_vNext[mirror_axis][0]
   } else {
-    if (!cell->m_vNext[mirror_axis].empty())
+    if (cell->m_pNext[mirror_axis] != nullptr)
       throw("Next is already not emty");
-    cell->m_vNext[mirror_axis].push_back(cell); // cell->m_vPrev[mirror_axis][0]
+    cell->m_pNext[mirror_axis] = cell; // cell->m_vPrev[mirror_axis][0]
   }
 }
 
