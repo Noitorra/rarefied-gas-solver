@@ -3,8 +3,8 @@
 #include "grid/grid_manager.h"
 #include "grid/cell.h"
 #include "config.h"
-
-#include <experimental\filesystem>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
@@ -26,23 +26,23 @@ void OutResults::Init(Grid* grid, GridManager* grid_manager) {
   grid_manager_ = grid_manager;
 
   // check if needed to create directories
-  namespace fs = std::experimental::filesystem;
+  namespace fs = boost::filesystem;
 
   for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
     for (int gas = 0; gas < Config::iGasesNumber; gas++) {
       std::string dir = Config::sOutputPrefix + "out/gas" + std::to_string(gas) +
         "/" + param_to_str((sep::MacroParamType)param) + "/data/";
       fs::path file_path(dir);
-      
-      std::error_code ec;
+
+      boost::system::error_code ec;
       fs::remove_all(file_path.parent_path(), ec);
       if (ec)
         throw("cannot remove directory");
-      fs::create_directories(file_path, ec);
+      boost::filesystem::create_directories(file_path, ec);
       if (ec)
         throw("cannot create directory");
       fs::path pic_dir(file_path.parent_path().parent_path() / fs::path("pic"));
-      fs::create_directories(pic_dir, ec);
+      boost::filesystem::create_directories(pic_dir, ec);
       if (ec)
         throw("cannot create directory");
     }
