@@ -4,7 +4,9 @@
 #include "grid/cell.h"
 #include "config.h"
 
-#include <experimental\filesystem>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
@@ -21,30 +23,30 @@ std::string param_to_str(sep::MacroParamType param) {
   }
 }
 
+void makeDir() {
+    
+}
+
 void OutResults::Init(Grid* grid, GridManager* grid_manager) {
   grid_ = grid;
   grid_manager_ = grid_manager;
 
-  // check if needed to create directories
-  namespace fs = std::experimental::filesystem;
+  std::string out_dir = Config::sOutputPrefix + "out";
+  system(("rm -rf " + out_dir).c_str());
 
-  for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
-    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
-      std::string dir = Config::sOutputPrefix + "out/gas" + std::to_string(gas) +
-        "/" + param_to_str((sep::MacroParamType)param) + "/data/";
-      fs::path file_path(dir);
+  system(("mkdir " + out_dir).c_str());
+  
+  // check if needed to create directories
+  for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+    std::string gas_dir = out_dir + "/gas" + std::to_string(gas);
+    system(("mkdir " + gas_dir).c_str());
       
-      std::error_code ec;
-      fs::remove_all(file_path.parent_path(), ec);
-      if (ec)
-        throw("cannot remove directory");
-      fs::create_directories(file_path, ec);
-      if (ec)
-        throw("cannot create directory");
-      fs::path pic_dir(file_path.parent_path().parent_path() / fs::path("pic"));
-      fs::create_directories(pic_dir, ec);
-      if (ec)
-        throw("cannot create directory");
+    for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
+      std::string param_dir = gas_dir + "/" + param_to_str((sep::MacroParamType)param);
+      
+      system(("mkdir " + param_dir).c_str());
+      system(("mkdir " + param_dir + "/data").c_str());
+      system(("mkdir " + param_dir + "/pic").c_str());
     }
   }
 }
