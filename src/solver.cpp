@@ -38,14 +38,14 @@ void Solver::Run() {
     ci::init(potential, ci::NO_SYMM);
   }
 
-  std::shared_ptr<OutResults> outResults(new OutResults());
-  outResults->Init(m_pGrid, m_pGridManager);
+  OutResults outResults;
+  outResults.Init(m_pGrid, m_pGridManager);
 
   auto startTimestamp = std::chrono::steady_clock::now();
   auto timestamp = startTimestamp;
 
   for (int it = 0; it < Config::iMaxIteration; it++) {
-    outResults->OutAll(it);
+    outResults.OutAll(it);
 
     MakeStep(sep::X);
     MakeStep(sep::Y);
@@ -92,7 +92,7 @@ void Solver::Run() {
     std::cout << std::endl;
   }
 
-  outResults->OutAll(Config::iMaxIteration);
+  outResults.OutAll(Config::iMaxIteration);
 
   std::cout << "Done" << std::endl;
 }
