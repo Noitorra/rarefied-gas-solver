@@ -11,10 +11,10 @@ int main(int argc, char * argv[]) {
 
   Config::Init();
 
-  std::shared_ptr<GridManager> pGridManager(new GridManager());
-  pGridManager->Init();
-  pGridManager->ConfigureGrid();
-  pGridManager->GetSolver()->Run();
+  GridManager gridManager;
+  gridManager.Init();
+  gridManager.ConfigureGrid();
+  gridManager.GetSolver()->Run();
 
   return 0;
 }

@@ -4,7 +4,9 @@
 #include "grid/cell.h"
 #include "config.h"
 
-#include <experimental\filesystem>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
@@ -21,30 +23,30 @@ std::string param_to_str(sep::MacroParamType param) {
   }
 }
 
+void makeDir() {
+    
+}
+
 void OutResults::Init(Grid* grid, GridManager* grid_manager) {
   grid_ = grid;
   grid_manager_ = grid_manager;
 
-  // check if needed to create directories
-  namespace fs = std::experimental::filesystem;
+  std::string out_dir = Config::sOutputPrefix + "out";
+  system(("rm -rf " + out_dir).c_str());
 
-  for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
-    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
-      std::string dir = Config::sOutputPrefix + "out/gas" + std::to_string(gas) +
-        "/" + param_to_str((sep::MacroParamType)param) + "/data/";
-      fs::path file_path(dir);
+  system(("mkdir " + out_dir).c_str());
+  
+  // check if needed to create directories
+  for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+    std::string gas_dir = out_dir + "/gas" + to_string(gas);
+    system(("mkdir " + gas_dir).c_str());
       
-      std::error_code ec;
-      fs::remove_all(file_path.parent_path(), ec);
-      if (ec)
-        throw("cannot remove directory");
-      fs::create_directories(file_path, ec);
-      if (ec)
-        throw("cannot create directory");
-      fs::path pic_dir(file_path.parent_path().parent_path() / fs::path("pic"));
-      fs::create_directories(pic_dir, ec);
-      if (ec)
-        throw("cannot create directory");
+    for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
+      std::string param_dir = gas_dir + "/" + param_to_str((sep::MacroParamType)param);
+      
+      system(("mkdir " + param_dir).c_str());
+      system(("mkdir " + param_dir + "/data").c_str());
+      system(("mkdir " + param_dir + "/pic").c_str());
     }
   }
 }
@@ -75,7 +77,7 @@ void OutResults::OutAll(int iteration) {
 
 // prepare parameters to be printed out
 void OutResults::LoadParameters() {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>&cells = grid_->GetInitCells();
+  std::vector<std::vector<std::vector<InitCellData*>>>&cells = grid_->GetInitCells();
 
   const Vector3i& vSize = grid_->GetSize();
   tbb::parallel_for(tbb::blocked_range<int>(0, vSize.x()), [&](const tbb::blocked_range<int>& r) {
@@ -84,7 +86,7 @@ void OutResults::LoadParameters() {
         const int z = 0;
         if (cells[x][y][z]->m_eType != sep::NORMAL_CELL)
           continue;
-        Cell *cell = cells[x][y][z].get()->m_pCell;
+        Cell *cell = cells[x][y][z]->m_pCell;
         cell->computeMacroData();
       }
     }
@@ -92,13 +94,13 @@ void OutResults::LoadParameters() {
 }
 
 void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>&cells = grid_->GetInitCells();
+  std::vector<std::vector<std::vector<InitCellData*>>>&cells = grid_->GetInitCells();
 
   std::string filename;
   const std::string& output_prefix = Config::sOutputPrefix;
 
-  filename = output_prefix + "out/gas" + std::to_string(gas) +
-    "/" + param_to_str(type) + "/data/" + std::to_string(index) + ".bin";
+  filename = output_prefix + "out/gas" + to_string(gas) +
+    "/" + param_to_str(type) + "/data/" + to_string(index) + ".bin";
 
   std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
 
@@ -159,7 +161,7 @@ void OutResults::OutAverageStream(int iteration) {
   const std::string& output_prefix = Config::sOutputPrefix;
   std::string as_filename_base = output_prefix + "out/gas";
   for (unsigned int gi = 0; gi < Config::iGasesNumber; gi++) {
-    std::string as_filename = as_filename_base + std::to_string(gi);
+    std::string as_filename = as_filename_base + to_string(gi);
     as_filename += "/";
     as_filename += "average_stream.bin";
 
@@ -170,7 +172,7 @@ void OutResults::OutAverageStream(int iteration) {
     } else {
       openmode = std::ios::app | std::ios::binary;
     }
-    filestream.open(as_filename, openmode);
+    filestream.open(as_filename.c_str(), openmode);
     if (filestream.is_open()) {
 
       switch (Config::eGridGeometryType) {
@@ -203,7 +205,7 @@ void OutResults::OutAverageStreamComb(std::fstream& filestream, int gas_n) {
 
 void OutResults::OutAverageStreamGPRT(std::fstream &filestream, int gas_n) {
   const Vector3i& grid_size = grid_->GetSize();
-  HTypeGridConfig* h_type_config = Config::pHTypeGridConfig.get();
+  HTypeGridConfig* h_type_config = Config::pHTypeGridConfig;
   int shift_x = 5;
   int D = h_type_config->D;
   int l = h_type_config->l;
@@ -223,7 +225,7 @@ void OutResults::OutAverageStreamGPRT(std::fstream &filestream, int gas_n) {
 }
 
 double OutResults::ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y) {
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& m_vCells = grid_->GetInitCells();
+  std::vector<std::vector<std::vector<InitCellData*>>>& m_vCells = grid_->GetInitCells();
 
   double average_stream = 0.0;
   for (int y = start_y; y < start_y + size_y; y++) {

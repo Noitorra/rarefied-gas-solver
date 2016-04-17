@@ -6,8 +6,8 @@
 class Gas;
 class BetaChain;
 
-typedef std::vector<std::shared_ptr<Gas>> GasVector;
-typedef std::vector<std::shared_ptr<BetaChain>> BetaChainVector;
+typedef std::vector<Gas*> GasVector;
+typedef std::vector<BetaChain*> BetaChainVector;
 
 struct HTypeGridConfig {
   int D;
@@ -26,7 +26,7 @@ struct Config {
   // Grid Related
   static Vector3i vGridSize;
   static sep::GridGeometry eGridGeometryType;
-  static std::shared_ptr<HTypeGridConfig> pHTypeGridConfig;
+  static HTypeGridConfig* pHTypeGridConfig;
   static bool bGPRTGrid;
   static Vector2d vCellSize;  // default cell size in mm
 

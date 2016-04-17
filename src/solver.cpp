@@ -38,14 +38,14 @@ void Solver::Run() {
     ci::init(potential, ci::NO_SYMM);
   }
 
-  std::shared_ptr<OutResults> outResults(new OutResults());
-  outResults->Init(m_pGrid, m_pGridManager);
+  OutResults outResults;
+  outResults.Init(m_pGrid, m_pGridManager);
 
   auto startTimestamp = std::chrono::steady_clock::now();
   auto timestamp = startTimestamp;
 
   for (int it = 0; it < Config::iMaxIteration; it++) {
-    outResults->OutAll(it);
+    outResults.OutAll(it);
 
     MakeStep(sep::X);
     MakeStep(sep::Y);
@@ -92,13 +92,13 @@ void Solver::Run() {
     std::cout << std::endl;
   }
 
-  outResults->OutAll(Config::iMaxIteration);
+  outResults.OutAll(Config::iMaxIteration);
 
   std::cout << "Done" << std::endl;
 }
 
 void Solver::InitCellType(sep::Axis axis) {
-  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  std::vector<Cell*>& vCellVector = m_pGrid->GetCells();
   // make type
   for (auto& item : vCellVector) {
     item->computeType(axis);
@@ -106,15 +106,15 @@ void Solver::InitCellType(sep::Axis axis) {
 }
 
 void Solver::MakeStep(sep::Axis axis) {
-  std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+  std::vector<Cell*>& cellVector = m_pGrid->GetCells();
 
   // Make half
-  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) {
     item->computeHalf(axis);
   });
 
   // Make value
-  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) {
     item->computeValue(axis);
   });
 }
@@ -130,24 +130,24 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
     gasv[gi0]->getMass(), gasv[gi1]->getMass(),
     particle, particle);
 
-  std::vector<std::shared_ptr<Cell>>& cellVector = m_pGrid->GetCells();
+  std::vector<Cell*>& cellVector = m_pGrid->GetCells();
 
-  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+  tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) {
     item->computeIntegral(gi0, gi1);
   });
 }
 
 void Solver::MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
-  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
+  std::vector<Cell*>& vCellVector = m_pGrid->GetCells();
 
-  tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+  tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](Cell* item) {
     item->computeBetaDecay(gi0, gi1, lambda);
   });
 }
 
 void Solver::CheckCells() {
-  std::vector<std::shared_ptr<Cell>>& vCellVector = m_pGrid->GetCells();
-  tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](const std::shared_ptr<Cell>& item) {
+  std::vector<Cell*>& vCellVector = m_pGrid->GetCells();
+  tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](Cell* item) {
     item->checkInnerValuesRange();
   });
 

@@ -18,7 +18,7 @@ public:
   void Init(GridManager* pGridManager);
   void Run();
 
-  Impulse* GetImpulse() const { return m_pImpulse.get(); }
+  Impulse* GetImpulse() const { return m_pImpulse; }
 private:
   void InitCellType(sep::Axis axis);
   void MakeStep(sep::Axis axis);
@@ -26,7 +26,7 @@ private:
   void MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
   void CheckCells();
 
-  std::shared_ptr<Impulse> m_pImpulse;
+  Impulse* m_pImpulse;
 
   GridManager* m_pGridManager;
   Grid* m_pGrid;

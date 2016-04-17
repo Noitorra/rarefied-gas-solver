@@ -30,20 +30,20 @@ public:
 
   const Vector3i& GetSize() const { return m_vSize; }
 
-  std::vector<std::shared_ptr<Cell>>& GetCells();
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& GetInitCells();
+  std::vector<Cell*>& GetCells();
+  std::vector<std::vector<std::vector<InitCellData*>>>& GetInitCells();
   InitCellData* GetInitCell(Vector2i vP);
 
 private:
-  void AddCell(std::shared_ptr<Cell> pCell);
+  void AddCell(Cell* pCell);
   void AllocateInitData();
 
   Vector3i m_vSize;
 
   GridManager* m_pGridManager;
 
-  std::vector<std::shared_ptr<Cell>> m_vCells;
-  std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>> m_vInitCells;
+  std::vector<Cell*> m_vCells;
+  std::vector<std::vector<std::vector<InitCellData*>>> m_vInitCells;
 };
 
 #endif // GRID_H_

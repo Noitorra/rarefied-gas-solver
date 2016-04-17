@@ -9,15 +9,15 @@ void Grid::Init(GridManager* pGridManager) {
   m_vSize = Config::vGridSize;
 }
 
-void Grid::AddCell(std::shared_ptr<Cell> pCell) {
+void Grid::AddCell(Cell* pCell) {
   m_vCells.push_back(pCell);
 }
 
-std::vector<std::shared_ptr<Cell>>& Grid::GetCells() {
+std::vector<Cell*>& Grid::GetCells() {
   return m_vCells;
 }
 
-std::vector<std::vector<std::vector<std::shared_ptr<InitCellData>>>>& Grid::GetInitCells() {
+std::vector<std::vector<std::vector<InitCellData*>>>& Grid::GetInitCells() {
   return m_vInitCells;
 }
 
@@ -26,22 +26,22 @@ InitCellData* Grid::GetInitCell(Vector2i vP) {
     vP.x() >= m_vSize.x() || vP.y() >= m_vSize.y()) {
     throw ("Wrong position");
   }
-  return m_vInitCells[vP.x()][vP.y()][0].get();
+  return m_vInitCells[vP.x()][vP.y()][0];
 }
 
 void Grid::AllocateInitData() {
   m_vSize = Config::vGridSize;
 
   for (int x = 0; x < m_vSize.x(); x++) {
-    std::vector<std::vector<std::shared_ptr<InitCellData>> > vec_yz;
+    std::vector<std::vector<InitCellData*> > vec_yz;
     m_vInitCells.push_back(vec_yz);
 
     for (int y = 0; y < m_vSize.y(); y++) {
-      std::vector<std::shared_ptr<InitCellData>> vec_z;
+      std::vector<InitCellData*> vec_z;
       m_vInitCells[x].push_back(vec_z);
 
       for (int z = 0; z < m_vSize.z(); z++) {
-        m_vInitCells[x][y].push_back(std::shared_ptr<InitCellData>(new InitCellData(sep::FAKE_CELL))); // Init fake cells, it's ok
+        m_vInitCells[x][y].push_back(new InitCellData(sep::FAKE_CELL)); // Init fake cells, it's ok
         // to see more go to grid_manager.cpp
       }
     }
