@@ -12,6 +12,7 @@
 
 #define NOMINMAX
 #include <tbb/tbb.h>
+#include <sstream>
 
 namespace sep {
   enum GridGeometry {
@@ -91,18 +92,23 @@ public:
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
-typedef std::function<void(int x, int y, GasesConfigsMap& configs,
-  const Vector2i& size, const Vector2i& start)> ConfigFunction;
 
 struct GridBox {
   Vector2i p;     // in cells
   Vector2i size;  // in cells
   CellConfig def_config;
 
-  ConfigFunction config_func;
+  virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) = 0;
 };
 
 template <typename T>
 inline int sgn(T val) {
   return (T(0) < val) - (val < T(0));
+}
+
+template <typename T>
+std::string to_string(T const & value) {
+  std::stringstream ss;
+  ss << value;
+  return ss.str();
 }

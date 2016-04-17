@@ -79,17 +79,17 @@ void GridManager::GridGeometryToInitialCells() {
     throw("no grid boxes");
 
   // determine grid size
-  Vector2i vMin(boxes_stack_[0].p), vMax;
-  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&](GridBox& box) {
-    if (box.p.x() < vMin.x())
-      vMin.x() = box.p.x();
-    if (box.p.y() < vMin.y())
-      vMin.y() = box.p.y();
+  Vector2i vMin(boxes_stack_[0]->p), vMax;
+  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&](GridBox* box) {
+    if (box->p.x() < vMin.x())
+      vMin.x() = box->p.x();
+    if (box->p.y() < vMin.y())
+      vMin.y() = box->p.y();
 
-    if (box.p.x() + box.size.x() > vMax.x())
-      vMax.x() = box.p.x() + box.size.x();
-    if (box.p.y() + box.size.y() > vMax.y())
-      vMax.y() = box.p.y() + box.size.y();
+    if (box->p.x() + box->size.x() > vMax.x())
+      vMax.x() = box->p.x() + box->size.x();
+    if (box->p.y() + box->size.y() > vMax.y())
+      vMax.y() = box->p.y() + box->size.y();
   });
   Vector2i size = vMax - vMin + Vector2i(2, 2); // size += 2 for fake cells
   Config::vGridSize = Vector3i(size.x(), size.y(), 1);
@@ -97,26 +97,26 @@ void GridManager::GridGeometryToInitialCells() {
 
   grid_->AllocateInitData();
 
-  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&](GridBox& box) {
-    for (int x = 0; x < box.size.x(); x++) {
-      for (int y = 0; y < box.size.y(); y++) {
-        Vector2i tmp_pos = box.p + Vector2i(x, y) - vMin;
+  std::for_each(boxes_stack_.begin(), boxes_stack_.end(), [&](GridBox* box) {
+    for (int x = 0; x < box->size.x(); x++) {
+      for (int y = 0; y < box->size.y(); y++) {
+        Vector2i tmp_pos = box->p + Vector2i(x, y) - vMin;
         InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         init_cell->m_eType = sep::NORMAL_CELL;
       }
     }
 
-    for (int x = -1; x < box.size.x() + 1; x++) {
-      for (int y = -1; y < box.size.y() + 1; y++) {
-        Vector2i tmp_pos = box.p + Vector2i(x, y) - vMin;
+    for (int x = -1; x < box->size.x() + 1; x++) {
+      for (int y = -1; y < box->size.y() + 1; y++) {
+        Vector2i tmp_pos = box->p + Vector2i(x, y) - vMin;
         InitCellData* init_cell = grid_->GetInitCell(tmp_pos);
         GasesConfigsMap& init_conds = init_cell->m_mInitConds;
         for (int gas = 0; gas < Config::iGasesNumber; gas++) {
-          init_conds[gas] = box.def_config;
+          init_conds[gas] = box->def_config;
         }
-        Vector2i size_with_fakes(box.size);
+        Vector2i size_with_fakes(box->size);
         size_with_fakes += Vector2i(2, 2);
-        box.config_func(x + 1, y + 1, init_conds, size_with_fakes, box.p);
+        box->config(x + 1, y + 1, init_conds, size_with_fakes, box->p);
       }
     }
   });
@@ -217,22 +217,24 @@ int GridManager::GetSlash(sep::NeighborType type) const {
   }
 }
 
-void GridManager::SetBox(Vector2d p, Vector2d size, ConfigFunction config_func) {
+void GridManager::AddBox(Vector2d p, Vector2d size, GridBox* box) {
+
+  if(box == nullptr) {
+    std::cout << "[GridManager::AddBox] Cannot add null box." << std::endl;
+    return;
+  }
+
   CellConfig def_config;
   def_config.pressure = GetPressure();
   def_config.T = GetTemperature();
   def_config.boundary_T = GetTemperature();
 
   Vector2d& cell_size = Config::vCellSize;
-  Vector2i cells_p(p.x() / cell_size.x(), p.y() / cell_size.y());
-  Vector2i cells_size(size.x() / cell_size.x(), size.y() / cell_size.y());
 
-  GridBox box;
-  box.p = cells_p;
-  box.size = cells_size;
-  box.def_config = def_config;
-  box.config_func = config_func;
-  //boxes_stack_.push_back({cells_p, cells_size, def_config, config_func});
+  box->p = Vector2i(p.x() / cell_size.x(), p.y() / cell_size.y());
+  box->size = Vector2i(size.x() / cell_size.x(), size.y() / cell_size.y());
+  box->def_config = def_config;
+
   boxes_stack_.push_back(box);
 }
 
@@ -277,7 +279,7 @@ void GridManager::FillInGrid() {
         if (grid_->GetInitCell(v_p)->m_eType == sep::EMPTY_CELL)
           continue;
         Cell* p_cell = new Cell();
-        grid_->AddCell(std::shared_ptr<Cell>(p_cell));
+        grid_->AddCell(p_cell);
         grid_->GetInitCell(v_p)->m_pCell = p_cell;
       }
     }
@@ -322,7 +324,7 @@ void GridManager::InitCells() {
   GasVector& gases = Config::vGas;
   double min_mass = 100.0;
   double max_mass = 0.0;
-  std::for_each(gases.begin(), gases.end(), [&](std::shared_ptr<Gas>& gas) {
+  std::for_each(gases.begin(), gases.end(), [&](Gas* gas) {
     const double& m = gas->getMass();
     min_mass = std::min(m, min_mass);
     max_mass = std::max(m, max_mass);
