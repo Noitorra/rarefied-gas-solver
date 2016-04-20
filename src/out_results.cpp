@@ -4,9 +4,9 @@
 #include "grid/cell.h"
 #include "config.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 std::string param_to_str(sep::MacroParamType param) {
   switch (param) {
@@ -23,8 +23,37 @@ std::string param_to_str(sep::MacroParamType param) {
   }
 }
 
-void makeDir() {
-    
+void mkdir(const std::string& dir) {
+#ifdef _WIN32
+  if (CreateDirectory(dir.c_str(), NULL)) {
+    // Directory created
+  } else if (ERROR_ALREADY_EXISTS == GetLastError()) {
+    // Directory already exists
+  } else {
+    // Failed for some other reason
+  }
+#else
+  system(("mkdir " + dir).c_str());
+#endif
+}
+
+void rmdir(const std::string& dir) {
+#ifdef _WIN32
+  SHFILEOPSTRUCT file_op = {
+    NULL,
+    FO_DELETE,
+    dir.c_str(),
+    "",
+    FOF_NOCONFIRMATION |
+    FOF_NOERRORUI |
+    FOF_SILENT,
+    false,
+    0,
+    "" };
+  SHFileOperation(&file_op);
+#else
+  system(("rm -rf " + dir).c_str());
+#endif
 }
 
 void OutResults::Init(Grid* grid, GridManager* grid_manager) {
@@ -32,21 +61,20 @@ void OutResults::Init(Grid* grid, GridManager* grid_manager) {
   grid_manager_ = grid_manager;
 
   std::string out_dir = Config::sOutputPrefix + "out";
-  system(("rm -rf " + out_dir).c_str());
-
-  system(("mkdir " + out_dir).c_str());
+  rmdir(out_dir);
+  mkdir(out_dir);
   
   // check if needed to create directories
   for (int gas = 0; gas < Config::iGasesNumber; gas++) {
     std::string gas_dir = out_dir + "/gas" + to_string(gas);
-    system(("mkdir " + gas_dir).c_str());
+    mkdir(gas_dir);
       
     for (int param = 0; param < (int)sep::LAST_PARAM; param++) {
       std::string param_dir = gas_dir + "/" + param_to_str((sep::MacroParamType)param);
       
-      system(("mkdir " + param_dir).c_str());
-      system(("mkdir " + param_dir + "/data").c_str());
-      system(("mkdir " + param_dir + "/pic").c_str());
+      mkdir(param_dir);
+      mkdir(param_dir + "/data");
+      mkdir(param_dir + "/pic");
     }
   }
 }
