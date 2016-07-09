@@ -1,5 +1,26 @@
+# helper function
+function(create_source_group SUB_DIR)
+    set(FULL_SUB_DIR ${PROJECT_SOURCE_DIR}/${SUB_DIR})
+    file(GLOB SUB_DIR_SOURCES 
+        "${FULL_SUB_DIR}/*.h" 
+        "${FULL_SUB_DIR}/*.hpp" 
+        "${FULL_SUB_DIR}/*.cpp"
+    )
+    string(REPLACE "/" "\\" SOURCE_GROUP ${SUB_DIR})
+    source_group(${SOURCE_GROUP} FILES ${SUB_DIR_SOURCES})
+endfunction()
+
 # RarefiedGasSolver, department project.
-SET(TARGET_NAME ${PROJECT_NAME})
+set(TARGET_NAME ${PROJECT_NAME})
+
+# Create groups for visual studio 
+create_source_group(src)
+file(GLOB_RECURSE SUB_DIRS LIST_DIRECTORIES TRUE RELATIVE ${PROJECT_SOURCE_DIR} *)
+foreach(SUB_DIR ${SUB_DIRS})
+    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${SUB_DIR})
+        create_source_group(${SUB_DIR})
+    endif()
+endforeach()
 
 file(GLOB_RECURSE PROJECT_SOURCES
     "*.h"
@@ -21,3 +42,4 @@ if(TBB_FOUND)
 	target_link_libraries(${TARGET_NAME} debug ${TBB_DEBUG_LIBRARIES})
 	target_link_libraries(${TARGET_NAME} optimized ${TBB_LIBRARIES})
 endif()
+
