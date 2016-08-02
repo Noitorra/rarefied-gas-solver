@@ -2,6 +2,7 @@
 #define _SSE_H_
 
 #include "emmintrin.h"
+
 //#include <xmmintrin.h>
 
 namespace sse {
@@ -15,6 +16,7 @@ namespace sse {
 		__m128 m;
 		__m128i mi;
 	};
+
 	typedef union f4 f4_t;
 
 	union d2 {
@@ -24,6 +26,7 @@ namespace sse {
 		__m128i mi;
 		__m128d md;
 	};
+
 	typedef union d2 d2_t;
 
 	inline __m128 exp(__m128 x);

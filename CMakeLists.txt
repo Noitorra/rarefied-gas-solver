@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(RarefiedGasSolver)
+project(RGS)
 
 # Initialize CXXFLAGS.
 message("COMPILER = ${CMAKE_CXX_COMPILER_ID}")

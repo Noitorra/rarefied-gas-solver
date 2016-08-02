@@ -3,12 +3,14 @@
 
 class Gas {
 private:
-  double m_dMass;
+	double m_dMass;
 public:
-  Gas(double mass);
-  virtual ~Gas();
+	Gas(double mass);
+	virtual ~Gas();
 
-  double getMass() const { return m_dMass; }
+	double getMass() const {
+		return m_dMass;
+	}
 };
 
 #endif /* GAS_H_ */
