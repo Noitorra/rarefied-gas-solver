@@ -5,7 +5,6 @@
 #include "config.h"
 #include "cell.h"
 #include "parameters/impulse.h"
-#include <algorithm>  // for visual studio compilator
 
 
 GridManager::GridManager() :
@@ -23,7 +22,7 @@ void GridManager::Init(Solver* pSolver) {
 
 void GridManager::PrintGrid() {
 	std::cout << "Printing grid..." << std::endl;
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 	for (int z = 0; z < grid_size.z(); z++) {
 		for (int y = 0; y < grid_size.y(); y++) {
 			for (int x = 0; x < grid_size.x(); x++) {
@@ -36,7 +35,7 @@ void GridManager::PrintGrid() {
 }
 
 void GridManager::PrintLinkage(sep::Axis axis) {
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 	for (int z = 0; z < grid_size.z(); z++) {
 		for (int y = 0; y < grid_size.y(); y++) {
 			for (int x = 0; x < grid_size.x(); x++) {
@@ -54,7 +53,7 @@ void GridManager::PrintLinkage(sep::Axis axis) {
 }
 
 void GridManager::ConfigureGrid() {
-	if (Config::bGPRTGrid == true) {
+	if (Config::m_bGPRTGrid == true) {
 		ConfigureGPRT();
 		//ConfigureGPRT2();
 		//BoundaryConditionTest();
@@ -93,7 +92,7 @@ void GridManager::GridGeometryToInitialCells() {
 			              vMax.y() = box->p.y() + box->size.y();
 	              });
 	Vector2i size = vMax - vMin + Vector2i(2, 2); // size += 2 for fake cells
-	Config::vGridSize = Vector3i(size.x(), size.y(), 1);
+	Config::m_vGridSize = Vector3i(size.x(), size.y(), 1);
 	vMin -= Vector2i(1, 1); // min_p -= 1 for fake cells
 
 	m_pGrid->AllocateInitData();
@@ -112,7 +111,7 @@ void GridManager::GridGeometryToInitialCells() {
 				              Vector2i tmp_pos = box->p + Vector2i(x, y) - vMin;
 				              InitCellData* init_cell = m_pGrid->GetInitCell(tmp_pos);
 				              GasesConfigsMap& init_conds = init_cell->m_mInitConds;
-				              for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+				              for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 					              init_conds[gas] = box->def_config;
 				              }
 				              Vector2i size_with_fakes(box->size);
@@ -124,7 +123,7 @@ void GridManager::GridGeometryToInitialCells() {
 }
 
 void GridManager::AdoptInitialCells() {
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 	for (int x = 0; x < grid_size.x(); x++) {
 		for (int y = 0; y < grid_size.y(); y++) {
 			for (int z = 0; z < grid_size.z(); z++) {
@@ -230,7 +229,7 @@ void GridManager::AddBox(Vector2d p, Vector2d size, GridBox* box) {
 	def_config.T = GetTemperature();
 	def_config.boundary_T = GetTemperature();
 
-	Vector2d& cell_size = Config::vCellSize;
+	Vector2d& cell_size = Config::m_vCellSize;
 
 	box->p = Vector2i(p.x() / cell_size.x(), p.y() / cell_size.y());
 	box->size = Vector2i(size.x() / cell_size.x(), size.y() / cell_size.y());
@@ -276,7 +275,7 @@ double GridManager::GetPressure() {
 }
 
 void GridManager::FillInGrid() {
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 	for (int x = 0; x < grid_size.x(); x++) {
 		for (int y = 0; y < grid_size.y(); y++) {
 			for (int z = 0; z < grid_size.z(); z++) {
@@ -292,7 +291,7 @@ void GridManager::FillInGrid() {
 }
 
 void GridManager::LinkCells() {
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 	for (int x = 0; x < grid_size.x(); x++) {
 		for (int y = 0; y < grid_size.y(); y++) {
 			for (int z = 0; z < grid_size.z(); z++) {
@@ -326,7 +325,7 @@ void GridManager::LinkCells() {
 }
 
 void GridManager::InitCells() {
-	GasVector& gases = Config::vGas;
+	GasVector& gases = Config::m_vGases;
 	double min_mass = 100.0;
 	double max_mass = 0.0;
 	std::for_each(gases.begin(), gases.end(), [&](Gas* gas) {
@@ -337,21 +336,21 @@ void GridManager::InitCells() {
 	double max_impulse = GetSolver()->GetImpulse()->getMaxImpulse();
 
 	// Set parameters
-	Vector2d cell_size = Config::vCellSize; // in mm
+	Vector2d cell_size = Config::m_vCellSize; // in mm
 	cell_size /= 1e3; // in m
 	cell_size /= Config::l_normalize; // normalized
 	Vector3d area_step(cell_size.x(), cell_size.y(), 0.1);
 
 	// decreasing time step if needed
 	double time_step = min_mass * std::min(area_step.x(), area_step.y()) / max_impulse;
-	//Config::dTimestep = std::min(Config::dTimestep, time_step);
-	Config::dTimestep = time_step;
+	//Config::m_dTimestep = std::min(Config::m_dTimestep, time_step);
+	Config::m_dTimestep = time_step;
 
-	//std::cout << "Time step: " << Config::dTimestep << " s" << std::endl;
-	std::cout << "Time step: " << Config::dTimestep * Config::tau_normalize << " s" << std::endl;
+	//std::cout << "Time step: " << Config::m_dTimestep << " s" << std::endl;
+	std::cout << "Time step: " << Config::m_dTimestep * Config::tau_normalize << " s" << std::endl;
 
 
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 	for (int x = 0; x < grid_size.x(); x++) {
 		for (int y = 0; y < grid_size.y(); y++) {
 			for (int z = 0; z < grid_size.z(); z++) {
@@ -365,7 +364,7 @@ void GridManager::InitCells() {
 				const GasesConfigsMap& init_conds = p_init_cell->m_mInitConds;
 				for (auto val : init_conds) {
 					const int& gas_number = val.first;
-					if (gas_number >= Config::iGasesNumber)
+					if (gas_number >= Config::m_iGasesNum)
 						continue;
 					const CellConfig& cond = val.second;
 					p_cell->setParameters(
@@ -426,8 +425,8 @@ void GridManager::LinkToMyself(Vector2i p, sep::Axis mirror_axis) {
 }
 
 void GridManager::PrintInfo() {
-	const Vector3i& grid_size = Config::vGridSize;
-	std::cout << "Grid size: " << Config::vGridSize.x() << " x " << Config::vGridSize.y() << std::endl;
+	const Vector3i& grid_size = Config::m_vGridSize;
+	std::cout << "Grid size: " << Config::m_vGridSize.x() << " x " << Config::m_vGridSize.y() << std::endl;
 
 	// normalization base
 	std::cout << std::endl << "Normalization base:" << std::endl;
@@ -442,13 +441,13 @@ void GridManager::PrintInfo() {
 
 	const double task_size = 0.3; // m
 	const double one_travel_time = task_size / Config::e_cut_normalize; // s
-	const double one_iteration_time = Config::tau_normalize * Config::dTimestep;
+	const double one_iteration_time = Config::tau_normalize * Config::m_dTimestep;
 	const int for_one_travel = one_travel_time / one_iteration_time;
 	std::cout << "approximate task size: " << task_size << " m" << std::endl;
 	std::cout << "one travel: " << one_travel_time << " s" << std::endl;
 	std::cout << "one iteration: " << one_iteration_time << " s" << std::endl;
 	std::cout << "for one travel need: " << for_one_travel << " iterations" << std::endl;
-	if (for_one_travel < Config::iMaxIteration)
+	if (for_one_travel < Config::m_iMaxIteration)
 		std::cout << "WARNING: too few iterations for one travel" << std::endl;
 	std::cout << std::endl;
 }

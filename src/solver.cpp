@@ -10,8 +10,6 @@
 #include "parameters/beta_chain.h"
 #include "integral/ci.hpp"
 
-#include <chrono>
-
 Solver::Solver() :
 	m_pImpulse(new Impulse),
 	m_pGridManager(new GridManager),
@@ -35,7 +33,7 @@ void Solver::Run() {
 	//  m_pGridManager->PrintLinkage(sep::X);
 	//  m_pGridManager->PrintLinkage(sep::Y);
 
-	if (Config::bUseIntegral) {
+	if (Config::m_bUseIntegral) {
 		ci::Potential* potential = new ci::HSPotential;
 		ci::init(potential, ci::NO_SYMM);
 	}
@@ -43,29 +41,29 @@ void Solver::Run() {
 	auto startTimestamp = std::chrono::steady_clock::now();
 	auto timestamp = startTimestamp;
 
-	for (int it = 0; it < Config::iMaxIteration; it++) {
+	for (int it = 0; it < Config::m_iMaxIteration; it++) {
 		m_pOutResults->OutAll(it);
 
 		MakeStep(sep::X);
 		MakeStep(sep::Y);
 		MakeStep(sep::Z);
 
-		if (Config::bUseIntegral) {
-			if (Config::iGasesNumber == 1) {
-				MakeIntegral(0, 0, Config::dTimestep);
-			} else if (Config::iGasesNumber == 2) {
-				MakeIntegral(0, 0, Config::dTimestep);
-				MakeIntegral(0, 1, Config::dTimestep);
-			} else if (Config::iGasesNumber >= 3) {
-				MakeIntegral(0, 0, Config::dTimestep);
-				MakeIntegral(0, 1, Config::dTimestep);
-				MakeIntegral(0, 2, Config::dTimestep);
+		if (Config::m_bUseIntegral) {
+			if (Config::m_iGasesNum == 1) {
+				MakeIntegral(0, 0, Config::m_dTimestep);
+			} else if (Config::m_iGasesNum == 2) {
+				MakeIntegral(0, 0, Config::m_dTimestep);
+				MakeIntegral(0, 1, Config::m_dTimestep);
+			} else if (Config::m_iGasesNum >= 3) {
+				MakeIntegral(0, 0, Config::m_dTimestep);
+				MakeIntegral(0, 1, Config::m_dTimestep);
+				MakeIntegral(0, 2, Config::m_dTimestep);
 			}
 		}
 
-		if (Config::bUseBetaChain) {
-			for (int i = 0; i < Config::iBetaChainsNumber; i++) {
-				auto& item = Config::vBetaChains[i];
+		if (Config::m_bUseBetaChain) {
+			for (int i = 0; i < Config::m_iBetaChainsNum; i++) {
+				auto& item = Config::m_vBetaChains[i];
 				MakeBetaDecay(item->iGasIndex1, item->iGasIndex2, item->dLambda1);
 				MakeBetaDecay(item->iGasIndex2, item->iGasIndex3, item->dLambda2);
 			}
@@ -77,21 +75,21 @@ void Solver::Run() {
 		auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTimestamp).count();
 		auto iterationTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - timestamp).count();
 
-		std::cout << "Run() : " << it << "/" << Config::iMaxIteration << std::endl;
+		std::cout << "Run() : " << it << "/" << Config::m_iMaxIteration << std::endl;
 		std::cout << "Iteration time: " << iterationTime << " ms" << std::endl;
-		std::cout << "Inner time: " << it * Config::tau_normalize * Config::dTimestep << " s" << std::endl;
+		std::cout << "Inner time: " << it * Config::tau_normalize * Config::m_dTimestep << " s" << std::endl;
 		std::cout << "Real time: " << wholeTime << " s" << std::endl;
 		std::cout << "Remaining time: ";
 		if (it == 0) {
 			std::cout << "Unknown";
 		} else {
-			std::cout << wholeTime * (Config::iMaxIteration - it) / it / 60 << " m";
+			std::cout << wholeTime * (Config::m_iMaxIteration - it) / it / 60 << " m";
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
 	}
 
-	m_pOutResults->OutAll(Config::iMaxIteration);
+	m_pOutResults->OutAll(Config::m_iMaxIteration);
 
 	std::cout << "Done" << std::endl;
 }
@@ -115,7 +113,7 @@ void Solver::MakeStep(sep::Axis axis) {
 }
 
 void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
-	GasVector& gasv = Config::vGas;
+	GasVector& gasv = Config::m_vGases;
 	ci::Particle particle;
 	particle.d = 1.;
 

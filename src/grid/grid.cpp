@@ -6,7 +6,7 @@
 Grid::Grid() {}
 
 void Grid::Init() {
-	m_vSize = Config::vGridSize;
+	m_vSize = Config::m_vGridSize;
 }
 
 void Grid::AddCell(Cell* pCell) {
@@ -30,7 +30,7 @@ InitCellData* Grid::GetInitCell(Vector2i vP) {
 }
 
 void Grid::AllocateInitData() {
-	m_vSize = Config::vGridSize;
+	m_vSize = Config::m_vGridSize;
 
 	for (int x = 0; x < m_vSize.x(); x++) {
 		std::vector<std::vector<InitCellData*>> vec_yz;

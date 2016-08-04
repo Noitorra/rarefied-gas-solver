@@ -207,7 +207,7 @@ void GridConstructor::ConfigureStandartGrid() {
 	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize; // s
 
 	// Some beta chain hack. Makes lambda without data type.
-	for (auto& item : Config::vBetaChains) {
+	for (auto& item : Config::m_vBetaChains) {
 		item->dLambda1 *= Config::tau_normalize;
 		item->dLambda2 *= Config::tau_normalize;
 	}
@@ -222,7 +222,7 @@ void GridConstructor::ConfigureStandartGrid() {
 	//Vector2d vPhysSize = Vector2d(520.0, 0.4);
 	Vector2d vPhysSize = Vector2d(5.2, 0.4);
 	Vector2i vNumSize = Vector2i(100, 30);
-	Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
+	Config::m_vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 	struct MyBox: GridBox {
 
@@ -275,7 +275,7 @@ void GridConstructor::ConfigureStandartGrid() {
 			configs[2].pressure = dXeStart; // hack
 			configs[2].T = dTgrad;
 
-			for (int i = 3; i < Config::iGasesNumber; i++) {
+			for (int i = 3; i < Config::m_iGasesNum; i++) {
 				configs[i].pressure = 0.0;
 				configs[i].T = dTgrad;
 			}
@@ -285,7 +285,7 @@ void GridConstructor::ConfigureStandartGrid() {
 				configs[0].boundary_pressure = dPCsLeft;
 				configs[0].boundary_T = dTgrad;
 
-				for (int i = 1; i < Config::iGasesNumber; i++) {
+				for (int i = 1; i < Config::m_iGasesNum; i++) {
 					configs[i].boundary_cond = sep::BT_DIFFUSE;
 					//configs[i].boundary_cond = sep::BT_GASE;
 					configs[i].boundary_pressure = 0.0;
@@ -298,7 +298,7 @@ void GridConstructor::ConfigureStandartGrid() {
 				configs[0].boundary_pressure = dPCsRight; // dPCsRight
 				configs[0].boundary_T = dTgrad;
 
-				for (int i = 1; i < Config::iGasesNumber; i++) {
+				for (int i = 1; i < Config::m_iGasesNum; i++) {
 					configs[i].boundary_cond = sep::BT_GASE;
 					configs[i].boundary_pressure = 0.0;
 					configs[i].boundary_stream = Vector3d();
@@ -323,7 +323,7 @@ void GridConstructor::ConfigureStandartGrid() {
 					configs[2].boundary_stream = Vector3d(0.0, dFlowXe, 0.0);
 					configs[2].boundary_T = e->temp;
 
-					for (int i = 3; i < Config::iGasesNumber; i++) {
+					for (int i = 3; i < Config::m_iGasesNum; i++) {
 						configs[i].boundary_cond = sep::BT_DIFFUSE;
 						configs[i].boundary_T = e->temp;
 					}
@@ -331,7 +331,7 @@ void GridConstructor::ConfigureStandartGrid() {
 					configs[0].boundary_cond = sep::BT_DIFFUSE;
 					configs[0].boundary_T = e ? e->temp : T1;
 
-					for (int i = 1; i < Config::iGasesNumber; i++) {
+					for (int i = 1; i < Config::m_iGasesNum; i++) {
 						configs[i].boundary_cond = sep::BT_DIFFUSE;
 						configs[i].boundary_T = e ? e->temp : T1;
 					}
@@ -341,7 +341,7 @@ void GridConstructor::ConfigureStandartGrid() {
 				configs[0].boundary_cond = sep::BT_DIFFUSE;
 				configs[0].boundary_T = T2;
 
-				for (int i = 1; i < Config::iGasesNumber; i++) {
+				for (int i = 1; i < Config::m_iGasesNum; i++) {
 					configs[i].boundary_cond = sep::BT_DIFFUSE;
 					configs[i].boundary_T = T2;
 				}
@@ -365,7 +365,7 @@ void GridConstructor::ConfigureTestGrid() {
 	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize; // s
 
 	// Some beta chain hack. Makes lambda without data type.
-	for (auto& item : Config::vBetaChains) {
+	for (auto& item : Config::m_vBetaChains) {
 		item->dLambda1 *= Config::tau_normalize;
 		item->dLambda2 *= Config::tau_normalize;
 	}
@@ -376,7 +376,7 @@ void GridConstructor::ConfigureTestGrid() {
 	//Vector2d vPhysSize = Vector2d(520.0, 0.4);
 	Vector2d vPhysSize = Vector2d(0.4, 0.4);
 	Vector2i vNumSize = Vector2i(20, 20);
-	Config::vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
+	Config::m_vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
 
 
 	struct TestBox: GridBox {

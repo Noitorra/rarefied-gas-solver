@@ -55,11 +55,11 @@ double box_6_start_x;
 
 void GridConstructor::ConfigureGPRT() {
 
-	Config::vCellSize = Vector2d(12.0, 0.4); // mm
+	Config::m_vCellSize = Vector2d(12.0, 0.4); // mm
 	T1 = 325.0 + 273.0;
 	T2 = 60.0 + 273.0;
-	Vector2d walls(Config::vCellSize);
-	Vector2d sp_delta(Config::vCellSize);
+	Vector2d walls(Config::m_vCellSize);
+	Vector2d sp_delta(Config::m_vCellSize);
 	walls *= 2.0;
 
 	// normalization base
@@ -89,7 +89,7 @@ void GridConstructor::ConfigureGPRT() {
 	box_6_start_x = 330.0 - 3 * sp_delta.x();
 
 	// Some beta chain hack. Makes lambda without data type.
-	for (auto& item : Config::vBetaChains) {
+	for (auto& item : Config::m_vBetaChains) {
 		item->dLambda1 *= Config::tau_normalize;
 		item->dLambda2 *= Config::tau_normalize;
 	}
@@ -123,7 +123,7 @@ void GridConstructor::ConfigureGPRT() {
 			}
 
 			//                if (y == 0) {
-			//                    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+			//                    for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 			//                        configs[gas].boundary_cond = sep::BT_MIRROR;
 			//                    }
 			//                }
@@ -141,7 +141,7 @@ void GridConstructor::ConfigureGPRT() {
 			configs[2].pressure = gradient(y, size.y() - 1, P_Kr_in + (P_sat_Kr - P_Kr_in) * 0.3, P_Kr_in + (P_sat_Kr - P_Kr_in) * 0.6);
 
 			//                if (y == 0) {
-			//                    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+			//                    for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 			//                        configs[gas].boundary_cond = sep::BT_MIRROR;
 			//                    }
 			//                }
@@ -182,7 +182,7 @@ void GridConstructor::ConfigureGPRT() {
 
 		virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 			Vector2i p_abs(x + start.x(), y + start.y());
-			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+			Vector2d p(p_abs.x() * Config::m_vCellSize.x(), p_abs.y() * Config::m_vCellSize.y());
 
 			global_temp(p, configs[0].T, box_6_start_x, T1, T2);
 			global_temp(p, configs[0].boundary_T, box_6_start_x, T1, T2);
@@ -220,7 +220,7 @@ void GridConstructor::ConfigureGPRT() {
 
 		virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 			Vector2i p_abs(x + start.x(), y + start.y());
-			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+			Vector2d p(p_abs.x() * Config::m_vCellSize.x(), p_abs.y() * Config::m_vCellSize.y());
 
 			global_temp(p, configs[0].T, box_6_start_x, T1, T2);
 			global_temp(p, configs[0].boundary_T, box_6_start_x, T1, T2);
@@ -235,7 +235,7 @@ void GridConstructor::ConfigureGPRT() {
 			global_pressure_Kr(p, configs[2].pressure, P_sat_Kr);
 
 			//            if (y == 0) {
-			//                for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+			//                for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 			//                    configs[gas].boundary_cond = sep::BT_MIRROR;
 			//                }
 			//            }
@@ -249,7 +249,7 @@ void GridConstructor::ConfigureGPRT() {
 
 		virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
 			Vector2i p_abs(x + start.x(), y + start.y());
-			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+			Vector2d p(p_abs.x() * Config::m_vCellSize.x(), p_abs.y() * Config::m_vCellSize.y());
 
 			global_temp(p, configs[0].T, box_6_start_x, T1, T2);
 			global_temp(p, configs[0].boundary_T, box_6_start_x, T1, T2);
@@ -264,7 +264,7 @@ void GridConstructor::ConfigureGPRT() {
 			global_pressure_Kr(p, configs[2].pressure, P_sat_Kr);
 
 			if (x == size.x() - 1) {
-				for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+				for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 					configs[gas].boundary_cond = sep::BT_GASE;
 					configs[gas].boundary_pressure = 0.0;
 					configs[gas].boundary_T = T2;
@@ -272,7 +272,7 @@ void GridConstructor::ConfigureGPRT() {
 			}
 
 			//                if (y == 0) {
-			//                    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+			//                    for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 			//                        configs[gas].boundary_cond = sep::BT_MIRROR;
 			//                    }
 			//                }
@@ -304,7 +304,7 @@ void GridConstructor::ConfigureGPRT() {
 			configs[2].pressure = gradient(x, size.x() - 1, P_Kr_in + (P_sat_Kr - P_Kr_in) * 0.3, P_sat_Kr * 0.65);
 
 			Vector2i p_abs(x + start.x(), y + start.y());
-			Vector2d p(p_abs.x() * Config::vCellSize.x(), p_abs.y() * Config::vCellSize.y());
+			Vector2d p(p_abs.x() * Config::m_vCellSize.x(), p_abs.y() * Config::m_vCellSize.y());
 
 			global_temp(p, configs[0].T, box_6_start_x, T1, T2);
 			global_temp(p, configs[0].boundary_T, box_6_start_x, T1, T2);
@@ -316,14 +316,14 @@ void GridConstructor::ConfigureGPRT() {
 			global_temp(p, configs[2].boundary_T, box_6_start_x, T1, T2);
 
 			//                if (y == 0) {
-			//                    for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+			//                    for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 			//                        configs[gas].boundary_cond = sep::BT_MIRROR;
 			//                    }
 			//                }
 		}
 	};
 
-	AddBox(Vector2d(130.0/* - sp_delta.x()*/, 0.0), Vector2d(walls.x(), Config::vCellSize.y()), new Box7());
+	AddBox(Vector2d(130.0/* - sp_delta.x()*/, 0.0), Vector2d(walls.x(), Config::m_vCellSize.y()), new Box7());
 }
 
 void GridConstructor::ConfigureGPRT2() {
@@ -412,7 +412,7 @@ void GridConstructor::PressureBoundaryConditionTestSmallArea() {
 	*	Pressure boundary conditions test small area
 	*/
 
-	Config::vCellSize = Vector2d(0.1, 0.002); // mm
+	Config::m_vCellSize = Vector2d(0.1, 0.002); // mm
 
 	// normalization base
 	Config::T_normalize = 600.0; // K
@@ -488,7 +488,7 @@ void GridConstructor::PressureBoundaryConditionTestBigArea() {
 	*	Pressure boundary conditions large area
 	*/
 
-	Config::vCellSize = Vector2d(0.5, 0.01); // mm
+	Config::m_vCellSize = Vector2d(0.5, 0.01); // mm
 
 	// normalization base
 	Config::T_normalize = 600.0; // K

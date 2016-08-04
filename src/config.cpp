@@ -3,51 +3,46 @@
 #include "parameters/beta_chain.h"
 #include "normalizer.h"
 
-using namespace std;
-
-double Config::dTimestep = 0.0; // sets automaticaly in grid_manager.cpp
-int Config::iMaxIteration = 2000;
-std::string Config::sOutputPrefix = "../";
-bool Config::bUseIntegral = true;
-bool Config::bUseBetaChain = false;
-int Config::iOutEach = 100;
-
-// Grid Related
-Vector3i Config::vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
-HTypeGridConfig* Config::pHTypeGridConfig = new HTypeGridConfig;
-Vector2d Config::vCellSize = Vector2d(1.0, 1.0); // default cell size in mm!
-bool Config::bGPRTGrid = false;
-
-// Gases Related
-GasVector Config::vGas;
-int Config::iGasesNumber = 2;
-BetaChainVector Config::vBetaChains;
-int Config::iBetaChainsNumber = 0;
-
-Normalizer* Config::pNormalizer = new Normalizer();
-
+Config::Config() : m_pNormalizer(new Normalizer()) {}
 
 void Config::Init() {
+    m_dTimestep = 0.0; // sets automaticaly in grid_manager.cpp
+    m_iMaxIteration = 2000;
+    m_sOutputPrefix = "../";
+    m_bUseIntegral = true;
+    m_bUseBetaChain = false;
+    m_iOutEach = 100;
+
+    // Grid Related
+    m_vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
+    m_pHTypeGridConfig = new HTypeGridConfig;
+    m_vCellSize = Vector2d(1.0, 1.0); // default cell size in mm!
+    m_bGPRTGrid = false;
+
+    // Gases Related
+    m_iGasesNum = 2;
+    m_iBetaChainsNum = 0;
+
 	// Fill gases. Use only iNumGases first gases.
-	vGas.push_back(new Gas(1.0)); //133 Cs
-	vGas.push_back(new Gas(88.0 / 133.0)); //88 Kr -> Rb -> Sr
-	vGas.push_back(new Gas(138.0 / 133.0)); //138 Xe -> Cs -> Ba
-	vGas.push_back(new Gas(88.0 / 133.0)); //88 Rb
-	vGas.push_back(new Gas(88.0 / 133.0)); //88 Sr
-	vGas.push_back(new Gas(138.0 / 133.0)); //138 Cs
-	vGas.push_back(new Gas(138.0 / 133.0)); //138 Ba
+	m_vGases.push_back(new Gas(1.0)); // 133 Cs
+	m_vGases.push_back(new Gas(88.0 / 133.0)); // 88 Kr -> Rb -> Sr
+	m_vGases.push_back(new Gas(138.0 / 133.0)); // 138 Xe -> Cs -> Ba
+	m_vGases.push_back(new Gas(88.0 / 133.0)); // 88 Rb
+	m_vGases.push_back(new Gas(88.0 / 133.0)); // 88 Sr
+	m_vGases.push_back(new Gas(138.0 / 133.0)); // 138 Cs
+	m_vGases.push_back(new Gas(138.0 / 133.0)); // 138 Ba
 
 	// Fill beta chains, use only iBetaChains first.
-	//vBetaChains.push_back(std::make_shared<BetaChain>(1, 2, 3, 6.78e-5, 6.49e-4)); // test!!!
+	// m_vBetaChains.push_back(std::make_shared<BetaChain>(1, 2, 3, 6.78e-5, 6.49e-4)); // test!!!
+	m_vBetaChains.push_back(new BetaChain(1, 3, 4, 6.78e-5, 6.49e-4));
+	m_vBetaChains.push_back(new BetaChain(2, 5, 6, 6.78e-5, 6.49e-4));
 
-	vBetaChains.push_back(new BetaChain(1, 3, 4, 6.78e-5, 6.49e-4));
-	vBetaChains.push_back(new BetaChain(2, 5, 6, 6.78e-5, 6.49e-4));
-
-	pNormalizer->loadFromFile();
+    // Normalization
+	m_pNormalizer->loadFromFile();
 }
 
 void Config::PrintMe() {
-	cout << "GridSize = " << vGridSize.x() <<
-			"x" << vGridSize.y() <<
-			"x" << vGridSize.z() << endl;
+    std::cout << "GridSize = " << m_vGridSize.x() <<
+			"x" << m_vGridSize.y() <<
+			"x" << m_vGridSize.z() << std::endl;
 }

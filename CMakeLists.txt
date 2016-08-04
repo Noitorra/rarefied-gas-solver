@@ -27,10 +27,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_mo
 find_package(TBB REQUIRED)
 
 set(output_dir "${CMAKE_CURRENT_SOURCE_DIR}/bin/")
+
 # First for the generic no-config case (e.g. with mingw)
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${output_dir} )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${output_dir} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${output_dir} )
+
 # Second, for multi-config builds (e.g. msvc)
 foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )

@@ -21,30 +21,98 @@ struct HTypeGridConfig {
 };
 
 struct Config {
-	
+
+public:
+    Config* getInstance() {
+        static Config* pConfig = new Config();
+        return pConfig;
+    }
+
+    Config();
+    void Init();
+    void PrintMe();
+
+    Vector3i getGridSize() {
+        return m_vGridSize;
+    }
+
+    HTypeGridConfig* getHTypeGridConfig() {
+        return m_pHTypeGridConfig;
+    }
+
+    bool isGPRTGrid() {
+        return m_bGPRTGrid;
+    }
+
+    Vector2d getCellSize() {
+        return m_vCellSize;
+    }
+
+    GasVector getGases() {
+        return m_vGases;
+    }
+
+    int getGasesNum() {
+        return m_iGasesNum;
+    }
+
+    BetaChainVector getBetaChains() {
+        return m_vBetaChains;
+    }
+
+    int getBetaChainsNum() {
+        return m_iBetaChainsNum;
+    }
+
+    double getTimestep() {
+        return m_dTimestep;
+    }
+
+    int getMaxIteration() {
+        return m_iMaxIteration;
+    }
+
+    bool isUseIntegral() {
+        return m_bUseIntegral;
+    }
+
+    std::string getOutputPrefix() {
+        return m_sOutputPrefix;
+    }
+
+    bool isUseBetaChains () {
+        return m_bUseBetaChain;
+    }
+
+    int getOutEach() {
+        return m_iOutEach;
+    }
+
+    Normalizer* getNormalizer() {
+        return m_pNormalizer;
+    }
+private:
+
 	// Grid Related
-	static Vector3i vGridSize;
-	static HTypeGridConfig* pHTypeGridConfig;
-	static bool bGPRTGrid;
-	static Vector2d vCellSize; // default cell size in mm
+	Vector3i m_vGridSize;
+	HTypeGridConfig* m_pHTypeGridConfig;
+	bool m_bGPRTGrid;
+	Vector2d m_vCellSize; // default cell size in mm
 
 	// Gas Related
-	static GasVector vGas;
-	static int iGasesNumber;
-	static BetaChainVector vBetaChains;
-	static int iBetaChainsNumber;
+	GasVector m_vGases;
+	int m_iGasesNum;
+	BetaChainVector m_vBetaChains;
+	int m_iBetaChainsNum;
 
-	static double dTimestep;
-	static int iMaxIteration;
-	static bool bUseIntegral;
-	static std::string sOutputPrefix;
-	static bool bUseBetaChain;
-	static int iOutEach;
+	double m_dTimestep;
+	int m_iMaxIteration;
+	bool m_bUseIntegral;
+	std::string m_sOutputPrefix;
+	bool m_bUseBetaChain;
+	int m_iOutEach;
 
-	static Normalizer* pNormalizer;
-
-	static void Init();
-	static void PrintMe();
+	Normalizer* m_pNormalizer;
 };
 
 #endif // CONFIG_H_

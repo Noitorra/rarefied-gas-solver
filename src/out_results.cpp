@@ -60,12 +60,12 @@ void OutResults::Init(Grid* grid, GridManager* grid_manager) {
 	grid_ = grid;
 	grid_manager_ = grid_manager;
 
-	std::string out_dir = Config::sOutputPrefix + "out";
+	std::string out_dir = Config::m_sOutputPrefix + "out";
 	rmdir(out_dir);
 	mkdir(out_dir);
 
 	// check if needed to create directories
-	for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+	for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 		std::string gas_dir = out_dir + "/gas" + to_string(gas);
 		mkdir(gas_dir);
 
@@ -84,7 +84,7 @@ void OutResults::OutAll(int iteration) {
 		std::cout << "Error: member OutResults is not initialized yet" << std::endl;
 		return;
 	}
-	if (iteration % Config::iOutEach)
+	if (iteration % Config::m_iOutEach)
 		return;
 	std::cout << "Out results " << iteration;
 
@@ -92,7 +92,7 @@ void OutResults::OutAll(int iteration) {
 
 	tbb::parallel_for(tbb::blocked_range<int>(0, sep::LAST_PARAM), [&](const tbb::blocked_range<int>& r) {
 		                  for (int param = r.begin(); param != r.end(); ++param) {
-			                  for (int gas = 0; gas < Config::iGasesNumber; gas++) {
+			                  for (int gas = 0; gas < Config::m_iGasesNum; gas++) {
 				                  OutParameter((sep::MacroParamType)param, gas, iteration);
 			                  }
 		                  }
@@ -125,14 +125,14 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
 	std::vector<std::vector<std::vector<InitCellData*>>>& cells = grid_->GetInitCells();
 
 	std::string filename;
-	const std::string& output_prefix = Config::sOutputPrefix;
+	const std::string& output_prefix = Config::m_sOutputPrefix;
 
 	filename = output_prefix + "out/gas" + to_string(gas) +
 			"/" + param_to_str(type) + "/data/" + to_string(index) + ".bin";
 
 	std::ofstream fs(filename.c_str(), std::ios::out | std::ios::binary);
 
-	const Vector3i& grid_size = Config::vGridSize;
+	const Vector3i& grid_size = Config::m_vGridSize;
 
 	// writing additional info
 	double tmp = (double)grid_size.x();
@@ -184,11 +184,11 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
 }
 
 void OutResults::OutAverageStream(int iteration) {
-	GasVector& gasv = Config::vGas;
+	GasVector& gasv = Config::m_vGases;
 
-	const std::string& output_prefix = Config::sOutputPrefix;
+	const std::string& output_prefix = Config::m_sOutputPrefix;
 	std::string as_filename_base = output_prefix + "out/gas";
-	for (unsigned int gi = 0; gi < Config::iGasesNumber; gi++) {
+	for (unsigned int gi = 0; gi < Config::m_iGasesNum; gi++) {
 		std::string as_filename = as_filename_base + to_string(gi);
 		as_filename += "/";
 		as_filename += "average_stream.bin";
@@ -203,7 +203,7 @@ void OutResults::OutAverageStream(int iteration) {
 		filestream.open(as_filename.c_str(), openmode);
 		if (filestream.is_open()) {
 
-			if (Config::bGPRTGrid == true) {
+			if (Config::m_bGPRTGrid == true) {
 				OutAverageStreamGPRT(filestream, gi);
 			} else {
 				OutAverageStreamComb(filestream, gi);
@@ -229,7 +229,7 @@ void OutResults::OutAverageStreamComb(std::fstream& filestream, int gas_n) {
 
 void OutResults::OutAverageStreamGPRT(std::fstream& filestream, int gas_n) {
 	const Vector3i& grid_size = grid_->GetSize();
-	HTypeGridConfig* h_type_config = Config::pHTypeGridConfig;
+	HTypeGridConfig* h_type_config = Config::m_pHTypeGridConfig;
 	int shift_x = 5;
 	int D = h_type_config->D;
 	int l = h_type_config->l;
