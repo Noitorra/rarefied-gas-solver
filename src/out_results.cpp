@@ -15,7 +15,7 @@ std::string param_to_str(sep::MacroParamType param) {
 	case sep::C_PARAM:
 		return "conc";
 	case sep::P_PARAM:
-		return "pressure";
+		return "dPressure";
 	case sep::FLOW_PARAM:
 		return "flow";
 	default:
@@ -150,9 +150,9 @@ void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
 			if (cell && cells[x][y][z]->m_eType == sep::NORMAL_CELL) {
 
 				// from normalized values back to normal
-				const double t = cell->m_vMacroData[gas].T * Config::T_normalize;
-				const double n = cell->m_vMacroData[gas].C * Config::n_normalize;
-				const double p = cell->m_vMacroData[gas].P * Config::P_normalize;
+				const double t = cell->m_vMacroData[gas].dTemperature * Config::T_normalize;
+				const double n = cell->m_vMacroData[gas].dDensity * Config::n_normalize;
+				const double p = cell->m_vMacroData[gas].dPressure * Config::P_normalize;
 				const double stream_x = cell->m_vMacroData[gas].Stream.x() * Config::n_normalize * Config::e_cut_normalize;
 				const double stream_y = cell->m_vMacroData[gas].Stream.y() * Config::n_normalize * Config::e_cut_normalize;
 

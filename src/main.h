@@ -46,19 +46,19 @@ namespace sep {
 		BT_FLOW
 	};
 
-	const double k = 1.38e-23; // Bolzman const
+    const double BOLTZMANN_CONSTANT = 1.38e-23; // Boltzmann const // TODO: Make more precise
 }
 
 class MacroData {
 public:
 	MacroData() :
-		C(1.0),
-		T(1.0),
-		P(1.0) { };
+		dDensity(1.0),
+		dTemperature(1.0),
+		dPressure(1.0) {};
 
-	double C; // concentration
-	double T; // temperature
-	double P; // pressure
+	double dDensity; // concentration
+	double dTemperature; // temperature
+	double dPressure; // dPressure
 
 	Vector3d Stream;
 	Vector3d HeatStream;
@@ -67,20 +67,20 @@ public:
 class CellConfig {
 public:
 	CellConfig() :
-		pressure(1.0),
-		T(1.0),
-		boundary_cond(sep::BT_DIFFUSE),
-		boundary_T(1.0),
-		boundary_pressure(1.0),
-		locked_axes(-1) { };
+		dPressure(1.0),
+		dTemperature(1.0),
+		eBoundaryType(sep::BT_DIFFUSE),
+		dBoundaryTemperature(1.0),
+		dBoundaryPressure(1.0),
+		iLockedAxes(-1) {};
 
-	double pressure; // initial pressure
-	double T; // initial temperature
-	sep::BoundaryType boundary_cond;
-	double boundary_T; // wall temperature
-	double boundary_pressure;
-	Vector3d boundary_stream;
-	int locked_axes;
+	double dPressure; // initial dPressure
+	double dTemperature; // initial temperature
+	sep::BoundaryType eBoundaryType;
+	double dBoundaryTemperature; // wall temperature
+	double dBoundaryPressure;
+	Vector3d vBoundaryFlow;
+	int iLockedAxes;
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;

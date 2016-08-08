@@ -23,7 +23,7 @@ struct HTypeGridConfig {
 struct Config {
 
 public:
-    Config* getInstance() {
+    static Config* getInstance() {
         static Config* pConfig = new Config();
         return pConfig;
     }
@@ -32,63 +32,67 @@ public:
     void Init();
     void PrintMe();
 
-    Vector3i getGridSize() {
+    Vector3i getGridSize() const {
         return m_vGridSize;
     }
 
-    HTypeGridConfig* getHTypeGridConfig() {
+    HTypeGridConfig* getHTypeGridConfig() const {
         return m_pHTypeGridConfig;
     }
 
-    bool isGPRTGrid() {
+    bool isGPRTGrid() const {
         return m_bGPRTGrid;
     }
 
-    Vector2d getCellSize() {
+    void setCellSize(const Vector2d& vCellSize) {
+        m_vCellSize = vCellSize;
+    }
+
+    Vector2d getCellSize() const {
         return m_vCellSize;
     }
 
-    GasVector getGases() {
+    GasVector getGases() const {
         return m_vGases;
     }
 
-    int getGasesNum() {
+    int getGasesNum() const {
         return m_iGasesNum;
     }
 
-    BetaChainVector getBetaChains() {
+    BetaChainVector getBetaChains() const {
         return m_vBetaChains;
     }
 
-    int getBetaChainsNum() {
+    int getBetaChainsNum() const {
         return m_iBetaChainsNum;
     }
 
-    double getTimestep() {
+    double getTimestep() const {
         return m_dTimestep;
     }
 
-    int getMaxIteration() {
+    int getMaxIteration() const {
         return m_iMaxIteration;
     }
 
-    bool isUseIntegral() {
+    bool isUseIntegral() const {
         return m_bUseIntegral;
     }
 
-    std::string getOutputPrefix() {
+    std::string getOutputPrefix() const {
         return m_sOutputPrefix;
     }
 
-    bool isUseBetaChains () {
+    bool isUseBetaChains() const {
         return m_bUseBetaChain;
     }
 
-    int getOutEach() {
+    int getOutEach() const {
         return m_iOutEach;
     }
 
-    Normalizer* getNormalizer() {
+    Normalizer* getNormalizer() const {
         return m_pNormalizer;
     }
 private:

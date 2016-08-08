@@ -225,9 +225,9 @@ void GridManager::AddBox(Vector2d p, Vector2d size, GridBox* box) {
 	}
 
 	CellConfig def_config;
-	def_config.pressure = GetPressure();
-	def_config.T = GetTemperature();
-	def_config.boundary_T = GetTemperature();
+	def_config.dPressure = GetPressure();
+	def_config.dTemperature = GetTemperature();
+	def_config.dBoundaryTemperature = GetTemperature();
 
 	Vector2d& cell_size = Config::m_vCellSize;
 
@@ -368,17 +368,17 @@ void GridManager::InitCells() {
 						continue;
 					const CellConfig& cond = val.second;
 					p_cell->setParameters(
-						cond.pressure,
-						cond.T,
+						cond.dPressure,
+						cond.dTemperature,
 						area_step,
 						gas_number,
-						cond.locked_axes
+						cond.iLockedAxes
 					);
 					p_cell->setBoundaryType(
-						cond.boundary_cond,
-						cond.boundary_T,
-						cond.boundary_stream,
-						cond.boundary_pressure,
+						cond.eBoundaryType,
+						cond.dBoundaryTemperature,
+						cond.vBoundaryFlow,
+						cond.dBoundaryPressure,
 						gas_number
 					);
 				}

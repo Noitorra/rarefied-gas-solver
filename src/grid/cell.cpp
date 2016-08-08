@@ -141,18 +141,18 @@ void Cell::computeMacroData() {
 
 	if (!is_normal()) {
 		for (unsigned int gi = 0; gi < Config::m_iGasesNum; gi++) {
-			m_vMacroData[gi].C = 0.0;
+			m_vMacroData[gi].dDensity = 0.0;
 			m_vMacroData[gi].Stream = Vector3d();
-			m_vMacroData[gi].T = 0.0;
-			m_vMacroData[gi].P = 0.0;
+			m_vMacroData[gi].dTemperature = 0.0;
+			m_vMacroData[gi].dPressure = 0.0;
 			m_vMacroData[gi].HeatStream = Vector3d();
 		}
 	} else {
 		for (unsigned int gi = 0; gi < Config::m_iGasesNum; gi++) {
-			m_vMacroData[gi].C = compute_concentration(gi);
+			m_vMacroData[gi].dDensity = compute_concentration(gi);
 			m_vMacroData[gi].Stream = compute_stream(gi);
-			m_vMacroData[gi].T = (m_vMacroData[gi].C == 0.0) ? 0.0 : compute_temperature(gi);
-			m_vMacroData[gi].P = (m_vMacroData[gi].C == 0.0) ? 0.0 : compute_pressure(gi);
+			m_vMacroData[gi].dTemperature = (m_vMacroData[gi].dDensity == 0.0) ? 0.0 : compute_temperature(gi);
+			m_vMacroData[gi].dPressure = (m_vMacroData[gi].dDensity == 0.0) ? 0.0 : compute_pressure(gi);
 			m_vMacroData[gi].HeatStream = compute_heatstream(gi);
 		}
 	}
@@ -739,7 +739,7 @@ double Cell::compute_temperature(unsigned int gi) {
 	Impulse* impulse = m_pSolver->GetImpulse();
 	ImpulseVector& impulsev = impulse->getVector();
 
-	double concentration = m_vMacroData[gi].C;
+	double concentration = m_vMacroData[gi].dDensity;
 	double temperature = 0.0;
 	Vector3d vAverageSpeed = m_vMacroData[gi].Stream;
 	vAverageSpeed /= concentration;
@@ -759,7 +759,7 @@ double Cell::compute_temperature(unsigned int gi) {
 }
 
 double Cell::compute_pressure(unsigned int gi) {
-	return m_vMacroData[gi].C * m_vMacroData[gi].T;
+	return m_vMacroData[gi].dDensity * m_vMacroData[gi].dTemperature;
 }
 
 Vector3d Cell::compute_stream(unsigned int gi) {

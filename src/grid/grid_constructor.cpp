@@ -1,9 +1,7 @@
 ﻿#include "grid_constructor.h"
 #include "config.h"
+#include "normalizer.h"
 #include "parameters/beta_chain.h"
-
-#define M_PI           3.14159265358979323846  /* pi */
-
 
 struct EmitterPart {
 	EmitterPart() {
@@ -124,7 +122,7 @@ public:
 
 		// Get Rid of Kelvin
 		for (auto& item : m_vEmitterParts) {
-			item->temp /= Config::T_normalize;
+            Config::getInstance()->getNormalizer()->normalize(item->temp, Normalizer::Type::TEMPERATURE);
 		}
 
 		_calc_length();
@@ -139,8 +137,8 @@ public:
 		std::vector<EmitterPart*> parts;
 		double l = 0.0; // already calc
 		for (auto& item : m_vEmitterParts) {
-			if ((dBegin + dEnd) / 2 * m_dLength > l && (dEnd + dBegin) / 2 * m_dLength <= l + item->length ||
-				(l + item->length / 2) > dBegin * m_dLength && (l + item->length / 2) <= dEnd * m_dLength) {
+			if (((dBegin + dEnd) / 2 * m_dLength > l && (dEnd + dBegin) / 2 * m_dLength <= l + item->length) ||
+				((l + item->length / 2) > dBegin * m_dLength && (l + item->length / 2) <= dEnd * m_dLength)) {
 				parts.push_back(item);
 			}
 			l += item->length;
@@ -196,20 +194,13 @@ private:
 // Feel free to edit this method
 void GridConstructor::ConfigureStandartGrid() {
 
-	// Main configuration part
-	// normalization base
-	Config::T_normalize = 1500.0; // K // Maximum temperature in system
-	Config::P_normalize = 150.0;
-	Config::n_normalize = Config::P_normalize / (sep::k * Config::T_normalize);
-	Config::m_normalize = 133 * 1.66e-27; // kg
-	Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
-	Config::l_normalize = 6.07e-5; // ����������� ������ ���������� �������
-	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize; // s
+    const Config* pConfig = Config::getInstance();
+    const Normalizer* pNormalizer = pConfig->getNormalizer();
 
 	// Some beta chain hack. Makes lambda without data type.
-	for (auto& item : Config::m_vBetaChains) {
-		item->dLambda1 *= Config::tau_normalize;
-		item->dLambda2 *= Config::tau_normalize;
+	for (auto& item : pConfig->getBetaChains()) {
+        pNormalizer->normalize(item->dLambda1, Normalizer::Type::LAMBDA);
+        pNormalizer->normalize(item->dLambda2, Normalizer::Type::LAMBDA);
 	}
 
 	// Bottom emmiter holes positioning
@@ -222,23 +213,26 @@ void GridConstructor::ConfigureStandartGrid() {
 	//Vector2d vPhysSize = Vector2d(520.0, 0.4);
 	Vector2d vPhysSize = Vector2d(5.2, 0.4);
 	Vector2i vNumSize = Vector2i(100, 30);
-	Config::m_vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
+    Config::getInstance()->setCellSize(Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y()));
 
 	struct MyBox: GridBox {
 
 		virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
+
+            const Normalizer* pNormalizer = Config::getInstance()->getNormalizer();
+
 			// Task parameters
-			double T1 = 1500.0 / Config::T_normalize;
-			double T2 = 900.0 / Config::T_normalize;
+			double T1 = pNormalizer->normalize(1500.0, Normalizer::Type::TEMPERATURE);
+			double T2 = pNormalizer->normalize(900.0, Normalizer::Type::TEMPERATURE);
 
-			double dPCsLeft = 150.0 / Config::P_normalize;
-			double dPCsRight = 150.0 / Config::P_normalize;
+			double dPCsLeft = pNormalizer->normalize(150.0, Normalizer::Type::PRESSURE);
+			double dPCsRight = pNormalizer->normalize(150.0, Normalizer::Type::PRESSURE);
 
-			double dKrStart = 7e-7 / Config::P_normalize;
-			double dXeStart = 1.2e-6 / Config::P_normalize;
+			double dPKrStart = pNormalizer->normalize(7e-7, Normalizer::Type::PRESSURE);
+			double dPXeStart = pNormalizer->normalize(1.2e-6, Normalizer::Type::PRESSURE);
 
-			double dQKr = 2.1e-9;
-			double dQXe = 3.6e-9;
+			double dQKrFull = 2.1e-9;
+			double dQXeFull = 3.6e-9;
 
 			double dTFlow = 600.0;
 
@@ -246,63 +240,63 @@ void GridConstructor::ConfigureStandartGrid() {
 
 			double dS = 2 * M_PI * dR * (10.8 * 7 + 11.8) * 1e-3;
 
-			double dFlowKr = dQKr / (dTFlow * sep::k * dS);
-			double dFlowXe = dQXe / (dTFlow * sep::k * dS);
+			double dQKr = dQKrFull / (dTFlow * sep::BOLTZMANN_CONSTANT * dS);
+			double dQXe = dQXeFull / (dTFlow * sep::BOLTZMANN_CONSTANT * dS);
 
-			//std::cout << "FlowKr = " << dFlowKr << std::endl;
-			//std::cout << "FlowXe = " << dFlowXe << std::endl;
+			//std::cout << "FlowKr = " << dQKr << std::endl;
+			//std::cout << "FlowXe = " << dQXe << std::endl;
 
-			dFlowKr /= Config::n_normalize * Config::e_cut_normalize;
-			dFlowXe /= Config::n_normalize * Config::e_cut_normalize;
+            pNormalizer->normalize(dQKr, Normalizer::Type::FLOW);
+            pNormalizer->normalize(dQXe, Normalizer::Type::FLOW);
 
-			//std::cout << "FlowKr = " << dFlowKr << std::endl;
-			//std::cout << "FlowXe = " << dFlowXe << std::endl;
+			//std::cout << "FlowKr = " << dQKr << std::endl;
+			//std::cout << "FlowXe = " << dQXe << std::endl;
 
-			dFlowKr *= 1; // 5 10
-			dFlowXe *= 1; // 5 10
+			dQKr *= 1; // 5 10
+			dQXe *= 1; // 5 10
 
 			// support variables
 			double dTgrad = T1 - (T1 - T2) * (2 * (y - 1) + 1) / 2 / (size.y() - 2);
 			double dPgrad = dPCsLeft - (dPCsLeft - dPCsRight) * (2 * (x - 1) + 1) / 2 / (size.x() - 2);
 
-			//configs[0].pressure = dPCsLeft;
-			configs[0].pressure = dPgrad;
-			configs[0].T = dTgrad;
+			//configs[0].dPressure = dPCsLeft;
+			configs[0].dPressure = dPgrad;
+			configs[0].dTemperature = dTgrad;
 
-			configs[1].pressure = dKrStart; // hack dKrStart
-			configs[1].T = dTgrad;
+			configs[1].dPressure = dPKrStart; // hack dPKrStart
+			configs[1].dTemperature = dTgrad;
 
-			configs[2].pressure = dXeStart; // hack
-			configs[2].T = dTgrad;
+			configs[2].dPressure = dPXeStart; // hack
+			configs[2].dTemperature = dTgrad;
 
-			for (int i = 3; i < Config::m_iGasesNum; i++) {
-				configs[i].pressure = 0.0;
-				configs[i].T = dTgrad;
+			for (int i = 3; i < Config::getInstance()->getGasesNum(); i++) {
+				configs[i].dPressure = 0.0;
+				configs[i].dTemperature = dTgrad;
 			}
 
 			if (x == 0 && (y != 0 && y != size.y() - 1)) { // left border
-				configs[0].boundary_cond = sep::BT_GASE;
-				configs[0].boundary_pressure = dPCsLeft;
-				configs[0].boundary_T = dTgrad;
+				configs[0].eBoundaryType = sep::BT_GASE;
+				configs[0].dBoundaryPressure = dPCsLeft;
+				configs[0].dBoundaryTemperature = dTgrad;
 
-				for (int i = 1; i < Config::m_iGasesNum; i++) {
-					configs[i].boundary_cond = sep::BT_DIFFUSE;
-					//configs[i].boundary_cond = sep::BT_GASE;
-					configs[i].boundary_pressure = 0.0;
-					configs[i].boundary_stream = Vector3d();
-					configs[i].boundary_T = dTgrad;
+				for (int i = 1; i < Config::getInstance()->getGasesNum(); i++) {
+					configs[i].eBoundaryType = sep::BT_DIFFUSE;
+					//configs[i].eBoundaryType = sep::BT_GASE;
+					configs[i].dBoundaryPressure = 0.0;
+					configs[i].vBoundaryFlow = Vector3d();
+					configs[i].dBoundaryTemperature = dTgrad;
 				}
 			}
 			if (x == size.x() - 1 && (y != 0 && y != size.y() - 1)) { // right border
-				configs[0].boundary_cond = sep::BT_GASE;
-				configs[0].boundary_pressure = dPCsRight; // dPCsRight
-				configs[0].boundary_T = dTgrad;
+				configs[0].eBoundaryType = sep::BT_GASE;
+				configs[0].dBoundaryPressure = dPCsRight; // dPCsRight
+				configs[0].dBoundaryTemperature = dTgrad;
 
-				for (int i = 1; i < Config::m_iGasesNum; i++) {
-					configs[i].boundary_cond = sep::BT_GASE;
-					configs[i].boundary_pressure = 0.0;
-					configs[i].boundary_stream = Vector3d();
-					configs[i].boundary_T = dTgrad;
+				for (int i = 1; i < Config::getInstance()->getGasesNum(); i++) {
+					configs[i].eBoundaryType = sep::BT_GASE;
+					configs[i].dBoundaryPressure = 0.0;
+					configs[i].vBoundaryFlow = Vector3d();
+					configs[i].dBoundaryTemperature = dTgrad;
 				}
 			}
 			if (y == 0 && (x != 0 && x != size.x() - 1)) { // bottom border
@@ -310,40 +304,40 @@ void GridConstructor::ConfigureStandartGrid() {
 				double dEnd = (1.0 * (x)) / (size.x() - 2);
 				EmitterPart* e = Emitter::getInstance()->getEmitterPart(dBegin, dEnd);
 				if (e && e->isAHole) { // a hole
-					configs[0].boundary_cond = sep::BT_DIFFUSE;
-					configs[0].boundary_T = e->temp;
+					configs[0].eBoundaryType = sep::BT_DIFFUSE;
+					configs[0].dBoundaryTemperature = e->temp;
 
 					// Kr
-					configs[1].boundary_cond = sep::BT_FLOW;
-					configs[1].boundary_stream = Vector3d(0.0, dFlowKr, 0.0);
-					configs[1].boundary_T = e->temp;
+					configs[1].eBoundaryType = sep::BT_FLOW;
+					configs[1].vBoundaryFlow = Vector3d(0.0, dQKr, 0.0);
+					configs[1].dBoundaryTemperature = e->temp;
 
 					// Xe
-					configs[2].boundary_cond = sep::BT_FLOW;
-					configs[2].boundary_stream = Vector3d(0.0, dFlowXe, 0.0);
-					configs[2].boundary_T = e->temp;
+					configs[2].eBoundaryType = sep::BT_FLOW;
+					configs[2].vBoundaryFlow = Vector3d(0.0, dQXe, 0.0);
+					configs[2].dBoundaryTemperature = e->temp;
 
-					for (int i = 3; i < Config::m_iGasesNum; i++) {
-						configs[i].boundary_cond = sep::BT_DIFFUSE;
-						configs[i].boundary_T = e->temp;
+					for (int i = 3; i < Config::getInstance()->getGasesNum(); i++) {
+						configs[i].eBoundaryType = sep::BT_DIFFUSE;
+						configs[i].dBoundaryTemperature = e->temp;
 					}
 				} else {
-					configs[0].boundary_cond = sep::BT_DIFFUSE;
-					configs[0].boundary_T = e ? e->temp : T1;
+					configs[0].eBoundaryType = sep::BT_DIFFUSE;
+					configs[0].dBoundaryTemperature = e ? e->temp : T1;
 
-					for (int i = 1; i < Config::m_iGasesNum; i++) {
-						configs[i].boundary_cond = sep::BT_DIFFUSE;
-						configs[i].boundary_T = e ? e->temp : T1;
+					for (int i = 1; i < Config::getInstance()->getGasesNum(); i++) {
+						configs[i].eBoundaryType = sep::BT_DIFFUSE;
+						configs[i].dBoundaryTemperature = e ? e->temp : T1;
 					}
 				}
 			}
 			if (y == size.y() - 1 && (x != 0 && x != size.x() - 1)) { // top border
-				configs[0].boundary_cond = sep::BT_DIFFUSE;
-				configs[0].boundary_T = T2;
+				configs[0].eBoundaryType = sep::BT_DIFFUSE;
+				configs[0].dBoundaryTemperature = T2;
 
-				for (int i = 1; i < Config::m_iGasesNum; i++) {
-					configs[i].boundary_cond = sep::BT_DIFFUSE;
-					configs[i].boundary_T = T2;
+				for (int i = 1; i < Config::getInstance()->getGasesNum(); i++) {
+					configs[i].eBoundaryType = sep::BT_DIFFUSE;
+					configs[i].dBoundaryTemperature = T2;
 				}
 			}
 		}
@@ -354,20 +348,14 @@ void GridConstructor::ConfigureStandartGrid() {
 
 
 void GridConstructor::ConfigureTestGrid() {
-	// Main configuration part
-	// normalization base
-	Config::T_normalize = 1500.0; // K // Maximum temperature in system
-	Config::P_normalize = 150.0;
-	Config::n_normalize = Config::P_normalize / sep::k / Config::T_normalize;
-	Config::m_normalize = 133 * 1.66e-27; // kg
-	Config::e_cut_normalize = std::sqrt(sep::k * Config::T_normalize / Config::m_normalize); // m / s
-	Config::l_normalize = 6.07e-5; // ����������� ������ ���������� �������
-	Config::tau_normalize = Config::l_normalize / Config::e_cut_normalize; // s
+
+    const Config* pConfig = Config::getInstance();
+    const Normalizer* pNormalizer = pConfig->getNormalizer();
 
 	// Some beta chain hack. Makes lambda without data type.
-	for (auto& item : Config::m_vBetaChains) {
-		item->dLambda1 *= Config::tau_normalize;
-		item->dLambda2 *= Config::tau_normalize;
+	for (auto& item : pConfig->getBetaChains()) {
+        pNormalizer->normalize(item->dLambda1, Normalizer::Type::LAMBDA);
+        pNormalizer->normalize(item->dLambda2, Normalizer::Type::LAMBDA);
 	}
 
 	PushTemperature(1.0);
@@ -376,18 +364,21 @@ void GridConstructor::ConfigureTestGrid() {
 	//Vector2d vPhysSize = Vector2d(520.0, 0.4);
 	Vector2d vPhysSize = Vector2d(0.4, 0.4);
 	Vector2i vNumSize = Vector2i(20, 20);
-	Config::m_vCellSize = Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y());
+	Config::getInstance()->setCellSize(Vector2d(vPhysSize.x() / vNumSize.x(), vPhysSize.y() / vNumSize.y()));
 
 
 	struct TestBox: GridBox {
 
 		virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) {
-			// Task parameters
-			double T1 = 900.0 / Config::T_normalize;
-			double T2 = 900.0 / Config::T_normalize;
 
-			double dPCsLeft = 450.0 / Config::P_normalize;
-			double dPCsRight = 150.0 / Config::P_normalize;
+            const Normalizer* pNormalizer = Config::getInstance()->getNormalizer();
+
+            // Task parameters
+			double T1 = pNormalizer->normalize(900.0, Normalizer::Type::TEMPERATURE);
+			double T2 = pNormalizer->normalize(900.0, Normalizer::Type::TEMPERATURE);
+
+			double dPCsLeft = pNormalizer->normalize(450.0, Normalizer::Type::PRESSURE);
+			double dPCsRight = pNormalizer->normalize(150.0, Normalizer::Type::PRESSURE);
 
 			double dFlowCsLeft = 0.1;
 			double dFlowCsRight = 0.1;
@@ -399,28 +390,28 @@ void GridConstructor::ConfigureTestGrid() {
 			//dTgrad = (T1 + T2) / 2;
 			dPgrad = (dPCsLeft + dPCsRight) / 2;
 
-			//configs[0].pressure = dPCsLeft;
-			configs[0].pressure = dPgrad; // dPgrad
-			configs[0].T = dTgrad;
+			//configs[0].dPressure = dPCsLeft;
+			configs[0].dPressure = dPgrad; // dPgrad
+			configs[0].dTemperature = dTgrad;
 
 			if (x == 0) { // left border
-				configs[0].boundary_cond = sep::BT_GASE;
-				configs[0].boundary_pressure = dPCsLeft;
-				//configs[0].boundary_stream = Vector3d(dFlowCsLeft, 0.0, 0.0);
-				configs[0].boundary_T = dTgrad;
+				configs[0].eBoundaryType = sep::BT_GASE;
+				configs[0].dBoundaryPressure = dPCsLeft;
+				//configs[0].vBoundaryFlow = Vector3d(dFlowCsLeft, 0.0, 0.0);
+				configs[0].dBoundaryTemperature = dTgrad;
 			}
 			if (x == size.x() - 1) { // right border
-				configs[0].boundary_cond = sep::BT_GASE;
-				configs[0].boundary_pressure = dPCsRight; // dPCsRight
-				configs[0].boundary_T = dTgrad;
+				configs[0].eBoundaryType = sep::BT_GASE;
+				configs[0].dBoundaryPressure = dPCsRight; // dPCsRight
+				configs[0].dBoundaryTemperature = dTgrad;
 			}
 			if (y == 0) { // bottom border
-				configs[0].boundary_cond = sep::BT_DIFFUSE;
-				configs[0].boundary_T = T1;
+				configs[0].eBoundaryType = sep::BT_DIFFUSE;
+				configs[0].dBoundaryTemperature = T1;
 			}
 			if (y == size.y() - 1) { // top border
-				configs[0].boundary_cond = sep::BT_DIFFUSE;
-				configs[0].boundary_T = T2;
+				configs[0].eBoundaryType = sep::BT_DIFFUSE;
+				configs[0].dBoundaryTemperature = T2;
 			}
 		}
 	};
