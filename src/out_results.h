@@ -12,9 +12,9 @@ class OutResults {
 public:
     OutResults();
 
-    void Init(Grid* grid, GridManager* grid_manager);
+    void Init(Grid* pGrid, GridManager* pGridManager);
 
-    void OutAll(int iteration);
+    void OutAll(int iIteration);
 
     void OutAverageStream(int iteration);
 
@@ -29,7 +29,7 @@ private:
 
     void OutAverageStreamGPRT(std::fstream& filestream, int gas_n);
 
-    Grid* grid_;
-    GridManager* grid_manager_;
+    Grid* m_pGrid;
+    GridManager* m_pGridManager;
     Config* m_pConfig;
 };

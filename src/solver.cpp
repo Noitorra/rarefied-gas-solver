@@ -12,17 +12,16 @@
 #include "integral/ci.hpp"
 
 Solver::Solver() :
-        m_pImpulse(new Impulse),
-        m_pGridManager(new GridManager),
+        m_pImpulse(new Impulse()),
+        m_pGridManager(new GridManager()),
         m_pGrid(nullptr),
-        m_pOutResults(new OutResults),
+        m_pOutResults(new OutResults()),
         m_pConfig(Config::getInstance()) {}
 
 void Solver::Init() {
-    m_pGridManager->ConfigureGrid();
+    m_pImpulse->Init();
     m_pGridManager->Init(this);
     m_pGrid = m_pGridManager->GetGrid();
-    m_pImpulse->Init();
     m_pOutResults->Init(m_pGrid, m_pGridManager);
 }
 
@@ -140,4 +139,8 @@ void Solver::MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
 void Solver::CheckCells() {
     std::vector<Cell*>& vCellVector = m_pGrid->GetCells();
     tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](Cell* item) { item->checkInnerValuesRange(); });
+}
+
+Impulse* Solver::GetImpulse() const {
+    return m_pImpulse;
 }

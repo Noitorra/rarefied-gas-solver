@@ -24,6 +24,7 @@ endif()
 # Add out modules directory to CMake's module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(TBB REQUIRED)
 
 set(output_dir "${CMAKE_CURRENT_SOURCE_DIR}/bin/")

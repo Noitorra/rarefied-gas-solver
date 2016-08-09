@@ -19,13 +19,9 @@ public:
 
     void PrintLinkage(sep::Axis axis);
 
-    Grid* GetGrid() const {
-        return m_pGrid;
-    }
+    Grid* GetGrid() const;
 
-    Solver* GetSolver() const {
-        return m_pSolver;
-    }
+    Solver* GetSolver() const;
 
 private:
     void PushTemperature(double t);

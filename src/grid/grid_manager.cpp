@@ -18,8 +18,9 @@ GridManager::GridManager() :
 }
 
 void GridManager::Init(Solver* pSolver) {
-    m_pGrid->Init();
     m_pSolver = pSolver;
+    ConfigureGrid();
+    m_pGrid->Init();
 }
 
 void GridManager::PrintGrid() {
@@ -451,4 +452,12 @@ void GridManager::PrintInfo() {
         std::cout << "WARNING: too few iterations for one travel" << std::endl;
     }
     std::cout << std::endl;
+}
+
+Grid* GridManager::GetGrid() const {
+    return m_pGrid;
+}
+
+Solver* GridManager::GetSolver() const {
+    return m_pSolver;
 }

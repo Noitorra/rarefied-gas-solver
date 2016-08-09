@@ -35,6 +35,13 @@ add_executable(${TARGET_NAME} ${PROJECT_SOURCES})
 # MESSAGE(STATUS MPI_LIBRARIES=${MPI_LIBRARIES})
 # target_link_libraries(${TARGET_NAME} ${MPI_LIBRARIES})
 
+# Boost
+if (Boost_FOUND)
+	include_directories(${Boost_INCLUDE_DIRS})
+	include_directories(${BOOST_INCLUDE_PATH})
+	target_link_libraries(${TARGET_NAME} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+endif ()
+
 # TBB
 if (TBB_FOUND)
     include_directories(${TBB_INCLUDE_DIRS})

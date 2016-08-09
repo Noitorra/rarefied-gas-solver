@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include "out_results.h"
 #include "grid/grid.h"
 #include "grid/grid_manager.h"
@@ -5,113 +6,79 @@
 #include "config.h"
 #include "normalizer.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 std::string param_to_str(sep::MacroParamType param) {
     switch (param) {
         case sep::T_PARAM:
-            return "temp";
+            return "temperature";
         case sep::C_PARAM:
-            return "conc";
+            return "density";
         case sep::P_PARAM:
-            return "dPressure";
+            return "pressure";
         case sep::FLOW_PARAM:
             return "flow";
         default:
-            return "no_param";
+            return "undefined";
     }
 }
 
-void mkdir(const std::string& dir) {
-#ifdef _WIN32
-    if (CreateDirectory(dir.c_str(), NULL)) {
-        // Directory created
-    } else if (ERROR_ALREADY_EXISTS == GetLastError()) {
-        // Directory already exists
-    } else {
-        // Failed for some other reason
+OutResults::OutResults() : m_pGrid(nullptr), m_pGridManager(nullptr), m_pConfig(Config::getInstance()) {}
+
+void OutResults::Init(Grid* pGrid, GridManager* pGridManager) {
+    m_pGrid = pGrid;
+    m_pGridManager = pGridManager;
+
+    std::string sOutDir = m_pConfig->getOutputPrefix() + "out";
+
+    if (boost::filesystem::exists(sOutDir)) {
+        boost::filesystem::remove_all(sOutDir);
     }
-#else
-    system(("mkdir " + dir).c_str());
-#endif
-}
-
-void rmdir(const std::string& dir) {
-#ifdef _WIN32
-    SHFILEOPSTRUCT file_op = {
-        NULL,
-        FO_DELETE,
-        dir.c_str(),
-        "",
-        FOF_NOCONFIRMATION |
-        FOF_NOERRORUI |
-        FOF_SILENT ,
-        false,
-        0,
-        ""};
-    SHFileOperation(&file_op);
-#else
-    system(("rm -rf " + dir).c_str());
-#endif
-}
-
-OutResults::OutResults() : grid_(nullptr), grid_manager_(nullptr), m_pConfig(Config::getInstance()) {}
-
-void OutResults::Init(Grid* grid, GridManager* grid_manager) {
-    grid_ = grid;
-    grid_manager_ = grid_manager;
-
-    std::string out_dir = m_pConfig->getOutputPrefix() + "out";
-    rmdir(out_dir);
-    mkdir(out_dir);
+    boost::filesystem::create_directory(sOutDir);
 
     // check if needed to create directories
-    for (int gas = 0; gas < m_pConfig->getGasesNum(); gas++) {
-        std::string gas_dir = out_dir + "/gas" + to_string(gas);
-        mkdir(gas_dir);
+    for (int iGas = 0; iGas < m_pConfig->getGasesNum(); iGas++) {
+        std::string sGasDir = sOutDir + "/" + "gas" + to_string(iGas);
+        boost::filesystem::create_directory(sGasDir);
 
-        for (int param = 0; param < (int) sep::LAST_PARAM; param++) {
-            std::string param_dir = gas_dir + "/" + param_to_str((sep::MacroParamType) param);
+        for (int iParam = 0; iParam < static_cast<int>(sep::LAST_PARAM); iParam++) {
+            std::string param_dir = sGasDir + "/" + param_to_str(static_cast<sep::MacroParamType>(iParam));
 
-            mkdir(param_dir);
-            mkdir(param_dir + "/data");
-            mkdir(param_dir + "/pic");
+            boost::filesystem::create_directory(param_dir);
+            boost::filesystem::create_directory(param_dir + "/" + "data");
+            boost::filesystem::create_directory(param_dir + "/" + "pic");
         }
     }
 }
 
-void OutResults::OutAll(int iteration) {
-    if (!grid_ || !grid_manager_) {
+void OutResults::OutAll(int iIteration) {
+    if (m_pGrid == nullptr || m_pGridManager == nullptr) {
         std::cout << "Error: member OutResults is not initialized yet" << std::endl;
         return;
     }
-    if (iteration % m_pConfig->getOutEach()) {
+    if (iIteration % m_pConfig->getOutEach()) {
         return;
     }
-    std::cout << "Out results " << iteration;
+    std::cout << "Out results " << iIteration;
 
     LoadParameters();
 
     tbb::parallel_for(tbb::blocked_range<int>(0, sep::LAST_PARAM), [&](const tbb::blocked_range<int>& r) {
         for (int param = r.begin(); param != r.end(); ++param) {
             for (int gas = 0; gas < m_pConfig->getGasesNum(); gas++) {
-                OutParameter(static_cast<sep::MacroParamType>(param), gas, iteration);
+                OutParameter(static_cast<sep::MacroParamType>(param), gas, iIteration);
             }
         }
         std::cout << ".";
     });
 
     std::cout << std::endl;
-    //  OutAverageStream(iteration);
+    //  OutAverageStream(iIteration);
 }
 
 // prepare parameters to be printed out
 void OutResults::LoadParameters() {
-    std::vector<std::vector<std::vector<InitCellData*>>>& cells = grid_->GetInitCells();
+    std::vector<std::vector<std::vector<InitCellData*>>>& cells = m_pGrid->GetInitCells();
 
-    const Vector3i& vSize = grid_->GetSize();
+    const Vector3i& vSize = m_pGrid->GetSize();
     tbb::parallel_for(tbb::blocked_range<int>(0, vSize.x()), [&](const tbb::blocked_range<int>& r) {
         for (int x = r.begin(); x != r.end(); ++x) {
             for (int y = 0; y < vSize.y(); y++) {
@@ -126,7 +93,7 @@ void OutResults::LoadParameters() {
 }
 
 void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
-    std::vector<std::vector<std::vector<InitCellData*>>>& cells = grid_->GetInitCells();
+    std::vector<std::vector<std::vector<InitCellData*>>>& cells = m_pGrid->GetInitCells();
 
     std::string filename;
     const std::string& output_prefix = m_pConfig->getOutputPrefix();
@@ -224,7 +191,7 @@ void OutResults::OutAverageStream(int iteration) {
 }
 
 void OutResults::OutAverageStreamComb(std::fstream& filestream, int gas_n) {
-    const Vector3i& grid_size = grid_->GetSize();
+    const Vector3i& grid_size = m_pGrid->GetSize();
     double left_average_stream = ComputeAverageColumnStream(1, gas_n, 0, grid_size.y());
     double right_average_stream = ComputeAverageColumnStream(grid_size.x() - 2, gas_n, 0, grid_size.y());
 
@@ -235,7 +202,7 @@ void OutResults::OutAverageStreamComb(std::fstream& filestream, int gas_n) {
 }
 
 void OutResults::OutAverageStreamGPRT(std::fstream& filestream, int gas_n) {
-    const Vector3i& grid_size = grid_->GetSize();
+    const Vector3i& grid_size = m_pGrid->GetSize();
     HTypeGridConfig* h_type_config = m_pConfig->getHTypeGridConfig();
     int shift_x = 5;
     int D = h_type_config->D;
@@ -256,7 +223,7 @@ void OutResults::OutAverageStreamGPRT(std::fstream& filestream, int gas_n) {
 }
 
 double OutResults::ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y) {
-    std::vector<std::vector<std::vector<InitCellData*>>>& m_vCells = grid_->GetInitCells();
+    std::vector<std::vector<std::vector<InitCellData*>>>& m_vCells = m_pGrid->GetInitCells();
 
     double average_stream = 0.0;
     for (int y = start_y; y < start_y + size_y; y++) {

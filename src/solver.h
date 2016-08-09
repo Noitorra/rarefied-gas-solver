@@ -25,9 +25,7 @@ public:
 
     void Run();
 
-    Impulse* GetImpulse() const {
-        return m_pImpulse;
-    }
+    Impulse* GetImpulse() const;
 
 private:
     void InitCellType(sep::Axis axis);

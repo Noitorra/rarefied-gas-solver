@@ -138,7 +138,7 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 iter_start = 0
-iter_end = 500
+iter_end = 2000
 iter_step = 100
 gas_num = 2
 
