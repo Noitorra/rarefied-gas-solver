@@ -41,13 +41,54 @@ double Normalizer::normalize(const double &value, const Normalizer::Type &type) 
             return value / m_dTemperature;
         case Type::PRESSURE:
             return value / m_dPressure;
+        case Type::DENSITY:
+            return value / m_dDensity;
         case Type::FLOW:
             return value / (m_dDensity * m_dVelocity);
         case Type::LAMBDA:
             return value * m_dTime;
+        case Type::LENGTH:
+            return value / m_dLength;
+        case Type::TIME:
+            return value / m_dTime;
     }
 }
 
 void Normalizer::normalize(double &value, const Normalizer::Type &type) const {
     value = normalize(static_cast<const double&>(value), type);
+}
+
+double Normalizer::restore(const double &value, const Normalizer::Type &type) const {
+    switch(type) {
+        case Type::TEMPERATURE:
+            return value * m_dTemperature;
+        case Type::PRESSURE:
+            return value * m_dPressure;
+        case Type::DENSITY:
+            return value * m_dDensity;
+        case Type::FLOW:
+            return value * (m_dDensity * m_dVelocity);
+        case Type::LAMBDA:
+            return value / m_dTime;
+        case Type::LENGTH:
+            return value * m_dLength;
+        case Type::TIME:
+            return value * m_dTime;
+    }
+}
+
+void Normalizer::restore(double &value, const Normalizer::Type &type) const {
+    value = restore(static_cast<const double&>(value), type);
+}
+
+void Normalizer::printInfo() const {
+    std::cout << std::endl << "Normalization base:" << std::endl;
+    std::cout << "Temperature: " << m_dTemperature << " K" << std::endl;
+    std::cout << "Density: " << m_dDensity << " 1/m^3" << std::endl;
+    std::cout << "Mass: " << m_dMass << " kg" << std::endl;
+    std::cout << "Velocity: " << m_dVelocity << " m/s" << std::endl;
+    std::cout << "Length: " << m_dLength << " m" << std::endl;
+    std::cout << "Time: " << m_dTime << " s" << std::endl;
+    std::cout << "Pressure: " << m_dPressure << " Pa" << std::endl;
+    std::cout << std::endl;
 }

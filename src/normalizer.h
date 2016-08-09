@@ -1,14 +1,19 @@
 #ifndef NORMALIZER_H_
 #define NORMALIZER_H_
 
+#include <ntsid.h>
+
 class Normalizer {
 public:
 
     enum class Type {
         TEMPERATURE,
         PRESSURE,
+        DENSITY,
         FLOW,
-        LAMBDA
+        LAMBDA,
+        LENGTH,
+        TIME
     };
 
 	Normalizer();
@@ -19,6 +24,8 @@ public:
 
     double restore(const double& value, const Type& type) const;
     void restore(double& value, const Type& type) const;
+
+    void printInfo() const;
 private:
 	double m_dDensity; // density
 	double m_dTemperature; // temperature

@@ -32,7 +32,11 @@ public:
     void Init();
     void PrintMe();
 
-    Vector3i getGridSize() const {
+    void setGridSize(const Vector3i& vGridSize) {
+        m_vGridSize = vGridSize;
+    }
+
+    const Vector3i& getGridSize() const {
         return m_vGridSize;
     }
 
@@ -48,24 +52,28 @@ public:
         m_vCellSize = vCellSize;
     }
 
-    Vector2d getCellSize() const {
+    const Vector2d& getCellSize() const {
         return m_vCellSize;
     }
 
-    GasVector getGases() const {
+    const GasVector& getGases() const {
         return m_vGases;
     }
 
-    int getGasesNum() const {
+    unsigned int getGasesNum() const {
         return m_iGasesNum;
     }
 
-    BetaChainVector getBetaChains() const {
+    const BetaChainVector& getBetaChains() const {
         return m_vBetaChains;
     }
 
-    int getBetaChainsNum() const {
+    unsigned int getBetaChainsNum() const {
         return m_iBetaChainsNum;
+    }
+
+    void setTimestep(double dTimestep) {
+        m_dTimestep = dTimestep;
     }
 
     double getTimestep() const {
@@ -80,7 +88,7 @@ public:
         return m_bUseIntegral;
     }
 
-    std::string getOutputPrefix() const {
+    const std::string& getOutputPrefix() const {
         return m_sOutputPrefix;
     }
 
@@ -105,9 +113,9 @@ private:
 
 	// Gas Related
 	GasVector m_vGases;
-	int m_iGasesNum;
+	unsigned int m_iGasesNum;
 	BetaChainVector m_vBetaChains;
-	int m_iBetaChainsNum;
+	unsigned int m_iBetaChainsNum;
 
 	double m_dTimestep;
 	int m_iMaxIteration;

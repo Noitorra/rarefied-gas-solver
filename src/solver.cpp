@@ -5,6 +5,7 @@
 #include "grid/cell.h"
 #include "out_results.h"
 #include "config.h"
+#include "normalizer.h"
 #include "parameters/impulse.h"
 #include "parameters/gas.h"
 #include "parameters/beta_chain.h"
@@ -14,7 +15,8 @@ Solver::Solver() :
 	m_pImpulse(new Impulse),
 	m_pGridManager(new GridManager),
 	m_pGrid(nullptr),
-	m_pOutResults(new OutResults) {}
+	m_pOutResults(new OutResults),
+    m_pConfig(Config::getInstance()) {}
 
 void Solver::Init() {
 	m_pGridManager->ConfigureGrid();
@@ -33,7 +35,7 @@ void Solver::Run() {
 	//  m_pGridManager->PrintLinkage(sep::X);
 	//  m_pGridManager->PrintLinkage(sep::Y);
 
-	if (Config::m_bUseIntegral) {
+	if (m_pConfig->isUseIntegral()) {
 		ci::Potential* potential = new ci::HSPotential;
 		ci::init(potential, ci::NO_SYMM);
 	}
@@ -41,29 +43,32 @@ void Solver::Run() {
 	auto startTimestamp = std::chrono::steady_clock::now();
 	auto timestamp = startTimestamp;
 
-	for (int it = 0; it < Config::m_iMaxIteration; it++) {
+	for (int it = 0; it < m_pConfig->getMaxIteration(); it++) {
 		m_pOutResults->OutAll(it);
 
 		MakeStep(sep::X);
 		MakeStep(sep::Y);
 		MakeStep(sep::Z);
 
-		if (Config::m_bUseIntegral) {
-			if (Config::m_iGasesNum == 1) {
-				MakeIntegral(0, 0, Config::m_dTimestep);
-			} else if (Config::m_iGasesNum == 2) {
-				MakeIntegral(0, 0, Config::m_dTimestep);
-				MakeIntegral(0, 1, Config::m_dTimestep);
-			} else if (Config::m_iGasesNum >= 3) {
-				MakeIntegral(0, 0, Config::m_dTimestep);
-				MakeIntegral(0, 1, Config::m_dTimestep);
-				MakeIntegral(0, 2, Config::m_dTimestep);
+		if (m_pConfig->isUseIntegral()) {
+            int iGasesNum = m_pConfig->getGasesNum();
+            double dTimestep = m_pConfig->getTimestep();
+
+			if (iGasesNum == 1) {
+				MakeIntegral(0, 0, dTimestep);
+			} else if (iGasesNum == 2) {
+				MakeIntegral(0, 0, dTimestep);
+				MakeIntegral(0, 1, dTimestep);
+			} else if (iGasesNum >= 3) {
+				MakeIntegral(0, 0, dTimestep);
+				MakeIntegral(0, 1, dTimestep);
+				MakeIntegral(0, 2, dTimestep);
 			}
 		}
 
-		if (Config::m_bUseBetaChain) {
-			for (int i = 0; i < Config::m_iBetaChainsNum; i++) {
-				auto& item = Config::m_vBetaChains[i];
+		if (m_pConfig->isUseBetaChains()) {
+			for (int i = 0; i < m_pConfig->getBetaChainsNum(); i++) {
+				auto& item = m_pConfig->getBetaChains()[i];
 				MakeBetaDecay(item->iGasIndex1, item->iGasIndex2, item->dLambda1);
 				MakeBetaDecay(item->iGasIndex2, item->iGasIndex3, item->dLambda2);
 			}
@@ -75,21 +80,21 @@ void Solver::Run() {
 		auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTimestamp).count();
 		auto iterationTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - timestamp).count();
 
-		std::cout << "Run() : " << it << "/" << Config::m_iMaxIteration << std::endl;
+		std::cout << "Run() : " << it << "/" << m_pConfig->getMaxIteration() << std::endl;
 		std::cout << "Iteration time: " << iterationTime << " ms" << std::endl;
-		std::cout << "Inner time: " << it * Config::tau_normalize * Config::m_dTimestep << " s" << std::endl;
+		std::cout << "Inner time: " << it * m_pConfig->getNormalizer()->restore(static_cast<const double&>(m_pConfig->getTimestep()), Normalizer::Type::TIME) << " s" << std::endl;
 		std::cout << "Real time: " << wholeTime << " s" << std::endl;
 		std::cout << "Remaining time: ";
 		if (it == 0) {
 			std::cout << "Unknown";
 		} else {
-			std::cout << wholeTime * (Config::m_iMaxIteration - it) / it / 60 << " m";
+			std::cout << wholeTime * (m_pConfig->getMaxIteration() - it) / it / 60 << " m";
 		}
 		std::cout << std::endl;
 		std::cout << std::endl;
 	}
 
-	m_pOutResults->OutAll(Config::m_iMaxIteration);
+	m_pOutResults->OutAll(m_pConfig->getMaxIteration());
 
 	std::cout << "Done" << std::endl;
 }
@@ -113,15 +118,15 @@ void Solver::MakeStep(sep::Axis axis) {
 }
 
 void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
-	GasVector& gasv = Config::m_vGases;
-	ci::Particle particle;
-	particle.d = 1.;
+	const GasVector& vGases = m_pConfig->getGases();
+	ci::Particle cParticle;
+	cParticle.d = 1.;
 
 	ci::gen(timestep, 50000, m_pImpulse->getResolution() / 2, m_pImpulse->getResolution() / 2,
 	        m_pImpulse->getXYZ2I(), m_pImpulse->getXYZ2I(),
 	        m_pImpulse->getMaxImpulse() / (m_pImpulse->getResolution() / 2),
-	        gasv[gi0]->getMass(), gasv[gi1]->getMass(),
-	        particle, particle);
+	        vGases[gi0]->getMass(), vGases[gi1]->getMass(),
+	        cParticle, cParticle);
 
 	std::vector<Cell*>& cellVector = m_pGrid->GetCells();
 	tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) { item->computeIntegral(gi0, gi1); });

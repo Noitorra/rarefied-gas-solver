@@ -9,7 +9,7 @@ class Gas;
 class GridManager;
 class Solver;
 class OutResults;
-
+class Config;
 
 class Solver {
 public:
@@ -33,6 +33,7 @@ private:
 	GridManager* m_pGridManager;
 	Grid* m_pGrid;
 	OutResults* m_pOutResults;
+    Config* m_pConfig;
 };
 
 #endif /* SOLVER_H_ */

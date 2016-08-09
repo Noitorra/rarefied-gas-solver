@@ -4,12 +4,11 @@
 
 class Grid;
 class GridManager;
+class Config;
 
 class OutResults {
 public:
-	OutResults() :
-		grid_(nullptr),
-		grid_manager_(nullptr) { };
+	OutResults();
 
 	void Init(Grid* grid, GridManager* grid_manager);
 	void OutAll(int iteration);
@@ -26,4 +25,5 @@ private:
 
 	Grid* grid_;
 	GridManager* grid_manager_;
+    Config* m_pConfig;
 };

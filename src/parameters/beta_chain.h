@@ -5,9 +5,9 @@ class BetaChain {
 public:
 	BetaChain(int gasIndex1, int gasIndex2, int gasIndex3, double lambda1, double lambda2);
 
-	int iGasIndex1;
-	int iGasIndex2;
-	int iGasIndex3;
+	unsigned int iGasIndex1;
+    unsigned int iGasIndex2;
+    unsigned int iGasIndex3;
 	double dLambda1;
 	double dLambda2;
 };

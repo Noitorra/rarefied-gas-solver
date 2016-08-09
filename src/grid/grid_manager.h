@@ -5,6 +5,7 @@
 
 class Grid;
 class Solver;
+class Config;
 
 class GridManager : public GridConstructor {
 public:
@@ -52,4 +53,5 @@ private:
 
 	Grid* m_pGrid;
 	Solver* m_pSolver;
+    Config* m_pConfig;
 };

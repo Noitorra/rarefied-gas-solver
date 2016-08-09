@@ -7,6 +7,7 @@
 class Solver;
 class GridManager;
 class Grid;
+class Config;
 
 typedef std::vector<double> DoubleVector;
 
@@ -39,12 +40,12 @@ public:
 	}
 
 private:
-	enum CellType {
-		CT_UNDEFINED,
-		CT_LEFT,
-		CT_NORMAL,
-		CT_PRERIGHT,
-		CT_RIGHT
+	enum class Type {
+		UNDEFINED,
+		LEFT,
+		NORMAL,
+		PRERIGHT,
+		RIGHT
 	};
 
 	// help methods
@@ -96,7 +97,7 @@ private:
 	std::vector<DoubleVector> m_vValue;
 	std::vector<DoubleVector> m_vHalf;
 
-	std::vector<CellType> m_vType;
+	std::vector<Type> m_vType;
 
 	std::vector<sep::BoundaryType> m_vBoundaryType;
 	std::vector<double> m_vBoundaryTemperature;
@@ -110,6 +111,7 @@ private:
 	GridManager* m_pGridManager;
 	Solver* m_pSolver;
 	Grid* m_pGrid;
+    Config* m_pConfig;
 };
 
 #endif /* CELL_H_ */
