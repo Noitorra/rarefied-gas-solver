@@ -1,7 +1,7 @@
 #include "grid.h"
 #include "grid_manager.h"
 #include "cell.h"
-#include "config.h"
+#include "config/config.h"
 
 Grid::Grid() {}
 

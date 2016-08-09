@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OUT_RESULTS_H_
+#define OUT_RESULTS_H_
 
 #include "main.h"
 
@@ -33,3 +34,5 @@ private:
     GridManager* m_pGridManager;
     Config* m_pConfig;
 };
+
+#endif /* OUT_RESULTS_H_ */

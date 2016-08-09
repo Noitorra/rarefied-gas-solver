@@ -1,8 +1,6 @@
-
-#include "config.h"
+#include "config/config.h"
 #include "solver.h"
 #include "grid/grid_manager.h"
-
 
 int main(int argc, char* argv[]) {
     //std::ofstream out("log.txt");

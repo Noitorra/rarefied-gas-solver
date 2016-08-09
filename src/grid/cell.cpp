@@ -4,7 +4,7 @@
 #include "solver.h"
 #include "parameters/gas.h"
 #include "parameters/impulse.h"
-#include "config.h"
+#include "config/config.h"
 
 #include "integral/ci.hpp"
 

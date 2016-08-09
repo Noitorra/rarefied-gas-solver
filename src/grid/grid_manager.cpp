@@ -2,8 +2,8 @@
 #include "grid_manager.h"
 #include "grid.h"
 #include "solver.h"
-#include "config.h"
-#include "normalizer.h"
+#include "config/config.h"
+#include "config/normalizer.h"
 #include "cell.h"
 #include "parameters/impulse.h"
 

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAIN_H_
+#define MAIN_H_
 
 #include <iostream>
 #include <fstream>
@@ -110,3 +111,5 @@ template<typename Enumeration>
 auto as_integer(Enumeration const value) -> typename std::underlying_type<Enumeration>::type {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
 }
+
+#endif /* MAIN_H_ */

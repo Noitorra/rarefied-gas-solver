@@ -1,6 +1,6 @@
 ﻿#include "grid_constructor.h"
-#include "config.h"
-#include "normalizer.h"
+#include "config/config.h"
+#include "config/normalizer.h"
 #include "parameters/beta_chain.h"
 
 void global_temp(Vector2d p, double& temperature, double box_6_start_x, double T1, double T2) {

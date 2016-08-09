@@ -1,6 +1,6 @@
 ﻿#include "grid_constructor.h"
-#include "config.h"
-#include "normalizer.h"
+#include "config/config.h"
+#include "config/normalizer.h"
 #include "parameters/beta_chain.h"
 
 struct EmitterPart {

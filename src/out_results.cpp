@@ -3,8 +3,8 @@
 #include "grid/grid.h"
 #include "grid/grid_manager.h"
 #include "grid/cell.h"
-#include "config.h"
-#include "normalizer.h"
+#include "config/config.h"
+#include "config/normalizer.h"
 
 std::string param_to_str(sep::MacroParamType param) {
     switch (param) {
