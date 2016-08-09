@@ -4,20 +4,22 @@
 #include "main.h"
 
 class Gas;
+
 class BetaChain;
+
 class Normalizer;
 
 typedef std::vector<Gas*> GasVector;
 typedef std::vector<BetaChain*> BetaChainVector;
 
 struct HTypeGridConfig {
-	int D;
-	int l;
-	int d;
-	int h;
-	int gaps_q;
-	double T1, T2;
-	double n1, n2, n3, n4;
+    int D;
+    int l;
+    int d;
+    int h;
+    int gaps_q;
+    double T1, T2;
+    double n1, n2, n3, n4;
 };
 
 struct Config {
@@ -29,7 +31,9 @@ public:
     }
 
     Config();
+
     void Init();
+
     void PrintMe();
 
     void setGridSize(const Vector3i& vGridSize) {
@@ -103,28 +107,29 @@ public:
     Normalizer* getNormalizer() const {
         return m_pNormalizer;
     }
+
 private:
 
-	// Grid Related
-	Vector3i m_vGridSize;
-	HTypeGridConfig* m_pHTypeGridConfig;
-	bool m_bGPRTGrid;
-	Vector2d m_vCellSize; // default cell size in mm
+    // Grid Related
+    Vector3i m_vGridSize;
+    HTypeGridConfig* m_pHTypeGridConfig;
+    bool m_bGPRTGrid;
+    Vector2d m_vCellSize; // default cell size in mm
 
-	// Gas Related
-	GasVector m_vGases;
-	unsigned int m_iGasesNum;
-	BetaChainVector m_vBetaChains;
-	unsigned int m_iBetaChainsNum;
+    // Gas Related
+    GasVector m_vGases;
+    unsigned int m_iGasesNum;
+    BetaChainVector m_vBetaChains;
+    unsigned int m_iBetaChainsNum;
 
-	double m_dTimestep;
-	int m_iMaxIteration;
-	bool m_bUseIntegral;
-	std::string m_sOutputPrefix;
-	bool m_bUseBetaChain;
-	int m_iOutEach;
+    double m_dTimestep;
+    int m_iMaxIteration;
+    bool m_bUseIntegral;
+    std::string m_sOutputPrefix;
+    bool m_bUseBetaChain;
+    int m_iOutEach;
 
-	Normalizer* m_pNormalizer;
+    Normalizer* m_pNormalizer;
 };
 
 #endif // CONFIG_H_

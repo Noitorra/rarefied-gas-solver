@@ -3,27 +3,33 @@
 #include "main.h"
 
 class Grid;
+
 class GridManager;
+
 class Config;
 
 class OutResults {
 public:
-	OutResults();
+    OutResults();
 
-	void Init(Grid* grid, GridManager* grid_manager);
-	void OutAll(int iteration);
-	void OutAverageStream(int iteration);
+    void Init(Grid* grid, GridManager* grid_manager);
+
+    void OutAll(int iteration);
+
+    void OutAverageStream(int iteration);
 
 private:
-	void LoadParameters();
-	void OutParameter(sep::MacroParamType type, int gas, int index);
+    void LoadParameters();
 
-	double ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y);
+    void OutParameter(sep::MacroParamType type, int gas, int index);
 
-	void OutAverageStreamComb(std::fstream& filestream, int gas_n);
-	void OutAverageStreamGPRT(std::fstream& filestream, int gas_n);
+    double ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y);
 
-	Grid* grid_;
-	GridManager* grid_manager_;
+    void OutAverageStreamComb(std::fstream& filestream, int gas_n);
+
+    void OutAverageStreamGPRT(std::fstream& filestream, int gas_n);
+
+    Grid* grid_;
+    GridManager* grid_manager_;
     Config* m_pConfig;
 };

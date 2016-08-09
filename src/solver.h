@@ -4,35 +4,46 @@
 #include "main.h"
 
 class Grid;
+
 class Impulse;
+
 class Gas;
+
 class GridManager;
+
 class Solver;
+
 class OutResults;
+
 class Config;
 
 class Solver {
 public:
-	Solver();
+    Solver();
 
-	void Init();
-	void Run();
+    void Init();
 
-	Impulse* GetImpulse() const {
-		return m_pImpulse;
-	}
+    void Run();
+
+    Impulse* GetImpulse() const {
+        return m_pImpulse;
+    }
 
 private:
-	void InitCellType(sep::Axis axis);
-	void MakeStep(sep::Axis axis);
-	void MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
-	void MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
-	void CheckCells();
+    void InitCellType(sep::Axis axis);
 
-	Impulse* m_pImpulse;
-	GridManager* m_pGridManager;
-	Grid* m_pGrid;
-	OutResults* m_pOutResults;
+    void MakeStep(sep::Axis axis);
+
+    void MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
+
+    void MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
+
+    void CheckCells();
+
+    Impulse* m_pImpulse;
+    GridManager* m_pGridManager;
+    Grid* m_pGrid;
+    OutResults* m_pOutResults;
     Config* m_pConfig;
 };
 

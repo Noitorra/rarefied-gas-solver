@@ -6,123 +6,123 @@
 
 // This class is a base class with basic method,
 // working with inner vector only
-template <typename T>
+template<typename T>
 class VectorBase {
 public:
-	VectorBase() {}
+    VectorBase() {}
 
-	virtual ~VectorBase() {
-		m_vMass.clear();
-	}
+    virtual ~VectorBase() {
+        m_vMass.clear();
+    }
 
-	std::vector<T>& getMass() {
-		return m_vMass;
-	}
+    std::vector<T>& getMass() {
+        return m_vMass;
+    }
 
-	const T mod() const {
-		return std::sqrt(mod2());
-	}
+    const T mod() const {
+        return std::sqrt(mod2());
+    }
 
-	const T mod2() const {
-		return calc_mod2();
-	}
+    const T mod2() const {
+        return calc_mod2();
+    }
 
-	T& operator[](unsigned int i) {
-		return m_vMass[i];
-	}
+    T& operator[](unsigned int i) {
+        return m_vMass[i];
+    }
 
 private:
-	const T calc_mod2() const {
-		T loc_mod2 = T(0);
-		for (auto& item : m_vMass) {
-			// loc_mod2 += (item*item);
-			loc_mod2 += (item * item);
-		}
-		return loc_mod2;
-	}
+    const T calc_mod2() const {
+        T loc_mod2 = T(0);
+        for (auto& item : m_vMass) {
+            // loc_mod2 += (item*item);
+            loc_mod2 += (item * item);
+        }
+        return loc_mod2;
+    }
 
 protected:
-	std::vector<T> m_vMass;
+    std::vector<T> m_vMass;
 };
 
 // public class, which contains x, y access
 // and set method..
-template <typename T>
+template<typename T>
 class Vector2 : public VectorBase<T> {
 public:
-	Vector2() {
-		this->m_vMass.resize(2, T(0));
-	}
+    Vector2() {
+        this->m_vMass.resize(2, T(0));
+    }
 
-	Vector2(const T& x, const T& y) {
-		this->m_vMass.resize(2, T(0));
-		set(x, y);
-	}
+    Vector2(const T& x, const T& y) {
+        this->m_vMass.resize(2, T(0));
+        set(x, y);
+    }
 
-	void set(const T& x, const T& y) {
-		this->m_vMass[0] = x;
-		this->m_vMass[1] = y;
-	}
+    void set(const T& x, const T& y) {
+        this->m_vMass[0] = x;
+        this->m_vMass[1] = y;
+    }
 
-	const Vector2 operator+(const Vector2& right) const {
-		Vector2 v2;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			v2.m_vMass[i] = this->m_vMass[i] + right.m_vMass[i];
-		}
-		return v2;
-	}
+    const Vector2 operator+(const Vector2& right) const {
+        Vector2 v2;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            v2.m_vMass[i] = this->m_vMass[i] + right.m_vMass[i];
+        }
+        return v2;
+    }
 
-	const Vector2& operator+=(const Vector2& right) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] += right.m_vMass[i];
-		}
-		return *this;
-	}
+    const Vector2& operator+=(const Vector2& right) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] += right.m_vMass[i];
+        }
+        return *this;
+    }
 
-	const Vector2 operator-(const Vector2& right) const {
-		Vector2 v2;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			v2.m_vMass[i] = this->m_vMass[i] - right.m_vMass[i];
-		}
-		return v2;
-	}
+    const Vector2 operator-(const Vector2& right) const {
+        Vector2 v2;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            v2.m_vMass[i] = this->m_vMass[i] - right.m_vMass[i];
+        }
+        return v2;
+    }
 
-	const Vector2& operator-=(const Vector2& right) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] -= right.m_vMass[i];
-		}
-		return *this;
-	}
+    const Vector2& operator-=(const Vector2& right) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] -= right.m_vMass[i];
+        }
+        return *this;
+    }
 
-	const Vector2& operator/=(const double val) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] /= val;
-		}
-		return *this;
-	}
+    const Vector2& operator/=(const double val) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] /= val;
+        }
+        return *this;
+    }
 
-	const Vector2& operator*=(const double val) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] *= val;
-		}
-		return *this;
-	}
+    const Vector2& operator*=(const double val) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] *= val;
+        }
+        return *this;
+    }
 
-	T& x() {
-		return this->m_vMass[0];
-	}
+    T& x() {
+        return this->m_vMass[0];
+    }
 
-	T& y() {
-		return this->m_vMass[1];
-	}
+    T& y() {
+        return this->m_vMass[1];
+    }
 
-	const T& x() const {
-		return this->m_vMass[0];
-	}
+    const T& x() const {
+        return this->m_vMass[0];
+    }
 
-	const T& y() const {
-		return this->m_vMass[1];
-	}
+    const T& y() const {
+        return this->m_vMass[1];
+    }
 };
 
 typedef Vector2<double> Vector2d;
@@ -132,119 +132,119 @@ typedef Vector2<unsigned int> Vector2u;
 
 // public class, which contains x, y access
 // and set method..
-template <typename T>
+template<typename T>
 class Vector3 : public VectorBase<T> {
 public:
-	Vector3() {
-		this->m_vMass.resize(3, T(0));
-	}
+    Vector3() {
+        this->m_vMass.resize(3, T(0));
+    }
 
-	Vector3(const T& x, const T& y, const T& z) {
-		this->m_vMass.resize(3, T(0));
-		set(x, y, z);
-	}
+    Vector3(const T& x, const T& y, const T& z) {
+        this->m_vMass.resize(3, T(0));
+        set(x, y, z);
+    }
 
-	void set(const T& x, const T& y, const T& z) {
-		this->m_vMass[0] = x;
-		this->m_vMass[1] = y;
-		this->m_vMass[2] = z;
-	}
+    void set(const T& x, const T& y, const T& z) {
+        this->m_vMass[0] = x;
+        this->m_vMass[1] = y;
+        this->m_vMass[2] = z;
+    }
 
-	T& x() {
-		return this->m_vMass[0];
-	}
+    T& x() {
+        return this->m_vMass[0];
+    }
 
-	T& y() {
-		return this->m_vMass[1];
-	}
+    T& y() {
+        return this->m_vMass[1];
+    }
 
-	T& z() {
-		return this->m_vMass[2];
-	}
+    T& z() {
+        return this->m_vMass[2];
+    }
 
-	const T& x() const {
-		return this->m_vMass[0];
-	}
+    const T& x() const {
+        return this->m_vMass[0];
+    }
 
-	const T& y() const {
-		return this->m_vMass[1];
-	}
+    const T& y() const {
+        return this->m_vMass[1];
+    }
 
-	const T& z() const {
-		return this->m_vMass[2];
-	}
+    const T& z() const {
+        return this->m_vMass[2];
+    }
 
-	const Vector3 operator+(const Vector3& right) const {
-		Vector3 v3;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			v3.m_vMass[i] = this->m_vMass[i] + right.m_vMass[i];
-		}
-		return v3;
-	}
+    const Vector3 operator+(const Vector3& right) const {
+        Vector3 v3;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            v3.m_vMass[i] = this->m_vMass[i] + right.m_vMass[i];
+        }
+        return v3;
+    }
 
-	const Vector3& operator+=(const Vector3& right) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] += right.m_vMass[i];
-		}
-		return *this;
-	}
+    const Vector3& operator+=(const Vector3& right) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] += right.m_vMass[i];
+        }
+        return *this;
+    }
 
-	const Vector3 operator-(const Vector3& right) const {
-		Vector3 v3;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			v3.m_vMass[i] = this->m_vMass[i] - right.m_vMass[i];
-		}
-		return v3;
-	}
+    const Vector3 operator-(const Vector3& right) const {
+        Vector3 v3;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            v3.m_vMass[i] = this->m_vMass[i] - right.m_vMass[i];
+        }
+        return v3;
+    }
 
-	const Vector3& operator-=(const Vector3& right) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] -= right.m_vMass[i];
-		}
-		return *this;
-	}
+    const Vector3& operator-=(const Vector3& right) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] -= right.m_vMass[i];
+        }
+        return *this;
+    }
 
-	template <typename TValue>
-	const Vector3 operator/(const TValue& right) const {
-		Vector3 v3;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			v3.m_vMass[i] = this->m_vMass[i] / right;
-		}
-		return v3;
-	}
+    template<typename TValue>
+    const Vector3 operator/(const TValue& right) const {
+        Vector3 v3;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            v3.m_vMass[i] = this->m_vMass[i] / right;
+        }
+        return v3;
+    }
 
-	template <typename TValue>
-	const Vector3& operator/=(const TValue& right) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] /= right;
-		}
-		return *this;
-	}
+    template<typename TValue>
+    const Vector3& operator/=(const TValue& right) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] /= right;
+        }
+        return *this;
+    }
 
-	template <typename TValue>
-	const Vector3 operator*(const TValue& right) const {
-		Vector3 v3;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			v3.m_vMass[i] = this->m_vMass[i] * right;
-		}
-		return v3;
-	}
+    template<typename TValue>
+    const Vector3 operator*(const TValue& right) const {
+        Vector3 v3;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            v3.m_vMass[i] = this->m_vMass[i] * right;
+        }
+        return v3;
+    }
 
-	template <typename TValue>
-	const Vector3& operator*=(const TValue& right) {
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			this->m_vMass[i] *= right;
-		}
-		return *this;
-	}
+    template<typename TValue>
+    const Vector3& operator*=(const TValue& right) {
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            this->m_vMass[i] *= right;
+        }
+        return *this;
+    }
 
-	inline bool operator==(const Vector3& rhs) const {
-		bool bEqual = true;
-		for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
-			bEqual = this->m_vMass[i] == rhs.m_vMass[i] && bEqual;
-		}
-		return bEqual;
-	}
+    inline bool operator==(const Vector3& rhs) const {
+        bool bEqual = true;
+        for (unsigned int i = 0; i < this->m_vMass.size(); i++) {
+            bEqual = this->m_vMass[i] == rhs.m_vMass[i] && bEqual;
+        }
+        return bEqual;
+    }
 };
 
 typedef Vector3<double> Vector3d;

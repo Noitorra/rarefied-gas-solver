@@ -7,7 +7,7 @@
 	2) In programm we use blank variables.
 */
 
-Normalizer::Normalizer(): m_dDensity(0), m_dTemperature(0), m_dPressure(0), m_dTime(0), m_dMass(0), m_dVelocity(0), m_dLength(0) {}
+Normalizer::Normalizer() : m_dDensity(0), m_dTemperature(0), m_dPressure(0), m_dTime(0), m_dMass(0), m_dVelocity(0), m_dLength(0) {}
 
 void Normalizer::loadFromFile() {
 
@@ -35,8 +35,8 @@ void Normalizer::loadFromFile() {
 
 }
 
-double Normalizer::normalize(const double &value, const Normalizer::Type &type) const {
-    switch(type) {
+double Normalizer::normalize(const double& value, const Normalizer::Type& type) const {
+    switch (type) {
         case Type::TEMPERATURE:
             return value / m_dTemperature;
         case Type::PRESSURE:
@@ -54,12 +54,12 @@ double Normalizer::normalize(const double &value, const Normalizer::Type &type) 
     }
 }
 
-void Normalizer::normalize(double &value, const Normalizer::Type &type) const {
+void Normalizer::normalize(double& value, const Normalizer::Type& type) const {
     value = normalize(static_cast<const double&>(value), type);
 }
 
-double Normalizer::restore(const double &value, const Normalizer::Type &type) const {
-    switch(type) {
+double Normalizer::restore(const double& value, const Normalizer::Type& type) const {
+    switch (type) {
         case Type::TEMPERATURE:
             return value * m_dTemperature;
         case Type::PRESSURE:
@@ -77,7 +77,7 @@ double Normalizer::restore(const double &value, const Normalizer::Type &type) co
     }
 }
 
-void Normalizer::restore(double &value, const Normalizer::Type &type) const {
+void Normalizer::restore(double& value, const Normalizer::Type& type) const {
     value = restore(static_cast<const double&>(value), type);
 }
 
