@@ -86,13 +86,14 @@ public:
 };
 
 typedef std::map<int, CellConfig> GasesConfigsMap;
+typedef std::function<void(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start)> ConfigFunction;
 
 struct GridBox {
     Vector2i p; // in cells
     Vector2i size; // in cells
     CellConfig def_config;
 
-    virtual void config(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start) = 0;
+    ConfigFunction configFunction;
 };
 
 template<typename T>

@@ -120,7 +120,7 @@ void GridManager::GridGeometryToInitialCells() {
                 }
                 Vector2i size_with_fakes(box->size);
                 size_with_fakes += Vector2i(2, 2);
-                box->config(x + 1, y + 1, init_conds, size_with_fakes, box->p);
+                box->configFunction(x + 1, y + 1, init_conds, size_with_fakes, box->p);
             }
         }
     });
@@ -221,9 +221,9 @@ int GridManager::GetSlash(sep::NeighborType type) const {
     }
 }
 
-void GridManager::AddBox(Vector2d p, Vector2d size, GridBox* box) {
+void GridManager::AddBox(Vector2d p, Vector2d size, ConfigFunction config_func) {
 
-    if (box == nullptr) {
+    if (config_func == nullptr) {
         std::cout << "[GridManager::AddBox] Cannot add null box." << std::endl;
         return;
     }
@@ -235,9 +235,11 @@ void GridManager::AddBox(Vector2d p, Vector2d size, GridBox* box) {
 
     const Vector2d& cell_size = m_pConfig->getCellSize();
 
+    GridBox* box = new GridBox();
     box->p = Vector2i(p.x() / cell_size.x(), p.y() / cell_size.y());
     box->size = Vector2i(size.x() / cell_size.x(), size.y() / cell_size.y());
     box->def_config = def_config;
+    box->configFunction = config_func;
 
     m_vBoxes.push_back(box);
 }

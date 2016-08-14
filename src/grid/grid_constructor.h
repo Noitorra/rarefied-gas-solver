@@ -33,7 +33,7 @@ private:
 
     // Set box to normal
     // 0 and (size - 1) - fake cells; size = box_size + 2
-    virtual void AddBox(Vector2d p, Vector2d size, GridBox* box) = 0;
+    virtual void AddBox(Vector2d p, Vector2d size, ConfigFunction config_func = {}) = 0;
     /*
     virtual void SetBox(Vector2d vP, Vector2d vSize,
       ConfigFunction config_func =

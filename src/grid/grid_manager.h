@@ -36,7 +36,7 @@ private:
 
     double GetPressure();
 
-    void AddBox(Vector2d p, Vector2d size, GridBox* box);
+    void AddBox(Vector2d p, Vector2d size, ConfigFunction configFunction);
 
     //void SetBox(Vector2d p, Vector2d size, ConfigFunction config_func);
     void PrintGrid();
