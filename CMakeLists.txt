@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.4)
 
 project(RGS)
 
@@ -17,15 +17,12 @@ endif()
 # set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 # Require MPI for this project:
-# find_package(MPI REQUIRED)
-# set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-# set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
+find_package(MPI REQUIRED)
+set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_CXX_COMPILE_FLAGS})
+set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_CXX_LINK_FLAGS})
 
-# Add out modules directory to CMake's module path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
-
+# Require Boost
 find_package(Boost COMPONENTS system filesystem REQUIRED)
-find_package(TBB REQUIRED)
 
 set(output_dir "${CMAKE_CURRENT_SOURCE_DIR}/bin/")
 

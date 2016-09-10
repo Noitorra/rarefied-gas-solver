@@ -4,6 +4,10 @@
 #include "parameters/beta_chain.h"
 #include "emitter.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846  /* pi */
+#endif
+
 // This method being invoked while grid configuration
 // Feel free to edit this method
 void GridConstructor::ConfigureStandartGrid() {
@@ -46,7 +50,6 @@ void GridConstructor::ConfigureStandartGrid() {
     double dTFlow = 600.0;
 
     double dR = 4e-3;
-
     double dS = 2 * M_PI * dR * (10.8 * 7 + 11.8) * 1e-3;
 
     double dQKr = dQKrFull / (dTFlow * sep::BOLTZMANN_CONSTANT * dS);

@@ -24,7 +24,7 @@ private:
 
     void OutParameter(sep::MacroParamType type, int gas, int index);
 
-    double ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y);
+    double ComputeAverageColumnStream(int index_x, int gi, int start_y, int size_y);
 
     void OutAverageStreamComb(std::fstream& filestream, int gas_n);
 

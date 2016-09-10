@@ -12,7 +12,6 @@
 
 #define NOMINMAX
 
-#include <tbb/tbb.h>
 #include <sstream>
 
 namespace sep {

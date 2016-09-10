@@ -1,8 +1,6 @@
 #ifndef NORMALIZER_H_
 #define NORMALIZER_H_
 
-#include <ntsid.h>
-
 class Normalizer {
 public:
 

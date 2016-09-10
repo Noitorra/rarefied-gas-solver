@@ -1,3 +1,4 @@
+#include <chrono>
 #include "solver.h"
 
 #include "grid/grid.h"
@@ -110,10 +111,14 @@ void Solver::MakeStep(sep::Axis axis) {
     std::vector<Cell*>& cellVector = m_pGrid->GetCells();
 
     // Make half
-    tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) { item->computeHalf(axis); });
+    for (auto item : cellVector) {
+        item->computeHalf(axis);
+    }
 
     // Make value
-    tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) { item->computeValue(axis); });
+    for (auto item : cellVector) {
+        item->computeValue(axis);
+    }
 }
 
 void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
@@ -128,17 +133,23 @@ void Solver::MakeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
             cParticle, cParticle);
 
     std::vector<Cell*>& cellVector = m_pGrid->GetCells();
-    tbb::parallel_for_each(cellVector.begin(), cellVector.end(), [&](Cell* item) { item->computeIntegral(gi0, gi1); });
+    for (auto item : cellVector) {
+        item->computeIntegral(gi0, gi1);
+    }
 }
 
 void Solver::MakeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
     std::vector<Cell*>& vCellVector = m_pGrid->GetCells();
-    tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](Cell* item) { item->computeBetaDecay(gi0, gi1, lambda); });
+    for (auto item : vCellVector) {
+        item->computeBetaDecay(gi0, gi1, lambda);
+    }
 }
 
 void Solver::CheckCells() {
     std::vector<Cell*>& vCellVector = m_pGrid->GetCells();
-    tbb::parallel_for_each(vCellVector.begin(), vCellVector.end(), [&](Cell* item) { item->checkInnerValuesRange(); });
+    for (auto item : vCellVector) {
+        item->checkInnerValuesRange();
+    }
 }
 
 Impulse* Solver::GetImpulse() const {

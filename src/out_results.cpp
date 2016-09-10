@@ -61,14 +61,12 @@ void OutResults::OutAll(int iIteration) {
 
     LoadParameters();
 
-    tbb::parallel_for(tbb::blocked_range<int>(0, sep::LAST_PARAM), [&](const tbb::blocked_range<int>& r) {
-        for (int param = r.begin(); param != r.end(); ++param) {
-            for (int gas = 0; gas < m_pConfig->getGasesNum(); gas++) {
-                OutParameter(static_cast<sep::MacroParamType>(param), gas, iIteration);
-            }
+    for (int param = 0; param != sep::LAST_PARAM; ++param) {
+        for (int gas = 0; gas < m_pConfig->getGasesNum(); gas++) {
+            OutParameter(static_cast<sep::MacroParamType>(param), gas, iIteration);
         }
         std::cout << ".";
-    });
+    }
 
     std::cout << std::endl;
     //  OutAverageStream(iIteration);
@@ -79,17 +77,15 @@ void OutResults::LoadParameters() {
     std::vector<std::vector<std::vector<InitCellData*>>>& cells = m_pGrid->GetInitCells();
 
     const Vector3i& vSize = m_pGrid->GetSize();
-    tbb::parallel_for(tbb::blocked_range<int>(0, vSize.x()), [&](const tbb::blocked_range<int>& r) {
-        for (int x = r.begin(); x != r.end(); ++x) {
-            for (int y = 0; y < vSize.y(); y++) {
-                const int z = 0;
-                if (cells[x][y][z]->m_eType != sep::NORMAL_CELL)
-                    continue;
-                Cell* cell = cells[x][y][z]->m_pCell;
+    for (int x = 0; x < vSize.x(); x++) {
+        for (int y = 0; y < vSize.y(); y++) {
+            const int z = 0;
+            if (cells[x][y][z]->m_eType == sep::NORMAL_CELL) {
+                Cell *cell = cells[x][y][z]->m_pCell;
                 cell->computeMacroData();
             }
         }
-    });
+    }
 }
 
 void OutResults::OutParameter(sep::MacroParamType type, int gas, int index) {
@@ -222,7 +218,7 @@ void OutResults::OutAverageStreamGPRT(std::fstream& filestream, int gas_n) {
               left_down_stream << " : " << right_down_stream << std::endl;
 }
 
-double OutResults::ComputeAverageColumnStream(int index_x, unsigned int gi, int start_y, int size_y) {
+double OutResults::ComputeAverageColumnStream(int index_x, int gi, int start_y, int size_y) {
     std::vector<std::vector<std::vector<InitCellData*>>>& m_vCells = m_pGrid->GetInitCells();
 
     double average_stream = 0.0;
