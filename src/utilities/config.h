@@ -4,10 +4,9 @@
 #include "main.h"
 
 class Gas;
-
 class BetaChain;
-
 class Normalizer;
+class Impulse;
 
 typedef std::vector<Gas*> GasVector;
 typedef std::vector<BetaChain*> BetaChainVector;
@@ -32,9 +31,9 @@ public:
 
     Config();
 
-    void Init();
+    void init();
 
-    void PrintMe();
+    std::string toString() const;
 
     void setGridSize(const Vector3i& vGridSize) {
         m_vGridSize = vGridSize;
@@ -108,6 +107,8 @@ public:
         return m_pNormalizer;
     }
 
+    Impulse* getImpulse() const;
+
 private:
 
     // Grid Related
@@ -130,6 +131,7 @@ private:
     int m_iOutEach;
 
     Normalizer* m_pNormalizer;
+    Impulse* m_pImpulse;
 };
 
 #endif // CONFIG_H_

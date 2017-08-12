@@ -39,6 +39,6 @@ target_link_libraries(${TARGET_NAME} ${MPI_CXX_LIBRARIES})
 if (Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIRS})
 	include_directories(${BOOST_INCLUDE_PATH})
-	target_link_libraries(${TARGET_NAME} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+	target_link_libraries(${TARGET_NAME} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_SERIALIZATION_LIBRARY})
 endif ()
 

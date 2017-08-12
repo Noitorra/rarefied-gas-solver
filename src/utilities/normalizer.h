@@ -16,7 +16,7 @@ public:
 
     Normalizer();
 
-    void loadFromFile();
+    void init();
 
     double normalize(const double& value, const Type& type) const;
 

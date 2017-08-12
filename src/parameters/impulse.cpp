@@ -32,11 +32,11 @@ void Impulse::Init() {
     std::cout << "Impulse::Init() : gasv.size() >= 2" << std::endl;
     }
     else {
-    std::cout << "Impulse::Init() : gasv.size() < 2" << std::endl;
+    std::cout << "Impulse::init() : gasv.size() < 2" << std::endl;
     }
     */
 
-    std::cout << "Impulse::Init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
+    std::cout << "Impulse::init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
 
     // calc delta impulse
     m_dDeltaImpulse = 2 * m_dMaxImpulse / (m_uResolution);

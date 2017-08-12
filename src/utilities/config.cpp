@@ -1,12 +1,13 @@
 #include "config.h"
 #include "parameters/gas.h"
 #include "parameters/beta_chain.h"
+#include "parameters/impulse.h"
 #include "normalizer.h"
 
-Config::Config() : m_pNormalizer(new Normalizer()) {}
+Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 
-void Config::Init() {
-    m_dTimestep = 0.0; // sets automaticaly in grid_manager.cpp
+void Config::init() {
+    m_dTimestep = 0.0; // sets automatically in grid_manager.cpp
     m_iMaxIteration = 2000;
     m_sOutputPrefix = "../";
     m_bUseIntegral = true;
@@ -40,11 +41,18 @@ void Config::Init() {
     m_vBetaChains.push_back(new BetaChain(2, 5, 6, 6.78e-5, 6.49e-4));
 
     // Normalization
-    m_pNormalizer->loadFromFile();
+    m_pNormalizer->init();
+
+    // Impulse
+    m_pImpulse->Init();
 }
 
-void Config::PrintMe() {
-    std::cout << "GridSize = " << m_vGridSize.x() <<
-              "x" << m_vGridSize.y() <<
-              "x" << m_vGridSize.z() << std::endl;
+std::string Config::toString() const {
+    std::ostringstream os;
+    os << "GridSize = [" << m_vGridSize.x() << "x" << m_vGridSize.y() << "x" << m_vGridSize.z() << "]";
+    return os.str();
+}
+
+Impulse* Config::getImpulse() const {
+    return m_pImpulse;
 }

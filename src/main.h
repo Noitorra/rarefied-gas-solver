@@ -47,6 +47,8 @@ namespace sep {
         BT_FLOW
     };
 
+
+
     const double BOLTZMANN_CONSTANT = 1.38e-23; // Boltzmann const // TODO: Make more precise
 }
 
@@ -64,52 +66,5 @@ public:
     Vector3d Stream;
     Vector3d HeatStream;
 };
-
-class CellConfig {
-public:
-    CellConfig() :
-            dPressure(1.0),
-            dTemperature(1.0),
-            eBoundaryType(sep::BT_DIFFUSE),
-            dBoundaryTemperature(1.0),
-            dBoundaryPressure(1.0),
-            iLockedAxes(-1) {};
-
-    double dPressure; // initial dPressure
-    double dTemperature; // initial temperature
-    sep::BoundaryType eBoundaryType;
-    double dBoundaryTemperature; // wall temperature
-    double dBoundaryPressure;
-    Vector3d vBoundaryFlow;
-    int iLockedAxes;
-};
-
-typedef std::map<int, CellConfig> GasesConfigsMap;
-typedef std::function<void(int x, int y, GasesConfigsMap& configs, const Vector2i& size, const Vector2i& start)> ConfigFunction;
-
-struct GridBox {
-    Vector2i p; // in cells
-    Vector2i size; // in cells
-    CellConfig def_config;
-
-    ConfigFunction configFunction;
-};
-
-template<typename T>
-inline int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-}
-
-template<typename T>
-std::string to_string(T const& value) {
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-}
-
-template<typename Enumeration>
-auto as_integer(Enumeration const value) -> typename std::underlying_type<Enumeration>::type {
-    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
-}
 
 #endif /* MAIN_H_ */

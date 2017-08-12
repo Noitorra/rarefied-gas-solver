@@ -9,7 +9,7 @@
 
 Normalizer::Normalizer() : m_dDensity(0), m_dTemperature(0), m_dPressure(0), m_dTime(0), m_dMass(0), m_dVelocity(0), m_dLength(0) {}
 
-void Normalizer::loadFromFile() {
+void Normalizer::init() {
 
     if (Config::getInstance()->isGPRTGrid()) {
 
