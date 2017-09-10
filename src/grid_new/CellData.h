@@ -6,11 +6,11 @@
 #include "Parameters.h"
 #include "Cell.h"
 
-class CellWrapper {
+class CellData {
     friend class boost::serialization::access;
 
 public:
-    enum class BoundaryCondition {
+    enum class BoundaryType {
         DIFFUSE,
         PRESSURE,
         FLOW,
@@ -18,29 +18,26 @@ public:
     };
     enum class Type {
         NORMAL,
-        SPECIAL
+        FAKE,
+        FAKE_PARALLEL
     };
 
 private:
     std::vector<Parameters> _params;
     std::vector<Parameters> _boundaryParams;
-    std::vector<BoundaryCondition> _boundaryConditions;
+    std::vector<BoundaryType> _boundaryTypes;
     Vector3d _step;
     Type _type;
-//    Cell* _cell;
 
 public:
-    CellWrapper() {}
+    CellData() : _type(Type::NORMAL) {}
 
-    CellWrapper(unsigned int gasesCount) : _type(Type::NORMAL) {
+    CellData(Type type, unsigned int gasesCount) : _type(type) {
         _params.resize(gasesCount);
         _boundaryParams.resize(gasesCount);
     }
 
-    void init() {
-//        _cell = new Cell(this);
-//        _cell->init(_params, _step, -1);
-    }
+    CellData(const CellData& o) = default;
 
     Parameters& getParams(unsigned int gas) {
         return _params[gas];
@@ -66,16 +63,12 @@ public:
         _type = type;
     }
 
-    bool isSpecial() const {
-        return _type == Type::SPECIAL;
+    const std::vector<BoundaryType>& getBoundaryTypes() const {
+        return _boundaryTypes;
     }
 
-    const std::vector<BoundaryCondition>& getBoundaryConditions() const {
-        return _boundaryConditions;
-    }
-
-    void setBoundaryConditions(const std::vector<BoundaryCondition>& boundaryConditions) {
-        _boundaryConditions = boundaryConditions;
+    void setBoundaryTypes(const std::vector<BoundaryType>& boundaryConditions) {
+        _boundaryTypes = boundaryConditions;
     }
 
 private:

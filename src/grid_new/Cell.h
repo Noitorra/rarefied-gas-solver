@@ -5,27 +5,42 @@
 
 class Config;
 class Parameters;
-class CellWrapper;
+class CellData;
 
 typedef std::vector<double> DoubleVector;
 
 class Cell {
+public:
     friend class OutResults;
 
-public:
-    enum BoundaryType {
-        BT_DIFFUSE,
-        BT_GASE,
-        BT_MIRROR,
-        BT_FLOW
+private:
+    enum class ComputationType {
+        UNDEFINED,
+        LEFT,
+        NORMAL,
+        PRE_RIGHT,
+        RIGHT
     };
 
-    Cell(CellWrapper* wrapper);
+    int _lockedAxes;
 
-    // initialize
-    void init(std::vector<Parameters> parameters, Vector3d dAreastep, int iLockedAxes);
+    std::vector<Cell*> _prev;
+    std::vector<Cell*> _next;
 
-    void setBoundaryType(BoundaryType eBoundaryType, const Parameters& params, int iGasIndex = 0);
+    std::vector<DoubleVector> _value;
+    std::vector<DoubleVector> _halfValue;
+
+    std::vector<ComputationType> _computationType;
+
+    Config* _config;
+    CellData* _data;
+
+public:
+    explicit Cell(CellData* data);
+
+    void init();
+
+    void link(unsigned int dim, Cell* nextCell, Cell* prevCell);
 
     void computeType(unsigned int dim);
 
@@ -44,15 +59,6 @@ public:
     std::vector<Parameters> computeMacroData();
 
 private:
-    enum class Type {
-        UNDEFINED,
-        LEFT,
-        NORMAL,
-        PRERIGHT,
-        RIGHT
-    };
-
-    // help methods
     void compute_type(unsigned int dim);
 
     void compute_half_left(unsigned int dim);
@@ -100,22 +106,6 @@ private:
     Vector3d compute_stream(unsigned int gi);
 
     Vector3d compute_heatstream(unsigned int gi);
-
-    // Variables
-    Vector3d m_vStep;
-    int m_iLockedAxes;
-
-    std::vector<Cell*> m_pPrev;
-    std::vector<Cell*> m_pNext;
-
-    std::vector<DoubleVector> m_vValue;
-    std::vector<DoubleVector> m_vHalf;
-
-    std::vector<Type> m_vType;
-
-    Config* m_pConfig;
-
-    CellWrapper* _wrapper;
 };
 
 #endif /* CELL_H_ */

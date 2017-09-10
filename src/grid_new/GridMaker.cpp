@@ -1,14 +1,12 @@
 #include "GridMaker.h"
 #include "utilities/parallel.h"
 #include "utilities/utils.h"
-#include "CellWrapper.h"
-#include "Grid.h"
+#include "CellData.h"
 
-#include <boost/range/adaptor/reversed.hpp>
 #include <iostream>
 
-GridMaker::ConfigBox::ConfigBox(const Vector2d& point, const Vector2d& size, GridMaker::SetupFunction setupFunction)
-        : _point(point), _size(size), _setupFunction(setupFunction) {}
+GridMaker::ConfigBox::ConfigBox(const Vector2d& point, const Vector2d& size, bool isSolid)
+    : _point(point), _size(size), _isSolid(isSolid) {}
 
 const Vector2d &GridMaker::ConfigBox::getPoint() const {
     return _point;
@@ -18,8 +16,60 @@ const Vector2d &GridMaker::ConfigBox::getSize() const {
     return _size;
 }
 
-const GridMaker::SetupFunction &GridMaker::ConfigBox::getSetupFunction() const {
-    return _setupFunction;
+bool GridMaker::ConfigBox::isSolid() const {
+    return _isSolid;
+}
+
+void GridMaker::ConfigBox::setMainFunction(const GridMaker::SetupFunction& mainFunction) {
+    _mainFunction = mainFunction;
+}
+
+void GridMaker::ConfigBox::setLeftBorderFunction(const GridMaker::BorderSetupFunction& leftBorderFunction) {
+    _leftBorderFunction = leftBorderFunction;
+}
+
+void GridMaker::ConfigBox::setRightBorderFunction(const GridMaker::BorderSetupFunction& rightBorderFunction) {
+    _rightBorderFunction = rightBorderFunction;
+}
+
+void GridMaker::ConfigBox::setTopBorderFunction(const GridMaker::BorderSetupFunction& topBorderFunction) {
+    _topBorderFunction = topBorderFunction;
+}
+
+void GridMaker::ConfigBox::setBottomBorderFunction(const GridMaker::BorderSetupFunction& bottomBorderFunction) {
+    _bottomBorderFunction = bottomBorderFunction;
+}
+
+const GridMaker::SetupFunction& GridMaker::ConfigBox::getMainFunction() const {
+    return _mainFunction;
+}
+
+const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getLeftBorderFunction() const {
+    return _leftBorderFunction;
+}
+
+const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getRightBorderFunction() const {
+    return _rightBorderFunction;
+}
+
+const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getTopBorderFunction() const {
+    return _topBorderFunction;
+}
+
+const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getBottomBorderFunction() const {
+    return _bottomBorderFunction;
+}
+
+void GridMaker::ConfigBox::setPoint(const Vector2d& point) {
+    _point = point;
+}
+
+void GridMaker::ConfigBox::setSize(const Vector2d& size) {
+    _size = size;
+}
+
+void GridMaker::ConfigBox::setIsSolid(bool isSolid) {
+    _isSolid = isSolid;
 }
 
 /*
@@ -31,32 +81,55 @@ const GridMaker::SetupFunction &GridMaker::ConfigBox::getSetupFunction() const {
  * - main process load all configs, splits them for each process, add's special cells
  * - slave process just loads configs and that's it...
  */
-Grid* GridMaker::makeGrid(const Vector2u& size, unsigned int gasesCount) {
-
-    Grid* grid = nullptr;
+Grid<CellData>* GridMaker::makeGrid(const Vector2u& size, unsigned int gasesCount) {
+    Grid<CellData>* grid = nullptr;
 
     if (Parallel::isUsingMPI() == true) {
         if (Parallel::isMaster() == true) {
 
             // make configs for whole task
-            Grid* wholeGrid = makeWholeGrid(size, gasesCount);
+            Grid<CellData>* wholeGrid = makeWholeGrid(size, gasesCount);
 
+            std::cout << "Whole grid:" << std::endl;
             std::cout << *wholeGrid << std::endl;
 
             // split configs onto several parts, for each process
-            std::vector<Grid*> splitGrids = splitGrid(wholeGrid, (unsigned int) Parallel::getSize());
+            std::vector<Grid<CellData>*> splittedGrids = splitGrid(wholeGrid, (unsigned int) Parallel::getSize());
+
+            std::cout << "Splitted grids:" << std::endl;
+            for (unsigned int y = 0; y < wholeGrid->getSize().y(); y++) {
+                for (unsigned int i = 0; i < splittedGrids.size(); i++) {
+                    Grid<CellData>* splitGrid = splittedGrids[i];
+                    for (unsigned int x = 0; x < splitGrid->getSize().x(); x++) {
+                        CellData* data = splitGrid->get(x, y);
+
+                        char code = 'X';
+                        if (data == nullptr) {
+                            code = ' ';
+                        } else if (data->getType() == CellData::Type::FAKE) {
+                            code = '1';
+                        } else if (data->getType() == CellData::Type::NORMAL) {
+                            code = '0';
+                        } else if (data->getType() == CellData::Type::FAKE_PARALLEL) {
+                            code = 'P';
+                        }
+
+                        std::cout << code;
+                    }
+                    if (i != splittedGrids.size() - 1) {
+                        std::cout << " ";
+                    }
+                }
+                std::cout << std::endl;
+            }
 
             // Self configs
-            grid = splitGrids[0];
+            grid = splittedGrids[0];
 
             // Send to other processes
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                const char* buffer = Utils::serialize(splitGrids[processor]);
+                const char* buffer = Utils::serialize(splittedGrids[processor]);
                 Parallel::send(buffer, processor, 100);
-            }
-
-            for (auto* tempGrid : splitGrids) {
-                std::cout << *tempGrid << std::endl;
             }
         } else {
             const char* buffer = Parallel::receive(0, 100);
@@ -64,17 +137,16 @@ Grid* GridMaker::makeGrid(const Vector2u& size, unsigned int gasesCount) {
         }
     } else {
         grid = makeWholeGrid(size, gasesCount);
-        const char* buffer = Utils::serialize(grid);
-        std::cout << *buffer << std::endl;
+        std::cout << *grid << std::endl;
     }
 
     return grid;
 }
 
-Grid* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gasesCount) {
+Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gasesCount) {
 
     // create boxes
-    ConfigBoxVector boxes = makeBoxes();
+    std::vector<ConfigBox*> boxes = makeBoxes();
 
     // find cells field size
     Vector2d lbPoint = boxes.front()->getPoint();
@@ -98,31 +170,129 @@ Grid* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gasesCount) {
     Vector2d wholeSize = rtPoint - lbPoint; // in original data
 
     // create configs for whole space
-    Grid* grid = new Grid(size);
-    for (const ConfigBox* box : boxes | boost::adaptors::reversed) {
+    Grid<CellData>* grid = new Grid<CellData>(size);
+    for (auto box : boxes) {
         const Vector2d lbWholeBoxPoint = box->getPoint() - lbPoint;
         const Vector2d rtWholeBoxPoint = lbWholeBoxPoint + box->getSize();
 
-        const Vector2u lbWholeBoxGridPoint = {
-                (unsigned int) (lbWholeBoxPoint.x() / wholeSize.x() * size.x()),
-                (unsigned int) (lbWholeBoxPoint.y() / wholeSize.y() * size.y())
+        Vector2u lbWholeBoxGridPoint = {
+                (unsigned int) (lbWholeBoxPoint.x() / wholeSize.x() * (size.x() - 2)) + 1,
+                (unsigned int) (lbWholeBoxPoint.y() / wholeSize.y() * (size.y() - 2)) + 1
         };
 
-        const Vector2u rtWholeBoxGridPoint = {
-                (unsigned int) (rtWholeBoxPoint.x() / wholeSize.x() * size.x()),
-                (unsigned int) (rtWholeBoxPoint.y() / wholeSize.y() * size.y())
+        Vector2u rtWholeBoxGridPoint = {
+                (unsigned int) (rtWholeBoxPoint.x() / wholeSize.x() * (size.x() - 2)) + 1,
+                (unsigned int) (rtWholeBoxPoint.y() / wholeSize.y() * (size.y() - 2)) + 1
         };
+
+        if (box->isSolid() == false) {
+            lbWholeBoxGridPoint.x() += -1;
+            lbWholeBoxGridPoint.y() += -1;
+            rtWholeBoxGridPoint.x() += 1;
+            rtWholeBoxGridPoint.y() += 1;
+        }
 
         const Vector2u wholeBoxGridSize = rtWholeBoxGridPoint - lbWholeBoxGridPoint;
 
         for (unsigned int x = 0; x < size.x(); x++) {
             for (unsigned int y = 0; y < size.y(); y++) {
-                if (x >= lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() && y >= lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y()) {
-
-                    // create and initialize config
-                    CellWrapper* config = new CellWrapper(gasesCount);
-                    box->getSetupFunction()(lbWholeBoxGridPoint, wholeBoxGridSize, *config);
-                    grid->set(x, y, config);
+                if (box->isSolid() == false) {
+                    if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getBottomBorderFunction() != nullptr) {
+                            box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getTopBorderFunction() != nullptr) {
+                            box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == lbWholeBoxGridPoint.x() && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getLeftBorderFunction() != nullptr) {
+                            box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getRightBorderFunction() != nullptr) {
+                            box->getRightBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::NORMAL, gasesCount);
+                        if (box->getMainFunction() != nullptr) {
+                            box->getMainFunction()({1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1),
+                                                    1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1)}, *data);
+                        }
+                        grid->set(x, y, data);
+                    }
+                } else {
+                    if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getBottomBorderFunction() != nullptr) {
+                            box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getTopBorderFunction() != nullptr) {
+                            box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == lbWholeBoxGridPoint.x() && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getLeftBorderFunction() != nullptr) {
+                            box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getRightBorderFunction() != nullptr) {
+                            box->getRightBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == lbWholeBoxGridPoint.x() && y == lbWholeBoxGridPoint.y()) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getBottomBorderFunction() != nullptr) {
+                            box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        if (box->getLeftBorderFunction() != nullptr) {
+                            box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == lbWholeBoxGridPoint.x() && y == rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getLeftBorderFunction() != nullptr) {
+                            box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        if (box->getTopBorderFunction() != nullptr) {
+                            box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getBottomBorderFunction() != nullptr) {
+                            box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        if (box->getRightBorderFunction() != nullptr) {
+                            box->getRightBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
+                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        if (box->getTopBorderFunction() != nullptr) {
+                            box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
+                        }
+                        if (box->getRightBorderFunction() != nullptr) {
+                            box->getRightBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
+                        }
+                        grid->set(x, y, data);
+                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                        grid->set(x, y, nullptr);
+                    }
                 }
             }
         }
@@ -131,98 +301,84 @@ Grid* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gasesCount) {
     return grid;
 }
 
-GridMaker::ConfigBoxVector GridMaker::makeBoxes() {
-    std::vector<GridMaker::ConfigBox*> boxes;
+std::vector<GridMaker::ConfigBox*> GridMaker::makeBoxes() {
+    std::vector<ConfigBox*> boxes;
 
-    boxes.push_back(new ConfigBox(Vector2d(0.0, 0.0), Vector2d(20.0, 20.0), [](Vector2u point, Vector2u size, CellWrapper config) {
-        // TODO: make a box
-    }));
+    ConfigBox* box0 = new ConfigBox(Vector2d(0.0, 0.0), Vector2d(100.0, 100.0), false);
+    boxes.push_back(box0);
 
-    boxes.push_back(new ConfigBox(Vector2d(30.0, 30.0), Vector2d(20.0, 20.0), [](Vector2u point, Vector2u size, CellWrapper config) {
-        // TODO: make a box
-    }));
-
-    boxes.push_back(new ConfigBox(Vector2d(15.0, 15.0), Vector2d(20.0, 20.0), [](Vector2u point, Vector2u size, CellWrapper config) {
-        // TODO: make a box
-    }));
+    ConfigBox* box1 = new ConfigBox(Vector2d(30.0, 30.0), Vector2d(40.0, 40.0), true);
+    boxes.push_back(box1);
 
     return boxes;
 }
 
-std::vector<Grid*> GridMaker::splitGrid(Grid* grid, unsigned int count) {
+std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned int numGrids) {
+    std::vector<Grid<CellData>*> grids;
 
-    // Calculate indexes where grid will be cut
-    unsigned int k = 0;
-    unsigned int realCount = 0;
-    unsigned int maxEachRealCount = grid->getRealCount() / count;
-    std::vector<unsigned int> indexes(count, grid->getCount() - 1);
+    unsigned int countNotNull = grid->getCountNotNull();
+    unsigned int splitCount = countNotNull / numGrids;
+    unsigned int splitIndex = 0;
+    unsigned int indexNotNull = 0;
+    unsigned int lastIndex = 0;
     for (unsigned int index = 0; index < grid->getCount(); index++) {
-        CellWrapper* config = grid->getByIndex(index);
-        if (config != nullptr) {
-            realCount++;
+        auto data = grid->getByIndex(index);
+        if (data != nullptr) {
+            indexNotNull++;
         }
 
-        if (k != count - 1 && realCount == maxEachRealCount) {
-            indexes[k] = index;
-            k++;
+        if (indexNotNull == splitCount * (splitIndex + 1) && indexNotNull <= countNotNull - splitCount
+            || indexNotNull == countNotNull && splitIndex < numGrids) {
+
+            // get new grid size and shift on X axis
+            unsigned int shiftIndex = lastIndex - lastIndex % grid->getSize().y();
+            unsigned int sizeX = Grid<CellData>::toPoint(index, grid->getSize()).x() - Grid<CellData>::toPoint(lastIndex, grid->getSize()).x() + 1;
+
+            // make split here
+            Grid<CellData>* newGrid = new Grid<CellData>(grid->getSize());
+            for (unsigned int k = lastIndex; k <= index; k++) {
+                unsigned int newIndex = k - shiftIndex;
+                newGrid->setByIndex(newIndex, grid->getByIndex(k));
+            }
+
+            // add 1 column to left
+            if (splitIndex != 0) {
+                sizeX += 1;
+                shiftIndex -= grid->getSize().y();
+                newGrid->resize(Vector2i(-1, 0), newGrid->getSize() - Vector2u(1, 0));
+                for (unsigned int k = lastIndex - grid->getSize().y(); k < lastIndex; k++) {
+                    if (grid->getByIndex(k) != nullptr) {
+                        auto newData = new CellData(*grid->getByIndex(k));
+                        newData->setType(CellData::Type::FAKE_PARALLEL);
+
+                        unsigned int newIndex = k - shiftIndex;
+                        newGrid->setByIndex(newIndex, newData);
+                    }
+                }
+            }
+
+            // add 2 column to right
+            if (splitIndex != numGrids - 1) {
+                sizeX += 2;
+                for (unsigned int k = index + 1; k < index + 1 + grid->getSize().y() * 2; k++) {
+                    if (grid->getByIndex(k) != nullptr) {
+                        auto newData = new CellData(*grid->getByIndex(k));
+                        newData->setType(CellData::Type::FAKE_PARALLEL);
+
+                        unsigned int newIndex = k - shiftIndex;
+                        newGrid->setByIndex(newIndex, newData);
+                    }
+                }
+            }
+
+            // cut unused space
+            newGrid->resize(Vector2i(), Vector2u(sizeX, grid->getSize().y()));
+            grids.push_back(newGrid);
+
+            lastIndex = index + 1;
+            splitIndex++;
         }
     }
 
-    // Allocate space
-    std::vector<Grid*> splitGrids(count, nullptr);
-    for (unsigned int i = 0; i < count; i++) {
-        unsigned int indexBegin = i == 0 ? 0 : indexes[i - 1] + 1;
-        unsigned int indexEnd = indexes[i];
-
-        Vector2u beginPoint = Grid::toPoint(indexBegin, grid->getSize());
-        Vector2u endPoint = Grid::toPoint(indexEnd, grid->getSize());
-
-        Vector2u splitGridPoint = {0, 0};
-        Vector2u splitGridSize = {endPoint.x() - beginPoint.x() + 1, grid->getSize().y()};
-
-        // Add 1 column of cells to the left
-        if (i != 0) {
-            splitGridSize.x() += 1;
-            splitGridPoint.x() += 1;
-        }
-
-        // Add 2 columns of cells to the right
-        if (i != count - 1) {
-            splitGridSize.x() += 2;
-        }
-
-        splitGrids[i] = new Grid(splitGridSize);
-
-        unsigned int indexStart = Grid::toIndex({beginPoint.x(), 0}, grid->getSize());
-        unsigned int indexShift = Grid::toIndex(splitGridPoint, splitGridSize);
-
-        unsigned int indexBeginLeft = Grid::toIndex({beginPoint.x() - 1, beginPoint.y()}, grid->getSize());
-        unsigned int indexEndRight = Grid::toIndex({endPoint.x() + 2, endPoint.y()}, grid->getSize());
-
-        for (unsigned int index = 0; index < grid->getCount(); index++) {
-            if (index >= indexBeginLeft && index < indexBegin) {
-                CellWrapper* config = grid->getByIndex(index);
-                if (config != nullptr) {
-                    config = new CellWrapper(*config);
-                    config->setType(CellWrapper::Type::SPECIAL);
-                }
-                splitGrids[i]->setByIndex(config, index - indexStart + indexShift);
-            }
-
-            if (index >= indexBegin && index <= indexEnd) {
-                splitGrids[i]->setByIndex(grid->getByIndex(index), index - indexStart + indexShift);
-            }
-
-            if (index > indexEnd && index <= indexEndRight) {
-                CellWrapper* config = grid->getByIndex(index);
-                if (config != nullptr) {
-                    config = new CellWrapper(*config);
-                    config->setType(CellWrapper::Type::SPECIAL);
-                }
-                splitGrids[i]->setByIndex(config, index - indexStart + indexShift);
-            }
-        }
-    }
-
-    return splitGrids;
+    return grids;
 }

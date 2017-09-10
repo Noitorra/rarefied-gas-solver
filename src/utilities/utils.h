@@ -39,6 +39,14 @@ public:
     }
 
     template<class T>
+    static std::string serializeToString(T object) {
+        std::ostringstream os;
+        boost::archive::text_oarchive oa(os);
+        oa << object;
+        return os.str();
+    }
+
+    template<class T>
     static void deserialize(const char* buffer, T& object) {
         std::istringstream is(buffer);
         boost::archive::text_iarchive ia(is);
