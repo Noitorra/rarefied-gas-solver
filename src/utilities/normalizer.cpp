@@ -1,3 +1,4 @@
+#include <iostream>
 #include "normalizer.h"
 #include "config.h"
 

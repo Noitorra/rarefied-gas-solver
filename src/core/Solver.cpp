@@ -1,7 +1,7 @@
 #include "Solver.h"
 
 #include <chrono>
-#include <grid_new/Cell.h>
+#include <grid/Cell.h>
 
 #include "utilities/normalizer.h"
 #include "parameters/gas.h"
@@ -78,7 +78,7 @@ void Solver::run() {
         makeStep(sep::Z);
 
         if (_config->isUseIntegral()) {
-            int iGasesNum = _config->getGasesNum();
+            int iGasesNum = _config->getGasesCount();
             double dTimestep = _config->getTimestep();
 
             if (iGasesNum == 1) {

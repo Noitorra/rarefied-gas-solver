@@ -2,75 +2,9 @@
 #include "utilities/parallel.h"
 #include "utilities/utils.h"
 #include "CellData.h"
+#include "GridBox.h"
 
 #include <iostream>
-
-GridMaker::ConfigBox::ConfigBox(const Vector2d& point, const Vector2d& size, bool isSolid)
-    : _point(point), _size(size), _isSolid(isSolid) {}
-
-const Vector2d &GridMaker::ConfigBox::getPoint() const {
-    return _point;
-}
-
-const Vector2d &GridMaker::ConfigBox::getSize() const {
-    return _size;
-}
-
-bool GridMaker::ConfigBox::isSolid() const {
-    return _isSolid;
-}
-
-void GridMaker::ConfigBox::setMainFunction(const GridMaker::SetupFunction& mainFunction) {
-    _mainFunction = mainFunction;
-}
-
-void GridMaker::ConfigBox::setLeftBorderFunction(const GridMaker::BorderSetupFunction& leftBorderFunction) {
-    _leftBorderFunction = leftBorderFunction;
-}
-
-void GridMaker::ConfigBox::setRightBorderFunction(const GridMaker::BorderSetupFunction& rightBorderFunction) {
-    _rightBorderFunction = rightBorderFunction;
-}
-
-void GridMaker::ConfigBox::setTopBorderFunction(const GridMaker::BorderSetupFunction& topBorderFunction) {
-    _topBorderFunction = topBorderFunction;
-}
-
-void GridMaker::ConfigBox::setBottomBorderFunction(const GridMaker::BorderSetupFunction& bottomBorderFunction) {
-    _bottomBorderFunction = bottomBorderFunction;
-}
-
-const GridMaker::SetupFunction& GridMaker::ConfigBox::getMainFunction() const {
-    return _mainFunction;
-}
-
-const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getLeftBorderFunction() const {
-    return _leftBorderFunction;
-}
-
-const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getRightBorderFunction() const {
-    return _rightBorderFunction;
-}
-
-const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getTopBorderFunction() const {
-    return _topBorderFunction;
-}
-
-const GridMaker::BorderSetupFunction& GridMaker::ConfigBox::getBottomBorderFunction() const {
-    return _bottomBorderFunction;
-}
-
-void GridMaker::ConfigBox::setPoint(const Vector2d& point) {
-    _point = point;
-}
-
-void GridMaker::ConfigBox::setSize(const Vector2d& size) {
-    _size = size;
-}
-
-void GridMaker::ConfigBox::setIsSolid(bool isSolid) {
-    _isSolid = isSolid;
-}
 
 /*
  * How to make a grid? Easy!
@@ -81,14 +15,14 @@ void GridMaker::ConfigBox::setIsSolid(bool isSolid) {
  * - main process load all configs, splits them for each process, add's special cells
  * - slave process just loads configs and that's it...
  */
-Grid<CellData>* GridMaker::makeGrid(const Vector2u& size, unsigned int gasesCount) {
+Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
     Grid<CellData>* grid = nullptr;
 
-    if (Parallel::isUsingMPI() == true) {
+    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
         if (Parallel::isMaster() == true) {
 
             // make configs for whole task
-            Grid<CellData>* wholeGrid = makeWholeGrid(size, gasesCount);
+            Grid<CellData>* wholeGrid = makeWholeGrid(size);
 
             std::cout << "Whole grid:" << std::endl;
             std::cout << *wholeGrid << std::endl;
@@ -136,22 +70,22 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size, unsigned int gasesCoun
             Utils::deserialize(buffer, grid);
         }
     } else {
-        grid = makeWholeGrid(size, gasesCount);
+        grid = makeWholeGrid(size);
         std::cout << *grid << std::endl;
     }
 
     return grid;
 }
 
-Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gasesCount) {
+Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
 
     // create boxes
-    std::vector<ConfigBox*> boxes = makeBoxes();
+    std::vector<GridBox*> boxes = makeBoxes();
 
     // find cells field size
     Vector2d lbPoint = boxes.front()->getPoint();
     Vector2d rtPoint = lbPoint;
-    for (ConfigBox *box : boxes) {
+    for (GridBox *box : boxes) {
         const Vector2d &boxPoint = box->getPoint();
         const Vector2d &boxSize = box->getSize();
         if (boxPoint.x() < lbPoint.x()) {
@@ -198,31 +132,31 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gase
             for (unsigned int y = 0; y < size.y(); y++) {
                 if (box->isSolid() == false) {
                     if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getTopBorderFunction() != nullptr) {
                             box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x == lbWholeBoxGridPoint.x() && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getLeftBorderFunction() != nullptr) {
                             box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x == rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getRightBorderFunction() != nullptr) {
                             box->getRightBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::NORMAL, gasesCount);
+                        auto data = new CellData(CellData::Type::NORMAL);
                         if (box->getMainFunction() != nullptr) {
                             box->getMainFunction()({1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1),
                                                     1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1)}, *data);
@@ -231,31 +165,31 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gase
                     }
                 } else {
                     if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getTopBorderFunction() != nullptr) {
                             box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x == lbWholeBoxGridPoint.x() && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getLeftBorderFunction() != nullptr) {
                             box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x == rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getRightBorderFunction() != nullptr) {
                             box->getRightBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
                         }
                         grid->set(x, y, data);
                     } else if (x == lbWholeBoxGridPoint.x() && y == lbWholeBoxGridPoint.y()) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
@@ -264,7 +198,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gase
                         }
                         grid->set(x, y, data);
                     } else if (x == lbWholeBoxGridPoint.x() && y == rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getLeftBorderFunction() != nullptr) {
                             box->getLeftBorderFunction()(1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1), *data);
                         }
@@ -273,7 +207,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gase
                         }
                         grid->set(x, y, data);
                     } else if (x == rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
@@ -282,7 +216,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gase
                         }
                         grid->set(x, y, data);
                     } else if (x == rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
-                        auto data = new CellData(CellData::Type::FAKE, gasesCount);
+                        auto data = new CellData(CellData::Type::FAKE);
                         if (box->getTopBorderFunction() != nullptr) {
                             box->getTopBorderFunction()(1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1), *data);
                         }
@@ -301,14 +235,51 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size, unsigned int gase
     return grid;
 }
 
-std::vector<GridMaker::ConfigBox*> GridMaker::makeBoxes() {
-    std::vector<ConfigBox*> boxes;
+std::vector<GridBox*> GridMaker::makeBoxes() {
+    std::vector<GridBox*> boxes;
 
-    ConfigBox* box0 = new ConfigBox(Vector2d(0.0, 0.0), Vector2d(100.0, 100.0), false);
-    boxes.push_back(box0);
+    GridBox* box = nullptr;
 
-    ConfigBox* box1 = new ConfigBox(Vector2d(30.0, 30.0), Vector2d(40.0, 40.0), true);
-    boxes.push_back(box1);
+    box = new GridBox(Vector2d(0.0, 0.0), Vector2d(100.0, 100.0), false);
+    box->setMainFunction([](Vector2d point, CellData& data) {
+        data.params(0).set(1.0, 1.0, 1.0);
+    });
+    box->setLeftBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(1.0);
+    });
+    box->setRightBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(1.0);
+    });
+    box->setTopBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(1.0);
+    });
+    box->setBottomBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(1.0);
+    });
+    boxes.push_back(box);
+
+    box = new GridBox(Vector2d(30.0, 30.0), Vector2d(40.0, 40.0), true);
+    box->setLeftBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(2.0);
+    });
+    box->setRightBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(2.0);
+    });
+    box->setTopBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(2.0);
+    });
+    box->setBottomBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams(0).setTemp(2.0);
+    });
+    boxes.push_back(box);
 
     return boxes;
 }

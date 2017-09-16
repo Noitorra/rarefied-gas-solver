@@ -3,7 +3,7 @@
 
 #include "utilities/types.h"
 #include "utilities/utils.h"
-#include "Parameters.h"
+#include "CellParameters.h"
 #include "Cell.h"
 
 class CellData {
@@ -23,28 +23,33 @@ public:
     };
 
 private:
-    std::vector<Parameters> _params;
-    std::vector<Parameters> _boundaryParams;
+    std::vector<CellParameters> _params;
+    std::vector<CellParameters> _boundaryParams;
     std::vector<BoundaryType> _boundaryTypes;
     Vector3d _step;
     Type _type;
 
 public:
-    CellData() : _type(Type::NORMAL) {}
+    CellData();
 
-    CellData(Type type, unsigned int gasesCount) : _type(type) {
-        _params.resize(gasesCount);
-        _boundaryParams.resize(gasesCount);
-    }
+    explicit CellData(Type type);
 
     CellData(const CellData& o) = default;
 
-    Parameters& getParams(unsigned int gas) {
+    CellParameters& params(unsigned int gas) {
         return _params[gas];
     }
 
-    Parameters& getBoundaryParams(unsigned int gas) {
+    CellParameters& boundaryParams(unsigned int gas) {
         return _boundaryParams[gas];
+    }
+
+    const BoundaryType getBoundaryType(unsigned int gas) const {
+        return _boundaryTypes[gas];
+    }
+
+    void setBoundaryTypes(unsigned int gas, BoundaryType boundaryType) {
+        _boundaryTypes[gas] = boundaryType;
     }
 
     const Vector3d &getStep() const {
@@ -61,14 +66,6 @@ public:
 
     void setType(Type type) {
         _type = type;
-    }
-
-    const std::vector<BoundaryType>& getBoundaryTypes() const {
-        return _boundaryTypes;
-    }
-
-    void setBoundaryTypes(const std::vector<BoundaryType>& boundaryConditions) {
-        _boundaryTypes = boundaryConditions;
     }
 
 private:

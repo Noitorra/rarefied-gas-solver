@@ -4,7 +4,7 @@
 #include "main.h"
 #include "utilities/config.h"
 #include "parameters/impulse.h"
-#include "grid_new/Grid.h"
+#include "grid/Grid.h"
 
 class Cell;
 

@@ -4,7 +4,7 @@
 #include "parameters/gas.h"
 #include "parameters/impulse.h"
 #include "utilities/config.h"
-#include "Parameters.h"
+#include "CellParameters.h"
 
 #include "integral/ci.hpp"
 #include "CellData.h"
@@ -19,7 +19,7 @@ Cell::Cell(CellData* data) : _data(data), _config(Config::getInstance()), _locke
 
 void Cell::init() {
     const GasVector& vGases = _config->getGases();
-    unsigned int iGasesNum = _config->getGasesNum();
+    unsigned int iGasesNum = _config->getGasesCount();
     Impulse* pImpulse = _config->getImpulse();
     ImpulseVector& vImpulses = pImpulse->getVector();
 
@@ -33,14 +33,14 @@ void Cell::init() {
 
         double dDensity = 0.0;
         for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
-            dDensity += compute_exp(vGases[gi]->getMass(), _data->getParams(gi).getTemp(), vImpulses[ii]);
+            dDensity += compute_exp(vGases[gi]->getMass(), _data->params(gi).getTemp(), vImpulses[ii]);
         }
 
         dDensity *= pImpulse->getDeltaImpulseQube();
-        dDensity = _data->getParams(gi).getPressure() / _data->getParams(gi).getTemp() / dDensity;
+        dDensity = _data->params(gi).getPressure() / _data->params(gi).getTemp() / dDensity;
 
         for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
-            _value[gi][ii] = dDensity * compute_exp(vGases[gi]->getMass(), _data->getParams(gi).getTemp(), vImpulses[ii]);
+            _value[gi][ii] = dDensity * compute_exp(vGases[gi]->getMass(), _data->params(gi).getTemp(), vImpulses[ii]);
         }
     }
 }
@@ -108,10 +108,10 @@ void Cell::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
     }
 }
 
-std::vector<Parameters> Cell::computeMacroData() {
-    unsigned int iGasesNum = _config->getGasesNum();
+std::vector<CellParameters> Cell::computeMacroData() {
+    unsigned int iGasesNum = _config->getGasesCount();
 
-    std::vector<Parameters> parameters(iGasesNum);
+    std::vector<CellParameters> parameters(iGasesNum);
 
     if (!is_normal()) {
         for (unsigned int gi = 0; gi < iGasesNum; gi++) {
@@ -143,7 +143,7 @@ bool Cell::is_normal() {
 
 /* Tests */
 bool Cell::checkInnerValuesRange() {
-    int iGasesNum = _config->getGasesNum();
+    int iGasesNum = _config->getGasesCount();
     ImpulseVector& vImpulses = _config->getImpulse()->getVector();
 
     bool result = true;
@@ -202,10 +202,10 @@ void Cell::compute_type(unsigned int dim) {
 }
 
 void Cell::compute_half_left(unsigned int dim) {
-    int iGasesNum = _config->getGasesNum();
+    int iGasesNum = _config->getGasesCount();
 
-    for (int gi = 0; gi < iGasesNum; gi++) {
-        switch (_data->getBoundaryTypes()[gi]) {
+    for (unsigned int gi = 0; gi < iGasesNum; gi++) {
+        switch (_data->getBoundaryType(gi)) {
             case CellData::BoundaryType::DIFFUSE:
                 compute_half_diffuse_left(dim, gi);
                 break;
@@ -224,7 +224,7 @@ void Cell::compute_half_left(unsigned int dim) {
 
 void Cell::compute_half_normal(unsigned int dim) {
     const GasVector& vGases = _config->getGases();
-    int iGasesNum = _config->getGasesNum();
+    int iGasesNum = _config->getGasesCount();
     ImpulseVector& vImpulses = _config->getImpulse()->getVector();
 
     for (unsigned int gi = 0; gi < iGasesNum; gi++) {
@@ -249,10 +249,10 @@ void Cell::compute_half_normal(unsigned int dim) {
 void Cell::compute_half_preright(unsigned int dim) {}
 
 void Cell::compute_half_right(unsigned int dim) {
-    int iGasesNum = _config->getGasesNum();
+    int iGasesNum = _config->getGasesCount();
 
-    for (int gi = 0; gi < iGasesNum; gi++) {
-        switch (_data->getBoundaryTypes()[gi]) {
+    for (unsigned int gi = 0; gi < iGasesNum; gi++) {
+        switch (_data->getBoundaryType(gi)) {
             case CellData::BoundaryType::DIFFUSE:
                 compute_half_diffuse_right(dim, gi);
                 break;
@@ -271,7 +271,7 @@ void Cell::compute_half_right(unsigned int dim) {
 
 void Cell::compute_value_normal(unsigned int dim) {
     const GasVector& vGases = _config->getGases();
-    int iGasesNum = _config->getGasesNum();
+    int iGasesNum = _config->getGasesCount();
     ImpulseVector& vImpulses = _config->getImpulse()->getVector();
 
     for (unsigned int gi = 0; gi < iGasesNum; gi++) {
@@ -307,14 +307,14 @@ void Cell::compute_half_diffuse_left(unsigned int dim, int gi) {
             C1_up += std::abs(vImpulses[ii][dim] * _halfValue[gi][ii]);
             C2_up += std::abs(vImpulses[ii][dim] * (_value[gi][ii] + _next[dim]->_value[gi][ii]) / 2);
         } else {
-            C1_down += std::abs(vImpulses[ii][dim] * compute_exp(vGases[gi]->getMass(), _data->getBoundaryParams(gi).getTemp(), vImpulses[ii]));
+            C1_down += std::abs(vImpulses[ii][dim] * compute_exp(vGases[gi]->getMass(), _data->boundaryParams(gi).getTemp(), vImpulses[ii]));
         }
     }
 
     for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
         if (vImpulses[ii][dim] > 0) {
-            _halfValue[gi][ii] = C1_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->getBoundaryParams(gi).getTemp(), vImpulses[ii]);
-            _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->getBoundaryParams(gi).getTemp(), vImpulses[ii]) - _next[dim]->_value[gi][ii];
+            _halfValue[gi][ii] = C1_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->boundaryParams(gi).getTemp(), vImpulses[ii]);
+            _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->boundaryParams(gi).getTemp(), vImpulses[ii]) - _next[dim]->_value[gi][ii];
             if (_value[gi][ii] < 0.0)
                 _value[gi][ii] = 0.0;
         }
@@ -344,14 +344,14 @@ void Cell::compute_half_diffuse_right(unsigned int dim, int gi) {
             C1_up += std::abs(vImpulses[ii][dim] * _prev[dim]->_halfValue[gi][ii]);
             C2_up += std::abs(vImpulses[ii][dim] * (_value[gi][ii] + _prev[dim]->_value[gi][ii]) / 2);
         } else {
-            C1_down += std::abs(vImpulses[ii][dim] * compute_exp(vGases[gi]->getMass(), _data->getBoundaryParams(gi).getTemp(), vImpulses[ii]));
+            C1_down += std::abs(vImpulses[ii][dim] * compute_exp(vGases[gi]->getMass(), _data->boundaryParams(gi).getTemp(), vImpulses[ii]));
         }
     }
 
     for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
         if (vImpulses[ii][dim] < 0) {
-            _prev[dim]->_halfValue[gi][ii] = C1_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->getBoundaryParams(gi).getTemp(), vImpulses[ii]);
-            _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->getBoundaryParams(gi).getTemp(), vImpulses[ii]) - _prev[dim]->_value[gi][ii];
+            _prev[dim]->_halfValue[gi][ii] = C1_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->boundaryParams(gi).getTemp(), vImpulses[ii]);
+            _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(vGases[gi]->getMass(), _data->boundaryParams(gi).getTemp(), vImpulses[ii]) - _prev[dim]->_value[gi][ii];
             if (_value[gi][ii] < 0.0)
                 _value[gi][ii] = 0.0;
         }
@@ -369,8 +369,8 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
     double C2_up = 0.0;
 
     Vector3d v3Speed = Vector3d();
-    if (_data->getBoundaryParams(gi).getPressure() > 0.0) {
-        v3Speed = _data->getBoundaryParams(gi).getFlow() / (_data->getBoundaryParams(gi).getPressure() / _data->getBoundaryParams(gi).getTemp());
+    if (_data->boundaryParams(gi).getPressure() > 0.0) {
+        v3Speed = _data->boundaryParams(gi).getFlow() / (_data->boundaryParams(gi).getPressure() / _data->boundaryParams(gi).getTemp());
     }
 
     for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
@@ -391,18 +391,18 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
         } else {
             C1_down += compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii] - v3Speed * vGases[gi]->getMass());
         }
     }
 
     // Vacuum
-    if (_data->getBoundaryParams(gi).getPressure() == 0.0) {
+    if (_data->boundaryParams(gi).getPressure() == 0.0) {
         C1_up = 0.0;
         C2_up = 0.0;
     } else {
-        C1_up = _data->getBoundaryParams(gi).getPressure() / _data->getBoundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C1_up;
-        C2_up = _data->getBoundaryParams(gi).getPressure() / _data->getBoundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C2_up;
+        C1_up = _data->boundaryParams(gi).getPressure() / _data->boundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C1_up;
+        C2_up = _data->boundaryParams(gi).getPressure() / _data->boundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C2_up;
 
         if (C1_up < 0.0)
             C1_up = 0.0;
@@ -414,12 +414,12 @@ void Cell::compute_half_gase_left(unsigned int dim, int gi) {
         if (vImpulses[ii][dim] > 0) {
             _halfValue[gi][ii] = C1_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii] - v3Speed * vGases[gi]->getMass());
 
             _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii] - v3Speed * vGases[gi]->getMass()) - _next[dim]->_value[gi][ii];
             if (_value[gi][ii] < 0.0)
                 _value[gi][ii] = 0.0;
@@ -437,8 +437,8 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
     double C2_up = 0.0;
 
     Vector3d v3Speed = Vector3d();
-    if (_data->getBoundaryParams(gi).getPressure() > 0.0) {
-        v3Speed = _data->getBoundaryParams(gi).getFlow() / (_data->getBoundaryParams(gi).getPressure() / _data->getBoundaryParams(gi).getTemp());
+    if (_data->boundaryParams(gi).getPressure() > 0.0) {
+        v3Speed = _data->boundaryParams(gi).getFlow() / (_data->boundaryParams(gi).getPressure() / _data->boundaryParams(gi).getTemp());
     }
 
     for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
@@ -459,18 +459,18 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
         } else {
             C1_down += compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii] - v3Speed * vGases[gi]->getMass());
         }
     }
 
     // Vacuum
-    if (_data->getBoundaryParams(gi).getPressure() == 0.0) {
+    if (_data->boundaryParams(gi).getPressure() == 0.0) {
         C1_up = 0.0;
         C2_up = 0.0;
     } else {
-        C1_up = _data->getBoundaryParams(gi).getPressure() / _data->getBoundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C1_up;
-        C2_up = _data->getBoundaryParams(gi).getPressure() / _data->getBoundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C2_up;
+        C1_up = _data->boundaryParams(gi).getPressure() / _data->boundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C1_up;
+        C2_up = _data->boundaryParams(gi).getPressure() / _data->boundaryParams(gi).getTemp() / pImpulse->getDeltaImpulseQube() - C2_up;
 
         if (C1_up < 0.0)
             C1_up = 0.0;
@@ -482,12 +482,12 @@ void Cell::compute_half_gase_right(unsigned int dim, int gi) {
         if (vImpulses[ii][dim] < 0) {
             _prev[dim]->_halfValue[gi][ii] = C1_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii] - v3Speed * vGases[gi]->getMass());
 
             _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii] - v3Speed * vGases[gi]->getMass()) - _prev[dim]->_value[gi][ii];
             if (_value[gi][ii] < 0.0)
                 _value[gi][ii] = 0.0;
@@ -523,13 +523,13 @@ void Cell::compute_half_flow_left(unsigned int dim, int gi) {
         } else {
             C1_down += vImpulses[ii][dim] * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii]);
         }
     }
 
-    C1_up = _data->getBoundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C1_up;
-    C2_up = _data->getBoundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C2_up;
+    C1_up = _data->boundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C1_up;
+    C2_up = _data->boundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C2_up;
 
     if (C1_up / C1_down < 0.0) {
         C1_up = 0.0;
@@ -542,12 +542,12 @@ void Cell::compute_half_flow_left(unsigned int dim, int gi) {
         if (vImpulses[ii][dim] > 0) {
             _halfValue[gi][ii] = C1_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii]);
 
             _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii]) - _next[dim]->_value[gi][ii];
 
             if (_value[gi][ii] < 0.0) {
@@ -584,13 +584,13 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
         } else {
             C1_down += std::abs(vImpulses[ii][dim]) * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii]);
         }
     }
 
-    C1_up = _data->getBoundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C1_up;
-    C2_up = _data->getBoundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C2_up;
+    C1_up = _data->boundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C1_up;
+    C2_up = _data->boundaryParams(gi).getFlow().get(dim) / pImpulse->getDeltaImpulseQube() - C2_up;
 
     if (C1_up / C1_down < 0.0)
         C1_up = 0.0;
@@ -601,12 +601,12 @@ void Cell::compute_half_flow_right(unsigned int dim, int gi) {
         if (vImpulses[ii][dim] < 0) {
             _prev[dim]->_halfValue[gi][ii] = C1_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii]);
 
             _value[gi][ii] = 2 * C2_up / C1_down * compute_exp(
                     vGases[gi]->getMass(),
-                    _data->getBoundaryParams(gi).getTemp(),
+                    _data->boundaryParams(gi).getTemp(),
                     vImpulses[ii]) - _prev[dim]->_value[gi][ii];
             if (_value[gi][ii] < 0.0)
                 _value[gi][ii] = 0.0;

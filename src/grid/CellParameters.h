@@ -3,29 +3,25 @@
 
 #include <utilities/types.h>
 
-class Parameters {
+#include <utility>
+
+class CellParameters {
     friend class boost::serialization::access;
 
 private:
-    double _pressure;
-    double _density;
-    double _temp;
+    double _pressure = 0.0;
+    double _density = 0.0;
+    double _temp = 0.0;
     Vector3d _flow;
     Vector3d _heatFlow;
 
 public:
-    Parameters() {
-        _heatFlow = Vector3d();
-    }
+    CellParameters() = default;
 
-    Parameters(double pressure, double density, double temp) : Parameters() {
+    void set(double pressure, double density, double temp) {
         _pressure = pressure;
         _density = density;
         _temp = temp;
-    }
-
-    Parameters(double pressure, double density, double temp, Vector3d flow) : Parameters(pressure, density, temp) {
-        _flow = flow;
     }
 
     double getPressure() const {
@@ -75,6 +71,7 @@ private:
         ar & _density;
         ar & _temp;
         ar & _flow;
+        ar & _heatFlow;
     }
 
 };

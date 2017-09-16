@@ -1,7 +1,10 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#include "main.h"
+#include <vector>
+#include <string>
+#include "core/main.h"
+#include "types.h"
 
 class Gas;
 class BetaChain;
@@ -25,7 +28,7 @@ struct Config {
 
 public:
     static Config* getInstance() {
-        static Config* pConfig = new Config();
+        static auto* pConfig = new Config();
         return pConfig;
     }
 
@@ -63,8 +66,8 @@ public:
         return m_vGases;
     }
 
-    unsigned int getGasesNum() const {
-        return m_iGasesNum;
+    unsigned int getGasesCount() const {
+        return m_iGasesCount;
     }
 
     const BetaChainVector& getBetaChains() const {
@@ -119,7 +122,7 @@ private:
 
     // Gas Related
     GasVector m_vGases;
-    unsigned int m_iGasesNum;
+    unsigned int m_iGasesCount;
     BetaChainVector m_vBetaChains;
     unsigned int m_iBetaChainsNum;
 

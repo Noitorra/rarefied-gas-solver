@@ -1,3 +1,7 @@
+#include <cmath>
+#include <vector>
+#include <utilities/types.h>
+#include <iostream>
 #include "impulse.h"
 
 Impulse::Impulse() {

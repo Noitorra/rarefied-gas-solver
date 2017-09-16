@@ -1,3 +1,4 @@
+#include <sstream>
 #include "config.h"
 #include "parameters/gas.h"
 #include "parameters/beta_chain.h"
@@ -21,7 +22,7 @@ void Config::init() {
     m_bGPRTGrid = false;
 
     // Gases Related
-    m_iGasesNum = 2;
+    m_iGasesCount = 2;
     m_iBetaChainsNum = 0;
 
     // Fill gases. Use only iNumGases first gases.

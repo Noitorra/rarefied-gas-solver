@@ -4,7 +4,7 @@
 #include "utilities/types.h"
 
 class Config;
-class Parameters;
+class CellParameters;
 class CellData;
 
 typedef std::vector<double> DoubleVector;
@@ -56,7 +56,7 @@ public:
     bool checkInnerValuesRange();
 
     // macro data
-    std::vector<Parameters> computeMacroData();
+    std::vector<CellParameters> computeMacroData();
 
 private:
     void compute_type(unsigned int dim);
