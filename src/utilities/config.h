@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <ostream>
 #include "core/main.h"
 #include "types.h"
 
@@ -11,20 +12,29 @@ class BetaChain;
 class Normalizer;
 class Impulse;
 
-typedef std::vector<Gas*> GasVector;
-typedef std::vector<BetaChain*> BetaChainVector;
-
-struct HTypeGridConfig {
-    int D;
-    int l;
-    int d;
-    int h;
-    int gaps_q;
-    double T1, T2;
-    double n1, n2, n3, n4;
-};
-
 struct Config {
+private:
+
+    // Grid Related
+    Vector3i m_vGridSize;
+    Vector2d m_vCellSize; // default cell size in mm
+
+    // Gas Related
+    std::vector<Gas> m_vGases;
+    unsigned int m_iGasesCount;
+    std::vector<BetaChain> m_vBetaChains;
+    unsigned int m_iBetaChainsCount;
+
+    double m_dTimestep;
+    bool m_bUseIntegral;
+    bool m_bUseBetaChain;
+
+    std::string m_sOutputFolder;
+    int m_iMaxIteration;
+    int m_iOutEach;
+
+    Normalizer* m_pNormalizer;
+    Impulse* m_pImpulse;
 
 public:
     static Config* getInstance() {
@@ -36,22 +46,12 @@ public:
 
     void init();
 
-    std::string toString() const;
-
     void setGridSize(const Vector3i& vGridSize) {
         m_vGridSize = vGridSize;
     }
 
     const Vector3i& getGridSize() const {
         return m_vGridSize;
-    }
-
-    HTypeGridConfig* getHTypeGridConfig() const {
-        return m_pHTypeGridConfig;
-    }
-
-    bool isGPRTGrid() const {
-        return m_bGPRTGrid;
     }
 
     void setCellSize(const Vector2d& vCellSize) {
@@ -62,7 +62,7 @@ public:
         return m_vCellSize;
     }
 
-    const GasVector& getGases() const {
+    const std::vector<Gas>& getGases() const {
         return m_vGases;
     }
 
@@ -70,12 +70,12 @@ public:
         return m_iGasesCount;
     }
 
-    const BetaChainVector& getBetaChains() const {
+    const std::vector<BetaChain>& getBetaChains() const {
         return m_vBetaChains;
     }
 
-    unsigned int getBetaChainsNum() const {
-        return m_iBetaChainsNum;
+    unsigned int getBetaChainsCount() const {
+        return m_iBetaChainsCount;
     }
 
     void setTimestep(double dTimestep) {
@@ -94,8 +94,8 @@ public:
         return m_bUseIntegral;
     }
 
-    const std::string& getOutputPrefix() const {
-        return m_sOutputPrefix;
+    const std::string& getOutputFolder() const {
+        return m_sOutputFolder;
     }
 
     bool isUseBetaChains() const {
@@ -112,29 +112,7 @@ public:
 
     Impulse* getImpulse() const;
 
-private:
-
-    // Grid Related
-    Vector3i m_vGridSize;
-    HTypeGridConfig* m_pHTypeGridConfig;
-    bool m_bGPRTGrid;
-    Vector2d m_vCellSize; // default cell size in mm
-
-    // Gas Related
-    GasVector m_vGases;
-    unsigned int m_iGasesCount;
-    BetaChainVector m_vBetaChains;
-    unsigned int m_iBetaChainsNum;
-
-    double m_dTimestep;
-    int m_iMaxIteration;
-    bool m_bUseIntegral;
-    std::string m_sOutputPrefix;
-    bool m_bUseBetaChain;
-    int m_iOutEach;
-
-    Normalizer* m_pNormalizer;
-    Impulse* m_pImpulse;
+    friend std::ostream& operator<<(std::ostream& os, const Config& config);
 };
 
 #endif // CONFIG_H_

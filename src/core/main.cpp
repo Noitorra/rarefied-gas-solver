@@ -12,11 +12,13 @@ int main(int argc, char* argv[]) {
     Parallel::init();
 
     // Print off a hello world message
-    std::cout << "Hello world from processor " << Parallel::getProcessorName() << ", rank " << Parallel::getRank()
+    std::cout << "Hello world from processor " << Parallel::getProcessorName()
+              << ", rank " << Parallel::getRank()
               << " out of " << Parallel::getSize() << " processors." << std::endl;
 
     // Create config
     Config::getInstance()->init();
+    std::cout << "Config:" << *Config::getInstance() << std::endl;
 
     // Create grid
     Grid<CellData>* grid = GridMaker::makeGrid({42, 22});

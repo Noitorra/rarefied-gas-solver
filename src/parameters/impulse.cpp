@@ -69,7 +69,7 @@ void Impulse::Init() {
                     m_pxyz2i[x][y][z] = static_cast<int>(m_vImpulse.size());
 
                     // save xyz for index
-                    m_pi2xyz.push_back(Vector3i(x, y, z));
+                    m_pi2xyz.emplace_back(x, y, z);
 
                     // save impulse value for index
                     m_vImpulse.push_back(vec);

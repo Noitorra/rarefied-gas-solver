@@ -8,6 +8,8 @@
 
 class CellData;
 
+class Cell;
+
 template<class T>
 class Grid {
 private:
@@ -85,6 +87,8 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Grid<CellData>& grid);
+
+    friend std::ostream& operator<<(std::ostream& os, const Grid<Cell>& grid);
 
     static inline unsigned int toIndex(const Vector2u& point, const Vector2u& size) {
         return point.x() * size.y() + point.y();

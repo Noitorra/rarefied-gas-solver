@@ -23,8 +23,8 @@ public:
     };
 
 private:
-    std::vector<CellParameters> _params;
-    std::vector<CellParameters> _boundaryParams;
+    CellParameters _params;
+    CellParameters _boundaryParams;
     std::vector<BoundaryType> _boundaryTypes;
     Vector3d _step;
     Type _type;
@@ -36,12 +36,12 @@ public:
 
     CellData(const CellData& o) = default;
 
-    CellParameters& params(unsigned int gas) {
-        return _params[gas];
+    CellParameters& params() {
+        return _params;
     }
 
-    CellParameters& boundaryParams(unsigned int gas) {
-        return _boundaryParams[gas];
+    CellParameters& boundaryParams() {
+        return _boundaryParams;
     }
 
     const BoundaryType getBoundaryType(unsigned int gas) const {
@@ -66,6 +66,18 @@ public:
 
     void setType(Type type) {
         _type = type;
+    }
+
+    bool isNormal() const {
+        return _type == Type::NORMAL;
+    }
+
+    bool isFake() const {
+        return _type == Type::FAKE;
+    }
+
+    bool isFakeParallel() const {
+        return _type == Type::FAKE_PARALLEL;
     }
 
 private:

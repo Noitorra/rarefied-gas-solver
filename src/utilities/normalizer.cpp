@@ -12,17 +12,17 @@ Normalizer::Normalizer() : m_dDensity(0), m_dTemperature(0), m_dPressure(0), m_d
 
 void Normalizer::init() {
 
-    if (Config::getInstance()->isGPRTGrid()) {
-
-        // From GPRT
-        m_dTemperature = 600.0; // K (Lowest temperature?)
-        m_dDensity = 1.81e22; // 1 / m^3
-        m_dPressure = m_dDensity * sep::BOLTZMANN_CONSTANT * m_dTemperature;
-        m_dMass = 133 * 1.66e-27; // kg
-        m_dVelocity = sqrt(sep::BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s
-        m_dLength = 0.5 * 6e-4;
-        m_dTime = m_dLength / m_dVelocity;
-    } else {
+//    if (Config::getInstance()->isGPRTGrid()) {
+//
+//        // From GPRT
+//        m_dTemperature = 600.0; // K (Lowest temperature?)
+//        m_dDensity = 1.81e22; // 1 / m^3
+//        m_dPressure = m_dDensity * sep::BOLTZMANN_CONSTANT * m_dTemperature;
+//        m_dMass = 133 * 1.66e-27; // kg
+//        m_dVelocity = sqrt(sep::BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s
+//        m_dLength = 0.5 * 6e-4;
+//        m_dTime = m_dLength / m_dVelocity;
+//    } else {
 
         // From GRID
         m_dTemperature = 1500.0; // K // Maximum temperature in system
@@ -32,7 +32,7 @@ void Normalizer::init() {
         m_dVelocity = sqrt(sep::BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s (This is how we define V1)
         m_dLength = 6.07e-5; // calculated and used to understand size of the system
         m_dTime = m_dLength / m_dVelocity; // s (just timestep)
-    }
+//    }
 
 }
 

@@ -4,64 +4,87 @@
 #include <utilities/types.h>
 
 #include <utility>
+#include <utilities/config.h>
 
 class CellParameters {
     friend class boost::serialization::access;
 
 private:
-    double _pressure = 0.0;
-    double _density = 0.0;
-    double _temp = 0.0;
-    Vector3d _flow;
-    Vector3d _heatFlow;
+    std::vector<double> _pressure;
+    std::vector<double> _density;
+    std::vector<double> _temp;
+    std::vector<Vector3d> _flow;
+    std::vector<Vector3d> _heatFlow;
 
 public:
-    CellParameters() = default;
+    CellParameters() {
+        unsigned int gasesCount = Config::getInstance()->getGasesCount();
 
-    void set(double pressure, double density, double temp) {
-        _pressure = pressure;
-        _density = density;
-        _temp = temp;
+        _pressure.resize(gasesCount);
+        _density.resize(gasesCount);
+        _temp.resize(gasesCount);
+        _flow.resize(gasesCount);
+        _heatFlow.resize(gasesCount);
+    };
+
+    void set(unsigned int gas, double pressure, double density, double temp) {
+        _pressure[gas] = pressure;
+        _density[gas] = density;
+        _temp[gas] = temp;
     }
 
-    double getPressure() const {
-        return _pressure;
+    void set(unsigned int gas, double pressure, double density, double temp, Vector3d flow, Vector3d heatFlow) {
+        set(gas, pressure, density, temp);
+        _flow[gas] = std::move(flow);
+        _heatFlow[gas] = std::move(heatFlow);
     }
 
-    void setPressure(double pressure) {
-        _pressure = pressure;
+    void reset() {
+        std::fill(_pressure.begin(), _pressure.end(), 0.0);
+        std::fill(_density.begin(), _density.end(), 0.0);
+        std::fill(_temp.begin(), _temp.end(), 0.0);
+        std::fill(_flow.begin(), _flow.end(), Vector3d());
+        std::fill(_heatFlow.begin(), _heatFlow.end(), Vector3d());
     }
 
-    double getDensity() const {
-        return _density;
+    double getPressure(unsigned int gas) const {
+        return _pressure[gas];
     }
 
-    void setDensity(double density) {
-        _density = density;
+    void setPressure(unsigned int gas, double pressure) {
+        _pressure[gas] = pressure;
     }
 
-    double getTemp() const {
-        return _temp;
+    double getDensity(unsigned int gas) const {
+        return _density[gas];
     }
 
-    void setTemp(double temp) {
-        _temp = temp;
+    void setDensity(unsigned int gas, double density) {
+        _density[gas] = density;
     }
 
-    const Vector3d& getFlow() const {
-        return _flow;
+    double getTemp(unsigned int gas) const {
+        return _temp[gas];
     }
 
-    void setFlow(const Vector3d& flow) {
-        _flow = flow;
+    void setTemp(unsigned int gas, double temp) {
+        _temp[gas] = temp;
     }
 
-    const Vector3d& getHeatFlow() const {
-        return _heatFlow;
+    const Vector3d& getFlow(unsigned int gas) const {
+        return _flow[gas];
     }
 
-    void setHeatFlow(const Vector3d& heatFlow) {
-        _heatFlow = heatFlow;
+    void setFlow(unsigned int gas, const Vector3d& flow) {
+        _flow[gas] = flow;
+    }
+
+    const Vector3d& getHeatFlow(unsigned int gas) const {
+        return _heatFlow[gas];
+    }
+
+    void setHeatFlow(unsigned int gas, const Vector3d& heatFlow) {
+        _heatFlow[gas] = heatFlow;
     }
 
 private:

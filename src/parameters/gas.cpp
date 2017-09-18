@@ -4,6 +4,7 @@ Gas::Gas(double mass) {
     m_dMass = mass;
 }
 
-Gas::~Gas() {
-    // TODO Auto-generated destructor stub
+std::ostream& operator<<(std::ostream& os, const Gas& gas) {
+    os << "Mass: " << gas.m_dMass;
+    return os;
 }

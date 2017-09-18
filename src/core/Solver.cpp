@@ -1,16 +1,22 @@
 #include "Solver.h"
 
 #include <chrono>
-#include <grid/Cell.h>
 
+#include "grid/Cell.h"
+#include "grid/CellData.h"
 #include "utilities/normalizer.h"
 #include "parameters/gas.h"
 #include "parameters/beta_chain.h"
 #include "integral/ci.hpp"
+#include "ResultsWriter.h"
 
-void Solver::init(Grid<CellData>* grid) {
+Solver::Solver() {
     _config = Config::getInstance();
     _impulse = _config->getImpulse();
+    _writer = new ResultsWriter();
+}
+
+void Solver::init(Grid<CellData>* grid) {
 
     // make cell grid
     _grid = new Grid<Cell>(grid->getSize());
@@ -46,6 +52,21 @@ void Solver::init(Grid<CellData>* grid) {
                     topCell = _grid->get(x, y + 1);
                 }
 
+                if (cell->getData()->isFake() == true) {
+                    if (leftCell != nullptr && leftCell->getData()->isFake() == true) {
+                        leftCell = nullptr;
+                    }
+                    if (rightCell != nullptr && rightCell->getData()->isFake() == true) {
+                        rightCell = nullptr;
+                    }
+                    if (bottomCell != nullptr && bottomCell->getData()->isFake() == true) {
+                        bottomCell = nullptr;
+                    }
+                    if (topCell != nullptr && topCell->getData()->isFake() == true) {
+                        topCell = nullptr;
+                    }
+                }
+
                 cell->link(sep::Axis::X, leftCell, rightCell);
                 cell->link(sep::Axis::Y, bottomCell, topCell);
             }
@@ -58,10 +79,8 @@ void Solver::run() {
     // Compute cell type for each axis
     initCellType(sep::X);
     initCellType(sep::Y);
-    initCellType(sep::Z);
 
-    //  m_pGridManager->PrintLinkage(sep::X);
-    //  m_pGridManager->PrintLinkage(sep::Y);
+    std::cout << *_grid << std::endl;
 
     if (_config->isUseIntegral()) {
         ci::Potential* potential = new ci::HSPotential;
@@ -71,11 +90,10 @@ void Solver::run() {
     auto startTimestamp = std::chrono::steady_clock::now();
     auto timestamp = startTimestamp;
 
-    for (int it = 0; it < _config->getMaxIteration(); it++) {
+    for (unsigned int iteration = 0; iteration < _config->getMaxIteration(); iteration++) {
 
         makeStep(sep::X);
         makeStep(sep::Y);
-        makeStep(sep::Z);
 
         if (_config->isUseIntegral()) {
             int iGasesNum = _config->getGasesCount();
@@ -94,28 +112,38 @@ void Solver::run() {
         }
 
         if (_config->isUseBetaChains()) {
-            for (int i = 0; i < _config->getBetaChainsNum(); i++) {
+            for (int i = 0; i < _config->getBetaChainsCount(); i++) {
                 auto& item = _config->getBetaChains()[i];
-                makeBetaDecay(item->iGasIndex1, item->iGasIndex2, item->dLambda1);
-                makeBetaDecay(item->iGasIndex2, item->iGasIndex3, item->dLambda2);
+                makeBetaDecay(item.iGasIndex1, item.iGasIndex2, item.dLambda1);
+                makeBetaDecay(item.iGasIndex2, item.iGasIndex3, item.dLambda2);
             }
         }
 
         checkCells();
 
+        Grid<CellParameters>* resultParams = new Grid<CellParameters>(_grid->getSize());
+        for (unsigned int i = 0; i < _grid->getCount(); i++) {
+            auto* cell = _grid->getByIndex(i);
+            if (cell != nullptr) {
+                auto& params = cell->getResultParams();
+                resultParams->setByIndex(i, &params);
+            }
+        }
+        _writer->writeAll(resultParams, iteration);
+
         auto now = std::chrono::steady_clock::now();
         auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTimestamp).count();
         auto iterationTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - timestamp).count();
 
-        std::cout << "run() : " << it << "/" << Config::getInstance()->getMaxIteration() << std::endl;
+        std::cout << "run() : " << iteration << "/" << Config::getInstance()->getMaxIteration() << std::endl;
         std::cout << "Iteration time: " << iterationTime << " ms" << std::endl;
-        std::cout << "Inner time: " << it * _config->getNormalizer()->restore(static_cast<const double&>(_config->getTimestep()), Normalizer::Type::TIME) << " s" << std::endl;
+        std::cout << "Inner time: " << iteration * _config->getNormalizer()->restore(static_cast<const double&>(_config->getTimestep()), Normalizer::Type::TIME) << " s" << std::endl;
         std::cout << "Real time: " << wholeTime << " s" << std::endl;
         std::cout << "Remaining time: ";
-        if (it == 0) {
+        if (iteration == 0) {
             std::cout << "Unknown";
         } else {
-            std::cout << wholeTime * (_config->getMaxIteration() - it) / it / 60 << " m";
+            std::cout << wholeTime * (_config->getMaxIteration() - iteration) / iteration / 60 << " m";
         }
         std::cout << std::endl;
         std::cout << std::endl;
@@ -154,7 +182,7 @@ void Solver::makeStep(sep::Axis axis) {
 }
 
 void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
-    const GasVector& vGases = _config->getGases();
+    const std::vector<Gas>& vGases = _config->getGases();
     ci::Particle cParticle{};
     cParticle.d = 1.;
 
@@ -162,7 +190,7 @@ void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
             _impulse->getResolution() / 2, _impulse->getResolution() / 2,
             _impulse->getXYZ2I(), _impulse->getXYZ2I(),
             _impulse->getMaxImpulse() / (_impulse->getResolution() / 2),
-            vGases[gi0]->getMass(), vGases[gi1]->getMass(),
+            vGases[gi0].getMass(), vGases[gi1].getMass(),
             cParticle, cParticle);
 
     const std::vector<Cell*>& cells = _grid->getValues();

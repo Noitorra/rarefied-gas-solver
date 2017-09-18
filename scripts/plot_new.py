@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker
 import numpy as np
 from numpy import *
+
 import config
 
 """
@@ -17,6 +18,8 @@ def plot_plain(binpath, pngpath, title, value):
     # reading additional info
     NX = int(data[0])
     NY = int(data[1])
+
+    print("NX = {0}; NY = {1};".format(NX, NY))
 
     data = data[2:]
 
@@ -76,9 +79,9 @@ def plot_plain(binpath, pngpath, title, value):
     # label
     cb.set_label(value)
 
-    if not data_isnan:
-        CS = plt.contour(D, colors='black')
-        plt.clabel(CS, inline=1, fontsize=10, fmt='%g')
+    # if not data_isnan:
+    #     CS = plt.contour(D, colors='black')
+    #     plt.clabel(CS, inline=1, fontsize=10, fmt='%g')
 
     plt.savefig(pngpath, dpi=100)
     plt.close()
@@ -105,6 +108,7 @@ def plot_flow(binpath, pngpath, title, value):
     UV = np.vstack((U, V))
     UV_max = np.amax(UV, axis=1)
     UV_min = np.amin(UV, axis=1)
+
     # get sqrt(x^x + y^y)
     UV_max = np.square(UV_max)
     UV_max = np.sum(UV_max)
@@ -121,6 +125,7 @@ def plot_flow(binpath, pngpath, title, value):
 
     # create figure
     plt.figure(figsize=(6 * NY / NX, 6))
+    
     # title
     plt.title(title)
 
@@ -138,11 +143,11 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 iter_start = 0
-iter_end = 2000
-iter_step = 100
-gas_num = 2
+iter_end = 99
+iter_step = 1
+gas_num = 1
 
-params = ["conc", "temp", "pressure", "flow"]
+params = ["density", "temp", "pressure", "flow"]
 cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'$(m^2s)^-1$']
 
 out_dirs = config.read_cfg_path("config.txt")
@@ -169,7 +174,7 @@ for out_i in range(0, out_num):
                                data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
                                params[par_i] + ' ' + s, cb_text[par_i])
                 # we have here 4 values: out_i, par_i, gas_i, i
-                max_done = out_num * par_num * gas_num * itr_num
+                max_done = out_num * par_num * gas_num * itr_num + 1
                 cur_done = ((out_i * par_num + par_i) * gas_num + gas_i) * itr_num + i
                 percent = cur_done / max_done * 100
                 print("Progress: [{} / {}][{} / {}][{} / {}][{} / {}][{:.2f}%]"

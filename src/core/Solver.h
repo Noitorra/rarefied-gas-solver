@@ -8,14 +8,17 @@
 
 class Cell;
 
+class ResultsWriter;
+
 class Solver {
 private:
     Config* _config;
     Impulse* _impulse;
     Grid<Cell>* _grid;
+    ResultsWriter* _writer;
 
 public:
-    Solver() = default;
+    Solver();
 
     void init(Grid<CellData>* grid);
 

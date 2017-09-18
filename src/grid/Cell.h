@@ -1,10 +1,11 @@
 #ifndef CELL_H_
 #define CELL_H_
 
+#include <ostream>
 #include "utilities/types.h"
+#include "CellParameters.h"
 
 class Config;
-class CellParameters;
 class CellData;
 
 typedef std::vector<double> DoubleVector;
@@ -13,7 +14,6 @@ class Cell {
 public:
     friend class OutResults;
 
-private:
     enum class ComputationType {
         UNDEFINED,
         LEFT,
@@ -22,8 +22,7 @@ private:
         RIGHT
     };
 
-    int _lockedAxes;
-
+private:
     std::vector<Cell*> _prev;
     std::vector<Cell*> _next;
 
@@ -35,12 +34,20 @@ private:
     Config* _config;
     CellData* _data;
 
+    CellParameters _resultParams;
+
 public:
     explicit Cell(CellData* data);
 
     void init();
 
-    void link(unsigned int dim, Cell* nextCell, Cell* prevCell);
+    void link(unsigned int dim, Cell* prevCell, Cell* nextCell);
+
+    CellData* getData();
+
+    CellParameters& getResultParams();
+
+    ComputationType getComputationType(unsigned int dim) const;
 
     void computeType(unsigned int dim);
 
@@ -54,9 +61,6 @@ public:
 
     // checks
     bool checkInnerValuesRange();
-
-    // macro data
-    std::vector<CellParameters> computeMacroData();
 
 private:
     void compute_type(unsigned int dim);
