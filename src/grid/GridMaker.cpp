@@ -1,6 +1,6 @@
 #include "GridMaker.h"
-#include "utilities/parallel.h"
-#include "utilities/utils.h"
+#include "utilities/Parallel.h"
+#include "utilities/Utils.h"
 #include "CellData.h"
 #include "GridBox.h"
 
@@ -63,10 +63,10 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
             // Send to other processes
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
                 const char* buffer = Utils::serialize(splittedGrids[processor]);
-                Parallel::send(buffer, processor, 100);
+                Parallel::send(buffer, processor, Parallel::COMMAND_GRID);
             }
         } else {
-            const char* buffer = Parallel::receive(0, 100);
+            const char* buffer = Parallel::recv(0, Parallel::COMMAND_GRID);
             Utils::deserialize(buffer, grid);
         }
     } else {
@@ -331,14 +331,17 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
             }
 
             // add 1 column to left
-            if (splitIndex != 0) {
+            if (splitIndex > 0) {
                 sizeX += 1;
                 shiftIndex -= grid->getSize().y();
                 newGrid->resize(Vector2i(-1, 0), newGrid->getSize() - Vector2u(1, 0));
                 for (unsigned int k = lastIndex - grid->getSize().y(); k < lastIndex; k++) {
-                    if (grid->getByIndex(k) != nullptr) {
-                        auto newData = new CellData(*grid->getByIndex(k));
+                    auto* kData = grid->getByIndex(k);
+                    if (kData != nullptr && kData->isFake() == false) {
+                        auto newData = new CellData(*kData);
                         newData->setType(CellData::Type::FAKE_PARALLEL);
+                        newData->setIndexInOriginalGrid(k);
+                        newData->setProcessorOfOriginalGrid(splitIndex - 1);
 
                         unsigned int newIndex = k - shiftIndex;
                         newGrid->setByIndex(newIndex, newData);
@@ -347,12 +350,15 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
             }
 
             // add 2 column to right
-            if (splitIndex != numGrids - 1) {
+            if (splitIndex < numGrids - 1) {
                 sizeX += 2;
                 for (unsigned int k = index + 1; k < index + 1 + grid->getSize().y() * 2; k++) {
-                    if (grid->getByIndex(k) != nullptr) {
-                        auto newData = new CellData(*grid->getByIndex(k));
+                    auto* kData = grid->getByIndex(k);
+                    if (kData != nullptr && kData->isFake() == false) {
+                        auto newData = new CellData(*kData);
                         newData->setType(CellData::Type::FAKE_PARALLEL);
+                        newData->setIndexInOriginalGrid(k);
+                        newData->setProcessorOfOriginalGrid(splitIndex + 1);
 
                         unsigned int newIndex = k - shiftIndex;
                         newGrid->setByIndex(newIndex, newData);
@@ -370,4 +376,48 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
     }
 
     return grids;
+}
+
+void GridMaker::syncGrid(Grid<Cell>* grid) {
+
+    // need vectors of ids
+    std::vector<int> sendNextIds;
+    std::vector<int> sendPrevIds;
+    std::vector<int> recvNextIds;
+    std::vector<int> recvPrevIds;
+
+    int processor = Parallel::getRank();
+    int size = Parallel::getSize();
+
+    // fill send vectors
+    for (auto* cell : grid->getValues()) {
+        if (cell != nullptr && cell->getData()->getType() == CellData::Type::FAKE_PARALLEL) {
+            if (cell->getData()->getProcessorOfOriginalGrid() > processor) {
+                sendNextIds.push_back(cell->getData()->getIndexInOriginalGrid());
+            } else {
+                sendPrevIds.push_back(cell->getData()->getIndexInOriginalGrid());
+            }
+        }
+    }
+
+    // parallel exchange for ids
+    if (processor % 2 == 0) {
+        if (processor < size - 1) {
+            Parallel::send(Utils::serialize(sendNextIds), processor + 1, Parallel::COMMAND_SYNC_IDS);
+            Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_IDS), recvNextIds);
+        }
+        if (processor > 0) {
+            Utils::deserialize(Parallel::recv(processor - 1, Parallel::COMMAND_SYNC_IDS), recvPrevIds);
+            Parallel::send(Utils::serialize(sendPrevIds), processor - 1, Parallel::COMMAND_SYNC_IDS);
+        }
+    } else {
+        if (processor > 0) {
+            Utils::deserialize(Parallel::recv(processor - 1, Parallel::COMMAND_SYNC_IDS), recvPrevIds);
+            Parallel::send(Utils::serialize(sendPrevIds), processor - 1, Parallel::COMMAND_SYNC_IDS);
+        }
+        if (processor < size - 1) {
+            Parallel::send(Utils::serialize(sendNextIds), processor + 1, Parallel::COMMAND_SYNC_IDS);
+            Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_IDS), recvNextIds);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-#include "parallel.h"
+#include "Parallel.h"
 #include <mpi.h>
 #include <cstring>
 
@@ -45,7 +45,7 @@ void Parallel::send(const char* buffer, int dest, int tag) {
     MPI::COMM_WORLD.Send(buffer, (int) std::strlen(buffer), MPI_BYTE, dest, tag);
 }
 
-const char* Parallel::receive(int source, int tag) {
+const char* Parallel::recv(int source, int tag) {
     MPI::Status status;
     MPI::COMM_WORLD.Probe(source, tag, status);
 

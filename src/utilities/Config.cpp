@@ -1,9 +1,9 @@
 #include <sstream>
-#include "config.h"
-#include "parameters/gas.h"
-#include "parameters/beta_chain.h"
-#include "parameters/impulse.h"
-#include "normalizer.h"
+#include "Config.h"
+#include "parameters/Gas.h"
+#include "parameters/BetaChain.h"
+#include "parameters/Impulse.h"
+#include "Normalizer.h"
 
 Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 
@@ -11,13 +11,13 @@ void Config::init() {
     m_sOutputFolder = "../";
 
     m_dTimestep = 0.01; // TODO: set it during grid creation
-    m_iMaxIteration = 100;
+    m_iMaxIteration = 1;
     m_iOutEach = 1;
     m_bUseIntegral = false;
     m_bUseBetaChain = false;
 
     // Grid Related
-    m_vGridSize = Vector3i(0, 0, 1); // dynamic determination of the grid size
+    m_vGridSize = Vector3u(42, 22, 1);
     m_vCellSize = Vector2d(1.0, 1.0); // default cell size in mm!
 
     // Gases Related

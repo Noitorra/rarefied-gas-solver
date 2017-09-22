@@ -1,6 +1,6 @@
 #include <iostream>
-#include "utilities/config.h"
-#include "utilities/parallel.h"
+#include "utilities/Config.h"
+#include "utilities/Parallel.h"
 #include "grid/GridMaker.h"
 #include "core/Solver.h"
 
@@ -20,11 +20,8 @@ int main(int argc, char* argv[]) {
     Config::getInstance()->init();
     std::cout << "Config:" << *Config::getInstance() << std::endl;
 
-    // Create grid
-    Grid<CellData>* grid = GridMaker::makeGrid({42, 22});
-
     Solver solver{};
-    solver.init(grid);
+    solver.init();
     solver.run();
 
     Parallel::finalize();

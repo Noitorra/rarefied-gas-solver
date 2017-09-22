@@ -1,10 +1,10 @@
-#include <utilities/config.h>
+#include <utilities/Config.h>
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include "ResultsWriter.h"
 #include "grid/Grid.h"
 #include "grid/Cell.h"
-#include "utilities/normalizer.h"
+#include "utilities/Normalizer.h"
 
 using namespace boost::filesystem;
 

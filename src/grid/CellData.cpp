@@ -1,4 +1,4 @@
-#include <utilities/config.h>
+#include <utilities/Config.h>
 #include "CellData.h"
 
 CellData::CellData() : CellData(Type::NORMAL) {}

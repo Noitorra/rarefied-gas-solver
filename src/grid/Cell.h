@@ -2,7 +2,7 @@
 #define CELL_H_
 
 #include <ostream>
-#include "utilities/types.h"
+#include "utilities/Types.h"
 #include "CellParameters.h"
 
 class Config;

@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include "core/main.h"
-#include "types.h"
+#include "core/Application.h"
+#include "Types.h"
 
 class Gas;
 class BetaChain;
@@ -16,7 +16,7 @@ struct Config {
 private:
 
     // Grid Related
-    Vector3i m_vGridSize;
+    Vector3u m_vGridSize;
     Vector2d m_vCellSize; // default cell size in mm
 
     // Gas Related
@@ -30,8 +30,8 @@ private:
     bool m_bUseBetaChain;
 
     std::string m_sOutputFolder;
-    int m_iMaxIteration;
-    int m_iOutEach;
+    unsigned int m_iMaxIteration;
+    unsigned int m_iOutEach;
 
     Normalizer* m_pNormalizer;
     Impulse* m_pImpulse;
@@ -46,11 +46,11 @@ public:
 
     void init();
 
-    void setGridSize(const Vector3i& vGridSize) {
+    void setGridSize(const Vector3u& vGridSize) {
         m_vGridSize = vGridSize;
     }
 
-    const Vector3i& getGridSize() const {
+    const Vector3u& getGridSize() const {
         return m_vGridSize;
     }
 
@@ -86,7 +86,7 @@ public:
         return m_dTimestep;
     }
 
-    int getMaxIteration() const {
+    unsigned int getMaxIteration() const {
         return m_iMaxIteration;
     }
 
@@ -102,7 +102,7 @@ public:
         return m_bUseBetaChain;
     }
 
-    int getOutEach() const {
+    unsigned int getOutEach() const {
         return m_iOutEach;
     }
 

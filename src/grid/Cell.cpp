@@ -1,8 +1,8 @@
-#include <utilities/utils.h>
+#include <utilities/Utils.h>
 #include "Cell.h"
 
-#include "parameters/gas.h"
-#include "parameters/impulse.h"
+#include "parameters/Gas.h"
+#include "parameters/Impulse.h"
 
 #include "integral/ci.hpp"
 #include "CellData.h"

@@ -1,7 +1,7 @@
 #ifndef RGS_GRIDMAKER_H
 #define RGS_GRIDMAKER_H
 
-#include <utilities/types.h>
+#include <utilities/Types.h>
 #include "Grid.h"
 
 class CellData;
@@ -10,14 +10,15 @@ class GridBox;
 
 class GridMaker {
 public:
-    static Grid<CellData>* makeGrid(const Vector2u& size);
+    Grid<CellData>* makeGrid(const Vector2u& size);
 
+    void syncGrid(Grid<Cell>* grid);
 private:
-    static Grid<CellData>* makeWholeGrid(const Vector2u& size);
+    Grid<CellData>* makeWholeGrid(const Vector2u& size);
 
-    static std::vector<GridBox*> makeBoxes();
+    std::vector<GridBox*> makeBoxes();
 
-    static std::vector<Grid<CellData>*> splitGrid(Grid<CellData>* grid, unsigned int numGrids);
+    std::vector<Grid<CellData>*> splitGrid(Grid<CellData>* grid, unsigned int numGrids);
 };
 
 

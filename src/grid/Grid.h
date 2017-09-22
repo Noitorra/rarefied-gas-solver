@@ -1,7 +1,7 @@
 #ifndef RGS_GRID_H
 #define RGS_GRID_H
 
-#include "utilities/types.h"
+#include "utilities/Types.h"
 #include <utility>
 #include <vector>
 #include <ostream>

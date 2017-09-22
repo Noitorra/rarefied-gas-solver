@@ -1,8 +1,8 @@
 #include <cmath>
 #include <vector>
-#include <utilities/types.h>
+#include <utilities/Types.h>
 #include <iostream>
-#include "impulse.h"
+#include "Impulse.h"
 
 Impulse::Impulse() {
     m_dMaxImpulse = 4.8;

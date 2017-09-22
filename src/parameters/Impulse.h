@@ -1,7 +1,7 @@
 #ifndef IMPULSE_H_
 #define IMPULSE_H_
 
-#include "core/main.h"
+#include "core/Application.h"
 
 typedef std::vector<Vector3d> ImpulseVector;
 

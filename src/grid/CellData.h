@@ -1,8 +1,8 @@
 #ifndef RGS_CELL_INFO_H
 #define RGS_CELL_INFO_H
 
-#include "utilities/types.h"
-#include "utilities/utils.h"
+#include "utilities/Types.h"
+#include "utilities/Utils.h"
 #include "CellParameters.h"
 #include "Cell.h"
 
@@ -28,6 +28,10 @@ private:
     std::vector<BoundaryType> _boundaryTypes;
     Vector3d _step;
     Type _type;
+
+    // fake parallel related
+    int _indexInOriginalGrid;
+    int _processorOfOriginalGrid;
 
 public:
     CellData();
@@ -80,13 +84,32 @@ public:
         return _type == Type::FAKE_PARALLEL;
     }
 
+    int getIndexInOriginalGrid() const {
+        return _indexInOriginalGrid;
+    }
+
+    void setIndexInOriginalGrid(int indexInOriginalGrid) {
+        _indexInOriginalGrid = indexInOriginalGrid;
+    }
+
+    int getProcessorOfOriginalGrid() const {
+        return _processorOfOriginalGrid;
+    }
+
+    void setProcessorOfOriginalGrid(int processorOfOriginalGrid) {
+        _processorOfOriginalGrid = processorOfOriginalGrid;
+    }
+
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
         ar & _params;
         ar & _boundaryParams;
+        ar & _boundaryTypes;
         ar & _step;
         ar & _type;
+        ar & _indexInOriginalGrid;
+        ar & _processorOfOriginalGrid;
     }
 };
 

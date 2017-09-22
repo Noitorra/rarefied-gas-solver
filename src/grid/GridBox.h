@@ -1,7 +1,7 @@
 #ifndef RGS_GRIDBOX_H
 #define RGS_GRIDBOX_H
 
-#include <utilities/types.h>
+#include <utilities/Types.h>
 #include <functional>
 
 class CellData;

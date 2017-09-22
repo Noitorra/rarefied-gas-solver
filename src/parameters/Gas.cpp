@@ -1,4 +1,4 @@
-#include "gas.h"
+#include "Gas.h"
 
 Gas::Gas(double mass) {
     m_dMass = mass;
