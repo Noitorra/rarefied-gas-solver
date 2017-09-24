@@ -26,8 +26,8 @@ private:
     std::vector<Cell*> _prev;
     std::vector<Cell*> _next;
 
-    std::vector<DoubleVector> _value;
-    std::vector<DoubleVector> _halfValue;
+    std::vector<DoubleVector> _values;
+    std::vector<DoubleVector> _halfValues;
 
     std::vector<ComputationType> _computationType;
 
@@ -59,8 +59,11 @@ public:
 
     void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
 
-    // checks
-    bool checkInnerValuesRange();
+    bool checkValuesRange();
+
+    std::vector<DoubleVector>& getValues();
+
+    std::vector<DoubleVector>& getHalfValues();
 
 private:
     void compute_type(unsigned int dim);
@@ -73,33 +76,27 @@ private:
 
     void compute_half_right(unsigned int dim);
 
-    void compute_half_diffuse_left(unsigned int dim, int gi);
+    void compute_half_diffuse_left(unsigned int dim, unsigned int gi);
 
-    void compute_half_diffuse_right(unsigned int dim, int gi);
+    void compute_half_diffuse_right(unsigned int dim, unsigned int gi);
 
-    void compute_half_gase_left(unsigned int dim, int gi);
+    void compute_half_gase_left(unsigned int dim, unsigned int gi);
 
-    void compute_half_gase_right(unsigned int dim, int gi);
+    void compute_half_gase_right(unsigned int dim, unsigned int gi);
 
-    void compute_half_flow_left(unsigned int dim, int gi);
+    void compute_half_flow_left(unsigned int dim, unsigned int gi);
 
-    void compute_half_flow_right(unsigned int dim, int gi);
+    void compute_half_flow_right(unsigned int dim, unsigned int gi);
 
-    void compute_half_mirror_left(unsigned int dim, int gi);
+    void compute_half_mirror_left(unsigned int dim, unsigned int gi);
 
-    void compute_half_mirror_right(unsigned int dim, int gi);
+    void compute_half_mirror_right(unsigned int dim, unsigned int gi);
 
     void compute_value_normal(unsigned int dim);
 
     double compute_exp(const double& mass, const double& temp, const Vector3d& impulse);
 
-    bool is_normal();
-
-    inline double limiter(const double& x, const double& y, const double& z) {
-        return limiter_superbee(x, y, z);
-    }
-
-    double limiter_superbee(const double& x, const double& y, const double& z);
+    double limiter(const double& x, const double& y, const double& z);
 
     double compute_concentration(unsigned int gi);
 

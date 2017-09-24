@@ -6,19 +6,30 @@
 
 class CellData;
 
+class CellParameters;
+
 class GridBox;
 
 class GridMaker {
 public:
+    enum class SyncType {
+        HALF_VALUES,
+        VALUES
+    };
+
+public:
     Grid<CellData>* makeGrid(const Vector2u& size);
 
-    void syncGrid(Grid<Cell>* grid);
+    void syncGrid(Grid<Cell>* grid, SyncType syncType);
+
+    Grid<CellParameters>* uniteGrids(const std::vector<Grid<CellParameters>*>& grids);
+
 private:
-    Grid<CellData>* makeWholeGrid(const Vector2u& size);
+    Grid<CellData>* makeOriginalGrid(const Vector2u& size);
 
     std::vector<GridBox*> makeBoxes();
 
-    std::vector<Grid<CellData>*> splitGrid(Grid<CellData>* grid, unsigned int numGrids);
+    std::vector<Grid<CellData>*> divideGrid(Grid<CellData>* grid, unsigned int numGrids);
 };
 
 

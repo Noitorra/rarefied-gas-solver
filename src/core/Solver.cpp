@@ -111,6 +111,11 @@ void Solver::run() {
             }
         }
 
+        // sync grid
+        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+        }
+
         // beta decay
         if (_config->isUseBetaChains()) {
             for (int i = 0; i < _config->getBetaChainsCount(); i++) {
@@ -120,13 +125,53 @@ void Solver::run() {
             }
         }
 
-        checkCells();
-
+        // sync grid
         if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-            _maker->syncGrid(_grid);
+            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
         }
 
-//        writeResults(iteration);
+        // test values
+        checkCells();
+
+        // create result params grid
+        Grid<CellParameters>* rpGrid = new Grid<CellParameters>(_grid->getSize());
+        for (unsigned int i = 0; i < _grid->getCount(); i++) {
+            auto* cell = _grid->getByIndex(i);
+            if (cell != nullptr) {
+                auto& params = cell->getResultParams();
+                rpGrid->setByIndex(i, &params);
+            }
+        }
+        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+            if (Parallel::isMaster() == true) {
+                std::vector<Grid<CellParameters>*> rpGrids;
+                rpGrids.push_back(rpGrid);
+
+                // receive params from master, then unite grids
+                for (int processor = 1; processor < Parallel::getSize(); processor++) {
+                    Grid<CellParameters>* rpGridFromSlave = nullptr;
+                    Utils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), rpGridFromSlave);
+                    rpGrids.push_back(rpGridFromSlave);
+                }
+
+                // unite received grids
+                rpGrid = _maker->uniteGrids(rpGrids);
+                for (unsigned int i = 0; i < rpGrids.size(); i++) {
+                    delete(rpGrids[i]);
+                }
+
+                _writer->writeAll(rpGrid, iteration);
+                delete(rpGrid);
+            } else {
+
+                // send params to master
+                Parallel::send(Utils::serialize(rpGrid), 0, Parallel::COMMAND_RESULT_PARAMS);
+                delete(rpGrid);
+            }
+        } else {
+            _writer->writeAll(rpGrid, iteration);
+            delete(rpGrid);
+        }
 
         //    auto now = std::chrono::steady_clock::now();
         //    auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - _startTime).count();
@@ -146,7 +191,7 @@ void Solver::run() {
         //    std::cout << std::endl;
 
         if (Parallel::isMaster() == true) {
-            auto percent = (unsigned int) (1.0 * iteration / maxIteration * 100);
+            auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIteration * 100);
 
             std::cout << '\r';
             std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
@@ -176,11 +221,33 @@ void Solver::makeTransfer() {
 
     // Transfer X
     for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeHalf(sep::X);
+
+    // sync grid
+    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+        _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES);
+    }
+
     for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeValue(sep::X);
+
+    // sync grid
+    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+        _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+    }
 
     // Transfer Y
     for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeHalf(sep::Y);
+
+    // sync grid
+    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+        _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES);
+    }
+
     for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeValue(sep::Y);
+
+    // sync grid
+    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+        _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+    }
 }
 
 void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
@@ -217,19 +284,7 @@ void Solver::checkCells() {
     const std::vector<Cell*>& cells = _grid->getValues();
     for (auto item : cells) {
         if (item != nullptr && item->getData()->isFakeParallel() == false) {
-            item->checkInnerValuesRange();
+            item->checkValuesRange();
         }
     }
-}
-
-void Solver::writeResults(unsigned int iteration) {
-    Grid<CellParameters>* resultParams = new Grid<CellParameters>(_grid->getSize());
-    for (unsigned int i = 0; i < _grid->getCount(); i++) {
-        auto* cell = _grid->getByIndex(i);
-        if (cell != nullptr) {
-            auto& params = cell->getResultParams();
-            resultParams->setByIndex(i, &params);
-        }
-    }
-    _writer->writeAll(resultParams, iteration);
 }

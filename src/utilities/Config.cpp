@@ -11,7 +11,7 @@ void Config::init() {
     m_sOutputFolder = "../";
 
     m_dTimestep = 0.01; // TODO: set it during grid creation
-    m_iMaxIteration = 1;
+    m_iMaxIteration = 100;
     m_iOutEach = 1;
     m_bUseIntegral = false;
     m_bUseBetaChain = false;

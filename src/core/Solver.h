@@ -37,8 +37,6 @@ private:
     void makeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
 
     void checkCells();
-
-    void writeResults(unsigned int iteration);
 };
 
 #endif //RGS_SOLVER_H

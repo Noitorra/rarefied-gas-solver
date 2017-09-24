@@ -19,8 +19,6 @@ def plot_plain(binpath, pngpath, title, value):
     NX = int(data[0])
     NY = int(data[1])
 
-    print("NX = {0}; NY = {1};".format(NX, NY))
-
     data = data[2:]
 
     # hack
@@ -143,7 +141,7 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 iter_start = 0
-iter_end = 99
+iter_end = 100
 iter_step = 1
 gas_num = 1
 
@@ -160,7 +158,7 @@ for out_i in range(0, out_num):
     for par_i in range(0, par_num):
         for gas_i in range(gas_num):
             data_folder = out_dirs[out_i] + 'gas' + '%i' % gas_i + '/'
-            for i in range(iter_start, iter_end + 1, iter_step):
+            for i in range(iter_start, iter_end, iter_step):
                 s = "%i" % i
 
                 if params[par_i] == "flow":

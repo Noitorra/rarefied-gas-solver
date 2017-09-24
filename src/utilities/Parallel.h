@@ -1,11 +1,15 @@
 #ifndef PARALLEL_H_
 #define PARALLEL_H_
 
+#include <string>
+
 class Parallel {
 public:
-    static const int COMMAND_GRID = 100;
-    static const int COMMAND_SYNC_IDS = 200;
-    static const int COMMAND_SYNC_VALUES = 300;
+    static const int COMMAND_GRID             = 100;
+    static const int COMMAND_SYNC_IDS         = 200;
+    static const int COMMAND_SYNC_VALUES      = 210;
+    static const int COMMAND_SYNC_HALF_VALUES = 220;
+    static const int COMMAND_RESULT_PARAMS    = 300;
 private:
     static bool _isUsingMPI;
 
@@ -22,13 +26,13 @@ public:
 
     static int getRank();
 
-    static char* getProcessorName();
+    static std::string getProcessorName();
 
     static bool isUsingMPI();
 
-    static void send(const char* buffer, int dest, int tag);
+    static void send(const std::string& buffer, int dest, int tag);
 
-    static const char* recv(int source, int tag);
+    static std::string recv(int source, int tag);
 };
 
 #endif // PARALLEL_H_

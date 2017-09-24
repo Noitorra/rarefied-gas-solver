@@ -18,7 +18,9 @@ int main(int argc, char* argv[]) {
 
     // Create config
     Config::getInstance()->init();
-    std::cout << "Config:" << *Config::getInstance() << std::endl;
+    if (Parallel::isMaster() == true) {
+        std::cout << "Config:" << std::endl << *Config::getInstance() << std::endl;
+    }
 
     Solver solver{};
     solver.init();

@@ -21,21 +21,20 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
     if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
         if (Parallel::isMaster() == true) {
 
-            // make configs for whole task
-            Grid<CellData>* wholeGrid = makeWholeGrid(size);
+            // make configs for original task
+            Grid<CellData>* originalGrid = makeOriginalGrid(size);
 
-            std::cout << "Whole grid:" << std::endl;
-            std::cout << *wholeGrid << std::endl;
+            std::cout << "Original grid:" << std::endl << *originalGrid << std::endl;
 
             // split configs onto several parts, for each process
-            std::vector<Grid<CellData>*> splittedGrids = splitGrid(wholeGrid, (unsigned int) Parallel::getSize());
+            std::vector<Grid<CellData>*> grids = divideGrid(originalGrid, (unsigned int) Parallel::getSize());
 
-            std::cout << "Splitted grids:" << std::endl;
-            for (unsigned int y = 0; y < wholeGrid->getSize().y(); y++) {
-                for (unsigned int i = 0; i < splittedGrids.size(); i++) {
-                    Grid<CellData>* splitGrid = splittedGrids[i];
-                    for (unsigned int x = 0; x < splitGrid->getSize().x(); x++) {
-                        CellData* data = splitGrid->get(x, y);
+            std::cout << "Divided grids:" << std::endl;
+            for (unsigned int y = 0; y < originalGrid->getSize().y(); y++) {
+                for (unsigned int i = 0; i < grids.size(); i++) {
+                    Grid<CellData>* dividedGrid = grids[i];
+                    for (unsigned int x = 0; x < dividedGrid->getSize().x(); x++) {
+                        CellData* data = dividedGrid->get(x, y);
 
                         char code = 'X';
                         if (data == nullptr) {
@@ -50,7 +49,7 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
 
                         std::cout << code;
                     }
-                    if (i != splittedGrids.size() - 1) {
+                    if (i != grids.size() - 1) {
                         std::cout << " ";
                     }
                 }
@@ -58,26 +57,25 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
             }
 
             // Self configs
-            grid = splittedGrids[0];
+            grid = grids[0];
 
             // Send to other processes
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                const char* buffer = Utils::serialize(splittedGrids[processor]);
-                Parallel::send(buffer, processor, Parallel::COMMAND_GRID);
+                Parallel::send(Utils::serialize(grids[processor]), processor, Parallel::COMMAND_GRID);
+                delete(grids[processor]);
             }
         } else {
-            const char* buffer = Parallel::recv(0, Parallel::COMMAND_GRID);
-            Utils::deserialize(buffer, grid);
+            Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_GRID), grid);
         }
     } else {
-        grid = makeWholeGrid(size);
+        grid = makeOriginalGrid(size);
         std::cout << *grid << std::endl;
     }
 
     return grid;
 }
 
-Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
+Grid<CellData>* GridMaker::makeOriginalGrid(const Vector2u& size) {
 
     // create boxes
     std::vector<GridBox*> boxes = makeBoxes();
@@ -101,66 +99,66 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
             rtPoint.y() = boxPoint.y() + boxSize.y();
         }
     }
-    Vector2d wholeSize = rtPoint - lbPoint; // in original data
+    Vector2d originalSize = rtPoint - lbPoint; // in original data
 
-    // create configs for whole space
+    // create configs for original space
     Grid<CellData>* grid = new Grid<CellData>(size);
     for (auto box : boxes) {
-        const Vector2d lbWholeBoxPoint = box->getPoint() - lbPoint;
-        const Vector2d rtWholeBoxPoint = lbWholeBoxPoint + box->getSize();
+        const Vector2d lbOriginalBoxPoint = box->getPoint() - lbPoint;
+        const Vector2d rtOriginalBoxPoint = lbOriginalBoxPoint + box->getSize();
 
-        Vector2u lbWholeBoxGridPoint = {
-                (unsigned int) (lbWholeBoxPoint.x() / wholeSize.x() * (size.x() - 2)) + 1,
-                (unsigned int) (lbWholeBoxPoint.y() / wholeSize.y() * (size.y() - 2)) + 1
+        Vector2u lbOriginalBoxGridPoint = {
+                (unsigned int) (lbOriginalBoxPoint.x() / originalSize.x() * (size.x() - 2)) + 1,
+                (unsigned int) (lbOriginalBoxPoint.y() / originalSize.y() * (size.y() - 2)) + 1
         };
 
-        Vector2u rtWholeBoxGridPoint = {
-                (unsigned int) (rtWholeBoxPoint.x() / wholeSize.x() * (size.x() - 2)) + 1,
-                (unsigned int) (rtWholeBoxPoint.y() / wholeSize.y() * (size.y() - 2)) + 1
+        Vector2u rtOriginalBoxGridPoint = {
+                (unsigned int) (rtOriginalBoxPoint.x() / originalSize.x() * (size.x() - 2)) + 1,
+                (unsigned int) (rtOriginalBoxPoint.y() / originalSize.y() * (size.y() - 2)) + 1
         };
 
         if (box->isSolid() == false) {
-            lbWholeBoxGridPoint.x() += -1;
-            lbWholeBoxGridPoint.y() += -1;
-            rtWholeBoxGridPoint.x() += 1;
-            rtWholeBoxGridPoint.y() += 1;
+            lbOriginalBoxGridPoint.x() += -1;
+            lbOriginalBoxGridPoint.y() += -1;
+            rtOriginalBoxGridPoint.x() += 1;
+            rtOriginalBoxGridPoint.y() += 1;
         }
 
-        const Vector2u wholeBoxGridSize = rtWholeBoxGridPoint - lbWholeBoxGridPoint;
+        const Vector2u originalBoxGridSize = rtOriginalBoxGridPoint - lbOriginalBoxGridPoint;
 
         for (unsigned int x = 0; x < size.x(); x++) {
             for (unsigned int y = 0; y < size.y(); y++) {
                 if (box->isSolid() == false) {
                     Vector2d point{
-                            1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1),
-                            1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1)
+                            1.0 * (x - lbOriginalBoxGridPoint.x()) / (rtOriginalBoxGridPoint.x() - lbOriginalBoxGridPoint.x() - 1),
+                            1.0 * (y - lbOriginalBoxGridPoint.y()) / (rtOriginalBoxGridPoint.y() - lbOriginalBoxGridPoint.y() - 1)
                     };
 
-                    if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
+                    if (x > lbOriginalBoxGridPoint.x() && x < rtOriginalBoxGridPoint.x() - 1 && y == lbOriginalBoxGridPoint.y()) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(point.x(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x > lbOriginalBoxGridPoint.x() && x < rtOriginalBoxGridPoint.x() - 1 && y == rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getTopBorderFunction() != nullptr) {
                             box->getTopBorderFunction()(point.x(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == lbWholeBoxGridPoint.x() && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x == lbOriginalBoxGridPoint.x() && y > lbOriginalBoxGridPoint.y() && y < rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getLeftBorderFunction() != nullptr) {
                             box->getLeftBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x == rtOriginalBoxGridPoint.x() - 1 && y > lbOriginalBoxGridPoint.y() && y < rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getRightBorderFunction() != nullptr) {
                             box->getRightBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x > lbOriginalBoxGridPoint.x() && x < rtOriginalBoxGridPoint.x() - 1 && y > lbOriginalBoxGridPoint.y() && y < rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::NORMAL);
                         if (box->getMainFunction() != nullptr) {
                             box->getMainFunction()(point, *data);
@@ -169,35 +167,35 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
                     }
                 } else {
                     Vector2d point{
-                            1.0 * (x - lbWholeBoxGridPoint.x()) / (rtWholeBoxGridPoint.x() - lbWholeBoxGridPoint.x() - 1),
-                            1.0 * (y - lbWholeBoxGridPoint.y()) / (rtWholeBoxGridPoint.y() - lbWholeBoxGridPoint.y() - 1)
+                            1.0 * (x - lbOriginalBoxGridPoint.x()) / (rtOriginalBoxGridPoint.x() - lbOriginalBoxGridPoint.x() - 1),
+                            1.0 * (y - lbOriginalBoxGridPoint.y()) / (rtOriginalBoxGridPoint.y() - lbOriginalBoxGridPoint.y() - 1)
                     };
 
-                    if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
+                    if (x > lbOriginalBoxGridPoint.x() && x < rtOriginalBoxGridPoint.x() - 1 && y == lbOriginalBoxGridPoint.y()) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(point.x(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x > lbOriginalBoxGridPoint.x() && x < rtOriginalBoxGridPoint.x() - 1 && y == rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getTopBorderFunction() != nullptr) {
                             box->getTopBorderFunction()(point.x(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == lbWholeBoxGridPoint.x() && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x == lbOriginalBoxGridPoint.x() && y > lbOriginalBoxGridPoint.y() && y < rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getLeftBorderFunction() != nullptr) {
                             box->getLeftBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x == rtOriginalBoxGridPoint.x() - 1 && y > lbOriginalBoxGridPoint.y() && y < rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getRightBorderFunction() != nullptr) {
                             box->getRightBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == lbWholeBoxGridPoint.x() && y == lbWholeBoxGridPoint.y()) {
+                    } else if (x == lbOriginalBoxGridPoint.x() && y == lbOriginalBoxGridPoint.y()) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(point.x(), *data);
@@ -206,7 +204,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
                             box->getLeftBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == lbWholeBoxGridPoint.x() && y == rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x == lbOriginalBoxGridPoint.x() && y == rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getLeftBorderFunction() != nullptr) {
                             box->getLeftBorderFunction()(point.y(), *data);
@@ -215,7 +213,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
                             box->getTopBorderFunction()(point.x(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y == lbWholeBoxGridPoint.y()) {
+                    } else if (x == rtOriginalBoxGridPoint.x() - 1 && y == lbOriginalBoxGridPoint.y()) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getBottomBorderFunction() != nullptr) {
                             box->getBottomBorderFunction()(point.x(), *data);
@@ -224,7 +222,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
                             box->getRightBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x == rtWholeBoxGridPoint.x() - 1 && y == rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x == rtOriginalBoxGridPoint.x() - 1 && y == rtOriginalBoxGridPoint.y() - 1) {
                         auto data = new CellData(CellData::Type::FAKE);
                         if (box->getTopBorderFunction() != nullptr) {
                             box->getTopBorderFunction()(point.x(), *data);
@@ -233,7 +231,7 @@ Grid<CellData>* GridMaker::makeWholeGrid(const Vector2u& size) {
                             box->getRightBorderFunction()(point.y(), *data);
                         }
                         grid->set(x, y, data);
-                    } else if (x > lbWholeBoxGridPoint.x() && x < rtWholeBoxGridPoint.x() - 1 && y > lbWholeBoxGridPoint.y() && y < rtWholeBoxGridPoint.y() - 1) {
+                    } else if (x > lbOriginalBoxGridPoint.x() && x < rtOriginalBoxGridPoint.x() - 1 && y > lbOriginalBoxGridPoint.y() && y < rtOriginalBoxGridPoint.y() - 1) {
                         grid->set(x, y, nullptr);
                     }
                 }
@@ -302,8 +300,8 @@ std::vector<GridBox*> GridMaker::makeBoxes() {
     return boxes;
 }
 
-std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned int numGrids) {
-    std::vector<Grid<CellData>*> grids;
+std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigned int numGrids) {
+    std::vector<Grid<CellData>*> dividedGrids;
 
     unsigned int countNotNull = grid->getCountNotNull();
     unsigned int splitCount = countNotNull / numGrids;
@@ -311,7 +309,7 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
     unsigned int indexNotNull = 0;
     unsigned int lastIndex = 0;
     for (unsigned int index = 0; index < grid->getCount(); index++) {
-        auto data = grid->getByIndex(index);
+        auto* data = grid->getByIndex(index);
         if (data != nullptr) {
             indexNotNull++;
         }
@@ -326,8 +324,13 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
             // make split here
             Grid<CellData>* newGrid = new Grid<CellData>(grid->getSize());
             for (unsigned int k = lastIndex; k <= index; k++) {
-                unsigned int newIndex = k - shiftIndex;
-                newGrid->setByIndex(newIndex, grid->getByIndex(k));
+                auto* kData = grid->getByIndex(k);
+                if (kData != nullptr) {
+                    kData->setIndexInOriginalGrid(k);
+
+                    unsigned int newIndex = k - shiftIndex;
+                    newGrid->setByIndex(newIndex, kData);
+                }
             }
 
             // add 1 column to left
@@ -338,7 +341,7 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
                 for (unsigned int k = lastIndex - grid->getSize().y(); k < lastIndex; k++) {
                     auto* kData = grid->getByIndex(k);
                     if (kData != nullptr && kData->isFake() == false) {
-                        auto newData = new CellData(*kData);
+                        auto* newData = new CellData(*kData);
                         newData->setType(CellData::Type::FAKE_PARALLEL);
                         newData->setIndexInOriginalGrid(k);
                         newData->setProcessorOfOriginalGrid(splitIndex - 1);
@@ -355,7 +358,7 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
                 for (unsigned int k = index + 1; k < index + 1 + grid->getSize().y() * 2; k++) {
                     auto* kData = grid->getByIndex(k);
                     if (kData != nullptr && kData->isFake() == false) {
-                        auto newData = new CellData(*kData);
+                        auto* newData = new CellData(*kData);
                         newData->setType(CellData::Type::FAKE_PARALLEL);
                         newData->setIndexInOriginalGrid(k);
                         newData->setProcessorOfOriginalGrid(splitIndex + 1);
@@ -368,17 +371,17 @@ std::vector<Grid<CellData>*> GridMaker::splitGrid(Grid<CellData>* grid, unsigned
 
             // cut unused space
             newGrid->resize(Vector2i(), Vector2u(sizeX, grid->getSize().y()));
-            grids.push_back(newGrid);
+            dividedGrids.push_back(newGrid);
 
             lastIndex = index + 1;
             splitIndex++;
         }
     }
 
-    return grids;
+    return dividedGrids;
 }
 
-void GridMaker::syncGrid(Grid<Cell>* grid) {
+void GridMaker::syncGrid(Grid<Cell>* grid, SyncType syncType) {
 
     // need vectors of ids
     std::vector<int> sendNextIds;
@@ -386,16 +389,25 @@ void GridMaker::syncGrid(Grid<Cell>* grid) {
     std::vector<int> recvNextIds;
     std::vector<int> recvPrevIds;
 
+    // need vectors of cells
+    std::vector<Cell*> sendNextCells;
+    std::vector<Cell*> sendPrevCells;
+    std::vector<Cell*> recvNextCells;
+    std::vector<Cell*> recvPrevCells;
+
     int processor = Parallel::getRank();
     int size = Parallel::getSize();
 
     // fill send vectors
-    for (auto* cell : grid->getValues()) {
-        if (cell != nullptr && cell->getData()->getType() == CellData::Type::FAKE_PARALLEL) {
-            if (cell->getData()->getProcessorOfOriginalGrid() > processor) {
+    for (auto& cell : grid->getValues()) {
+        if (cell != nullptr && cell->getData()->isFakeParallel() == true) {
+            int originalProcessor = cell->getData()->getProcessorOfOriginalGrid();
+            if (originalProcessor > processor) {
                 sendNextIds.push_back(cell->getData()->getIndexInOriginalGrid());
-            } else {
+                recvNextCells.push_back(cell);
+            } else if (originalProcessor < processor) {
                 sendPrevIds.push_back(cell->getData()->getIndexInOriginalGrid());
+                recvPrevCells.push_back(cell);
             }
         }
     }
@@ -420,4 +432,151 @@ void GridMaker::syncGrid(Grid<Cell>* grid) {
             Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_IDS), recvNextIds);
         }
     }
+
+    // fill recv vectors
+    for (auto& id : recvNextIds) {
+        for (auto& cell : grid->getValues()) {
+            if (cell != nullptr && cell->getData()->isFakeParallel() == false) {
+                if (id == cell->getData()->getIndexInOriginalGrid()) {
+                    sendNextCells.push_back(cell);
+                }
+            }
+        }
+    }
+    for (auto& id : recvPrevIds) {
+        for (auto& cell : grid->getValues()) {
+            if (cell != nullptr && cell->getData()->isFakeParallel() == false) {
+                if (id == cell->getData()->getIndexInOriginalGrid()) {
+                    sendPrevCells.push_back(cell);
+                }
+            }
+        }
+    }
+
+    switch (syncType) {
+        case SyncType::HALF_VALUES:
+
+            // parallel exchange for half values
+            if (processor % 2 == 0) {
+                if (processor < size - 1) {
+                    for (auto& cell : sendNextCells) {
+                        Parallel::send(Utils::serialize(cell->getHalfValues()), processor + 1, Parallel::COMMAND_SYNC_HALF_VALUES);
+                    }
+                    for (auto& cell : recvNextCells) {
+                        Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_HALF_VALUES), cell->getHalfValues());
+                    }
+                }
+                if (processor > 0) {
+                    for (auto& cell : recvPrevCells) {
+                        Utils::deserialize(Parallel::recv(processor - 1, Parallel::COMMAND_SYNC_HALF_VALUES), cell->getHalfValues());
+                    }
+                    for (auto& cell : sendPrevCells) {
+                        Parallel::send(Utils::serialize(cell->getHalfValues()), processor - 1, Parallel::COMMAND_SYNC_HALF_VALUES);
+                    }
+                }
+            } else {
+                if (processor > 0) {
+                    for (auto& cell : recvPrevCells) {
+                        Utils::deserialize(Parallel::recv(processor - 1, Parallel::COMMAND_SYNC_HALF_VALUES), cell->getHalfValues());
+                    }
+                    for (auto& cell : sendPrevCells) {
+                        Parallel::send(Utils::serialize(cell->getHalfValues()), processor - 1, Parallel::COMMAND_SYNC_HALF_VALUES);
+                    }
+                }
+                if (processor < size - 1) {
+                    for (auto& cell : sendNextCells) {
+                        Parallel::send(Utils::serialize(cell->getHalfValues()), processor + 1, Parallel::COMMAND_SYNC_HALF_VALUES);
+                    }
+                    for (auto& cell : recvNextCells) {
+                        Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_HALF_VALUES), cell->getHalfValues());
+                    }
+                }
+            }
+            break;
+        case SyncType::VALUES:
+
+            // parallel exchange for normal values
+            if (processor % 2 == 0) {
+                if (processor < size - 1) {
+                    for (auto& cell : sendNextCells) {
+                        Parallel::send(Utils::serialize(cell->getValues()), processor + 1, Parallel::COMMAND_SYNC_VALUES);
+                    }
+                    for (auto& cell : recvNextCells) {
+                        Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_VALUES), cell->getValues());
+                    }
+                }
+                if (processor > 0) {
+                    for (auto& cell : recvPrevCells) {
+                        Utils::deserialize(Parallel::recv(processor - 1, Parallel::COMMAND_SYNC_VALUES), cell->getValues());
+                    }
+                    for (auto& cell : sendPrevCells) {
+                        Parallel::send(Utils::serialize(cell->getValues()), processor - 1, Parallel::COMMAND_SYNC_VALUES);
+                    }
+                }
+            } else {
+                if (processor > 0) {
+                    for (auto& cell : recvPrevCells) {
+                        Utils::deserialize(Parallel::recv(processor - 1, Parallel::COMMAND_SYNC_VALUES), cell->getValues());
+                    }
+                    for (auto& cell : sendPrevCells) {
+                        Parallel::send(Utils::serialize(cell->getValues()), processor - 1, Parallel::COMMAND_SYNC_VALUES);
+                    }
+                }
+                if (processor < size - 1) {
+                    for (auto& cell : sendNextCells) {
+                        Parallel::send(Utils::serialize(cell->getValues()), processor + 1, Parallel::COMMAND_SYNC_VALUES);
+                    }
+                    for (auto& cell : recvNextCells) {
+                        Utils::deserialize(Parallel::recv(processor + 1, Parallel::COMMAND_SYNC_VALUES), cell->getValues());
+                    }
+                }
+            }
+            break;
+    }
+}
+
+Grid<CellParameters>* GridMaker::uniteGrids(const std::vector<Grid<CellParameters>*>& grids) {
+    Vector2u size{0, grids[0]->getSize().y()};
+    for (unsigned int i = 0; i < grids.size(); i++) {
+        size.x() += grids[i]->getSize().x();
+        if (i > 0) {
+            size.x() -= 1;
+        }
+        if (i < grids.size() - 1) {
+            size.x() -= 2;
+        }
+    }
+
+    auto* unitedGrid = new Grid<CellParameters>(size);
+
+    unsigned int shiftX = 0;
+    for (unsigned int i = 0; i < grids.size(); i++) {
+        unsigned int startX = 0;
+        if (i > 0) {
+            startX += 1;
+        }
+        unsigned int endX = grids[i]->getSize().x();
+        if (i < grids.size() - 1) {
+            endX -= 2;
+        }
+
+        for (unsigned int x = startX; x < endX; x++) {
+            for (unsigned int y = 0; y < grids[i]->getSize().y(); y++) {
+                auto* params = grids[i]->get(x, y);
+                if (params != nullptr) {
+                    unitedGrid->set({x + shiftX - startX, y}, params);
+                }
+            }
+        }
+
+        shiftX += grids[i]->getSize().x();
+        if (i > 0) {
+            shiftX -= 1;
+        }
+        if (i < grids.size() - 1) {
+            shiftX -= 2;
+        }
+    }
+
+    return unitedGrid;
 }
