@@ -8,7 +8,7 @@
 Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 
 void Config::init() {
-    m_sOutputFolder = "c:/Dev/Projects/!MAIN/output/";
+    m_sOutputFolder = "../../output/";
 
     // Grid Related
     m_vGridSize = Vector3u(22, 12, 1);
