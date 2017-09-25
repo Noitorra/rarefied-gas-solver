@@ -31,10 +31,10 @@ int Parallel::getRank() {
 }
 
 std::string Parallel::getProcessorName() {
-    auto* processor_name = new char[MPI_MAX_PROCESSOR_NAME];
+    char processor_name[MPI::MAX_PROCESSOR_NAME];
     int name_len;
     MPI::Get_processor_name(processor_name, name_len);
-    return processor_name;
+    return std::string(processor_name, static_cast<unsigned long>(name_len));
 }
 
 bool Parallel::isUsingMPI() {
@@ -45,18 +45,18 @@ void Parallel::send(const std::string& buffer, int dest, int tag) {
 //    std::cout << "Send from " << getRank() << " to " << dest
 //              << " buffer = [" << buffer.size() << "b][" << "..." << "]" << std::endl;
 
-    MPI::COMM_WORLD.Send(buffer.c_str(), static_cast<int>(buffer.size()), MPI_BYTE, dest, tag);
+    MPI::COMM_WORLD.Send(buffer.c_str(), static_cast<int>(buffer.size()), MPI::BYTE, dest, tag);
 }
 
 std::string Parallel::recv(int source, int tag) {
     MPI::Status status;
     MPI::COMM_WORLD.Probe(source, tag, status);
 
-    int len = status.Get_count(MPI_BYTE);
+    int len = status.Get_count(MPI::BYTE);
 
     char rawBuffer[len];
 
-    MPI::COMM_WORLD.Recv(rawBuffer, len, MPI_BYTE, source, tag);
+    MPI::COMM_WORLD.Recv(rawBuffer, len, MPI::BYTE, source, tag);
 
     std::string buffer{rawBuffer, static_cast<unsigned long>(len)};
 

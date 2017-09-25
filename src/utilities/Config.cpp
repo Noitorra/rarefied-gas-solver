@@ -17,7 +17,7 @@ void Config::init() {
     m_iMaxIteration = 100;
     m_iOutEach = 1;
 
-    m_bUseIntegral = true;
+    m_bUseIntegral = false;
     m_bUseBetaChain = false;
 
     m_vAxis.push_back(Axis::X);
