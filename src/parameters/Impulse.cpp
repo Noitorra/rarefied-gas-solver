@@ -1,8 +1,9 @@
 #include <cmath>
 #include <vector>
-#include <utilities/Types.h>
 #include <iostream>
+
 #include "Impulse.h"
+#include "utilities/Config.h"
 
 Impulse::Impulse() {
     m_dMaxImpulse = 4.8;
@@ -29,18 +30,13 @@ Impulse::~Impulse() {
 void Impulse::Init() {
 
     // TODO: Possibly very wrong!
-    /*
-    GasVector& gasv = m_pSolver->GetGas();
-    if (gasv.size() >= 2) {
-    m_dMaxImpulse = std::max(gasv[0]->getMass(), gasv[1]->getMass()) * m_dMaxImpulse;
-    std::cout << "Impulse::init() : gasv.size() >= 2" << std::endl;
-    }
-    else {
-    std::cout << "Impulse::init() : gasv.size() < 2" << std::endl;
-    }
-    */
-
-//    std::cout << "Impulse::init() : m_dMaxImpulse = " << m_dMaxImpulse << std::endl;
+//    const std::vector<Gas>& gasv = Config::getInstance()->getGases();
+//    if (gasv.size() >= 2) {
+//        m_dMaxImpulse = std::max(gasv[0].getMass(), gasv[1].getMass()) * m_dMaxImpulse;
+//        std::cout << "Impulse::init() : gasv.size() >= 2" << std::endl;
+//    } else {
+//        std::cout << "Impulse::init() : gasv.size() < 2" << std::endl;
+//    }
 
     // calc delta impulse
     m_dDeltaImpulse = 2 * m_dMaxImpulse / (m_uResolution);
@@ -50,7 +46,6 @@ void Impulse::Init() {
     std::vector<double> line;
     for (unsigned int i = 0; i < m_uResolution; i++) {
         line.push_back(m_dDeltaImpulse * (i + 0.5) - m_dMaxImpulse);
-        //    std::cout << "[Impulse] impulse[" << i << "] = " << line.back() << std::endl;
     }
 
     // xyz2i
@@ -66,13 +61,13 @@ void Impulse::Init() {
                 if (vec.mod() < m_dMaxImpulse) {
 
                     // save index for xyz
-                    m_pxyz2i[x][y][z] = static_cast<int>(m_vImpulse.size());
+                    m_pxyz2i[x][y][z] = static_cast<int>(m_vImpulses.size());
 
                     // save xyz for index
                     m_pi2xyz.emplace_back(x, y, z);
 
                     // save impulse value for index
-                    m_vImpulse.push_back(vec);
+                    m_vImpulses.push_back(vec);
                 } else {
                     m_pxyz2i[x][y][z] = -1; // TODO: the fuck should i do here ... ?
                 }
@@ -81,50 +76,54 @@ void Impulse::Init() {
     }
 }
 
-void Impulse::setMaxImpulse(double max_impulse) {
-    m_dMaxImpulse = max_impulse;
+void Impulse::setMaxImpulse(double dMaxImpulse) {
+    m_dMaxImpulse = dMaxImpulse;
 }
 
-void Impulse::setResolution(unsigned int resolution) {
-    m_uResolution = resolution;
-}
-
-unsigned int Impulse::getResolution() {
-    return m_uResolution;
-}
-
-double Impulse::getMaxImpulse() {
+double Impulse::getMaxImpulse() const {
     return m_dMaxImpulse;
 }
 
-double Impulse::getDeltaImpulse() {
+void Impulse::setResolution(unsigned int uResolution) {
+    m_uResolution = uResolution;
+}
+
+unsigned int Impulse::getResolution() const {
+    return m_uResolution;
+}
+
+int*** Impulse::getXYZ2I() const {
+    return m_pxyz2i;
+}
+
+double Impulse::getDeltaImpulse() const {
     return m_dDeltaImpulse;
 }
 
-double Impulse::getDeltaImpulseQube() {
+double Impulse::getDeltaImpulseQube() const {
     return m_dDeltaImpulseQube;
 }
 
-std::vector<Vector3d>& Impulse::getVector() {
-    return m_vImpulse;
+const std::vector<Vector3d>& Impulse::getVector() const {
+    return m_vImpulses;
 }
 
-int Impulse::reverseIndex(int ii, sep::Axis eAxis) {
+int Impulse::reverseIndex(int ii, unsigned int axis) {
     // ii -> xyz
     // xyz -> reverse xyz -> rii
     Vector3i v3i = m_pi2xyz[ii];
     int ri = 0;
-    switch (eAxis) {
-        case sep::X:
+    switch (static_cast<Config::Axis>(axis)) {
+        case Config::Axis::X:
             ri = m_pxyz2i[m_uResolution - 1 - v3i.x()][v3i.y()][v3i.z()];
             break;
-        case sep::Y:
+
+        case Config::Axis::Y:
             ri = m_pxyz2i[v3i.x()][m_uResolution - 1 - v3i.y()][v3i.z()];
             break;
-        case sep::Z:
+
+        case Config::Axis::Z:
             ri = m_pxyz2i[v3i.x()][v3i.y()][m_uResolution - 1 - v3i.z()];
-            break;
-        default:
             break;
     }
     if (ri == -1) {

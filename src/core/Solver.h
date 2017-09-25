@@ -1,7 +1,6 @@
 #ifndef RGS_SOLVER_H
 #define RGS_SOLVER_H
 
-#include "Application.h"
 #include "utilities/Config.h"
 #include "parameters/Impulse.h"
 #include "grid/Grid.h"

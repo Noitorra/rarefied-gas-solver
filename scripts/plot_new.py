@@ -85,6 +85,7 @@ def plot_plain(binpath, pngpath, title, value):
     plt.close()
     return 0
 
+
 def plot_flow(binpath, pngpath, title, value):
     data = np.fromfile(binpath, dtype=float)
 
@@ -148,32 +149,34 @@ gas_num = 1
 params = ["density", "temp", "pressure", "flow"]
 cb_text = [r'n, m^-3', r'T, K', r'P, Pa', r'$(m^2s)^-1$']
 
-out_dirs = config.read_cfg_path("config.txt")
+out_dir = config.read_cfg_path("config.txt")
 
-out_num = len(out_dirs)
 par_num = len(params)
 itr_num = (iter_end - iter_start)
 
-for out_i in range(0, out_num):
-    for par_i in range(0, par_num):
-        for gas_i in range(gas_num):
-            data_folder = out_dirs[out_i] + 'gas' + '%i' % gas_i + '/'
-            for i in range(iter_start, iter_end, iter_step):
-                s = "%i" % i
+for par_i in range(par_num):
+    for gas_i in range(gas_num):
+        data_folder = out_dir + 'gas' + '%i' % gas_i + '/'
+        for i in range(iter_start, iter_end, iter_step):
+            s = "%i" % i
 
-                if params[par_i] == "flow":
-                    # FLOW
-                    plot_flow(data_folder + params[par_i] + '/data/'+s+'.bin',
-                               data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
-                               params[par_i] + ' ' + s, cb_text[par_i])
-                else:
-                    # CONC PRESSSURE TEMP
-                    plot_plain(data_folder + params[par_i] + '/data/'+s+'.bin',
-                               data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
-                               params[par_i] + ' ' + s, cb_text[par_i])
-                # we have here 4 values: out_i, par_i, gas_i, i
-                max_done = out_num * par_num * gas_num * itr_num + 1
-                cur_done = ((out_i * par_num + par_i) * gas_num + gas_i) * itr_num + i
-                percent = cur_done / max_done * 100
-                print("Progress: [{} / {}][{} / {}][{} / {}][{} / {}][{:.2f}%]"
-                      .format(out_i + 1, out_num, par_i + 1, par_num, gas_i + 1, gas_num, i, itr_num, percent))
+            if params[par_i] == "flow":
+                # FLOW
+                plot_flow(data_folder + params[par_i] + '/data/' + s + '.bin',
+                            data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
+                            params[par_i] + ' ' + s, cb_text[par_i])
+            else:
+                # CONC PRESSSURE TEMP
+                plot_plain(data_folder + params[par_i] + '/data/' + s + '.bin',
+                            data_folder + params[par_i] + '/pic/' + params[par_i] + s + '.png',
+                            params[par_i] + ' ' + s, cb_text[par_i])
+
+            # we have here 4 values: out_i, par_i, gas_i, i
+            cur_done = (par_i * gas_num + gas_i) * itr_num + i
+            max_done = par_num * gas_num * itr_num
+            percent = cur_done / max_done * 100
+            print("Progress: [{} / {}][{} / {}][{} / {}][{:.2f}%]"
+                    .format(par_i + 1, par_num, gas_i + 1, gas_num, i + 1, itr_num, percent), end='\r', flush=True)
+
+print("\n")
+print("Done")

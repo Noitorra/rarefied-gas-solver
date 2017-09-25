@@ -8,35 +8,35 @@
 Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 
 void Config::init() {
-    m_sOutputFolder = "../";
-
-    m_dTimestep = 0.01; // TODO: set it during grid creation
-    m_iMaxIteration = 100;
-    m_iOutEach = 1;
-    m_bUseIntegral = false;
-    m_bUseBetaChain = false;
+    m_sOutputFolder = "c:/Dev/Projects/!MAIN/output/";
 
     // Grid Related
-    m_vGridSize = Vector3u(42, 22, 1);
+    m_vGridSize = Vector3u(22, 12, 1);
     m_vCellSize = Vector2d(1.0, 1.0); // default cell size in mm!
 
-    // Gases Related
-    m_iGasesCount = 1;
-    m_iBetaChainsCount = 0;
+    m_iMaxIteration = 100;
+    m_iOutEach = 1;
 
-    // Fill gases. Use only iNumGases first gases.
-    m_vGases.clear();
-    m_vGases.emplace_back(1.0); // 133 Cs
-    m_vGases.emplace_back(88.0 / 133.0); // 88 Kr -> Rb -> Sr
+    m_bUseIntegral = true;
+    m_bUseBetaChain = false;
+
+    m_vAxis.push_back(Axis::X);
+    m_vAxis.push_back(Axis::Y);
+
+    m_dTimestep = 0.01; // TODO: set it during grid creation
+
+    // Gases related
+    m_iGasesCount = 1;
+    m_vGases.emplace_back(1.0);           // 133 Cs
+    m_vGases.emplace_back(88.0 / 133.0);  // 88 Kr -> Rb -> Sr
     m_vGases.emplace_back(138.0 / 133.0); // 138 Xe -> Cs -> Ba
-    m_vGases.emplace_back(88.0 / 133.0); // 88 Rb
-    m_vGases.emplace_back(88.0 / 133.0); // 88 Sr
+    m_vGases.emplace_back(88.0 / 133.0);  // 88 Rb
+    m_vGases.emplace_back(88.0 / 133.0);  // 88 Sr
     m_vGases.emplace_back(138.0 / 133.0); // 138 Cs
     m_vGases.emplace_back(138.0 / 133.0); // 138 Ba
 
-    // Fill beta chains, use only iBetaChains first.
-    // m_vBetaChains.push_back(std::make_shared<BetaChain>(1, 2, 3, 6.78e-5, 6.49e-4)); // test!!!
-    m_vBetaChains.clear();
+    // Beta chains related
+    m_iBetaChainsCount = 0;
     m_vBetaChains.emplace_back(1, 3, 4, 6.78e-5, 6.49e-4);
     m_vBetaChains.emplace_back(2, 5, 6, 6.78e-5, 6.49e-4);
 
@@ -45,10 +45,6 @@ void Config::init() {
 
     // Impulse
     m_pImpulse->Init();
-}
-
-Impulse* Config::getImpulse() const {
-    return m_pImpulse;
 }
 
 std::ostream& operator<<(std::ostream& os, const Config& config) {

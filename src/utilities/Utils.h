@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <vector>
+#include <chrono>
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -40,7 +41,7 @@ public:
     }
 
     template<typename Enumeration>
-    static inline auto asInteger(Enumeration const value) -> typename std::underlying_type<Enumeration>::type {
+    static inline auto asNumber(Enumeration const value) -> typename std::underlying_type<Enumeration>::type {
         return static_cast<typename std::underlying_type<Enumeration>::type>(value);
     }
 
@@ -57,6 +58,17 @@ public:
         std::istringstream is(buffer);
         boost::archive::binary_iarchive ia(is);
         ia >> object;
+    }
+
+    static std::string getCurrentDateAndTime() {
+        auto now = std::chrono::system_clock::now();
+        auto now_time_t = std::chrono::system_clock::to_time_t(now);
+        char buffer[100];
+        if (std::strftime(buffer, sizeof(buffer), "%Y-%m-%d_%H-%M-%S", std::localtime(&now_time_t)) > 0) {
+            return std::string(buffer);
+        } else {
+            return "unknown";
+        }
     }
 };
 

@@ -541,9 +541,16 @@ Grid<CellParameters>* GridMaker::uniteGrids(const std::vector<Grid<CellParameter
         size.x() += grids[i]->getSize().x();
         if (i > 0) {
             size.x() -= 1;
+
         }
         if (i < grids.size() - 1) {
             size.x() -= 2;
+        }
+
+        if (i > 0) {
+            if (grids[i]->get(1, 0) == nullptr) {
+                size.x() -= 1;
+            }
         }
     }
 
@@ -558,6 +565,12 @@ Grid<CellParameters>* GridMaker::uniteGrids(const std::vector<Grid<CellParameter
         unsigned int endX = grids[i]->getSize().x();
         if (i < grids.size() - 1) {
             endX -= 2;
+        }
+
+        if (i > 0) {
+            if (grids[i]->get(1, 0) == nullptr) {
+                shiftX -= 1;
+            }
         }
 
         for (unsigned int x = startX; x < endX; x++) {

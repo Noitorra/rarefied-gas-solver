@@ -41,19 +41,19 @@ public:
 
     void init();
 
-    void link(unsigned int dim, Cell* prevCell, Cell* nextCell);
+    void link(unsigned int axis, Cell* prevCell, Cell* nextCell);
 
     CellData* getData();
 
     CellParameters& getResultParams();
 
-    ComputationType getComputationType(unsigned int dim) const;
+    ComputationType getComputationType(unsigned int axis) const;
 
-    void computeType(unsigned int dim);
+    void computeType(unsigned int axis);
 
-    void computeValue(unsigned int dim);
+    void computeValue(unsigned int axis);
 
-    void computeHalf(unsigned int dim);
+    void computeHalf(unsigned int axis);
 
     void computeIntegral(unsigned int gi0, unsigned int gi1);
 
@@ -66,33 +66,33 @@ public:
     std::vector<DoubleVector>& getHalfValues();
 
 private:
-    void compute_type(unsigned int dim);
+    void compute_type(unsigned int axis);
 
-    void compute_half_left(unsigned int dim);
+    void compute_half_left(unsigned int axis);
 
-    void compute_half_normal(unsigned int dim);
+    void compute_half_normal(unsigned int axis);
 
-    void compute_half_preright(unsigned int dim);
+    void compute_half_preright(unsigned int axis);
 
-    void compute_half_right(unsigned int dim);
+    void compute_half_right(unsigned int axis);
 
-    void compute_half_diffuse_left(unsigned int dim, unsigned int gi);
+    void compute_half_diffuse_left(unsigned int axis, unsigned int gi);
 
-    void compute_half_diffuse_right(unsigned int dim, unsigned int gi);
+    void compute_half_diffuse_right(unsigned int axis, unsigned int gi);
 
-    void compute_half_gase_left(unsigned int dim, unsigned int gi);
+    void compute_half_gase_left(unsigned int axis, unsigned int gi);
 
-    void compute_half_gase_right(unsigned int dim, unsigned int gi);
+    void compute_half_gase_right(unsigned int axis, unsigned int gi);
 
-    void compute_half_flow_left(unsigned int dim, unsigned int gi);
+    void compute_half_flow_left(unsigned int axis, unsigned int gi);
 
-    void compute_half_flow_right(unsigned int dim, unsigned int gi);
+    void compute_half_flow_right(unsigned int axis, unsigned int gi);
 
-    void compute_half_mirror_left(unsigned int dim, unsigned int gi);
+    void compute_half_mirror_left(unsigned int axis, unsigned int gi);
 
-    void compute_half_mirror_right(unsigned int dim, unsigned int gi);
+    void compute_half_mirror_right(unsigned int axis, unsigned int gi);
 
-    void compute_value_normal(unsigned int dim);
+    void compute_value_normal(unsigned int axis);
 
     double compute_exp(const double& mass, const double& temp, const Vector3d& impulse);
 

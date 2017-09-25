@@ -1,16 +1,17 @@
-#include <utilities/Config.h>
 #include <boost/filesystem.hpp>
 #include <iostream>
+
 #include "ResultsWriter.h"
 #include "grid/Grid.h"
 #include "grid/Cell.h"
 #include "utilities/Normalizer.h"
+#include "utilities/Utils.h"
 
 using namespace boost::filesystem;
 
 ResultsWriter::ResultsWriter() {
     _root = Config::getInstance()->getOutputFolder();
-    _main = "123"; // TODO: Generate timecode for main folder name
+    _main = Utils::getCurrentDateAndTime();
     _params = {"pressure", "density", "temp", "flow", "heatflow"};
     _types = {"data", "pic"};
     _gas = "gas";

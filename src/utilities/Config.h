@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include "core/Application.h"
 #include "Types.h"
 
 class Gas;
@@ -13,23 +12,35 @@ class Normalizer;
 class Impulse;
 
 struct Config {
-private:
+public:
+    enum class Axis {
+        X = 0,
+        Y = 1,
+        Z = 2
+    };
 
-    // Grid Related
+private:
+    std::string m_sOutputFolder;
+
+    // Grid related
     Vector3u m_vGridSize;
     Vector2d m_vCellSize; // default cell size in mm
 
-    // Gas Related
+    bool m_bUseIntegral;
+    bool m_bUseBetaChain;
+
+    std::vector<Axis> m_vAxis;
+
+    // Gas related
     std::vector<Gas> m_vGases;
     unsigned int m_iGasesCount;
+
+    // Beta chains
     std::vector<BetaChain> m_vBetaChains;
     unsigned int m_iBetaChainsCount;
 
     double m_dTimestep;
-    bool m_bUseIntegral;
-    bool m_bUseBetaChain;
 
-    std::string m_sOutputFolder;
     unsigned int m_iMaxIteration;
     unsigned int m_iOutEach;
 
@@ -110,7 +121,13 @@ public:
         return m_pNormalizer;
     }
 
-    Impulse* getImpulse() const;
+    Impulse* getImpulse() const {
+        return m_pImpulse;
+    }
+
+    const std::vector<Axis>& getAxis() const {
+        return m_vAxis;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Config& config);
 };

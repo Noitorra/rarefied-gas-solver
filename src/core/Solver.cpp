@@ -64,8 +64,8 @@ void Solver::init() {
                     }
                 }
 
-                cell->link(sep::Axis::X, linkCells[0], linkCells[1]);
-                cell->link(sep::Axis::Y, linkCells[2], linkCells[3]);
+                cell->link(Utils::asNumber(Config::Axis::X), linkCells[0], linkCells[1]);
+                cell->link(Utils::asNumber(Config::Axis::Y), linkCells[2], linkCells[3]);
             }
         }
     }
@@ -109,12 +109,14 @@ void Solver::run() {
                 makeIntegral(0, 1, dTimestep);
                 makeIntegral(0, 2, dTimestep);
             }
+
+            // sync grid
+            if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+                _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+            }
+
         }
 
-        // sync grid
-        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
-        }
 
         // beta decay
         if (_config->isUseBetaChains()) {
@@ -123,11 +125,11 @@ void Solver::run() {
                 makeBetaDecay(item.iGasIndex1, item.iGasIndex2, item.dLambda1);
                 makeBetaDecay(item.iGasIndex2, item.iGasIndex3, item.dLambda2);
             }
-        }
 
-        // sync grid
-        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+            // sync grid
+            if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+                _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+            }
         }
 
         // test values
@@ -137,7 +139,7 @@ void Solver::run() {
         Grid<CellParameters>* rpGrid = new Grid<CellParameters>(_grid->getSize());
         for (unsigned int i = 0; i < _grid->getCount(); i++) {
             auto* cell = _grid->getByIndex(i);
-            if (cell != nullptr) {
+            if (cell != nullptr && cell->getData()->isFakeParallel() == false) {
                 auto& params = cell->getResultParams();
                 rpGrid->setByIndex(i, &params);
             }
@@ -210,8 +212,9 @@ void Solver::initType() {
     // compute type
     for (auto item : cells) {
         if (item != nullptr && item->getData()->isFakeParallel() == false) {
-            item->computeType(sep::X);
-            item->computeType(sep::Y);
+            for (auto axis : _config->getAxis()) {
+                item->computeType(static_cast<unsigned int>(axis));
+            }
         }
     }
 }
@@ -219,34 +222,30 @@ void Solver::initType() {
 void Solver::makeTransfer() {
     const std::vector<Cell*>& cells = _grid->getValues();
 
-    // Transfer X
-    for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeHalf(sep::X);
+    for (auto axis : _config->getAxis()) {
 
-    // sync grid
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-        _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES);
-    }
+        // Transfer X
+        for (auto item : cells) {
+            if (item != nullptr && item->getData()->isFakeParallel() == false) {
+                item->computeHalf(static_cast<unsigned int>(axis));
+            }
+        }
 
-    for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeValue(sep::X);
+        // sync grid
+        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+            _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES);
+        }
 
-    // sync grid
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-        _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
-    }
+        for (auto item : cells) {
+            if (item != nullptr && item->getData()->isFakeParallel() == false) {
+                item->computeValue(static_cast<unsigned int>(axis));
+            }
+        }
 
-    // Transfer Y
-    for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeHalf(sep::Y);
-
-    // sync grid
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-        _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES);
-    }
-
-    for (auto item : cells) if (item != nullptr && item->getData()->isFakeParallel() == false) item->computeValue(sep::Y);
-
-    // sync grid
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-        _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+        // sync grid
+        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+        }
     }
 }
 

@@ -1,9 +1,7 @@
 #ifndef IMPULSE_H_
 #define IMPULSE_H_
 
-#include "core/Application.h"
-
-typedef std::vector<Vector3d> ImpulseVector;
+#include "utilities/Types.h"
 
 class Impulse {
 private:
@@ -14,7 +12,7 @@ private:
     // getting
     double m_dDeltaImpulse;
     double m_dDeltaImpulseQube;
-    ImpulseVector m_vImpulse;
+    std::vector<Vector3d> m_vImpulses;
     int*** m_pxyz2i;
     std::vector<Vector3i> m_pi2xyz;
 
@@ -25,25 +23,23 @@ public:
 
     void Init();
 
-    void setMaxImpulse(double max_impulse);
+    void setMaxImpulse(double dMaxImpulse);
 
-    void setResolution(unsigned int resolution);
+    double getMaxImpulse() const;
 
-    unsigned int getResolution();
+    void setResolution(unsigned int uResolution);
 
-    double getMaxImpulse();
+    unsigned int getResolution() const;
 
-    int*** getXYZ2I() const {
-        return m_pxyz2i;
-    }
+    int*** getXYZ2I() const;
 
-    double getDeltaImpulse();
+    double getDeltaImpulse() const;
 
-    double getDeltaImpulseQube();
+    double getDeltaImpulseQube() const;
 
-    ImpulseVector& getVector();
+    const std::vector<Vector3d>& getVector() const;
 
-    int reverseIndex(int ii, sep::Axis eAxis);
+    int reverseIndex(int ii, unsigned int axis);
 };
 
 #endif /* IMPULSE_H_ */
