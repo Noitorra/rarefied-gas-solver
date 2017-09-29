@@ -7,15 +7,17 @@ std::ostream& operator<<(std::ostream& os, const Grid<CellData>& grid) {
         for (unsigned int x = 0; x < grid._size.x(); x++) {
             CellData* data = grid.get(x, grid._size.y() - y - 1);
 
-            char code = 'X';
+            char code = 'U';
             if (data == nullptr) {
                 code = ' ';
-            } else if (data->getType() == CellData::Type::FAKE) {
-                code = '1';
-            } else if (data->getType() == CellData::Type::NORMAL) {
-                code = '0';
-            } else if (data->getType() == CellData::Type::FAKE_PARALLEL) {
-                code = 'P';
+            } else if (data->isProcessing() == true) {
+                if (data->isFake() == true) {
+                    code = '1';
+                } else if (data->isNormal() == true) {
+                    code = '0';
+                }
+            } else {
+                code = 'S';
             }
 
             os << code;
@@ -28,62 +30,24 @@ std::ostream& operator<<(std::ostream& os, const Grid<CellData>& grid) {
 std::ostream& operator<<(std::ostream& os, const Grid<Cell>& grid) {
     os << "Grid(Size = " << grid._size << "; CountNotNull = " << grid.getCountNotNull() << "):" << std::endl;
     for (unsigned int y = 0; y < grid._size.y(); y++) {
-        for (unsigned int x = 0; x < grid._size.x(); x++) {
-            Cell* cell = grid.get(x, grid._size.y() - y - 1);
-
-            char code = 'U';
-            if (cell != nullptr) {
-                switch (cell->getComputationType(0)) {
-                    case Cell::ComputationType::NORMAL:
-                        code = 'N';
-                        break;
-                    case Cell::ComputationType::LEFT:
-                        code = 'L';
-                        break;
-                    case Cell::ComputationType::PRE_RIGHT:
-                        code = 'P';
-                        break;
-                    case Cell::ComputationType::RIGHT:
-                        code = 'R';
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                code = ' ';
+        const std::vector<Config::Axis>& axis = Config::getInstance()->getAxis();
+        for (unsigned int i = 0; i < axis.size(); i++) {
+            if (i != 0) {
+                os << ' ';
             }
 
-            os << code;
-        }
+            for (unsigned int x = 0; x < grid._size.x(); x++) {
+                Cell* cell = grid.get(x, grid._size.y() - y - 1);
 
-        os << ' ';
-
-        for (unsigned int x = 0; x < grid._size.x(); x++) {
-            Cell* cell = grid.get(x, grid._size.y() - y - 1);
-
-            char code = 'U';
-            if (cell != nullptr) {
-                switch (cell->getComputationType(1)) {
-                    case Cell::ComputationType::NORMAL:
-                        code = 'N';
-                        break;
-                    case Cell::ComputationType::LEFT:
-                        code = 'L';
-                        break;
-                    case Cell::ComputationType::PRE_RIGHT:
-                        code = 'P';
-                        break;
-                    case Cell::ComputationType::RIGHT:
-                        code = 'R';
-                        break;
-                    default:
-                        break;
+                char code;
+                if (cell != nullptr) {
+                    code = cell->getComputationTypeAsCode(Utils::asNumber(axis[i]));
+                } else {
+                    code = ' ';
                 }
-            } else {
-                code = ' ';
-            }
 
-            os << code;
+                os << code;
+            }
         }
         os << std::endl;
     }

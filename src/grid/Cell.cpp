@@ -45,7 +45,7 @@ void Cell::init() {
     }
 }
 
-void Cell::link(unsigned int axis, Cell* prevCell, Cell* nextCell) {
+void Cell::link(int axis, Cell* prevCell, Cell* nextCell) {
     _prev[axis] = prevCell;
     _next[axis] = nextCell;
 }
@@ -54,11 +54,11 @@ CellData* Cell::getData() {
     return _data;
 }
 
-void Cell::computeType(unsigned int axis) {
+void Cell::computeType(int axis) {
     compute_type(axis);
 }
 
-void Cell::computeHalf(unsigned int axis) {
+void Cell::computeHalf(int axis) {
     switch (_computationType[axis]) {
         case ComputationType::LEFT:
             compute_half_left(axis);
@@ -77,7 +77,7 @@ void Cell::computeHalf(unsigned int axis) {
     }
 }
 
-void Cell::computeValue(unsigned int axis) {
+void Cell::computeValue(int axis) {
     switch (_computationType[axis]) {
         case ComputationType::NORMAL:
             compute_value_normal(axis);
@@ -132,38 +132,49 @@ bool Cell::checkValuesRange() {
     int iGasesCount = _config->getGasesCount();
     const std::vector<Vector3d>& vImpulses = _config->getImpulse()->getVector();
 
-    bool result = true;
+    bool isAllValuesCorrect = true;
+    bool isAllHalfValuesCorrect = true;
 
     for (unsigned int gi = 0; gi < iGasesCount; gi++) {
         for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
-            if (_values[gi][ii] < 0) {
+            if (isAllValuesCorrect == true && _values[gi][ii] < 0) {
 
                 // wrong values
-                result = false;
-                std::cout << "Cell::checkValuesRange(): Error [type][gi][ii]"
-                          << "[" << Utils::asNumber(_computationType[0])
-                          << ":" << Utils::asNumber(_computationType[1])
-                          << ":" << Utils::asNumber(_computationType[2]) << "]"
-                          << "[" << gi << "]"
-                          << "[" << ii << "]"
+                isAllValuesCorrect = false;
+                std::cout << "Warn: Values out of range";
+                std::cout << "[";
+                for (unsigned int i = 0; i < _config->getAxis().size(); i++) {
+                    if (i != 0) {
+                        std::cout << ":";
+                    }
+                    std::cout << getComputationTypeAsCode(Utils::asNumber(_config->getAxis()[i]));
+                }
+                std::cout << "]";
+                std::cout << "[" << gi << "]" << "[" << ii << "]"
+                          << " id = " << _data->getId() << " syncId = " << _data->getSyncId()
                           << " value = " << _values[gi][ii] << std::endl;
             }
-            if (_halfValues[gi][ii] < 0) {
+            if (isAllHalfValuesCorrect == true && _halfValues[gi][ii] < 0) {
 
                 // wrong values
-                result = false;
-                std::cout << "Cell::checkValuesRange(): Error [type][gi][ii]"
-                          << "[" << Utils::asNumber(_computationType[0])
-                          << ":" << Utils::asNumber(_computationType[1])
-                          << ":" << Utils::asNumber(_computationType[2]) << "]"
-                          << "[" << gi << "]"
-                          << "[" << ii << "]"
+                isAllHalfValuesCorrect = false;
+                std::cout << "Warn: Values out of range";
+                std::cout << "[";
+                for (unsigned int i = 0; i < _config->getAxis().size(); i++) {
+                    if (i != 0) {
+                        std::cout << ":";
+                    }
+                    std::cout << getComputationTypeAsCode(Utils::asNumber(_config->getAxis()[i]));
+                }
+                std::cout << "]";
+                std::cout << "[" << gi << "]" << "[" << ii << "]"
+                          << " id = " << _data->getId() << " syncId = " << _data->getSyncId()
                           << " half = " << _halfValues[gi][ii] << std::endl;
             }
         }
     }
 
-    return result;
+    return isAllValuesCorrect && isAllHalfValuesCorrect;
 }
 
 std::vector<DoubleVector>& Cell::getValues() {
@@ -176,7 +187,7 @@ std::vector<DoubleVector>& Cell::getHalfValues() {
 
 // private ------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cell::compute_type(unsigned int axis) {
+void Cell::compute_type(int axis) {
     if (_prev[axis] == nullptr) {
         if (_next[axis] != nullptr) {
             _computationType[axis] = ComputationType::LEFT;
@@ -194,7 +205,7 @@ void Cell::compute_type(unsigned int axis) {
     }
 }
 
-void Cell::compute_half_left(unsigned int axis) {
+void Cell::compute_half_left(int axis) {
     int iGasesCount = _config->getGasesCount();
 
     for (unsigned int gi = 0; gi < iGasesCount; gi++) {
@@ -215,7 +226,7 @@ void Cell::compute_half_left(unsigned int axis) {
     }
 }
 
-void Cell::compute_half_normal(unsigned int axis) {
+void Cell::compute_half_normal(int axis) {
     const std::vector<Gas>& vGases = _config->getGases();
     int iGasesCount = _config->getGasesCount();
     const std::vector<Vector3d>& vImpulses = _config->getImpulse()->getVector();
@@ -241,9 +252,9 @@ void Cell::compute_half_normal(unsigned int axis) {
     }
 }
 
-void Cell::compute_half_preright(unsigned int axis) {}
+void Cell::compute_half_preright(int axis) {}
 
-void Cell::compute_half_right(unsigned int axis) {
+void Cell::compute_half_right(int axis) {
     int iGasesCount = _config->getGasesCount();
 
     for (unsigned int gi = 0; gi < iGasesCount; gi++) {
@@ -264,7 +275,7 @@ void Cell::compute_half_right(unsigned int axis) {
     }
 }
 
-void Cell::compute_value_normal(unsigned int axis) {
+void Cell::compute_value_normal(int axis) {
     const std::vector<Gas>& vGases = _config->getGases();
     int iGasesCount = _config->getGasesCount();
     const std::vector<Vector3d>& vImpulses = _config->getImpulse()->getVector();
@@ -277,7 +288,7 @@ void Cell::compute_value_normal(unsigned int axis) {
     }
 }
 
-void Cell::compute_half_diffuse_left(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_diffuse_left(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     const std::vector<Vector3d>& vImpulses = _config->getImpulse()->getVector();
 
@@ -326,7 +337,7 @@ void Cell::compute_half_diffuse_left(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_diffuse_right(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_diffuse_right(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     const std::vector<Vector3d>& vImpulses = _config->getImpulse()->getVector();
 
@@ -374,7 +385,7 @@ void Cell::compute_half_diffuse_right(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_gase_left(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_gase_left(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     Impulse* pImpulse = _config->getImpulse();
     const std::vector<Vector3d>& vImpulses = pImpulse->getVector();
@@ -442,7 +453,7 @@ void Cell::compute_half_gase_left(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_gase_right(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_gase_right(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     Impulse* pImpulse = _config->getImpulse();
     const std::vector<Vector3d>& vImpulses = pImpulse->getVector();
@@ -510,7 +521,7 @@ void Cell::compute_half_gase_right(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_flow_left(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_flow_left(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     Impulse* pImpulse = _config->getImpulse();
     const std::vector<Vector3d>& vImpulses = pImpulse->getVector();
@@ -571,7 +582,7 @@ void Cell::compute_half_flow_left(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_flow_right(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_flow_right(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     Impulse* pImpulse = _config->getImpulse();
     const std::vector<Vector3d>& vImpulses = pImpulse->getVector();
@@ -628,7 +639,7 @@ void Cell::compute_half_flow_right(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_mirror_left(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_mirror_left(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     Impulse* pImpulse = _config->getImpulse();
     const std::vector<Vector3d>& vImpulses = pImpulse->getVector();
@@ -658,7 +669,7 @@ void Cell::compute_half_mirror_left(unsigned int axis, unsigned int gi) {
     }
 }
 
-void Cell::compute_half_mirror_right(unsigned int axis, unsigned int gi) {
+void Cell::compute_half_mirror_right(int axis, unsigned int gi) {
     const std::vector<Gas>& vGases = _config->getGases();
     Impulse* pImpulse = _config->getImpulse();
     const std::vector<Vector3d>& vImpulses = pImpulse->getVector();
@@ -786,6 +797,24 @@ Vector3d Cell::compute_heatstream(unsigned int gi) {
     return Vector3d();
 }
 
-Cell::ComputationType Cell::getComputationType(unsigned int axis) const {
-    return _computationType[axis];
+char Cell::getComputationTypeAsCode(int axis) const {
+    char code;
+    switch (_computationType[axis]) {
+        case Cell::ComputationType::UNDEFINED:
+            code = 'U';
+            break;
+        case Cell::ComputationType::NORMAL:
+            code = 'N';
+            break;
+        case Cell::ComputationType::LEFT:
+            code = 'L';
+            break;
+        case Cell::ComputationType::PRE_RIGHT:
+            code = 'P';
+            break;
+        case Cell::ComputationType::RIGHT:
+            code = 'R';
+            break;
+    }
+    return code;
 }

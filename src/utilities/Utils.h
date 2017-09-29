@@ -45,6 +45,15 @@ public:
         return static_cast<typename std::underlying_type<Enumeration>::type>(value);
     }
 
+    template<typename Enumeration>
+    static inline auto asNumberVector(std::vector<Enumeration> const values) -> std::vector<typename std::underlying_type<Enumeration>::type> {
+        std::vector<typename std::underlying_type<Enumeration>::type> basicValues;
+        for (unsigned int i = 0; i < values.size(); i++) {
+            basicValues.push_back(static_cast<typename std::underlying_type<Enumeration>::type>(values[i]));
+        }
+        return basicValues;
+    }
+
     template<class T>
     static std::string serialize(T object) {
         std::ostringstream os;

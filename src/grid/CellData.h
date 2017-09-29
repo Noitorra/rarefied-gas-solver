@@ -18,8 +18,13 @@ public:
     };
     enum class Type {
         NORMAL,
-        FAKE,
-        FAKE_PARALLEL
+        FAKE
+    };
+    enum class SyncType {
+        NONE,
+        HALF_VALUES,
+        VALUES,
+        ALL
     };
 
 private:
@@ -29,9 +34,13 @@ private:
     Vector3d _step;
     Type _type;
 
-    // fake parallel related
-    int _indexInOriginalGrid;
-    int _processorOfOriginalGrid;
+    int _id; // unique identifier for detecting cells
+    bool _isProcessing; // flag to disable fake parallel cells processing
+
+    int _syncId; // id to which this cell is synced
+    int _syncProcessorRank; // processor rank to which this cell is synced
+    std::vector<int> _syncAxis; // axis on which this cell do sync
+    SyncType _syncType; // what part of cell data we need to sync
 
 public:
     CellData();
@@ -80,24 +89,69 @@ public:
         return _type == Type::FAKE;
     }
 
-    bool isFakeParallel() const {
-        return _type == Type::FAKE_PARALLEL;
+    bool isProcessing() const {
+        return _isProcessing;
     }
 
-    int getIndexInOriginalGrid() const {
-        return _indexInOriginalGrid;
+    void setProcessing(bool isProcessing) {
+        _isProcessing = isProcessing;
     }
 
-    void setIndexInOriginalGrid(int indexInOriginalGrid) {
-        _indexInOriginalGrid = indexInOriginalGrid;
+    SyncType getSyncType() const {
+        return _syncType;
     }
 
-    int getProcessorOfOriginalGrid() const {
-        return _processorOfOriginalGrid;
+    void setSyncType(SyncType syncType) {
+        _syncType = syncType;
     }
 
-    void setProcessorOfOriginalGrid(int processorOfOriginalGrid) {
-        _processorOfOriginalGrid = processorOfOriginalGrid;
+    bool isSyncHalfValues() {
+        return _syncType == SyncType::HALF_VALUES || _syncType == SyncType::ALL;
+    }
+
+    bool isSyncValues() {
+        return _syncType == SyncType::VALUES || _syncType == SyncType::ALL;
+    }
+
+    int getId() const {
+        return _id;
+    }
+
+    void setId(int id) {
+        _id = id;
+    }
+
+    int getSyncId() const {
+        return _syncId;
+    }
+
+    void setSyncId(int syncId) {
+        _syncId = syncId;
+    }
+
+    int getSyncProcessorRank() const {
+        return _syncProcessorRank;
+    }
+
+    void setSyncProcessorRank(int syncProcessorRank) {
+        _syncProcessorRank = syncProcessorRank;
+    }
+
+    bool isSyncAvaliable(int axis) const {
+        return std::find(_syncAxis.begin(), _syncAxis.end(), axis) != _syncAxis.end();
+    }
+
+    void addSyncAxis(int axis) {
+        _syncAxis.push_back(axis);
+    }
+
+    void setSyncAxis(int axis) {
+        _syncAxis.clear();
+        _syncAxis.push_back(axis);
+    }
+
+    void removeSyncAxis() {
+        _syncAxis.clear();
     }
 
 private:
@@ -108,8 +162,12 @@ private:
         ar & _boundaryTypes;
         ar & _step;
         ar & _type;
-        ar & _indexInOriginalGrid;
-        ar & _processorOfOriginalGrid;
+        ar & _id;
+        ar & _isProcessing;
+        ar & _syncId;
+        ar & _syncProcessorRank;
+        ar & _syncAxis;
+        ar & _syncType;
     }
 };
 

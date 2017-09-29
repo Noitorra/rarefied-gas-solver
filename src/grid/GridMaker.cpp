@@ -30,27 +30,45 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
             std::vector<Grid<CellData>*> grids = divideGrid(originalGrid, (unsigned int) Parallel::getSize());
 
             std::cout << "Divided grids:" << std::endl;
-            for (unsigned int y = 0; y < originalGrid->getSize().y(); y++) {
+            for (unsigned int y = originalGrid->getSize().y() - 1; y + 1 > 0; y--) {
                 for (unsigned int i = 0; i < grids.size(); i++) {
                     Grid<CellData>* dividedGrid = grids[i];
                     for (unsigned int x = 0; x < dividedGrid->getSize().x(); x++) {
                         CellData* data = dividedGrid->get(x, y);
 
-                        char code = 'X';
+                        char code = 'U';
                         if (data == nullptr) {
                             code = ' ';
-                        } else if (data->getType() == CellData::Type::FAKE) {
-                            code = '1';
-                        } else if (data->getType() == CellData::Type::NORMAL) {
-                            code = '0';
-                        } else if (data->getType() == CellData::Type::FAKE_PARALLEL) {
-                            code = 'P';
+                        } else if (data->isProcessing() == true) {
+                            if (data->getType() == CellData::Type::FAKE) {
+                                code = '1';
+                            } else if (data->getType() == CellData::Type::NORMAL) {
+                                code = '0';
+                            }
+                        } else {
+                            code = 'S';
                         }
+//                        } else {
+//                            switch(data->getSyncType()) {
+//                                case CellData::SyncType::NONE:
+//                                    code = 'N';
+//                                    break;
+//                                case CellData::SyncType::HALF_VALUES:
+//                                    code = 'H';
+//                                    break;
+//                                case CellData::SyncType::VALUES:
+//                                    code = 'V';
+//                                    break;
+//                                case CellData::SyncType::ALL:
+//                                    code = 'A';
+//                                    break;
+//                            }
+//                        }
 
                         std::cout << code;
                     }
                     if (i != grids.size() - 1) {
-                        std::cout << " ";
+                        std::cout << "-";
                     }
                 }
                 std::cout << std::endl;
@@ -274,7 +292,53 @@ std::vector<GridBox*> GridMaker::makeBoxes() {
     });
     boxes.push_back(box);
 
-    box = new GridBox(Vector2d(30.0, 30.0), Vector2d(40.0, 40.0), true);
+    box = new GridBox(Vector2d(20.0, 10.0), Vector2d(40.0, 20.0), true);
+    box->setLeftBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 2.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    box->setRightBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 2.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    box->setTopBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 2.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    box->setBottomBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 2.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    boxes.push_back(box);
+
+    box = new GridBox(Vector2d(40.0, 40.0), Vector2d(40.0, 20.0), true);
+    box->setLeftBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 1.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    box->setRightBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 1.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    box->setTopBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 1.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    box->setBottomBorderFunction([](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 1.0);
+        data.setStep(Vector3d(0.1, 0.1, 0.0));
+    });
+    boxes.push_back(box);
+
+    box = new GridBox(Vector2d(20.0, 70.0), Vector2d(40.0, 20.0), true);
     box->setLeftBorderFunction([](double point, CellData& data) {
         data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
         data.boundaryParams().setTemp(0, 2.0);
@@ -326,28 +390,79 @@ std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigne
             for (unsigned int k = lastIndex; k <= index; k++) {
                 auto* kData = grid->getByIndex(k);
                 if (kData != nullptr) {
-                    kData->setIndexInOriginalGrid(k);
+                    kData->setId(k); // id from original grid
 
-                    unsigned int newIndex = k - shiftIndex;
-                    newGrid->setByIndex(newIndex, kData);
+                    newGrid->setByIndex(k - shiftIndex, kData);
                 }
             }
 
             // add 1 column to left
             if (splitIndex > 0) {
-                sizeX += 1;
-                shiftIndex -= grid->getSize().y();
-                newGrid->resize(Vector2i(-1, 0), newGrid->getSize() - Vector2u(1, 0));
+                unsigned int addX = 1;
+                for (unsigned int k = lastIndex; k < lastIndex + grid->getSize().y(); k++) {
+                    auto* kData = grid->getByIndex(k);
+                    auto* kPrevData = grid->getByIndex(k - grid->getSize().y());
+                    if (kData != nullptr && kData->isFake() == true && kPrevData != nullptr && kPrevData->isNormal() == true) {
+                        addX += 1;
+                        break;
+                    }
+                }
+
+                sizeX += addX;
+                shiftIndex -= addX * grid->getSize().y();
+                newGrid->resize(Vector2i(-addX, 0), newGrid->getSize() - Vector2u(addX, 0));
                 for (unsigned int k = lastIndex - grid->getSize().y(); k < lastIndex; k++) {
                     auto* kData = grid->getByIndex(k);
-                    if (kData != nullptr && kData->isFake() == false) {
+                    if (kData != nullptr) {
+                        if (kData->isFake() == true) {
+                            auto* kNextData = grid->getByIndex(k + grid->getSize().y());
+                            if (kNextData == nullptr || kNextData->isFake() == true) {
+                                continue;
+                            }
+                        }
+
                         auto* newData = new CellData(*kData);
-                        newData->setType(CellData::Type::FAKE_PARALLEL);
-                        newData->setIndexInOriginalGrid(k);
-                        newData->setProcessorOfOriginalGrid(splitIndex - 1);
+                        newData->setProcessing(false);
+                        newData->setSyncId(k);
+                        newData->setSyncProcessorRank(splitIndex - 1);
+                        newData->setSyncType(CellData::SyncType::ALL);
 
                         unsigned int newIndex = k - shiftIndex;
                         newGrid->setByIndex(newIndex, newData);
+                        newData->setId(-newIndex); // if from new grid (negative)
+                    }
+                }
+                for (unsigned int k = lastIndex; k < lastIndex + grid->getSize().y(); k++) {
+
+                    // get current data
+                    auto* kData = grid->getByIndex(k);
+                    if (kData != nullptr && kData->isFake() == true) {
+
+                        // get prev data
+                        unsigned int kPrev = k - grid->getSize().y();
+                        auto* kPrevData = grid->getByIndex(kPrev);
+                        if (kPrevData != nullptr && kPrevData->isNormal() == true) {
+
+                            // get prev data from newGrid
+                            auto* newPrevData = newGrid->getByIndex(kPrev - shiftIndex);
+                            newPrevData->setSyncType(CellData::SyncType::VALUES);
+                            std::cout << "ValuesData id = " << newPrevData->getId() << " syncId = " << newPrevData->getSyncId() << std::endl;
+
+                            // get prev prev data
+                            unsigned int kPrevPrev = kPrev - grid->getSize().y();
+                            auto* kPrevPrevData = grid->getByIndex(kPrevPrev);
+                            if (kPrevPrevData != nullptr && kPrevPrevData->isNormal() == true) {
+                                auto* newData = new CellData(*kPrevPrevData);
+                                newData->setProcessing(false);
+                                newData->setSyncId(kPrevPrev);
+                                newData->setSyncProcessorRank(splitIndex - 1);
+                                newData->setSyncType(CellData::SyncType::ALL);
+
+                                unsigned int newIndex = kPrevPrev - shiftIndex;
+                                newGrid->setByIndex(newIndex, newData);
+                                newData->setId(-newIndex); // if from new grid (negative)
+                            }
+                        }
                     }
                 }
             }
@@ -357,14 +472,39 @@ std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigne
                 sizeX += 2;
                 for (unsigned int k = index + 1; k < index + 1 + grid->getSize().y() * 2; k++) {
                     auto* kData = grid->getByIndex(k);
-                    if (kData != nullptr && kData->isFake() == false) {
-                        auto* newData = new CellData(*kData);
-                        newData->setType(CellData::Type::FAKE_PARALLEL);
-                        newData->setIndexInOriginalGrid(k);
-                        newData->setProcessorOfOriginalGrid(splitIndex + 1);
+                    if (kData != nullptr) {
+                        if (kData->isFake() == true) {
+                            unsigned int kPrev = k - grid->getSize().y();
+                            auto* kPrevData = grid->getByIndex(kPrev);
+                            if (kPrevData != nullptr && kPrevData->isNormal() == true) {
+                                unsigned int nextLastIndex = index + 1;
+                                unsigned int nextShiftIndex = nextLastIndex - nextLastIndex % grid->getSize().y();
+                                nextShiftIndex -= 2 * grid->getSize().y();
+                                unsigned int newIndexPrev = kPrev - nextShiftIndex;
 
-                        unsigned int newIndex = k - shiftIndex;
-                        newGrid->setByIndex(newIndex, newData);
+                                auto* newPrevData = newGrid->getByIndex(kPrev - shiftIndex);
+                                newPrevData->setSyncId(-newIndexPrev);
+                                newPrevData->setSyncProcessorRank(splitIndex + 1);
+                                newPrevData->setSyncAxis(Utils::asNumber(Config::Axis::X));
+                                newPrevData->setSyncType(CellData::SyncType::HALF_VALUES);
+                                std::cout << "HalfValuesData id = " << newPrevData->getId() << " syncId = " << newPrevData->getSyncId() << std::endl;
+                            }
+                        }
+
+                        Vector2u point = Grid<CellData>::toPoint(k, grid->getSize());
+                        auto* kPrevDataX = point.x() > 0 ? grid->get(point.x() - 1, point.y()) : nullptr;
+                        auto* kPrevDataY = point.y() > 0 ? grid->get(point.x(), point.y() - 1) : nullptr;
+                        if (kData->isNormal() == true || kPrevDataX != nullptr && kPrevDataX->isNormal() == true || kPrevDataY != nullptr && kPrevDataY->isNormal() == true) {
+                            auto* newData = new CellData(*kData);
+                            newData->setProcessing(false);
+                            newData->setSyncId(k);
+                            newData->setSyncProcessorRank(splitIndex + 1);
+                            newData->setSyncType(CellData::SyncType::ALL);
+
+                            unsigned int newIndex = k - shiftIndex;
+                            newGrid->setByIndex(newIndex, newData);
+                            newData->setId(-newIndex); // if from new grid (negative)
+                        }
                     }
                 }
             }
@@ -381,7 +521,7 @@ std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigne
     return dividedGrids;
 }
 
-void GridMaker::syncGrid(Grid<Cell>* grid, SyncType syncType) {
+void GridMaker::syncGrid(Grid<Cell>* grid, SyncType syncType, std::vector<int> syncAxis) {
 
     // need vectors of ids
     std::vector<int> sendNextIds;
@@ -400,13 +540,33 @@ void GridMaker::syncGrid(Grid<Cell>* grid, SyncType syncType) {
 
     // fill send vectors
     for (auto& cell : grid->getValues()) {
-        if (cell != nullptr && cell->getData()->isFakeParallel() == true) {
-            int originalProcessor = cell->getData()->getProcessorOfOriginalGrid();
+        if (cell != nullptr) {
+            if (syncType == SyncType::HALF_VALUES) {
+                if (cell->getData()->isSyncHalfValues() == false) {
+                    continue;
+                }
+            } else if (syncType == SyncType::VALUES) {
+                if (cell->getData()->isSyncValues() == false) {
+                    continue;
+                }
+            }
+            bool isSyncAvaliableOnAxis = true;
+            for (auto axis : syncAxis) {
+                if (cell->getData()->isSyncAvaliable(axis) == false) {
+                    isSyncAvaliableOnAxis = false;
+                    break;
+                }
+            }
+            if (isSyncAvaliableOnAxis == false) {
+                continue;
+            }
+
+            int originalProcessor = cell->getData()->getSyncProcessorRank();
             if (originalProcessor > processor) {
-                sendNextIds.push_back(cell->getData()->getIndexInOriginalGrid());
+                sendNextIds.push_back(cell->getData()->getSyncId());
                 recvNextCells.push_back(cell);
             } else if (originalProcessor < processor) {
-                sendPrevIds.push_back(cell->getData()->getIndexInOriginalGrid());
+                sendPrevIds.push_back(cell->getData()->getSyncId());
                 recvPrevCells.push_back(cell);
             }
         }
@@ -436,8 +596,8 @@ void GridMaker::syncGrid(Grid<Cell>* grid, SyncType syncType) {
     // fill recv vectors
     for (auto& id : recvNextIds) {
         for (auto& cell : grid->getValues()) {
-            if (cell != nullptr && cell->getData()->isFakeParallel() == false) {
-                if (id == cell->getData()->getIndexInOriginalGrid()) {
+            if (cell != nullptr) {
+                if (id == cell->getData()->getId()) {
                     sendNextCells.push_back(cell);
                 }
             }
@@ -445,8 +605,8 @@ void GridMaker::syncGrid(Grid<Cell>* grid, SyncType syncType) {
     }
     for (auto& id : recvPrevIds) {
         for (auto& cell : grid->getValues()) {
-            if (cell != nullptr && cell->getData()->isFakeParallel() == false) {
-                if (id == cell->getData()->getIndexInOriginalGrid()) {
+            if (cell != nullptr) {
+                if (id == cell->getData()->getId()) {
                     sendPrevCells.push_back(cell);
                 }
             }

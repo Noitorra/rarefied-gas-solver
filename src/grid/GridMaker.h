@@ -20,7 +20,7 @@ public:
 public:
     Grid<CellData>* makeGrid(const Vector2u& size);
 
-    void syncGrid(Grid<Cell>* grid, SyncType syncType);
+    void syncGrid(Grid<Cell>* grid, SyncType syncType, std::vector<int> syncAxis);
 
     Grid<CellParameters>* uniteGrids(const std::vector<Grid<CellParameters>*>& grids);
 

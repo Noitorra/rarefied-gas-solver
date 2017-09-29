@@ -142,7 +142,7 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 iter_start = 0
-iter_end = 100
+iter_end = 500
 iter_step = 1
 gas_num = 1
 
@@ -175,7 +175,7 @@ for par_i in range(par_num):
             cur_done = (par_i * gas_num + gas_i) * itr_num + i
             max_done = par_num * gas_num * itr_num
             percent = cur_done / max_done * 100
-            print("Progress: [{} / {}][{} / {}][{} / {}][{:.2f}%]"
+            print("Progress: [{} / {}][{} / {}][{} / {}][{:.2f}%]                  "
                     .format(par_i + 1, par_num, gas_i + 1, gas_num, i + 1, itr_num, percent), end='\r', flush=True)
 
 print("\n")

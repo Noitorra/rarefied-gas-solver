@@ -76,7 +76,7 @@ void Solver::run() {
     // Compute cell type for each axis
     initType();
 
-//    std::cout << *_grid << std::endl;
+    std::cout << *_grid << std::endl;
 
     if (_config->isUseIntegral()) {
         ci::Potential* potential = new ci::HSPotential;
@@ -112,7 +112,7 @@ void Solver::run() {
 
             // sync grid
             if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-                _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+                _maker->syncGrid(_grid, GridMaker::SyncType::VALUES, Utils::asNumberVector(_config->getAxis()));
             }
 
         }
@@ -128,7 +128,7 @@ void Solver::run() {
 
             // sync grid
             if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-                _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+                _maker->syncGrid(_grid, GridMaker::SyncType::VALUES, Utils::asNumberVector(_config->getAxis()));
             }
         }
 
@@ -139,7 +139,7 @@ void Solver::run() {
         Grid<CellParameters>* rpGrid = new Grid<CellParameters>(_grid->getSize());
         for (unsigned int i = 0; i < _grid->getCount(); i++) {
             auto* cell = _grid->getByIndex(i);
-            if (cell != nullptr && cell->getData()->isFakeParallel() == false) {
+            if (cell != nullptr && cell->getData()->isProcessing() == true) {
                 auto& params = cell->getResultParams();
                 rpGrid->setByIndex(i, &params);
             }
@@ -211,7 +211,7 @@ void Solver::initType() {
 
     // compute type
     for (auto item : cells) {
-        if (item != nullptr && item->getData()->isFakeParallel() == false) {
+        if (item != nullptr && item->getData()->isProcessing() == true) {
             for (auto axis : _config->getAxis()) {
                 item->computeType(static_cast<unsigned int>(axis));
             }
@@ -224,27 +224,28 @@ void Solver::makeTransfer() {
 
     for (auto axis : _config->getAxis()) {
 
-        // Transfer X
+        // compute half values
         for (auto item : cells) {
-            if (item != nullptr && item->getData()->isFakeParallel() == false) {
-                item->computeHalf(static_cast<unsigned int>(axis));
+            if (item != nullptr && item->getData()->isProcessing() == true) {
+                item->computeHalf(Utils::asNumber(axis));
             }
         }
 
         // sync grid
         if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-            _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES);
+            _maker->syncGrid(_grid, GridMaker::SyncType::HALF_VALUES, {Utils::asNumber(axis)});
         }
 
+        // compute values
         for (auto item : cells) {
-            if (item != nullptr && item->getData()->isFakeParallel() == false) {
-                item->computeValue(static_cast<unsigned int>(axis));
+            if (item != nullptr && item->getData()->isProcessing() == true) {
+                item->computeValue(Utils::asNumber(axis));
             }
         }
 
         // sync grid
         if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES);
+            _maker->syncGrid(_grid, GridMaker::SyncType::VALUES, {Utils::asNumber(axis)});
         }
     }
 }
@@ -264,7 +265,7 @@ void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
 
     const std::vector<Cell*>& cells = _grid->getValues();
     for (auto item : cells) {
-        if (item != nullptr && item->getData()->isFakeParallel() == false) {
+        if (item != nullptr && item->getData()->isProcessing() == true) {
             item->computeIntegral(gi0, gi1);
         }
     }
@@ -273,7 +274,7 @@ void Solver::makeIntegral(unsigned int gi0, unsigned int gi1, double timestep) {
 void Solver::makeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
     const std::vector<Cell*>& cells = _grid->getValues();
     for (auto item : cells) {
-        if (item != nullptr && item->getData()->isFakeParallel() == false) {
+        if (item != nullptr && item->getData()->isProcessing() == true) {
             item->computeBetaDecay(gi0, gi1, lambda);
         }
     }
@@ -282,7 +283,7 @@ void Solver::makeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
 void Solver::checkCells() {
     const std::vector<Cell*>& cells = _grid->getValues();
     for (auto item : cells) {
-        if (item != nullptr && item->getData()->isFakeParallel() == false) {
+        if (item != nullptr && item->getData()->isProcessing() == true) {
             item->checkValuesRange();
         }
     }
