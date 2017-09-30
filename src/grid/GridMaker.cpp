@@ -381,9 +381,12 @@ std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigne
         if (indexNotNull == splitCount * (splitIndex + 1) && indexNotNull <= countNotNull - splitCount
             || indexNotNull == countNotNull && splitIndex < numGrids) {
 
+            Vector2u point = Grid<CellData>::toPoint(index, grid->getSize());
+            Vector2u lastPoint = Grid<CellData>::toPoint(lastIndex, grid->getSize());
+
             // get new grid size and shift on X axis
             unsigned int shiftIndex = lastIndex - lastIndex % grid->getSize().y();
-            unsigned int sizeX = Grid<CellData>::toPoint(index, grid->getSize()).x() - Grid<CellData>::toPoint(lastIndex, grid->getSize()).x() + 1;
+            unsigned int sizeX = point.x() - lastPoint.x() + 1;
 
             // make split here
             Grid<CellData>* newGrid = new Grid<CellData>(grid->getSize());
