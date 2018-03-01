@@ -54,11 +54,13 @@ std::string Parallel::recv(int source, int tag) {
 
     int len = status.Get_count(MPI::BYTE);
 
-    char rawBuffer[len];
+    char* rawBuffer = new char[len];
 
     MPI::COMM_WORLD.Recv(rawBuffer, len, MPI::BYTE, source, tag);
 
     std::string buffer{rawBuffer, static_cast<unsigned long>(len)};
+
+    delete[] rawBuffer;
 
 //    std::cout << "Recv from " << source << " to " << getRank()
 //              << " buffer = [" << buffer.size() << "b][" << "..." << "]" << std::endl;

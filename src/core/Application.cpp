@@ -12,6 +12,11 @@ int main(int argc, char* argv[]) {
 
     Parallel::init();
 
+    std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> startTime;
+    if (Parallel::isMaster()) {
+        startTime = std::chrono::steady_clock::now();
+    }
+
     // Print off a hello world message
     std::cout << "Hello world from processor " << Parallel::getProcessorName()
               << ", rank " << Parallel::getRank()
@@ -26,6 +31,12 @@ int main(int argc, char* argv[]) {
     Solver solver{};
     solver.init();
     solver.run();
+
+    if (Parallel::isMaster()) {
+        auto now = std::chrono::steady_clock::now();
+        auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
+        std::cout << "It took - " << wholeTime << " seconds" << std::endl;
+    }
 
     Parallel::finalize();
 }

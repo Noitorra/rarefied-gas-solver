@@ -76,7 +76,7 @@ void Solver::run() {
     // Compute cell type for each axis
     initType();
 
-    std::cout << *_grid << std::endl;
+//    std::cout << *_grid << std::endl;
 
     if (_config->isUseIntegral()) {
         ci::Potential* potential = new ci::HSPotential;
@@ -135,44 +135,47 @@ void Solver::run() {
         // test values
         checkCells();
 
-        // create result params grid
-        Grid<CellParameters>* rpGrid = new Grid<CellParameters>(_grid->getSize());
-        for (unsigned int i = 0; i < _grid->getCount(); i++) {
-            auto* cell = _grid->getByIndex(i);
-            if (cell != nullptr && cell->getData()->isProcessing() == true) {
-                auto& params = cell->getResultParams();
-                rpGrid->setByIndex(i, &params);
+        if (iteration % _config->getOutEach() == 0) {
+
+            // create result params grid
+            Grid<CellParameters>* rpGrid = new Grid<CellParameters>(_grid->getSize());
+            for (unsigned int i = 0; i < _grid->getCount(); i++) {
+                auto* cell = _grid->getByIndex(i);
+                if (cell != nullptr && cell->getData()->isProcessing() == true) {
+                    auto& params = cell->getResultParams();
+                    rpGrid->setByIndex(i, &params);
+                }
             }
-        }
-        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-            if (Parallel::isMaster() == true) {
-                std::vector<Grid<CellParameters>*> rpGrids;
-                rpGrids.push_back(rpGrid);
+            if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+                if (Parallel::isMaster() == true) {
+                    std::vector<Grid<CellParameters>*> rpGrids;
+                    rpGrids.push_back(rpGrid);
 
-                // receive params from master, then unite grids
-                for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                    Grid<CellParameters>* rpGridFromSlave = nullptr;
-                    Utils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), rpGridFromSlave);
-                    rpGrids.push_back(rpGridFromSlave);
+                    // receive params from master, then unite grids
+                    for (int processor = 1; processor < Parallel::getSize(); processor++) {
+                        Grid<CellParameters>* rpGridFromSlave = nullptr;
+                        Utils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), rpGridFromSlave);
+                        rpGrids.push_back(rpGridFromSlave);
+                    }
+
+                    // unite received grids
+                    rpGrid = _maker->uniteGrids(rpGrids);
+                    for (unsigned int i = 0; i < rpGrids.size(); i++) {
+                        delete (rpGrids[i]);
+                    }
+
+                    _writer->writeAll(rpGrid, iteration);
+                    delete (rpGrid);
+                } else {
+
+                    // send params to master
+                    Parallel::send(Utils::serialize(rpGrid), 0, Parallel::COMMAND_RESULT_PARAMS);
+                    delete (rpGrid);
                 }
-
-                // unite received grids
-                rpGrid = _maker->uniteGrids(rpGrids);
-                for (unsigned int i = 0; i < rpGrids.size(); i++) {
-                    delete(rpGrids[i]);
-                }
-
-                _writer->writeAll(rpGrid, iteration);
-                delete(rpGrid);
             } else {
-
-                // send params to master
-                Parallel::send(Utils::serialize(rpGrid), 0, Parallel::COMMAND_RESULT_PARAMS);
-                delete(rpGrid);
+                _writer->writeAll(rpGrid, iteration);
+                delete (rpGrid);
             }
-        } else {
-            _writer->writeAll(rpGrid, iteration);
-            delete(rpGrid);
         }
 
         //    auto now = std::chrono::steady_clock::now();
