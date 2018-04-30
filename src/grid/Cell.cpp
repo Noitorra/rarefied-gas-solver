@@ -233,7 +233,11 @@ void Cell::compute_half_normal(int axis) {
 
     for (unsigned int gi = 0; gi < iGasesCount; gi++) {
         for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
-            double y = _config->getTimestep() / vGases[gi].getMass() * std::abs(vImpulses[ii].get(axis) / _data->getStep().get(axis));
+            double y = _config->getTimestep() / vGases[gi].getMass() * std::abs(vImpulses[ii].get(axis)) / _data->getStep().get(axis);
+
+            if (y < 0 || y > 1) {
+                throw std::runtime_error("Wrong Gamma - " + std::to_string(y) + " timestep - " + std::to_string(_config->getTimestep()));
+            }
 
             if (vImpulses[ii].get(axis) > 0) {
                 _halfValues[gi][ii] = _values[gi][ii] + (1 - y) / 2 * limiter(
@@ -283,6 +287,7 @@ void Cell::compute_value_normal(int axis) {
     for (unsigned int gi = 0; gi < iGasesCount; gi++) {
         for (unsigned int ii = 0; ii < vImpulses.size(); ii++) {
             double y = _config->getTimestep() / vGases[gi].getMass() * vImpulses[ii].get(axis) / _data->getStep().get(axis);
+
             _values[gi][ii] = _values[gi][ii] - y * (_halfValues[gi][ii] - _prev[axis]->_halfValues[gi][ii]);
         }
     }

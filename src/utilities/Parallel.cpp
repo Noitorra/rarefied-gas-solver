@@ -68,3 +68,7 @@ std::string Parallel::recv(int source, int tag) {
     return buffer;
 }
 
+void Parallel::abort() {
+    MPI::COMM_WORLD.Abort(-1);
+}
+

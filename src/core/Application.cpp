@@ -2,7 +2,6 @@
 #include <thread>
 #include "utilities/Config.h"
 #include "utilities/Parallel.h"
-#include "grid/GridMaker.h"
 #include "Solver.h"
 
 int main(int argc, char* argv[]) {
@@ -28,9 +27,14 @@ int main(int argc, char* argv[]) {
         std::cout << "Config:" << std::endl << *Config::getInstance() << std::endl;
     }
 
-    Solver solver{};
-    solver.init();
-    solver.run();
+    try {
+        Solver solver{};
+        solver.init();
+        solver.run();
+    } catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
+        Parallel::abort();
+    }
 
     if (Parallel::isMaster()) {
         auto now = std::chrono::steady_clock::now();

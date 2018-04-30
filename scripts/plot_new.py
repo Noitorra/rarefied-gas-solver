@@ -142,8 +142,8 @@ def plot_flow(binpath, pngpath, title, value):
 # main program
 
 iter_start = 0
-iter_end = 500
-iter_step = 1
+iter_end = 100000
+iter_step = 1000
 gas_num = 1
 
 params = ["density", "temp", "pressure", "flow"]

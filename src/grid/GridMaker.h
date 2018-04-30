@@ -30,6 +30,8 @@ private:
     std::vector<GridBox*> makeBoxes();
 
     std::vector<Grid<CellData>*> divideGrid(Grid<CellData>* grid, unsigned int numGrids);
+
+    void updateTimestep();
 };
 
 

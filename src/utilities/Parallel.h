@@ -6,6 +6,7 @@
 class Parallel {
 public:
     static const int COMMAND_GRID             = 100;
+    static const int COMMAND_GRID_TIMESTEP    = 110;
     static const int COMMAND_SYNC_IDS         = 200;
     static const int COMMAND_SYNC_VALUES      = 210;
     static const int COMMAND_SYNC_HALF_VALUES = 220;
@@ -33,6 +34,8 @@ public:
     static void send(const std::string& buffer, int dest, int tag);
 
     static std::string recv(int source, int tag);
+
+    static void abort();
 };
 
 #endif // PARALLEL_H_

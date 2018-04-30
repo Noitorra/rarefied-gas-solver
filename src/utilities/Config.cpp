@@ -11,11 +11,11 @@ void Config::init() {
     m_sOutputFolder = "../../output/";
 
     // Grid Related
-    m_vGridSize = Vector3u(202, 202, 1); // 122, 52, 1
+    m_vGridSize = Vector3u(20, 7, 1); // 122, 52, 1
     m_vCellSize = Vector2d(1.0, 1.0); // default cell size in mm!
 
-    m_iMaxIteration = 200;
-    m_iOutEach = 199;
+    m_iMaxIteration = 100000;
+    m_iOutEach = 100;
 
     m_bUseIntegral = true;
     m_bUseBetaChain = false;

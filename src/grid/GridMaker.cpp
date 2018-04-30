@@ -3,6 +3,7 @@
 #include "utilities/Utils.h"
 #include "CellData.h"
 #include "GridBox.h"
+#include "parameters/Impulse.h"
 
 #include <iostream>
 
@@ -26,6 +27,9 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
 
             std::cout << "Original grid:" << std::endl << *originalGrid << std::endl;
 
+            // update config time
+            updateTimestep();
+
             // split configs onto several parts, for each process
             std::vector<Grid<CellData>*> grids = divideGrid(originalGrid, (unsigned int) Parallel::getSize());
 
@@ -48,23 +52,6 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
                         } else {
                             code = 'S';
                         }
-//                        } else {
-//                            switch(data->getSyncType()) {
-//                                case CellData::SyncType::NONE:
-//                                    code = 'N';
-//                                    break;
-//                                case CellData::SyncType::HALF_VALUES:
-//                                    code = 'H';
-//                                    break;
-//                                case CellData::SyncType::VALUES:
-//                                    code = 'V';
-//                                    break;
-//                                case CellData::SyncType::ALL:
-//                                    code = 'A';
-//                                    break;
-//                            }
-//                        }
-
                         std::cout << code;
                     }
                     if (i != grids.size() - 1) {
@@ -83,11 +70,17 @@ Grid<CellData>* GridMaker::makeGrid(const Vector2u& size) {
                 delete(grids[processor]);
             }
         } else {
+            // update config time
+            updateTimestep();
+
             Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_GRID), grid);
         }
     } else {
         grid = makeOriginalGrid(size);
         std::cout << *grid << std::endl;
+
+        // update config time
+        updateTimestep();
     }
 
     return grid;
@@ -265,101 +258,132 @@ std::vector<GridBox*> GridMaker::makeBoxes() {
 
     GridBox* box = nullptr;
 
-    box = new GridBox(Vector2d(0.0, 0.0), Vector2d(100.0, 100.0), false);
-    box->setMainFunction([](Vector2d point, CellData& data) {
+    const double sizeX = 5.0 / 18;
+    const double sizeY = 0.4 / 5;
+
+    box = new GridBox(Vector2d(0.0, 0.0), Vector2d(5.0, 0.4), false);
+    box->setMainFunction([=](Vector2d point, CellData& data) {
         data.params().set(0, 1.0, 1.0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
+        data.setStep(Vector3d(sizeX, sizeY, 0.0));
     });
-    box->setLeftBorderFunction([](double point, CellData& data) {
+    box->setLeftBorderFunction([=](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::FLOW);
+        data.boundaryParams().setTemp(0, 2.0);
+        data.boundaryParams().setFlow(0, Vector3d());
+        data.setStep(Vector3d(sizeX, sizeY, 0.0));
+    });
+    box->setRightBorderFunction([=](double point, CellData& data) {
+        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+        data.boundaryParams().setTemp(0, 0.5);
+        data.setStep(Vector3d(sizeX, sizeY, 0.0));
+    });
+    box->setTopBorderFunction([=](double point, CellData& data) {
         data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
         data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
+        data.setStep(Vector3d(sizeX, sizeY, 0.0));
     });
-    box->setRightBorderFunction([](double point, CellData& data) {
+    box->setBottomBorderFunction([=](double point, CellData& data) {
         data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
         data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setTopBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setBottomBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
+        data.setStep(Vector3d(sizeX, sizeY, 0.0));
     });
     boxes.push_back(box);
 
-    box = new GridBox(Vector2d(20.0, 10.0), Vector2d(40.0, 20.0), true);
-    box->setLeftBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setRightBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setTopBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setBottomBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    boxes.push_back(box);
-
-    box = new GridBox(Vector2d(40.0, 40.0), Vector2d(40.0, 20.0), true);
-    box->setLeftBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setRightBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setTopBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setBottomBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 1.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    boxes.push_back(box);
-
-    box = new GridBox(Vector2d(20.0, 70.0), Vector2d(40.0, 20.0), true);
-    box->setLeftBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setRightBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setTopBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    box->setBottomBorderFunction([](double point, CellData& data) {
-        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
-        data.boundaryParams().setTemp(0, 2.0);
-        data.setStep(Vector3d(0.1, 0.1, 0.0));
-    });
-    boxes.push_back(box);
+//    box = new GridBox(Vector2d(0.0, 0.0), Vector2d(100.0, 100.0), false);
+//    box->setMainFunction([](Vector2d point, CellData& data) {
+//        data.params().set(0, 1.0, 1.0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setLeftBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setRightBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setTopBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setBottomBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    boxes.push_back(box);
+//
+//    box = new GridBox(Vector2d(20.0, 10.0), Vector2d(40.0, 20.0), true);
+//    box->setLeftBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setRightBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setTopBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setBottomBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    boxes.push_back(box);
+//
+//    box = new GridBox(Vector2d(40.0, 40.0), Vector2d(40.0, 20.0), true);
+//    box->setLeftBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setRightBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setTopBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setBottomBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 1.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    boxes.push_back(box);
+//
+//    box = new GridBox(Vector2d(20.0, 70.0), Vector2d(40.0, 20.0), true);
+//    box->setLeftBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setRightBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setTopBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    box->setBottomBorderFunction([](double point, CellData& data) {
+//        data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
+//        data.boundaryParams().setTemp(0, 2.0);
+//        data.setStep(Vector3d(0.1, 0.1, 0.0));
+//    });
+//    boxes.push_back(box);
 
     return boxes;
 }
@@ -378,8 +402,43 @@ std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigne
             indexNotNull++;
         }
 
-        if (indexNotNull == splitCount * (splitIndex + 1) && indexNotNull <= countNotNull - splitCount
-            || indexNotNull == countNotNull && splitIndex < numGrids) {
+        if (indexNotNull >= splitCount * (splitIndex + 1) && indexNotNull < countNotNull || indexNotNull == countNotNull && splitIndex < numGrids) {
+
+            std::cout << "Index = " << index << " MaxIndex = " << grid->getCount() << std::endl;
+
+            if (data != nullptr) {
+                if (data->isNormal() == true) {
+                    if (index > 0) {
+                        auto* prevData = grid->getByIndex(index - 1);
+                        if (prevData != nullptr && prevData->isFake() == true) {
+                            continue;
+                        }
+                    }
+
+                    if (index < grid->getCount() - 1) {
+                        auto* nextData = grid->getByIndex(index + 1);
+                        if (nextData != nullptr && nextData->isFake() == true) {
+                            continue;
+                        }
+                    }
+                } else {
+                    if (index > 0) {
+                        auto* prevData = grid->getByIndex(index - 1);
+                        if (prevData != nullptr && prevData->isNormal() == true) {
+                            continue;
+                        }
+                    }
+
+                    if (index < grid->getCount() - 1) {
+                        auto* nextData = grid->getByIndex(index + 1);
+                        if (nextData != nullptr && nextData->isNormal() == true) {
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            std::cout << "DONE" << std::endl;
 
             Vector2u point = Grid<CellData>::toPoint(index, grid->getSize());
             Vector2u lastPoint = Grid<CellData>::toPoint(lastIndex, grid->getSize());
@@ -497,7 +556,7 @@ std::vector<Grid<CellData>*> GridMaker::divideGrid(Grid<CellData>* grid, unsigne
                         Vector2u point = Grid<CellData>::toPoint(k, grid->getSize());
                         auto* kPrevDataX = point.x() > 0 ? grid->get(point.x() - 1, point.y()) : nullptr;
                         auto* kPrevDataY = point.y() > 0 ? grid->get(point.x(), point.y() - 1) : nullptr;
-                        if (kData->isNormal() == true || kPrevDataX != nullptr && kPrevDataX->isNormal() == true || kPrevDataY != nullptr && kPrevDataY->isNormal() == true) {
+                        if (kData->isNormal() == true && (kPrevDataX != nullptr && kPrevDataX->isNormal() == true || kPrevDataY != nullptr && kPrevDataY->isNormal() == true)) {
                             auto* newData = new CellData(*kData);
                             newData->setProcessing(false);
                             newData->setSyncId(k);
@@ -755,4 +814,27 @@ Grid<CellParameters>* GridMaker::uniteGrids(const std::vector<Grid<CellParameter
     }
 
     return unitedGrid;
+}
+
+void GridMaker::updateTimestep() {
+    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+        if (Parallel::isMaster() == true) {
+            double minStep = 0.4 / 5;
+            double timestep = 0.95 * 1.0 * minStep / Config::getInstance()->getImpulse()->getMaxImpulse();
+            Config::getInstance()->setTimestep(timestep);
+
+            // Send to other processes
+            for (int processor = 1; processor < Parallel::getSize(); processor++) {
+                Parallel::send(Utils::serialize(timestep), processor, Parallel::COMMAND_GRID_TIMESTEP);
+            }
+        } else {
+            double timestep = 0.0;
+            Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_GRID_TIMESTEP), timestep);
+            Config::getInstance()->setTimestep(timestep);
+        }
+    } else {
+        double minStep = 0.4 / 7;
+        double timestep = 0.9 * 1.0 * minStep / Config::getInstance()->getImpulse()->getMaxImpulse();
+        Config::getInstance()->setTimestep(timestep);
+    }
 }

@@ -76,14 +76,10 @@ void Solver::run() {
     // Compute cell type for each axis
     initType();
 
-//    std::cout << *_grid << std::endl;
-
     if (_config->isUseIntegral()) {
         ci::Potential* potential = new ci::HSPotential;
         ci::init(potential, ci::NO_SYMM);
     }
-
-//    auto startTime = std::chrono::steady_clock::now();
 
     if (Parallel::isMaster() == true) {
         std::cout << std::endl;
@@ -116,7 +112,6 @@ void Solver::run() {
             }
 
         }
-
 
         // beta decay
         if (_config->isUseBetaChains()) {
@@ -178,28 +173,12 @@ void Solver::run() {
             }
         }
 
-        //    auto now = std::chrono::steady_clock::now();
-        //    auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - _startTime).count();
-        //    auto iterationTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - _startTime).count();
-        //
-        //    std::cout << "run() : " << iteration << "/" << maxIteration << std::endl;
-        //    std::cout << "Iteration time: " << iterationTime << " ms" << std::endl;
-        //    std::cout << "Inner time: " << iteration * _config->getNormalizer()->restore(static_cast<const double&>(_config->getTimestep()), Normalizer::Type::TIME) << " s" << std::endl;
-        //    std::cout << "Real time: " << wholeTime << " s" << std::endl;
-        //    std::cout << "Remaining time: ";
-        //    if (iteration == 0) {
-        //        std::cout << "Unknown";
-        //    } else {
-        //        std::cout << wholeTime * (_config->getMaxIteration() - iteration) / iteration / 60 << " m";
-        //    }
-        //    std::cout << std::endl;
-        //    std::cout << std::endl;
-
         if (Parallel::isMaster() == true) {
             auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIteration * 100);
 
             std::cout << '\r';
             std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
+            std::cout << "[" << iteration << "/" << maxIteration << "] ";
             std::cout << percent << "%";
             std::cout.flush();
         }
