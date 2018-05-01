@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(RGS)
 
 # Initialize CXXFLAGS.
+cmake_policy(SET CMP0054 OLD)
 message("COMPILER = ${CMAKE_CXX_COMPILER_ID}")
 if(UNIX)
 	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
