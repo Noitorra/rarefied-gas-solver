@@ -10,11 +10,11 @@
 #include "integral/ci.hpp"
 #include "ResultsWriter.h"
 
-Solver::Solver() {
+Solver::Solver(GridConstructor* constructor) {
     _config = Config::getInstance();
     _impulse = _config->getImpulse();
     _writer = new ResultsWriter();
-    _maker = new GridMaker();
+    _maker = new GridMaker(constructor);
 }
 
 void Solver::init() {

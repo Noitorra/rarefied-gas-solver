@@ -1,6 +1,8 @@
 #ifndef RGS_SOLVER_H
 #define RGS_SOLVER_H
 
+#include <grid/GridBox.h>
+#include <grid/GridConstructor.h>
 #include "utilities/Config.h"
 #include "parameters/Impulse.h"
 #include "grid/Grid.h"
@@ -20,7 +22,7 @@ private:
     GridMaker* _maker;
 
 public:
-    Solver();
+    explicit Solver(GridConstructor* constructor);
 
     void init();
 

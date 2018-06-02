@@ -1,6 +1,7 @@
 #include <iostream>
 #include <thread>
-#include "utilities/Config.h"
+#include <grid/CellData.h>
+#include <grid/TestConstructor.h>
 #include "utilities/Parallel.h"
 #include "Solver.h"
 
@@ -28,7 +29,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        Solver solver{};
+        Solver solver{new TestConstructor()};
         solver.init();
         solver.run();
     } catch (const std::exception& e) {

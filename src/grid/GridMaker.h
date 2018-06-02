@@ -3,6 +3,7 @@
 
 #include <utilities/Types.h>
 #include "Grid.h"
+#include "GridConstructor.h"
 
 class CellData;
 
@@ -17,6 +18,8 @@ public:
         VALUES
     };
 
+    explicit GridMaker(GridConstructor* constructor);
+
 public:
     Grid<CellData>* makeGrid(const Vector2u& size);
 
@@ -27,11 +30,11 @@ public:
 private:
     Grid<CellData>* makeOriginalGrid(const Vector2u& size);
 
-    std::vector<GridBox*> makeBoxes();
-
     std::vector<Grid<CellData>*> divideGrid(Grid<CellData>* grid, unsigned int numGrids);
 
     void updateTimestep();
+
+    GridConstructor* _constructor;
 };
 
 
