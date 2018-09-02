@@ -1,14 +1,14 @@
 #include <iostream>
 #include <thread>
 #include <grid/CellData.h>
-#include <grid/TestConstructor.h>
-#include "utilities/Parallel.h"
 #include "Solver.h"
 
 int main(int argc, char* argv[]) {
     //std::ofstream out("log.txt");
     //std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
     //std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
+
+    std::string filename = "../../mesh/plane.msh";
 
     Parallel::init();
 
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        Solver solver{new TestConstructor()};
+        Solver solver(filename);
         solver.init();
         solver.run();
     } catch (const std::exception& e) {

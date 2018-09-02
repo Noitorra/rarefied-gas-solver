@@ -2,13 +2,12 @@
 #define RGS_RESULTSPRINTER_H
 
 #include <string>
+#include <vector>
 
-template <class T>
-class Grid;
+class Mesh;
+class CellResults;
 
-class CellParameters;
-
-class ResultsWriter {
+class ResultsFormatter {
 private:
     enum Param {
         PRESSURE,
@@ -28,10 +27,12 @@ private:
     std::vector<std::string> _params;
     std::vector<std::string> _types;
     std::string _gas;
-public:
-    ResultsWriter();
 
-    void writeAll(Grid<CellParameters>* grid, unsigned int iteration);
+public:
+    ResultsFormatter();
+
+    void writeAll(Mesh* mesh, const std::vector<CellResults>& results, unsigned int iteration);
+
 };
 
 

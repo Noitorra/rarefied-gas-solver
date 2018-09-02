@@ -1,3 +1,5 @@
+#include <utility>
+
 #ifndef RGS_GRIDMAKER_H
 #define RGS_GRIDMAKER_H
 
@@ -13,28 +15,16 @@ class GridBox;
 
 class GridMaker {
 public:
-    enum class SyncType {
-        HALF_VALUES,
-        VALUES
-    };
-
-    explicit GridMaker(GridConstructor* constructor);
+    explicit GridMaker(std::string meshfile) : _meshfile(std::move(meshfile)) {}
 
 public:
-    Grid<CellData>* makeGrid(const Vector2u& size);
-
-    void syncGrid(Grid<Cell>* grid, SyncType syncType, std::vector<int> syncAxis);
-
-    Grid<CellParameters>* uniteGrids(const std::vector<Grid<CellParameters>*>& grids);
+    Grid* makeGrid();
+    void syncGrid(Grid* grid);
 
 private:
-    Grid<CellData>* makeOriginalGrid(const Vector2u& size);
-
-    std::vector<Grid<CellData>*> divideGrid(Grid<CellData>* grid, unsigned int numGrids);
-
+    std::string _meshfile;
+    std::vector<Grid*> divideGrid(Grid* grid, unsigned int numGrids);
     void updateTimestep();
-
-    GridConstructor* _constructor;
 };
 
 

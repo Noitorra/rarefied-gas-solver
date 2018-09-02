@@ -31,7 +31,7 @@ private:
     CellParameters _params;
     CellParameters _boundaryParams;
     std::vector<BoundaryType> _boundaryTypes;
-    Vector3d _step;
+    double _volume;
     Type _type;
 
     int _id; // unique identifier for detecting cells
@@ -47,7 +47,7 @@ public:
 
     explicit CellData(Type type);
 
-    CellData(const CellData& o) = default;
+    CellData(const CellData&) = default;
 
     CellParameters& params() {
         return _params;
@@ -65,12 +65,12 @@ public:
         _boundaryTypes[gas] = boundaryType;
     }
 
-    const Vector3d &getStep() const {
-        return _step;
+    const double getVolume() const {
+        return _volume;
     }
 
-    void setStep(const Vector3d &step) {
-        _step = step;
+    void setVolume(const double& volume) {
+        _volume = volume;
     }
 
     Type getType() const {
@@ -160,7 +160,7 @@ private:
         ar & _params;
         ar & _boundaryParams;
         ar & _boundaryTypes;
-        ar & _step;
+//        ar & _step;
         ar & _type;
         ar & _id;
         ar & _isProcessing;

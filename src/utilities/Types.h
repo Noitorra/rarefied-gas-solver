@@ -7,31 +7,38 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 
-/*
- * This class is a base class with basic method,
- * working with inner vector only
- */
 template<typename T>
 class VectorBase {
+public:
     friend class boost::serialization::access;
 
+protected:
+    std::vector<T> _array;
+
 public:
-    VectorBase() {}
+    VectorBase() = default;
 
-    virtual ~VectorBase() {
-        _array.clear();
-    }
-
-    std::vector<T>& getMass() {
+    std::vector<T>& getArray() {
         return _array;
     }
 
-    const T mod() const {
-        return std::sqrt(mod2());
+    const T module() const {
+        return std::sqrt(moduleSquare());
     }
 
-    const T mod2() const {
-        return calcMod2();
+    const T moduleSquare() const {
+        T moduleSquare = T(0);
+        for (const auto& item : _array) {
+            moduleSquare += (item * item);
+        }
+        return moduleSquare;
+    }
+
+    void normalizeSelf() {
+        T m = module();
+        for (auto& item : _array) {
+            item /= m;
+        }
     }
 
     const T& get(unsigned int i) const {
@@ -54,18 +61,7 @@ public:
         return os;
     }
 
-protected:
-    std::vector<T> _array;
-
 private:
-    const T calcMod2() const {
-        T loc_mod2 = T(0);
-        for (auto& item : _array) {
-            loc_mod2 += (item * item);
-        }
-        return loc_mod2;
-    }
-
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version)
     {
@@ -73,8 +69,6 @@ private:
     }
 };
 
-// public class, which contains x, y access
-// and set method..
 template<typename T>
 class Vector2 : public VectorBase<T> {
 public:
@@ -90,6 +84,35 @@ public:
     void set(const T& x, const T& y) {
         this->_array[0] = x;
         this->_array[1] = y;
+    }
+
+    T& x() {
+        return this->_array[0];
+    }
+
+    T& y() {
+        return this->_array[1];
+    }
+
+    const T& x() const {
+        return this->_array[0];
+    }
+
+    const T& y() const {
+        return this->_array[1];
+    }
+
+    Vector2 normalize() {
+        this->normalizeSelf();
+        return &this;
+    }
+
+    const T scalar(const Vector2& right) const {
+        T value = 0;
+        for (unsigned int i = 0; i < this->_array.size(); i++) {
+            value += this->_array[i] * right._array[i];
+        }
+        return value;
     }
 
     const Vector2 operator+(const Vector2& right) const {
@@ -115,6 +138,14 @@ public:
         return v2;
     }
 
+    const Vector2 operator-() const {
+        Vector2 v2;
+        for (unsigned int i = 0; i < this->_array.size(); i++) {
+            v2._array[i] = -this->_array[i];
+        }
+        return v2;
+    }
+
     const Vector2& operator-=(const Vector2& right) {
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             this->_array[i] -= right._array[i];
@@ -122,34 +153,31 @@ public:
         return *this;
     }
 
-    const Vector2& operator/=(const double val) {
+    template<typename TValue>
+    const Vector2& operator/=(const TValue& val) {
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             this->_array[i] /= val;
         }
         return *this;
     }
 
-    const Vector2& operator*=(const double val) {
+    template<typename TValue>
+    const Vector2& operator*=(const TValue& val) {
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             this->_array[i] *= val;
         }
         return *this;
     }
 
-    T& x() {
-        return this->_array[0];
-    }
-
-    T& y() {
-        return this->_array[1];
-    }
-
-    const T& x() const {
-        return this->_array[0];
-    }
-
-    const T& y() const {
-        return this->_array[1];
+    const bool operator==(const Vector2& rhs) const {
+        bool isEqual = true;
+        for (unsigned int i = 0; i < this->_array.size(); i++) {
+            if (this->_array[i] != rhs._array[i]) {
+                isEqual = false;
+                break;
+            }
+        }
+        return isEqual;
     }
 };
 
@@ -159,8 +187,6 @@ typedef Vector2<int> Vector2i;
 typedef Vector2<unsigned int> Vector2u;
 typedef Vector2<short> Vector2b;
 
-// public class, which contains x, y access
-// and set method..
 template<typename T>
 class Vector3 : public VectorBase<T> {
 public:
@@ -203,6 +229,27 @@ public:
         return this->_array[2];
     }
 
+    Vector3 normalize() {
+        this->normalizeSelf();
+        return &this;
+    }
+
+    const T scalar(const Vector3& right) const {
+        T value = 0;
+        for (unsigned int i = 0; i < this->_array.size(); i++) {
+            value += this->_array[i] * right._array[i];
+        }
+        return value;
+    }
+
+    Vector3 vector(const Vector3& right) const {
+        return Vector3(
+                y() * right.z() - z() * right.y(),
+                z() * right.x() - x() * right.z(),
+                x() * right.y() - y() * right.x()
+        );
+    }
+
     const Vector3 operator+(const Vector3& right) const {
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
@@ -222,6 +269,14 @@ public:
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v3._array[i] = this->_array[i] - right._array[i];
+        }
+        return v3;
+    }
+
+    const Vector3 operator-() const {
+        Vector3 v3;
+        for (unsigned int i = 0; i < this->_array.size(); i++) {
+            v3._array[i] = -this->_array[i];
         }
         return v3;
     }
@@ -267,12 +322,15 @@ public:
         return *this;
     }
 
-    inline bool operator==(const Vector3& rhs) const {
-        bool equal = true;
+    const bool operator==(const Vector3& rhs) const {
+        bool isEqual = true;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
-            equal = this->_array[i] == rhs._array[i] && equal;
+            if (this->_array[i] != rhs._array[i]) {
+                isEqual = false;
+                break;
+            }
         }
-        return equal;
+        return isEqual;
     }
 };
 

@@ -4,101 +4,72 @@
 #include <ostream>
 #include "utilities/Types.h"
 #include "CellParameters.h"
+#include "CellResults.h"
 
 class Config;
-class CellData;
+class CellConnection;
 
 typedef std::vector<double> DoubleVector;
 
 class Cell {
 public:
-    friend class OutResults;
-
-    enum class ComputationType {
-        UNDEFINED,
-        LEFT,
+    enum class Type {
         NORMAL,
-        PRE_RIGHT,
-        RIGHT
+        BORDER,
+        PARALLEL
+    };
+    enum class BoundaryType {
+        DIFFUSE,
+        PRESSURE,
+        FLOW,
+        MIRROR
     };
 
 private:
-    std::vector<Cell*> _prev;
-    std::vector<Cell*> _next;
+    int _id;
+    Type _type;
+    CellParameters _params;
+    CellParameters _boundaryParams;
+    double _volume;
+
+    std::vector<std::shared_ptr<CellConnection>> _connections;
 
     std::vector<DoubleVector> _values;
-    std::vector<DoubleVector> _halfValues;
+    std::vector<DoubleVector> _newValues;
 
-    std::vector<ComputationType> _computationType;
-
-    Config* _config;
-    CellData* _data;
-
-    CellParameters _resultParams;
+    std::shared_ptr<CellResults> _results;
 
 public:
-    explicit Cell(CellData* data);
+    Cell(int id, Type type, double volume);
 
     void init();
 
-    void link(int axis, Cell* prevCell, Cell* nextCell);
+    std::vector<DoubleVector>& getValues();
 
-    CellData* getData();
+    int getId() const;
 
-    CellParameters& getResultParams();
+    Type getType() const;
 
-    char getComputationTypeAsCode(int axis) const;
+    void addConnection(CellConnection* connection);
 
-    void computeType(int axis);
+    void computeTransfer();
 
-    void computeValue(int axis);
-
-    void computeHalf(int axis);
+    void swapValues();
 
     void computeIntegral(unsigned int gi0, unsigned int gi1);
 
     void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
 
-    bool checkValuesRange();
-
-    std::vector<DoubleVector>& getValues();
-
-    std::vector<DoubleVector>& getHalfValues();
+    CellResults* getResults();
 
 private:
-    void compute_type(int axis);
+    double fast_exp(const double& mass, const double& temp, const Vector3d& impulse);
 
-    void compute_half_left(int axis);
+    void compute_transfer_normal();
 
-    void compute_half_normal(int axis);
+    void compute_transfer_border();
 
-    void compute_half_preright(int axis);
-
-    void compute_half_right(int axis);
-
-    void compute_half_diffuse_left(int axis, unsigned int gi);
-
-    void compute_half_diffuse_right(int axis, unsigned int gi);
-
-    void compute_half_gase_left(int axis, unsigned int gi);
-
-    void compute_half_gase_right(int axis, unsigned int gi);
-
-    void compute_half_flow_left(int axis, unsigned int gi);
-
-    void compute_half_flow_right(int axis, unsigned int gi);
-
-    void compute_half_mirror_left(int axis, unsigned int gi);
-
-    void compute_half_mirror_right(int axis, unsigned int gi);
-
-    void compute_value_normal(int axis);
-
-    double compute_exp(const double& mass, const double& temp, const Vector3d& impulse);
-
-    double limiter(const double& x, const double& y, const double& z);
-
-    double compute_concentration(unsigned int gi);
+    double compute_density(unsigned int gi);
 
     double compute_temperature(unsigned int gi, double density, const Vector3d& stream);
 

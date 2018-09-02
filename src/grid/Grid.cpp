@@ -1,55 +1,108 @@
+#include <integral/ci.hpp>
 #include "Grid.h"
-#include "CellData.h"
+#include "Cell.h"
+#include "CellConnection.h"
+#include "mesh/Mesh.h"
+#include "parameters/Gas.h"
+#include "parameters/Impulse.h"
 
-std::ostream& operator<<(std::ostream& os, const Grid<CellData>& grid) {
-    os << "Grid(Size = " << grid._size << "; CountNotNull = " << grid.getCountNotNull() << "):" << std::endl;
-    for (unsigned int y = 0; y < grid._size.y(); y++) {
-        for (unsigned int x = 0; x < grid._size.x(); x++) {
-            CellData* data = grid.get(x, grid._size.y() - y - 1);
-
-            char code = 'U';
-            if (data == nullptr) {
-                code = ' ';
-            } else if (data->isProcessing() == true) {
-                if (data->isFake() == true) {
-                    code = '1';
-                } else if (data->isNormal() == true) {
-                    code = '0';
-                }
-            } else {
-                code = 'S';
-            }
-
-            os << code;
+Grid::Grid(Mesh* mesh) {
+    // element -> cell
+    for (int i = 0; i < mesh->getElementsCount(); i++) {
+        Element* element = mesh->getElement(i);
+        if (element->getType() == Element::Type::QUADRANGLE) {
+            Cell* cell = new Cell(element->getId(), Cell::Type::NORMAL, element->getVolume());
+            _cells.emplace_back(cell);
         }
-        os << std::endl;
     }
-    return os;
+
+    // side elements -> cell connections
+    for (int i = 0; i < mesh->getElementsCount(); i++) {
+        Element* element = mesh->getElement(i);
+        if (element->getType() == Element::Type::QUADRANGLE) {
+            auto cell = getCellById(element->getId());
+
+            for (const auto& sideElement : element->getSideElements()) {
+
+                // find other element for this side
+                const auto& elements = element->getSideElements();
+                auto result = std::find_if(elements.begin(), elements.end(), [&sideElement](const Element& otherElement) {
+                    return otherElement.contains(sideElement->getNodes());
+                });
+                if (result != elements.end()) {
+                    Element* otherElement = result->get();
+                    auto otherCell = getCellById(otherElement->getId());
+                    auto connection = new CellConnection(cell, otherCell, sideElement->getVolume(), sideElement->getNormal());
+                    cell->addConnection(connection);
+                } else {
+                    auto borderCell = new Cell(-1, Cell::Type::BORDER, 0.0);
+                    _cells.emplace_back(borderCell);
+
+                    auto connection = new CellConnection(cell, borderCell, sideElement->getVolume(), sideElement->getNormal());
+                    cell->addConnection(connection);
+                }
+            }
+        }
+    }
 }
 
-std::ostream& operator<<(std::ostream& os, const Grid<Cell>& grid) {
-    os << "Grid(Size = " << grid._size << "; CountNotNull = " << grid.getCountNotNull() << "):" << std::endl;
-    for (unsigned int y = 0; y < grid._size.y(); y++) {
-        const std::vector<Config::Axis>& axis = Config::getInstance()->getAxis();
-        for (unsigned int i = 0; i < axis.size(); i++) {
-            if (i != 0) {
-                os << ' ';
-            }
+const std::vector<std::shared_ptr<Cell>>& Grid::getCells() const {
+    return _cells;
+}
 
-            for (unsigned int x = 0; x < grid._size.x(); x++) {
-                Cell* cell = grid.get(x, grid._size.y() - y - 1);
+Cell* Grid::getCellById(int id) {
+    auto result = std::find_if(_cells.begin(), _cells.end(), [&id](const Cell& cell) {
+        return cell.getId() == id;
+    });
+    return result != _cells.end() ? result->get() : nullptr;
+}
 
-                char code;
-                if (cell != nullptr) {
-                    code = cell->getComputationTypeAsCode(Utils::asNumber(axis[i]));
-                } else {
-                    code = ' ';
-                }
+void Grid::computeTransfer() {
 
-                os << code;
-            }
+    // first go for border cells
+    for (const auto& cell : _cells) {
+        if (cell->getType() == Cell::Type::BORDER) {
+            cell->computeTransfer();
         }
-        os << std::endl;
     }
-    return os;
+
+    // then go for normal cells
+    for (const auto& cell : _cells) {
+        if (cell->getType() == Cell::Type::NORMAL) {
+            cell->computeTransfer();
+        }
+    }
+
+    // move changes from next step to current step
+    for (const auto& cell : _cells) {
+        if (cell->getType() == Cell::Type::NORMAL) {
+            cell->swapValues();
+        }
+    }
+}
+
+void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
+    auto impulse = Config::getInstance()->getImpulse();
+    const auto& gases = Config::getInstance()->getGases();
+    double timestep = Config::getInstance()->getTimestep();
+
+    ci::Particle cParticle{};
+    cParticle.d = 1.;
+
+    ci::gen(timestep, 50000,
+            impulse->getResolution() / 2, impulse->getResolution() / 2,
+            impulse->getXYZ2I(), impulse->getXYZ2I(),
+            impulse->getMaxImpulse() / (impulse->getResolution() / 2),
+            gases[gi1].getMass(), gases[gi2].getMass(),
+            cParticle, cParticle);
+
+    for (const auto& cell : _cells) {
+        cell->computeIntegral(gi1, gi2);
+    }
+}
+
+void Grid::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
+    for (const auto& cell : _cells) {
+        cell->computeBetaDecay(gi0, gi1, lambda);
+    }
 }

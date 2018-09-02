@@ -32,7 +32,7 @@ void Impulse::Init() {
     // TODO: Possibly very wrong!
 //    const std::vector<Gas>& gasv = Config::getInstance()->getGases();
 //    if (gasv.size() >= 2) {
-//        m_dMaxImpulse = std::max(gasv[0].getMass(), gasv[1].getMass()) * m_dMaxImpulse;
+//        m_dMaxImpulse = std::max(gasv[0].getMass(), gasv[1].getArray()) * m_dMaxImpulse;
 //        std::cout << "Impulse::init() : gasv.size() >= 2" << std::endl;
 //    } else {
 //        std::cout << "Impulse::init() : gasv.size() < 2" << std::endl;
@@ -58,7 +58,7 @@ void Impulse::Init() {
             m_pxyz2i[x][y] = new int[m_uResolution];
             for (unsigned int z = 0; z < line.size(); z++) {
                 Vector3d vec(line[x], line[y], line[z]);
-                if (vec.mod() < m_dMaxImpulse) {
+                if (vec.module() < m_dMaxImpulse) {
 
                     // save index for xyz
                     m_pxyz2i[x][y][z] = static_cast<int>(m_vImpulses.size());

@@ -1,10 +1,8 @@
 #ifndef RGS_PARAMETERS_H
 #define RGS_PARAMETERS_H
 
-#include <utilities/Types.h>
-
-#include <utility>
-#include <utilities/Config.h>
+#include "utilities/Types.h"
+#include "utilities/Config.h"
 
 class CellParameters {
     friend class boost::serialization::access;

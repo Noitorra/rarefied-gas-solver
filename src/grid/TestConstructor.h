@@ -17,27 +17,27 @@ public:
          box = new GridBox(Vector2d(0.0, 0.0), Vector2d(100.0, 100.0), false);
          box->setMainFunction([](Vector2d point, CellData& data) {
              data.params().set(0, 1.0, 1.0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setLeftBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setRightBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setTopBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setBottomBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          boxes.push_back(box);
 
@@ -45,22 +45,22 @@ public:
          box->setLeftBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setRightBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setTopBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setBottomBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          boxes.push_back(box);
 
@@ -68,22 +68,22 @@ public:
          box->setLeftBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setRightBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setTopBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setBottomBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 1.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          boxes.push_back(box);
 
@@ -91,22 +91,22 @@ public:
          box->setLeftBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setRightBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setTopBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          box->setBottomBorderFunction([](double point, CellData& data) {
              data.setBoundaryTypes(0, CellData::BoundaryType::DIFFUSE);
              data.boundaryParams().setTemp(0, 2.0);
-             data.setStep(Vector3d(0.1, 0.1, 0.0));
+             data.setVolume(Vector3d(0.1, 0.1, 0.0));
          });
          boxes.push_back(box);
 

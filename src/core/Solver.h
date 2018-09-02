@@ -8,36 +8,22 @@
 #include "grid/Grid.h"
 
 class Cell;
-
-class ResultsWriter;
-
+class ResultsFormatter;
 class GridMaker;
 
 class Solver {
 private:
     Config* _config;
-    Impulse* _impulse;
-    Grid<Cell>* _grid;
-    ResultsWriter* _writer;
+    Grid* _grid;
+    ResultsFormatter* _writer;
     GridMaker* _maker;
 
 public:
-    explicit Solver(GridConstructor* constructor);
+    explicit Solver(const std::string& meshfile);
 
     void init();
 
     void run();
-
-private:
-    void initType();
-
-    void makeTransfer();
-
-    void makeIntegral(unsigned int gi0, unsigned int gi1, double timestep);
-
-    void makeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
-
-    void checkCells();
 };
 
 #endif //RGS_SOLVER_H
