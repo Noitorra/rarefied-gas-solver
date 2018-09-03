@@ -72,8 +72,8 @@ void Solver::run() {
 
             for (int i = 0; i < _config->getBetaChainsCount(); i++) {
                 auto& item = _config->getBetaChains()[i];
-                _grid->computeBetaDecay(item._gasIndex1, item._gasIndex2, item._lambda1);
-                _grid->computeBetaDecay(item._gasIndex2, item._gasIndex3, item._lambda2);
+                _grid->computeBetaDecay(item.getGasIndex1(), item.getGasIndex2(), item.getLambda1());
+                _grid->computeBetaDecay(item.getGasIndex2(), item.getGasIndex3(), item.getLambda2());
             }
         }
 

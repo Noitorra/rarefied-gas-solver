@@ -21,6 +21,26 @@ public:
         _lambda2 = lambda2;
     }
 
+    unsigned int getGasIndex1() const {
+        return _gasIndex1;
+    }
+
+    unsigned int getGasIndex2() const {
+        return _gasIndex2;
+    }
+
+    unsigned int getGasIndex3() const {
+        return _gasIndex3;
+    }
+
+    double getLambda1() const {
+        return _lambda1;
+    }
+
+    double getLambda2() const {
+        return _lambda2;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const BetaChain& chain) {
         os << "gasIndex1: " << chain._gasIndex1
            << " gasIndex2: " << chain._gasIndex2
