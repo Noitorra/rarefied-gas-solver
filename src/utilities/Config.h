@@ -1,10 +1,11 @@
-#ifndef CONFIG_H_
-#define CONFIG_H_
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#include "Types.h"
 
 #include <vector>
 #include <string>
 #include <ostream>
-#include "Types.h"
 
 class Gas;
 class BetaChain;
@@ -132,4 +133,4 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Config& config);
 };
 
-#endif // CONFIG_H_
+#endif // CONFIG_H

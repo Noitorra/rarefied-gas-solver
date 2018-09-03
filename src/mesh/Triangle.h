@@ -1,5 +1,5 @@
-#ifndef TESTING_TRIANGLE_H
-#define TESTING_TRIANGLE_H
+#ifndef RGS_TRIANGLE_H
+#define RGS_TRIANGLE_H
 
 #include "Element.h"
 #include "Line.h"
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //TESTING_TRIANGLE_H
+#endif //RGS_TRIANGLE_H

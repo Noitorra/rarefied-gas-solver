@@ -1,5 +1,5 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef TYPES_H
+#define TYPES_H
 
 #include <vector>
 #include <cmath>
@@ -340,4 +340,4 @@ typedef Vector3<int> Vector3i;
 typedef Vector3<unsigned int> Vector3u;
 typedef Vector3<short> Vector3b;
 
-#endif // TYPES_H_
+#endif // TYPES_H

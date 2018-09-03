@@ -1,5 +1,5 @@
-#ifndef TESTING_NODE_H
-#define TESTING_NODE_H
+#ifndef RGS_NODE_H
+#define RGS_NODE_H
 
 #include <utilities/Types.h>
 
@@ -22,4 +22,4 @@ public:
 };
 
 
-#endif //TESTING_NODE_H
+#endif //RGS_NODE_H

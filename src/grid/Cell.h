@@ -1,10 +1,11 @@
-#ifndef CELL_H_
-#define CELL_H_
+#ifndef RGS_CELL_H
+#define RGS_CELL_H
 
-#include <ostream>
 #include "utilities/Types.h"
 #include "CellParameters.h"
 #include "CellResults.h"
+
+#include <ostream>
 
 class Config;
 class CellConnection;
@@ -81,4 +82,4 @@ private:
 
 };
 
-#endif /* CELL_H_ */
+#endif /* RGS_CELL_H */

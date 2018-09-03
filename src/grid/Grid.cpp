@@ -1,10 +1,10 @@
-#include <integral/ci.hpp>
 #include "Grid.h"
 #include "Cell.h"
 #include "CellConnection.h"
 #include "mesh/Mesh.h"
 #include "parameters/Gas.h"
 #include "parameters/Impulse.h"
+#include "integral/ci.hpp"
 
 Grid::Grid(Mesh* mesh) {
     // element -> cell

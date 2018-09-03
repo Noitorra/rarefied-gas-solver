@@ -1,9 +1,10 @@
-#include <sstream>
 #include "Config.h"
 #include "parameters/Gas.h"
 #include "parameters/BetaChain.h"
 #include "parameters/Impulse.h"
 #include "Normalizer.h"
+
+#include <sstream>
 
 Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 

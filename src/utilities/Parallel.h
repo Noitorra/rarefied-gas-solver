@@ -1,5 +1,5 @@
-#ifndef PARALLEL_H_
-#define PARALLEL_H_
+#ifndef PARALLEL_H
+#define PARALLEL_H
 
 #include <string>
 
@@ -38,4 +38,4 @@ public:
     static void abort();
 };
 
-#endif // PARALLEL_H_
+#endif // PARALLEL_H

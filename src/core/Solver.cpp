@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include "Solver.h"
 #include "grid/GridMaker.h"
 #include "grid/Cell.h"
@@ -7,6 +5,8 @@
 #include "integral/ci.hpp"
 #include "utilities/Parallel.h"
 #include "ResultsFormatter.h"
+
+#include <chrono>
 
 Solver::Solver(const std::string& meshfile) {
     _config = Config::getInstance();
@@ -72,8 +72,8 @@ void Solver::run() {
 
             for (int i = 0; i < _config->getBetaChainsCount(); i++) {
                 auto& item = _config->getBetaChains()[i];
-                _grid->computeBetaDecay(item.iGasIndex1, item.iGasIndex2, item.dLambda1);
-                _grid->computeBetaDecay(item.iGasIndex2, item.iGasIndex3, item.dLambda2);
+                _grid->computeBetaDecay(item._gasIndex1, item._gasIndex2, item._lambda1);
+                _grid->computeBetaDecay(item._gasIndex2, item._gasIndex3, item._lambda2);
             }
         }
 

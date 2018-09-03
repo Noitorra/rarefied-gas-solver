@@ -1,17 +1,11 @@
-#include <utility>
-
 #ifndef RGS_GRIDMAKER_H
 #define RGS_GRIDMAKER_H
 
-#include <utilities/Types.h>
+#include "utilities/Types.h"
 #include "Grid.h"
-#include "GridConstructor.h"
 
 class CellData;
-
 class CellParameters;
-
-class GridBox;
 
 class GridMaker {
 public:

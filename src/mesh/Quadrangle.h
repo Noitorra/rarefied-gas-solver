@@ -1,9 +1,5 @@
-//
-// Created by Dmitry Sherbakov on 12.08.2018.
-//
-
-#ifndef TESTING_QUADRANGLE_H
-#define TESTING_QUADRANGLE_H
+#ifndef RGS_QUADRANGLE_H
+#define RGS_QUADRANGLE_H
 
 #include "Element.h"
 #include "Line.h"
@@ -64,4 +60,4 @@ public:
 };
 
 
-#endif //TESTING_QUADRANGLE_H
+#endif //RGS_QUADRANGLE_H

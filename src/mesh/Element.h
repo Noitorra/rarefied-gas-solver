@@ -1,5 +1,5 @@
-#ifndef TESTING_ELEMENT_H
-#define TESTING_ELEMENT_H
+#ifndef RGS_ELEMENT_H
+#define RGS_ELEMENT_H
 
 #include <vector>
 #include <memory>
@@ -67,4 +67,4 @@ public:
 };
 
 
-#endif //TESTING_ELEMENT_H
+#endif //RGS_ELEMENT_H

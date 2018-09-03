@@ -1,7 +1,9 @@
-#include <iostream>
-#include <thread>
+#include "utilities/Parallel.h"
 #include "grid/CellData.h"
 #include "Solver.h"
+
+#include <iostream>
+#include <thread>
 
 int main(int argc, char* argv[]) {
     //std::ofstream out("log.txt");

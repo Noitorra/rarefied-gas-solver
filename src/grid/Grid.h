@@ -2,6 +2,7 @@
 #define RGS_GRID_H
 
 #include "utilities/Types.h"
+
 #include <vector>
 
 class Cell;

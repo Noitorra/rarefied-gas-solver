@@ -1,12 +1,12 @@
-#include <boost/filesystem.hpp>
-#include <iostream>
-
 #include "ResultsFormatter.h"
 #include "utilities/Normalizer.h"
 #include "utilities/Utils.h"
 #include "grid/Grid.h"
 #include "grid/Cell.h"
 #include "mesh/Mesh.h"
+
+#include <boost/filesystem.hpp>
+#include <iostream>
 
 using namespace boost::filesystem;
 

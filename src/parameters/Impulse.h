@@ -1,5 +1,5 @@
-#ifndef IMPULSE_H_
-#define IMPULSE_H_
+#ifndef IMPULSE_H
+#define IMPULSE_H
 
 #include "utilities/Types.h"
 
@@ -42,4 +42,4 @@ public:
     int reverseIndex(int ii, unsigned int axis);
 };
 
-#endif /* IMPULSE_H_ */
+#endif /* IMPULSE_H */

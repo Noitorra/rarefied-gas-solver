@@ -1,17 +1,12 @@
-#include <utility>
+#ifndef RGS_MESH_H
+#define RGS_MESH_H
 
-//
-// Created by Dmitry Sherbakov on 12.08.2018.
-//
-
-#ifndef TESTING_MESH_H
-#define TESTING_MESH_H
+#include "Node.h"
+#include "Element.h"
 
 #include <vector>
 #include <map>
 #include <memory>
-#include "Node.h"
-#include "Element.h"
 
 class Mesh {
 private:
@@ -74,4 +69,4 @@ private:
 };
 
 
-#endif //TESTING_MESH_H
+#endif //RGS_MESH_H

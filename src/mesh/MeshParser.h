@@ -1,12 +1,9 @@
-//
-// Created by Dmitry Sherbakov on 12.08.2018.
-//
+#ifndef RGS_MESHPARSER_H
+#define RGS_MESHPARSER_H
 
-#ifndef TESTING_MESHPARSER_H
-#define TESTING_MESHPARSER_H
+#include "Mesh.h"
 
 #include <map>
-#include "Mesh.h"
 
 class MeshParser {
 private:
@@ -42,4 +39,4 @@ private:
 };
 
 
-#endif //TESTING_MESHPARSER_H
+#endif //RGS_MESHPARSER_H

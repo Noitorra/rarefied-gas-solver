@@ -1,5 +1,5 @@
-#ifndef TESTING_LINE_H
-#define TESTING_LINE_H
+#ifndef RGS_LINE_H
+#define RGS_LINE_H
 
 #include <cmath>
 #include "Element.h"
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //TESTING_LINE_H
+#endif //RGS_LINE_H

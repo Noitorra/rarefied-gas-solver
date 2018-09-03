@@ -1,11 +1,8 @@
-#include <utilities/Utils.h>
 #include "Cell.h"
-
+#include "CellConnection.h"
 #include "parameters/Gas.h"
 #include "parameters/Impulse.h"
-
 #include "integral/ci.hpp"
-#include "CellConnection.h"
 
 Cell::Cell(int id, Cell::Type type, double volume) : _id(id), _type(type), _volume(volume) {}
 

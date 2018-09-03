@@ -1,6 +1,7 @@
-#include <iostream>
 #include "Normalizer.h"
 #include "Config.h"
+
+#include <iostream>
 
 static const double BOLTZMANN_CONSTANT = 1.38e-23; // Boltzmann const // TODO: Make more precise
 
@@ -20,8 +21,8 @@ void Normalizer::init() {
 //        m_dTemperature = 600.0; // K (Lowest temperature?)
 //        m_dDensity = 1.81e22; // 1 / m^3
 //        m_dPressure = m_dDensity * sep::BOLTZMANN_CONSTANT * m_dTemperature;
-//        m_dMass = 133 * 1.66e-27; // kg
-//        m_dVelocity = sqrt(sep::BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s
+//        _mass = 133 * 1.66e-27; // kg
+//        m_dVelocity = sqrt(sep::BOLTZMANN_CONSTANT * m_dTemperature / _mass); // m / s
 //        m_dLength = 0.5 * 6e-4;
 //        m_dTime = m_dLength / m_dVelocity;
 //    } else {

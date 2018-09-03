@@ -1,9 +1,5 @@
-//
-// Created by Dmitry Sherbakov on 17.08.2018.
-//
-
-#ifndef TESTING_POINT_H
-#define TESTING_POINT_H
+#ifndef RGS_POINT_H
+#define RGS_POINT_H
 
 #include "Element.h"
 
@@ -12,4 +8,4 @@ public:
     Point(int id, const std::vector<Node*>& nodes) : Element(Type::POINT, id, nodes) {}
 };
 
-#endif //TESTING_POINT_H
+#endif //RGS_POINT_H

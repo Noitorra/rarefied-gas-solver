@@ -1,19 +1,24 @@
-#ifndef GAS_H_
-#define GAS_H_
+#ifndef GAS_H
+#define GAS_H
 
 #include <ostream>
 
 class Gas {
 private:
-    double m_dMass;
+    double _mass;
 public:
-    explicit Gas(double mass);
-
-    double getMass() const {
-        return m_dMass;
+    explicit Gas(double mass) {
+        _mass = mass;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Gas& gas);
+    double getMass() const {
+        return _mass;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Gas& gas) {
+        os << "Mass: " << gas._mass;
+        return os;
+    }
 };
 
-#endif /* GAS_H_ */
+#endif /* GAS_H */
