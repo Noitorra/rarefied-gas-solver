@@ -1,7 +1,3 @@
-//
-// Created by Dmitry Sherbakov on 12.08.2018.
-//
-
 #include "Mesh.h"
 #include "Point.h"
 #include "Line.h"

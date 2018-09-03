@@ -3,6 +3,9 @@
 #include "parameters/Impulse.h"
 #include "mesh/Mesh.h"
 #include "mesh/MeshParser.h"
+#include "utilities/Parallel.h"
+
+#include <iostream>
 
 /*
  * How to make a grid? Easy!

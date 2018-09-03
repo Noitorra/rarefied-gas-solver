@@ -229,9 +229,9 @@ public:
         return this->_array[2];
     }
 
-    Vector3 normalize() {
+    const Vector3& normalize() {
         this->normalizeSelf();
-        return &this;
+        return *this;
     }
 
     const T scalar(const Vector3& right) const {

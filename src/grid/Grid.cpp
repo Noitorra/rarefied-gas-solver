@@ -26,8 +26,8 @@ Grid::Grid(Mesh* mesh) {
 
                 // find other element for this side
                 const auto& elements = element->getSideElements();
-                auto result = std::find_if(elements.begin(), elements.end(), [&sideElement](const Element& otherElement) {
-                    return otherElement.contains(sideElement->getNodes());
+                auto result = std::find_if(elements.begin(), elements.end(), [&sideElement](const std::shared_ptr<Element>& otherElement) {
+                    return otherElement->contains(sideElement->getNodes());
                 });
                 if (result != elements.end()) {
                     Element* otherElement = result->get();
@@ -51,8 +51,8 @@ const std::vector<std::shared_ptr<Cell>>& Grid::getCells() const {
 }
 
 Cell* Grid::getCellById(int id) {
-    auto result = std::find_if(_cells.begin(), _cells.end(), [&id](const Cell& cell) {
-        return cell.getId() == id;
+    auto result = std::find_if(_cells.begin(), _cells.end(), [&id](const std::shared_ptr<Cell>& cell) {
+        return cell->getId() == id;
     });
     return result != _cells.end() ? result->get() : nullptr;
 }

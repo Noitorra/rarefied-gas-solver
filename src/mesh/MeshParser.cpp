@@ -1,11 +1,8 @@
-//
-// Created by Dmitry Sherbakov on 12.08.2018.
-//
+#include "MeshParser.h"
 
 #include <fstream>
 #include <sstream>
-#include "MeshParser.h"
-#include "Elements.h"
+#include <iostream>
 
 using namespace std;
 

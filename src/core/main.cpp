@@ -1,6 +1,6 @@
 #include <iostream>
 #include <thread>
-#include <grid/CellData.h>
+#include "grid/CellData.h"
 #include "Solver.h"
 
 int main(int argc, char* argv[]) {

@@ -5,6 +5,7 @@
 #include "grid/Cell.h"
 #include "parameters/BetaChain.h"
 #include "integral/ci.hpp"
+#include "utilities/Parallel.h"
 #include "ResultsFormatter.h"
 
 Solver::Solver(const std::string& meshfile) {

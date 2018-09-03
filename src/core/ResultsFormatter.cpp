@@ -1,4 +1,5 @@
 #include <boost/filesystem.hpp>
+#include <iostream>
 
 #include "ResultsFormatter.h"
 #include "utilities/Normalizer.h"
@@ -52,12 +53,21 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& resu
     }
 
     // cells
-    auto numberOfAllIndices = 0;
+    std::vector<Element*> elements;
     for (const auto& element : mesh->getElements()) {
+        auto pos = std::find_if(results.begin(), results.end(), [&element](const CellResults& res) {
+            return element->getId() == res.getId();
+        });
+        if (pos != results.end()) {
+            elements.push_back(element.get());
+        }
+    }
+    auto numberOfAllIndices = 0;
+    for (auto element : elements) {
         numberOfAllIndices += element->getNodes().size();
     }
-    fs << "CELLS " << mesh->getElementsCount() << " " << numberOfAllIndices << std::endl;
-    for (const auto& element : mesh->getElements()) {
+    fs << "CELLS " << elements.size() << " " << numberOfAllIndices << std::endl;
+    for (auto element : elements) {
         const auto& nodes = element->getNodes();
         fs << nodes.size();
         for (const auto& node : nodes) {
@@ -67,8 +77,8 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& resu
     }
 
     // cell types
-    fs << "CELL_TYPES " << mesh->getElementsCount() << std::endl;
-    for (const auto& element : mesh->getElements()) {
+    fs << "CELL_TYPES " << elements.size() << std::endl;
+    for (auto element : elements) {
         int cellType = 0;
         switch (element->getType()) {
             case Element::Type::POINT:
@@ -88,11 +98,11 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& resu
     }
 
     // scalar field (density, temperature, pressure) - lookup table "default"
-    fs << "CELL_DATA " << mesh->getElementsCount();
+    fs << "CELL_DATA " << elements.size();
     fs << "SCALARS " << "density" << " " << "double" << " " << 1 << std::endl;
     fs << "LOOKUP_TABLE " << "default" << std::endl;
     auto normalizer = Config::getInstance()->getNormalizer();
-    for (const auto& element : mesh->getElements()) {
+    for (auto element : elements) {
         double value = 0.0;
         auto pos = std::find_if(results.begin(), results.end(), [&element](const CellResults& res) {
             return element->getId() == res.getId();

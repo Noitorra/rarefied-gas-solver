@@ -55,8 +55,8 @@ public:
 
     bool contains(const std::vector<Node*>& nodes) const {
         for (const auto& node : nodes) {
-            auto result = std::find_if(_nodes.begin(), _nodes.end(), [&node](const Node& value) {
-                return value.getId() == node->getId();
+            auto result = std::find_if(_nodes.begin(), _nodes.end(), [&node](Node* value) {
+                return value->getId() == node->getId();
             });
             if (result == _nodes.end()) {
                 return false;
