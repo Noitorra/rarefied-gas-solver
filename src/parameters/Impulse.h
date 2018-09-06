@@ -1,6 +1,7 @@
 #ifndef IMPULSE_H
 #define IMPULSE_H
 
+#include <ostream>
 #include "utilities/Types.h"
 
 class Impulse {
@@ -39,7 +40,9 @@ public:
 
     const std::vector<Vector3d>& getVector() const;
 
-    int reverseIndex(int ii, unsigned int axis);
+//    int reverseIndex(int ii, unsigned int axis);
+
+    friend std::ostream& operator<<(std::ostream& os, const Impulse& impulse);
 };
 
 #endif /* IMPULSE_H */

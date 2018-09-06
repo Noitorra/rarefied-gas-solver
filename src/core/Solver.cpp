@@ -18,6 +18,7 @@ void Solver::init() {
 
     // init cell grid
     _grid = _maker->makeGrid();
+    _grid->init();
 }
 
 void Solver::run() {
@@ -76,6 +77,17 @@ void Solver::run() {
                 _grid->computeBetaDecay(item.getGasIndex2(), item.getGasIndex3(), item.getLambda2());
             }
         }
+
+        // check grid
+        _grid->check();
+
+        std::vector<CellResults*> results;
+        for (const auto& cell : _grid->getCells()) {
+            if (cell->getType() == Cell::Type::NORMAL) {
+                results.push_back(cell->getResults());
+            }
+        }
+        _writer->writeAll(_grid->getMesh(), results, iteration);
 
 //        if (iteration % _config->getOutEach() == 0) {
 //

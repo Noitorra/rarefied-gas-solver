@@ -13,24 +13,11 @@ class Normalizer;
 class Impulse;
 
 struct Config {
-public:
-    enum class Axis {
-        X = 0,
-        Y = 1,
-        Z = 2
-    };
-
 private:
     std::string m_sOutputFolder;
 
-    // Grid related
-    Vector3u m_vGridSize;
-    Vector2d m_vCellSize; // default cell size in mm
-
     bool m_bUseIntegral;
     bool m_bUseBetaChain;
-
-    std::vector<Axis> m_vAxis;
 
     // Gas related
     std::vector<Gas> m_vGases;
@@ -57,22 +44,6 @@ public:
     Config();
 
     void init();
-
-    void setGridSize(const Vector3u& vGridSize) {
-        m_vGridSize = vGridSize;
-    }
-
-    const Vector3u& getGridSize() const {
-        return m_vGridSize;
-    }
-
-    void setCellSize(const Vector2d& vCellSize) {
-        m_vCellSize = vCellSize;
-    }
-
-    const Vector2d& getCellSize() const {
-        return m_vCellSize;
-    }
 
     const std::vector<Gas>& getGases() const {
         return m_vGases;
@@ -124,10 +95,6 @@ public:
 
     Impulse* getImpulse() const {
         return m_pImpulse;
-    }
-
-    const std::vector<Axis>& getAxis() const {
-        return m_vAxis;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Config& config);

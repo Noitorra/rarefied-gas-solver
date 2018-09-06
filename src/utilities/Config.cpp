@@ -11,18 +11,11 @@ Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 void Config::init() {
     m_sOutputFolder = "../../output/";
 
-    // Grid Related
-    m_vGridSize = Vector3u(20, 7, 1); // 122, 52, 1
-    m_vCellSize = Vector2d(1.0, 1.0); // default cell size in mm!
+    m_iMaxIteration = 100;
+    m_iOutEach = 1;
 
-    m_iMaxIteration = 100000;
-    m_iOutEach = 100;
-
-    m_bUseIntegral = true;
+    m_bUseIntegral = false;
     m_bUseBetaChain = false;
-
-    m_vAxis.push_back(Axis::X);
-    m_vAxis.push_back(Axis::Y);
 
     m_dTimestep = 0.01; // TODO: set it during grid creation
 
@@ -49,9 +42,6 @@ void Config::init() {
 }
 
 std::ostream& operator<<(std::ostream& os, const Config& config) {
-    os << "GridSize: " << config.m_vGridSize << std::endl
-       << "CellSize: " << config.m_vCellSize << std::endl;
-
     os << "GasesCount: " << config.m_iGasesCount << std::endl;
     os << "Gases: [";
     for (unsigned int i = 0; i < config.m_iGasesCount; i++) {
@@ -78,7 +68,7 @@ std::ostream& operator<<(std::ostream& os, const Config& config) {
        << "OutputPrefix: " << config.m_sOutputFolder << std::endl
        << "MaxIteration: " << config.m_iMaxIteration << std::endl
        << "OutEach: "      << config.m_iOutEach      << std::endl
-       << "Normalizer: "   << config.m_pNormalizer   << std::endl
-       << "Impulse: "      << config.m_pImpulse      << std::endl;
+       << "Normalizer: "   << *config.m_pNormalizer   << std::endl
+       << "Impulse: "      << *config.m_pImpulse;
     return os;
 }

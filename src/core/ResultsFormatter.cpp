@@ -18,7 +18,7 @@ ResultsFormatter::ResultsFormatter() {
     _gas = "gas";
 }
 
-void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& results, unsigned int iteration) {
+void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& results, unsigned int iteration) {
     if (exists(_root) == false) {
         std::cout << "No such folder: " << _root << std::endl;
         return;
@@ -29,34 +29,36 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& resu
         create_directory(mainPath);
     }
 
-    for (const auto& type : _types) {
-        path typePath{mainPath / type};
-        if (exists(typePath) == false) {
-            create_directory(typePath);
-        }
-    }
+//    for (const auto& type : _types) {
+//        path typePath{mainPath / type};
+//        if (exists(typePath) == false) {
+//            create_directory(typePath);
+//        }
+//    }
 
-    path filePath = mainPath / _types[Type::DATA] / (std::to_string(iteration) + ".vtk");
+    path filePath = mainPath / (std::to_string(iteration) + ".vtk"); // _types[Type::DATA] /
     std::ofstream fs(filePath.generic_string(), std::ios::out); //  | std::ios::binary
 
     // writing file
-    fs << "# vtk DataFile Version 3.0" << std::endl; // header - version and identifier
-    fs << "Result for mesh (NAME)" << std::endl; // title (256c max)
+    fs << "# vtk DataFile Version 2.0" << std::endl; // header - version and identifier
+    fs << "SAMPLE FILE" << std::endl; // title (256c max)
     fs << "ASCII" << std::endl; // data type (ASCII or BINARY)
     fs << "DATASET UNSTRUCTURED_GRID" << std::endl; // type of form
+    fs << std::endl;
 
     // points
-    fs << "POINTS " << mesh->getNodesCount() << "double" << std::endl;
+    fs << "POINTS " << mesh->getNodesCount() << " " << "double" << std::endl;
     for (auto i = 0; i < mesh->getNodesCount(); i++) {
         auto point = mesh->getNode(i)->getPosition();
         fs << point.x() << " " << point.y() << " " << point.z() << std::endl;
     }
+    fs << std::endl;
 
     // cells
     std::vector<Element*> elements;
     for (const auto& element : mesh->getElements()) {
-        auto pos = std::find_if(results.begin(), results.end(), [&element](const CellResults& res) {
-            return element->getId() == res.getId();
+        auto pos = std::find_if(results.begin(), results.end(), [&element](CellResults* res) {
+            return element->getId() == res->getId();
         });
         if (pos != results.end()) {
             elements.push_back(element.get());
@@ -65,16 +67,18 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& resu
     auto numberOfAllIndices = 0;
     for (auto element : elements) {
         numberOfAllIndices += element->getNodes().size();
+        numberOfAllIndices += 1;
     }
     fs << "CELLS " << elements.size() << " " << numberOfAllIndices << std::endl;
     for (auto element : elements) {
         const auto& nodes = element->getNodes();
         fs << nodes.size();
         for (const auto& node : nodes) {
-            fs << " " << node->getId();
+            fs << " " << (node->getId() - 1);
         }
         fs << std::endl;
     }
+    fs << std::endl;
 
     // cell types
     fs << "CELL_TYPES " << elements.size() << std::endl;
@@ -96,19 +100,22 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults>& resu
         }
         fs << cellType << std::endl;
     }
+    fs << std::endl;
 
     // scalar field (density, temperature, pressure) - lookup table "default"
-    fs << "CELL_DATA " << elements.size();
+    fs << "CELL_DATA " << elements.size() << std::endl;
     fs << "SCALARS " << "density" << " " << "double" << " " << 1 << std::endl;
     fs << "LOOKUP_TABLE " << "default" << std::endl;
     auto normalizer = Config::getInstance()->getNormalizer();
     for (auto element : elements) {
         double value = 0.0;
-        auto pos = std::find_if(results.begin(), results.end(), [&element](const CellResults& res) {
-            return element->getId() == res.getId();
+        auto pos = std::find_if(results.begin(), results.end(), [&element](CellResults* res) {
+            return element->getId() == res->getId();
         });
         if (pos != results.end()) {
-            value = normalizer->restore(pos->getPressure(0), Normalizer::Type::PRESSURE);
+            value = normalizer->restore((*pos)->getTemp(0), Normalizer::Type::TEMPERATURE);
+//            value = (*pos)->getDensity(0);
+//            value = element->getSideElements().size();
         }
         fs << value << std::endl;
     }

@@ -4,6 +4,8 @@
 #include "parameters/Impulse.h"
 #include "integral/ci.hpp"
 
+#include <boost/format.hpp>
+
 Cell::Cell(int id, Cell::Type type, double volume) : _id(id), _type(type), _volume(volume) {}
 
 void Cell::init() {
@@ -38,18 +40,24 @@ void Cell::init() {
     }
 }
 
-
-std::vector<DoubleVector>& Cell::getValues() {
-    return _values;
-}
-
-
 int Cell::getId() const {
     return _id;
 }
 
 Cell::Type Cell::getType() const {
     return _type;
+}
+
+std::vector<DoubleVector>& Cell::getValues() {
+    return _values;
+}
+
+const std::vector<std::shared_ptr<CellConnection>>& Cell::getConnections() const {
+    return _connections;
+}
+
+double Cell::getVolume() const {
+    return _volume;
 }
 
 void Cell::addConnection(CellConnection* connection) {
@@ -96,10 +104,32 @@ void Cell::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
     }
 }
 
+void Cell::check() {
+    auto config = Config::getInstance();
+    const auto& impulses = config->getImpulse()->getVector();
+    auto gasesCount = config->getGasesCount();
+    for (unsigned int gi = 0; gi < gasesCount; gi++) {
+        for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+            if (_values[gi][ii] < 0.0) {
+                std::string text = (boost::format("Values below zero: gi = %d; ii = %d; value = %f") % gi % ii % _values[gi][ii]).str();
+                throw std::runtime_error(text);
+            }
+        }
+    }
+}
+
+CellParameters& Cell::getParams() {
+    return _params;
+}
+
+CellParameters& Cell::getBoundaryParams() {
+    return _boundaryParams;
+}
+
 CellResults* Cell::getResults() {
 
     // lazy initialization
-    if (_results != nullptr) {
+    if (_results == nullptr) {
         _results.reset(new CellResults(_id));
     }
 
@@ -166,7 +196,7 @@ void Cell::compute_transfer_border() {
             if (projection > 0.0) {
                 cUp += projection * connection->getSecond()->getValues()[gi][ii];
             } else {
-                cDown += projection * fast_exp(gases[gi].getMass(), _boundaryParams.getTemp(gi), impulses[ii]);
+                cDown += -projection * fast_exp(gases[gi].getMass(), _boundaryParams.getTemp(gi), impulses[ii]);
             }
         }
     }
@@ -175,7 +205,7 @@ void Cell::compute_transfer_border() {
     for (unsigned int gi = 0; gi < gasesCount; gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
             double projection = impulses[ii].scalar(connection->getNormal12());
-            if (projection > 0.0) {
+            if (projection < 0.0) {
                 _values[gi][ii] = h * fast_exp(gases[gi].getMass(), _boundaryParams.getTemp(gi), impulses[ii]);
             }
         }

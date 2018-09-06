@@ -13,14 +13,14 @@ public:
 
         // find all sides and diagonals
         for (unsigned int i = 0; i < _nodes.size(); i++) {
-            for (unsigned int j = i; j < _nodes.size(); j++) {
+            for (unsigned int j = i + 1; j < _nodes.size(); j++) {
                 Line* line = new Line(-1, {_nodes[i], _nodes[j]});
 
                 bool isSide = true;
                 Vector3d* direction = nullptr;
                 for (unsigned int k = 0; k < _nodes.size(); k++) {
                     if (k != i && k != j) {
-                        Line* kLine = new Line(-1, {_nodes[i], _nodes[j]});
+                        Line* kLine = new Line(-1, {_nodes[i], _nodes[k]});
                         Vector3d kDirection = line->getVector().vector(kLine->getVector());
                         if (direction == nullptr) {
                             direction = new Vector3d(kDirection);

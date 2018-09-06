@@ -9,9 +9,9 @@ CellData::CellData(CellData::Type type) : _type(type), _isProcessing(true), _syn
     unsigned int gasesCount = config->getGasesCount();
     _boundaryTypes.resize(gasesCount);
 
-    _syncAxis.clear();
-    for (auto axis : config->getAxis()) {
-        _syncAxis.push_back(Utils::asNumber(axis));
-    }
+//    _syncAxis.clear();
+//    for (auto axis : config->getAxis()) {
+//        _syncAxis.push_back(Utils::asNumber(axis));
+//    }
 }
 

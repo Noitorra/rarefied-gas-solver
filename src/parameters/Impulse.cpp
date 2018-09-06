@@ -108,28 +108,36 @@ const std::vector<Vector3d>& Impulse::getVector() const {
     return m_vImpulses;
 }
 
-int Impulse::reverseIndex(int ii, unsigned int axis) {
-    // ii -> xyz
-    // xyz -> reverse xyz -> rii
-    Vector3i v3i = m_pi2xyz[ii];
-    int ri = 0;
-    switch (static_cast<Config::Axis>(axis)) {
-        case Config::Axis::X:
-            ri = m_pxyz2i[m_uResolution - 1 - v3i.x()][v3i.y()][v3i.z()];
-            break;
-
-        case Config::Axis::Y:
-            ri = m_pxyz2i[v3i.x()][m_uResolution - 1 - v3i.y()][v3i.z()];
-            break;
-
-        case Config::Axis::Z:
-            ri = m_pxyz2i[v3i.x()][v3i.y()][m_uResolution - 1 - v3i.z()];
-            break;
-    }
-    if (ri == -1) {
-        std::cout << "Impulse::reverseIndex() bad reverse, index = -1." << std::endl;
-        return ii;
-    }
-    //std::cout << "In: " << ii << " Reverse: " << ri << std::endl;
-    return ri;
+std::ostream& operator<<(std::ostream& os, const Impulse& impulse) {
+    os << "MaxImpulse: " << impulse.m_dMaxImpulse << std::endl
+       << "Resolution: " << impulse.m_uResolution << std::endl
+       << "DeltaImpulse: " << impulse.m_dDeltaImpulse << std::endl
+       << "DeltaImpulseQube: " << impulse.m_dDeltaImpulseQube;
+    return os;
 }
+
+//int Impulse::reverseIndex(int ii, unsigned int axis) {
+//    // ii -> xyz
+//    // xyz -> reverse xyz -> rii
+//    Vector3i v3i = m_pi2xyz[ii];
+//    int ri = 0;
+//    switch (static_cast<Config::Axis>(axis)) {
+//        case Config::Axis::X:
+//            ri = m_pxyz2i[m_uResolution - 1 - v3i.x()][v3i.y()][v3i.z()];
+//            break;
+//
+//        case Config::Axis::Y:
+//            ri = m_pxyz2i[v3i.x()][m_uResolution - 1 - v3i.y()][v3i.z()];
+//            break;
+//
+//        case Config::Axis::Z:
+//            ri = m_pxyz2i[v3i.x()][v3i.y()][m_uResolution - 1 - v3i.z()];
+//            break;
+//    }
+//    if (ri == -1) {
+//        std::cout << "Impulse::reverseIndex() bad reverse, index = -1." << std::endl;
+//        return ii;
+//    }
+//    //std::cout << "In: " << ii << " Reverse: " << ri << std::endl;
+//    return ri;
+//}

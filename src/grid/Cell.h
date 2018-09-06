@@ -45,11 +45,15 @@ public:
 
     void init();
 
-    std::vector<DoubleVector>& getValues();
-
     int getId() const;
 
     Type getType() const;
+
+    std::vector<DoubleVector>& getValues();
+
+    const std::vector<std::shared_ptr<CellConnection>>& getConnections() const;
+
+    double getVolume() const;
 
     void addConnection(CellConnection* connection);
 
@@ -60,6 +64,12 @@ public:
     void computeIntegral(unsigned int gi0, unsigned int gi1);
 
     void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
+
+    void check();
+
+    CellParameters& getParams();
+
+    CellParameters& getBoundaryParams();
 
     CellResults* getResults();
 

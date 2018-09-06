@@ -19,8 +19,8 @@
 Grid* GridMaker::makeGrid() {
     Mesh* mesh = nullptr;
 
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-        if (Parallel::isMaster() == true) {
+//    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+//        if (Parallel::isMaster() == true) {
 
             // load mesh
             mesh = MeshParser::getInstance().loadMesh(_meshfile);
@@ -28,27 +28,27 @@ Grid* GridMaker::makeGrid() {
             std::cout << "Count Elements = " << mesh->getElementsCount() << std::endl;
 
             // update config time
-            updateTimestep();
+//            updateTimestep();
 
             // select self mesh
-            mesh = nullptr;
+//            mesh = nullptr;
 
             // send to other processes
 //            for (int processor = 1; processor < Parallel::getSize(); processor++) {
 //                Parallel::send(Utils::serialize(grids[processor]), processor, Parallel::COMMAND_GRID);
 //                delete(grids[processor]);
 //            }
-        } else {
-            // update config time
-            updateTimestep();
-
-            // get mesh from master process
-//            Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_GRID), grid);
-        }
-    } else {
-        // update config time
-        updateTimestep();
-    }
+//        } else {
+//            // update config time
+//            updateTimestep();
+//
+//            // get mesh from master process
+////            Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_GRID), grid);
+//        }
+//    } else {
+//        // update config time
+//        updateTimestep();
+//    }
 
     return new Grid(mesh);
 }

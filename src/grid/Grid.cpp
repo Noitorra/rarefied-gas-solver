@@ -6,12 +6,14 @@
 #include "parameters/Impulse.h"
 #include "integral/ci.hpp"
 
-Grid::Grid(Mesh* mesh) {
+Grid::Grid(Mesh* mesh) : _mesh(mesh) {
+
     // element -> cell
     for (int i = 0; i < mesh->getElementsCount(); i++) {
         Element* element = mesh->getElement(i);
         if (element->getType() == Element::Type::QUADRANGLE) {
             Cell* cell = new Cell(element->getId(), Cell::Type::NORMAL, element->getVolume());
+            cell->getParams().set(0, 1.0, 1.0, 1.0);
             _cells.emplace_back(cell);
         }
     }
@@ -25,17 +27,28 @@ Grid::Grid(Mesh* mesh) {
             for (const auto& sideElement : element->getSideElements()) {
 
                 // find other element for this side
-                const auto& elements = element->getSideElements();
-                auto result = std::find_if(elements.begin(), elements.end(), [&sideElement](const std::shared_ptr<Element>& otherElement) {
+                std::vector<Element*> elements;
+                for (const auto& e : mesh->getElements()) {
+                    if (e->getType() == Element::Type::QUADRANGLE && e->getId() != element->getId()) {
+                        elements.push_back(e.get());
+                    }
+                }
+                auto result = std::find_if(elements.begin(), elements.end(), [&sideElement](Element* otherElement) {
                     return otherElement->contains(sideElement->getNodes());
                 });
                 if (result != elements.end()) {
-                    Element* otherElement = result->get();
+                    Element* otherElement = *result;
                     auto otherCell = getCellById(otherElement->getId());
-                    auto connection = new CellConnection(cell, otherCell, sideElement->getVolume(), sideElement->getNormal());
-                    cell->addConnection(connection);
+                    if (otherCell != nullptr) {
+                        auto connection = new CellConnection(cell, otherCell, sideElement->getVolume(), sideElement->getNormal());
+                        cell->addConnection(connection);
+                    }
                 } else {
                     auto borderCell = new Cell(-1, Cell::Type::BORDER, 0.0);
+                    borderCell->getParams().set(0, 1.0, 1.0, 1.0);
+                    borderCell->getBoundaryParams().set(0, 1.0, 1.0, 0.5);
+                    auto borderConnection = new CellConnection(borderCell, cell, sideElement->getVolume(), -sideElement->getNormal());
+                    borderCell->addConnection(borderConnection);
                     _cells.emplace_back(borderCell);
 
                     auto connection = new CellConnection(cell, borderCell, sideElement->getVolume(), sideElement->getNormal());
@@ -44,6 +57,10 @@ Grid::Grid(Mesh* mesh) {
             }
         }
     }
+}
+
+Mesh* Grid::getMesh() const {
+    return _mesh;
 }
 
 const std::vector<std::shared_ptr<Cell>>& Grid::getCells() const {
@@ -55,6 +72,27 @@ Cell* Grid::getCellById(int id) {
         return cell->getId() == id;
     });
     return result != _cells.end() ? result->get() : nullptr;
+}
+
+void Grid::init() {
+    for (const auto& cell : _cells) {
+        cell->init();
+    }
+
+    double minStep = std::numeric_limits<double>::max();
+    for (const auto& cell : _cells) {
+        if (cell->getType() == Cell::Type::NORMAL) {
+            double maxSquare = 0.0;
+            for (const auto& connection : cell->getConnections()) {
+                maxSquare = std::max(connection->getSquare(), maxSquare);
+            }
+            double step = cell->getVolume() / maxSquare;
+            minStep = std::min(minStep, step);
+        }
+    }
+
+    auto config = Config::getInstance();
+    config->setTimestep(0.9 * minStep / config->getImpulse()->getMaxImpulse());
 }
 
 void Grid::computeTransfer() {
@@ -104,5 +142,11 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
 void Grid::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
     for (const auto& cell : _cells) {
         cell->computeBetaDecay(gi0, gi1, lambda);
+    }
+}
+
+void Grid::check() {
+    for (const auto& cell : _cells) {
+        cell->check();
     }
 }

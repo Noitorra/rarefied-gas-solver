@@ -1,6 +1,8 @@
 #ifndef NORMALIZER_H
 #define NORMALIZER_H
 
+#include <ostream>
+
 class Normalizer {
 public:
     enum class Type {
@@ -35,7 +37,7 @@ public:
 
     void restore(double& value, const Type& type) const;
 
-    void printInfo() const;
+    friend std::ostream& operator<<(std::ostream& os, const Normalizer& normalizer);
 
 };
 

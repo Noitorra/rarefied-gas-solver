@@ -85,14 +85,13 @@ void Normalizer::restore(double& value, const Normalizer::Type& type) const {
     value = restore(static_cast<const double&>(value), type);
 }
 
-void Normalizer::printInfo() const {
-    std::cout << std::endl << "Normalization base:" << std::endl;
-    std::cout << "Temperature: " << m_dTemperature << " K" << std::endl;
-    std::cout << "Density: " << m_dDensity << " 1/m^3" << std::endl;
-    std::cout << "Mass: " << m_dMass << " kg" << std::endl;
-    std::cout << "Velocity: " << m_dVelocity << " m/s" << std::endl;
-    std::cout << "Length: " << m_dLength << " m" << std::endl;
-    std::cout << "Time: " << m_dTime << " s" << std::endl;
-    std::cout << "Pressure: " << m_dPressure << " Pa" << std::endl;
-    std::cout << std::endl;
+std::ostream& operator<<(std::ostream& os, const Normalizer& normalizer) {
+    os << "Temperature: " << normalizer.m_dTemperature << " K" << std::endl
+       << "Density: " << normalizer.m_dDensity << " 1/m^3" << std::endl
+       << "Mass: " << normalizer.m_dMass << " kg" << std::endl
+       << "Velocity: " << normalizer.m_dVelocity << " m/s" << std::endl
+       << "Length: " << normalizer.m_dLength << " m" << std::endl
+       << "Time: " << normalizer.m_dTime << " s" << std::endl
+       << "Pressure: " << normalizer.m_dPressure << " Pa";
+    return os;
 }

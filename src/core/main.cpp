@@ -22,12 +22,14 @@ int main(int argc, char* argv[]) {
     // Print off a hello world message
     std::cout << "Hello world from processor " << Parallel::getProcessorName()
               << ", rank " << Parallel::getRank()
-              << " out of " << Parallel::getSize() << " processors." << std::endl;
+              << " out of " << Parallel::getSize() << " processors." << std::endl << std::endl;
 
     // Create config
     Config::getInstance()->init();
     if (Parallel::isMaster() == true) {
-        std::cout << "Config:" << std::endl << *Config::getInstance() << std::endl;
+        std::cout << "Configuration ------------------------------------------------------------" << std::endl
+                  << *Config::getInstance() << std::endl
+                  << "--------------------------------------------------------------------------" << std::endl << std::endl;
     }
 
     try {
