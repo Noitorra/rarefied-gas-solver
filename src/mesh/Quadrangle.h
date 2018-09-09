@@ -5,22 +5,40 @@
 #include "Line.h"
 
 class Quadrangle : public Element {
+    friend class boost::serialization::access;
+
 private:
     std::vector<std::shared_ptr<Line>> _diagonalElements;
 
 public:
-    Quadrangle(int id, const std::vector<Node*>& nodes) : Element(Type::QUADRANGLE, id, nodes) {
+    Quadrangle() = default;
+
+    Quadrangle(int id, int physicalEntityId, int geomUnitId, const std::vector<int>& partitions, const std::vector<int>& nodeIds)
+    : Element(Type::QUADRANGLE, id, physicalEntityId, geomUnitId, partitions, nodeIds) {}
+
+    explicit Quadrangle(const std::vector<int>& nodeIds) : Quadrangle(0, -1, -1, {}, nodeIds) {}
+
+private:
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & boost::serialization::base_object<Element>(*this);
+        ar & _diagonalElements;
+    }
+
+    void createSideElements(const std::vector<Node*>& nodes) override {
 
         // find all sides and diagonals
-        for (unsigned int i = 0; i < _nodes.size(); i++) {
-            for (unsigned int j = i + 1; j < _nodes.size(); j++) {
-                Line* line = new Line(-1, {_nodes[i], _nodes[j]});
+        _sideElements.clear();
+        _diagonalElements.clear();
+        for (unsigned int i = 0; i < nodes.size(); i++) {
+            for (unsigned int j = i + 1; j < nodes.size(); j++) {
+                Line* line = new Line({nodes[i]->getId(), nodes[j]->getId()});
 
                 bool isSide = true;
                 Vector3d* direction = nullptr;
-                for (unsigned int k = 0; k < _nodes.size(); k++) {
+                for (unsigned int k = 0; k < nodes.size(); k++) {
                     if (k != i && k != j) {
-                        Line* kLine = new Line(-1, {_nodes[i], _nodes[k]});
+                        Line* kLine = new Line({nodes[i]->getId(), nodes[k]->getId()});
                         Vector3d kDirection = line->getVector().vector(kLine->getVector());
                         if (direction == nullptr) {
                             direction = new Vector3d(kDirection);
@@ -34,18 +52,17 @@ public:
                 }
 
                 if (isSide == true) {
-                    _sideElements.emplace_back(line);
-
-                    Vector3d v1 = _nodes[j]->getPosition() - _nodes[i]->getPosition();
+                    Vector3d v1 = nodes[j]->getPosition() - nodes[i]->getPosition();
                     int p = 0;
-                    for (unsigned int k = 0; k < _nodes.size(); k++) {
+                    for (unsigned int k = 0; k < nodes.size(); k++) {
                         if (k != i && k != j) {
                             p = k;
                             break;
                         }
                     }
-                    Vector3d v2 = _nodes[p]->getPosition() - _nodes[i]->getPosition();
-                    _sideElements.back()->setNormal(-v1.vector(v2).vector(v1).normalize());
+                    Vector3d v2 = nodes[p]->getPosition() - nodes[i]->getPosition();
+
+                    _sideElements.emplace_back(new SideElement(line, -v1.vector(v2).vector(v1).normalize()));
                 } else {
                     _diagonalElements.emplace_back(line);
                 }
@@ -58,6 +75,5 @@ public:
         _volume = diag1.vector(diag2).module() / 2;
     }
 };
-
 
 #endif //RGS_QUADRANGLE_H

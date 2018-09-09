@@ -5,66 +5,55 @@
 #include "Element.h"
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <memory>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <bits/unordered_map.h>
 
 class Mesh {
+    friend class boost::serialization::access;
+
 private:
     std::vector<std::shared_ptr<Node>> _nodes;
-    std::map<int, Node*> _nodesMap;
+    std::unordered_map<int, Node*> _nodesMap;
     std::vector<std::shared_ptr<Element>> _elements;
 
 public:
     Mesh() = default;
 
-    std::size_t getNodesCapacity() const {
-        return _nodes.capacity();
-    }
+    void init();
 
-    void setNodesCapacity(std::size_t capacity) {
-        _nodes.reserve(capacity);
-    }
+    std::unordered_map<int, Mesh*> split();
 
-    std::size_t getNodesCount() const {
-        return _nodes.size();
-    }
+    void reserveNodes(std::size_t capacity);
 
-    void addNode(int id, Vector3d position) {
-        Node* node = new Node(id, std::move(position));
-        _nodes.emplace_back(node);
-        _nodesMap.emplace(node->getId(), node);
-    }
+    void addNode(int id, Vector3d position);
 
-    Node* getNodeById(int id) const {
-        return _nodesMap.at(id);
-    }
+    void addNode(Node* node);
 
-    Node* getNode(int index) const {
-        return _nodes[index].get();
-    }
+    Node* getNode(int id) const;
 
-    std::size_t getElementsCapacity() const {
-        return _elements.capacity();
-    }
+    const std::vector<std::shared_ptr<Node>>& getNodes() const;
 
-    void setElementsCapacity(std::size_t capacity) {
-        _elements.reserve(capacity);
-    }
+    void reserveElements(std::size_t capacity);
 
-    std::size_t getElementsCount() const {
-        return _elements.size();
-    }
+    std::size_t getElementsCount() const;
 
-    void addElement(int id, int type, const std::vector<int>& tags, const std::vector<int>& nodeIds);
+    void addElement(int id, int type, int physicalEntityId, int geomUnitId, const std::vector<int>& partitions, const std::vector<int>& nodeIds);
 
-    Element* getElement(int index) {
-        return _elements[index].get();
-    }
+    void addElement(Element* element);
+
+    Element* getElement(int index) const;
 
     const std::vector<std::shared_ptr<Element>>& getElements() const;
 
 private:
-    std::vector<Node*> getNodes(const std::vector<int>& nodeIds);
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & _nodesMap;
+        ar & _elements;
+    }
 
 };
 

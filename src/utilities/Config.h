@@ -21,11 +21,9 @@ private:
 
     // Gas related
     std::vector<Gas> m_vGases;
-    unsigned int m_iGasesCount;
 
     // Beta chains
     std::vector<BetaChain> m_vBetaChains;
-    unsigned int m_iBetaChainsCount;
 
     double m_dTimestep;
 
@@ -49,16 +47,8 @@ public:
         return m_vGases;
     }
 
-    unsigned int getGasesCount() const {
-        return m_iGasesCount;
-    }
-
     const std::vector<BetaChain>& getBetaChains() const {
         return m_vBetaChains;
-    }
-
-    unsigned int getBetaChainsCount() const {
-        return m_iBetaChainsCount;
     }
 
     void setTimestep(double dTimestep) {

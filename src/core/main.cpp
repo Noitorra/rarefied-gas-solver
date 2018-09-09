@@ -1,5 +1,4 @@
 #include "utilities/Parallel.h"
-#include "grid/CellData.h"
 #include "Solver.h"
 
 #include <iostream>
@@ -26,7 +25,7 @@ int main(int argc, char* argv[]) {
 
     // Create config
     Config::getInstance()->init();
-    if (Parallel::isMaster() == true) {
+    if (Parallel::isMaster()) {
         std::cout << "Configuration ------------------------------------------------------------" << std::endl
                   << *Config::getInstance() << std::endl
                   << "--------------------------------------------------------------------------" << std::endl << std::endl;
@@ -38,6 +37,7 @@ int main(int argc, char* argv[]) {
         solver.run();
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
+
         Parallel::abort();
     }
 

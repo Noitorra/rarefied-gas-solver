@@ -14,6 +14,9 @@ MeshParser::MeshParser() {
     _keywords.emplace(Type::ELEMENTS, "Elements");
 
     _mesh = nullptr;
+
+    _isNodesSizeLine = true;
+    _isElementsSizeLine = true;
 }
 
 Mesh *MeshParser::loadMesh(const string &filename) {
@@ -66,10 +69,12 @@ void MeshParser::parse(const string& line) {
                     is >> _version >> _dataType >> _fileSize;
                     break;
                 case Type::NODES:
-                    if (_mesh->getNodesCapacity() == 0) {
+                    if (_isNodesSizeLine) {
+                        _isNodesSizeLine = false;
+
                         size_t capacity;
                         is >> capacity;
-                        _mesh->setNodesCapacity(capacity);
+                        _mesh->reserveNodes(capacity);
                     } else {
                         int id;
                         double x, y, z;
@@ -78,10 +83,12 @@ void MeshParser::parse(const string& line) {
                     }
                     break;
                 case Type::ELEMENTS:
-                    if (_mesh->getElementsCapacity() == 0) {
+                    if (_isElementsSizeLine) {
+                        _isElementsSizeLine = false;
+
                         size_t capacity;
                         is >> capacity;
-                        _mesh->setElementsCapacity(capacity);
+                        _mesh->reserveElements(capacity);
                     } else {
                         int id, type, tagsCount;
                         is >> id >> type >> tagsCount;
@@ -91,18 +98,25 @@ void MeshParser::parse(const string& line) {
                             is >> tag;
                             tags.push_back(tag);
                         }
+                        int physicalEntityId = tags[0];
+                        int geomUnitId = tags[1];
+                        vector<int> partitions;
+                        for (auto i = 3; i < tags.size(); i++) {
+                            partitions.push_back(tags[i]);
+                        }
+
                         vector<int> nodeIds;
                         do {
                             int nodeId;
                             is >> nodeId;
                             nodeIds.push_back(nodeId);
                         } while (is.good());
-                        _mesh->addElement(id, type, tags, nodeIds);
+
+                        _mesh->addElement(id, type, physicalEntityId, geomUnitId, partitions, nodeIds);
                     }
                     break;
             }
         }
     }
 }
-
 

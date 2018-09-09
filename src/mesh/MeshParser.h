@@ -15,6 +15,9 @@ private:
     };
     std::map<Type, std::string> _keywords;
     Type _type;
+    bool _isNodesSizeLine;
+    bool _isElementsSizeLine;
+
     Mesh* _mesh;
     float _version;
     int _dataType;

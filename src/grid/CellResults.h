@@ -4,10 +4,14 @@
 #include "CellParameters.h"
 
 class CellResults : public CellParameters {
+    friend class boost::serialization::access;
+
 private:
     int _id;
 
 public:
+    CellResults() = default;
+
     explicit CellResults(int id) : CellParameters(), _id(id) {}
 
     int getId() const {
@@ -16,6 +20,13 @@ public:
 
     void setId(int id) {
         _id = id;
+    }
+
+private:
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & boost::serialization::base_object<CellParameters>(*this);
+        ar & _id;
     }
 
 };

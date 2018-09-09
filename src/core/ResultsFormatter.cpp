@@ -2,7 +2,7 @@
 #include "utilities/Normalizer.h"
 #include "utilities/Utils.h"
 #include "grid/Grid.h"
-#include "grid/Cell.h"
+#include "grid/NormalCell.h"
 #include "mesh/Mesh.h"
 
 #include <boost/filesystem.hpp>
@@ -47,9 +47,9 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& res
     fs << std::endl;
 
     // points
-    fs << "POINTS " << mesh->getNodesCount() << " " << "double" << std::endl;
-    for (auto i = 0; i < mesh->getNodesCount(); i++) {
-        auto point = mesh->getNode(i)->getPosition();
+    fs << "POINTS " << mesh->getNodes().size() << " " << "double" << std::endl;
+    for (const auto& node : mesh->getNodes()) {
+        auto point = node->getPosition();
         fs << point.x() << " " << point.y() << " " << point.z() << std::endl;
     }
     fs << std::endl;
@@ -66,15 +66,15 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& res
     }
     auto numberOfAllIndices = 0;
     for (auto element : elements) {
-        numberOfAllIndices += element->getNodes().size();
+        numberOfAllIndices += element->getNodeIds().size();
         numberOfAllIndices += 1;
     }
     fs << "CELLS " << elements.size() << " " << numberOfAllIndices << std::endl;
     for (auto element : elements) {
-        const auto& nodes = element->getNodes();
-        fs << nodes.size();
-        for (const auto& node : nodes) {
-            fs << " " << (node->getId() - 1);
+        const auto& nodeIds = element->getNodeIds();
+        fs << nodeIds.size();
+        for (const auto& nodeId : nodeIds) {
+            fs << " " << (nodeId - 1);
         }
         fs << std::endl;
     }
@@ -116,6 +116,7 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& res
             value = normalizer->restore((*pos)->getTemp(0), Normalizer::Type::TEMPERATURE);
 //            value = (*pos)->getDensity(0);
 //            value = element->getSideElements().size();
+//            value = element->getProcessId();
         }
         fs << value << std::endl;
     }

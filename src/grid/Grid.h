@@ -4,24 +4,28 @@
 #include "utilities/Types.h"
 
 #include <vector>
+#include <unordered_map>
 
-class Cell;
+class BaseCell;
 class CellConnection;
 class Mesh;
 
 class Grid {
 private:
     Mesh* _mesh;
-    std::vector<std::shared_ptr<Cell>> _cells;
+    std::vector<std::shared_ptr<BaseCell>> _cells;
+    std::unordered_map<int, BaseCell*> _cellsMap;
 
 public:
     explicit Grid(Mesh* mesh);
 
     Mesh* getMesh() const;
 
-    const std::vector<std::shared_ptr<Cell>>& getCells() const;
+    void addCell(BaseCell* cell);
 
-    Cell* getCellById(int id);
+    const std::vector<std::shared_ptr<BaseCell>>& getCells() const;
+
+    BaseCell* getCellById(int id);
 
     void init();
 
@@ -32,6 +36,8 @@ public:
     void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda);
 
     void check();
+
+    void sync();
 
 };
 

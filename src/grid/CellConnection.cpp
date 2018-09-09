@@ -1,14 +1,14 @@
 #include "CellConnection.h"
-#include "Cell.h"
+#include "NormalCell.h"
 
-CellConnection::CellConnection(Cell* first, Cell* second, double square, const Vector3d& normal12)
+CellConnection::CellConnection(BaseCell* first, BaseCell* second, double square, const Vector3d& normal12)
         : _first(first), _second(second), _square(square), _normal12(normal12), _normal21(-normal12) {}
 
-Cell* CellConnection::getFirst() const {
+BaseCell* CellConnection::getFirst() const {
     return _first;
 }
 
-Cell* CellConnection::getSecond() const {
+BaseCell* CellConnection::getSecond() const {
     return _second;
 }
 

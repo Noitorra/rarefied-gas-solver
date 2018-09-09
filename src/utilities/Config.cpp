@@ -11,7 +11,7 @@ Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 void Config::init() {
     m_sOutputFolder = "../../output/";
 
-    m_iMaxIteration = 100;
+    m_iMaxIteration = 10;
     m_iOutEach = 1;
 
     m_bUseIntegral = false;
@@ -20,19 +20,17 @@ void Config::init() {
     m_dTimestep = 0.01; // TODO: set it during grid creation
 
     // Gases related
-    m_iGasesCount = 1;
     m_vGases.emplace_back(1.0);           // 133 Cs
-    m_vGases.emplace_back(88.0 / 133.0);  // 88 Kr -> Rb -> Sr
-    m_vGases.emplace_back(138.0 / 133.0); // 138 Xe -> Cs -> Ba
-    m_vGases.emplace_back(88.0 / 133.0);  // 88 Rb
-    m_vGases.emplace_back(88.0 / 133.0);  // 88 Sr
-    m_vGases.emplace_back(138.0 / 133.0); // 138 Cs
-    m_vGases.emplace_back(138.0 / 133.0); // 138 Ba
+//    m_vGases.emplace_back(88.0 / 133.0);  // 88 Kr -> Rb -> Sr
+//    m_vGases.emplace_back(138.0 / 133.0); // 138 Xe -> Cs -> Ba
+//    m_vGases.emplace_back(88.0 / 133.0);  // 88 Rb
+//    m_vGases.emplace_back(88.0 / 133.0);  // 88 Sr
+//    m_vGases.emplace_back(138.0 / 133.0); // 138 Cs
+//    m_vGases.emplace_back(138.0 / 133.0); // 138 Ba
 
     // Beta chains related
-    m_iBetaChainsCount = 0;
-    m_vBetaChains.emplace_back(1, 3, 4, 6.78e-5, 6.49e-4);
-    m_vBetaChains.emplace_back(2, 5, 6, 6.78e-5, 6.49e-4);
+//    m_vBetaChains.emplace_back(1, 3, 4, 6.78e-5, 6.49e-4);
+//    m_vBetaChains.emplace_back(2, 5, 6, 6.78e-5, 6.49e-4);
 
     // Normalization
     m_pNormalizer->init();
@@ -42,21 +40,19 @@ void Config::init() {
 }
 
 std::ostream& operator<<(std::ostream& os, const Config& config) {
-    os << "GasesCount: " << config.m_iGasesCount << std::endl;
     os << "Gases: [";
-    for (unsigned int i = 0; i < config.m_iGasesCount; i++) {
+    for (unsigned int i = 0; i < config.m_vGases.size(); i++) {
         os << config.m_vGases[i];
-        if (i != config.m_iGasesCount - 1) {
+        if (i != config.m_vGases.size() - 1) {
             os << ", ";
         }
     }
     os << "]" << std::endl;
 
-    os << "BetaChainsCount: " << config.m_iBetaChainsCount << std::endl;
     os << "BetaChains: [";
-    for (unsigned int i = 0; i < config.m_iBetaChainsCount; i++) {
+    for (unsigned int i = 0; i < config.m_vBetaChains.size(); i++) {
         os << config.m_vBetaChains[i];
-        if (i != config.m_iBetaChainsCount - 1) {
+        if (i != config.m_vBetaChains.size() - 1) {
             os << ", ";
         }
     }

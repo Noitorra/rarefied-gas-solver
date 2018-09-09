@@ -3,23 +3,23 @@
 
 #include <utilities/Types.h>
 
-class Cell;
+class BaseCell;
 
 class CellConnection {
 private:
-    Cell* _first;
-    Cell* _second;
+    BaseCell* _first;
+    BaseCell* _second;
 
     double _square;
     Vector3d _normal12;
     Vector3d _normal21;
 
 public:
-    CellConnection(Cell* first, Cell* second, double square, const Vector3d& normal12);
+    CellConnection(BaseCell* first, BaseCell* second, double square, const Vector3d& normal12);
 
-    Cell* getFirst() const;
+    BaseCell* getFirst() const;
 
-    Cell* getSecond() const;
+    BaseCell* getSecond() const;
 
     double getSquare() const;
 

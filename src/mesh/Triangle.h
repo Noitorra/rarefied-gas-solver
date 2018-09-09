@@ -5,24 +5,34 @@
 #include "Line.h"
 
 class Triangle : public Element {
+    friend class boost::serialization::access;
+
 public:
-    Triangle(int id, const std::vector<Node*>& nodes) : Element(Type::LINE, id, nodes) {
-        Vector3d v1 = _nodes[1]->getPosition() - _nodes[0]->getPosition();
-        Vector3d v2 = _nodes[2]->getPosition() - _nodes[0]->getPosition();
-        Vector3d v3 = _nodes[2]->getPosition() - _nodes[1]->getPosition();
+    Triangle() = default;
 
-        _sideElements.emplace_back(new Line(-1, {_nodes[0], _nodes[1]}));
-        _sideElements.back()->setNormal(-v1.vector(v2).vector(v1).normalize());
+    Triangle(int id, int physicalEntityId, int geomUnitId, const std::vector<int>& partitions, const std::vector<int>& nodeIds)
+    : Element(Type::TRIANGLE, id, physicalEntityId, geomUnitId, partitions, nodeIds) {}
 
-        _sideElements.emplace_back(new Line(-1, {_nodes[1], _nodes[2]}));
-        _sideElements.back()->setNormal(v3.vector(v1).vector(v3).normalize());
+    explicit Triangle(const std::vector<int>& nodeIds) : Triangle(0, -1, -1, {}, nodeIds) {}
 
-        _sideElements.emplace_back(new Line(-1, {_nodes[2], _nodes[0]}));
-        _sideElements.back()->setNormal(v2.vector(v3).vector(v2).normalize());
+private:
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & boost::serialization::base_object<Element>(*this);
+    }
+
+    void createSideElements(const std::vector<Node*>& nodes) override {
+        Vector3d v1 = nodes[1]->getPosition() - nodes[0]->getPosition();
+        Vector3d v2 = nodes[2]->getPosition() - nodes[0]->getPosition();
+        Vector3d v3 = nodes[2]->getPosition() - nodes[1]->getPosition();
+
+        _sideElements.clear();
+        _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -v1.vector(v2).vector(v1).normalize()));
+        _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), v3.vector(v1).vector(v3).normalize()));
+        _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[0]->getId()}), v2.vector(v3).vector(v2).normalize()));
 
         _volume = v1.vector(v2).module() / 2;
     }
 };
-
 
 #endif //RGS_TRIANGLE_H

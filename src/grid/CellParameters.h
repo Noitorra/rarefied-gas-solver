@@ -3,6 +3,8 @@
 
 #include "utilities/Types.h"
 #include "utilities/Config.h"
+#include "parameters/Gas.h"
+#include "parameters/Impulse.h"
 
 class CellParameters {
     friend class boost::serialization::access;
@@ -16,13 +18,13 @@ private:
 
 public:
     CellParameters() {
-        unsigned int gasesCount = Config::getInstance()->getGasesCount();
+        auto gasesSize = Config::getInstance()->getGases().size();
 
-        _pressure.resize(gasesCount);
-        _density.resize(gasesCount);
-        _temp.resize(gasesCount);
-        _flow.resize(gasesCount);
-        _heatFlow.resize(gasesCount);
+        _pressure.resize(gasesSize);
+        _density.resize(gasesSize);
+        _temp.resize(gasesSize);
+        _flow.resize(gasesSize);
+        _heatFlow.resize(gasesSize);
     };
 
     void set(unsigned int gas, double pressure, double density, double temp) {
