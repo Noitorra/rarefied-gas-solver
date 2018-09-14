@@ -32,10 +32,10 @@ void BorderCell::computeTransfer() {
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
             double projection = impulses[ii].scalar(connection->getNormal12());
-            if (projection > 0.0) {
-                cUp += projection * connection->getSecond()->getValues()[gi][ii];
+            if (projection < 0.0) {
+                cUp += -projection * connection->getSecond()->getValues()[gi][ii];
             } else {
-                cDown += -projection * fast_exp(gases[gi].getMass(), _boundaryParams.getTemp(gi), impulses[ii]);
+                cDown += projection * fast_exp(gases[gi].getMass(), _boundaryParams.getTemp(gi), impulses[ii]);
             }
         }
     }
@@ -44,7 +44,7 @@ void BorderCell::computeTransfer() {
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
             double projection = impulses[ii].scalar(connection->getNormal12());
-            if (projection < 0.0) {
+            if (projection >= 0.0) {
                 _values[gi][ii] = h * fast_exp(gases[gi].getMass(), _boundaryParams.getTemp(gi), impulses[ii]);
             }
         }

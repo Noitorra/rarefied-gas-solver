@@ -25,18 +25,18 @@ private:
         ar & _diagonalElements;
     }
 
-    void createSideElements(const std::vector<Node*>& nodes) override {
+    void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) override {
 
         // find all sides and diagonals
         _sideElements.clear();
         _diagonalElements.clear();
-        for (unsigned int i = 0; i < nodes.size(); i++) {
-            for (unsigned int j = i + 1; j < nodes.size(); j++) {
+        for (auto i = 0; i < nodes.size(); i++) {
+            for (auto j = i + 1; j < nodes.size(); j++) {
                 Line* line = new Line({nodes[i]->getId(), nodes[j]->getId()});
 
                 bool isSide = true;
                 Vector3d* direction = nullptr;
-                for (unsigned int k = 0; k < nodes.size(); k++) {
+                for (auto k = 0; k < nodes.size(); k++) {
                     if (k != i && k != j) {
                         Line* kLine = new Line({nodes[i]->getId(), nodes[k]->getId()});
                         Vector3d kDirection = line->getVector().vector(kLine->getVector());
@@ -52,17 +52,19 @@ private:
                 }
 
                 if (isSide == true) {
-                    Vector3d v1 = nodes[j]->getPosition() - nodes[i]->getPosition();
-                    int p = 0;
-                    for (unsigned int k = 0; k < nodes.size(); k++) {
-                        if (k != i && k != j) {
-                            p = k;
-                            break;
+                    if (isSideElementsRequired) {
+                        Vector3d v1 = nodes[j]->getPosition() - nodes[i]->getPosition();
+                        int p = 0;
+                        for (auto k = 0; k < nodes.size(); k++) {
+                            if (k != i && k != j) {
+                                p = k;
+                                break;
+                            }
                         }
-                    }
-                    Vector3d v2 = nodes[p]->getPosition() - nodes[i]->getPosition();
+                        Vector3d v2 = nodes[p]->getPosition() - nodes[i]->getPosition();
 
-                    _sideElements.emplace_back(new SideElement(line, -v1.vector(v2).vector(v1).normalize()));
+                        _sideElements.emplace_back(new SideElement(line, -v1.vector(v2).vector(v1).normalize()));
+                    }
                 } else {
                     _diagonalElements.emplace_back(line);
                 }

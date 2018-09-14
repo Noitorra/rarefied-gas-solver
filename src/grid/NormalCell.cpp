@@ -114,7 +114,6 @@ CellResults* NormalCell::getResults() {
             pressure = compute_pressure(gi, density, temp);
             heatFlow = compute_heatstream(gi);
         }
-
         _results->set(gi, pressure, density, temp, flow, heatFlow);
     }
 

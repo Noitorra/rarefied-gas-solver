@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     //std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
     //std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
 
-    std::string filename = "../../mesh/plane.msh";
+    std::string filename = "../../mesh/test.msh";
 
     Parallel::init();
 

@@ -31,12 +31,14 @@ private:
         ar & _vector;
     }
 
-    void createSideElements(const std::vector<Node*>& nodes) override {
+    void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) override {
         _vector = nodes[1]->getPosition() - nodes[0]->getPosition();
 
-        _sideElements.clear();
-        _sideElements.emplace_back(new SideElement(new Point({nodes[0]->getId()}), -Vector3d(_vector).normalize()));
-        _sideElements.emplace_back(new SideElement(new Point({nodes[1]->getId()}), Vector3d(_vector).normalize()));
+        if (isSideElementsRequired) {
+            _sideElements.clear();
+            _sideElements.emplace_back(new SideElement(new Point({nodes[0]->getId()}), -Vector3d(_vector).normalize()));
+            _sideElements.emplace_back(new SideElement(new Point({nodes[1]->getId()}), Vector3d(_vector).normalize()));
+        }
 
         _volume = _vector.module();
     }

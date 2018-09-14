@@ -49,6 +49,11 @@ void Solver::init() {
         mesh = _wholeMesh;
     }
 
+    // write details on generated mesh
+    if (Parallel::isMaster() == true) {
+        _formatter->writeMeshDetails(_wholeMesh);
+    }
+
     // init all
     _grid = new Grid(mesh);
     _grid->init();

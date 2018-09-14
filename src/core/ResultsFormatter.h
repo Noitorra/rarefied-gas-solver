@@ -32,6 +32,7 @@ public:
     ResultsFormatter();
 
     void writeAll(Mesh* mesh, const std::vector<CellResults*>& results, unsigned int iteration);
+    void writeMeshDetails(Mesh* mesh);
 
 };
 

@@ -8,6 +8,7 @@
 #include <memory>
 #include <unordered_map>
 #include <boost/serialization/shared_ptr.hpp>
+#include <iostream>
 
 class Element {
     friend class boost::serialization::access;
@@ -17,7 +18,8 @@ public:
         POINT = 15,
         LINE = 1,
         TRIANGLE = 2,
-        QUADRANGLE = 3
+        QUADRANGLE = 3,
+        TETRAHEDRON = 4
     };
 
 protected:
@@ -34,19 +36,21 @@ protected:
 public:
     Element() = default;
 
-    Element(Type type, int id, int physicalEntityId, int geomUnitId, std::vector<int> partitions, std::vector<int> nodeIds)
-    : _type(type), _id(id), _physicalEntityId(physicalEntityId), _geomUnitId(geomUnitId), _partitions(std::move(partitions)), _nodeIds(std::move(nodeIds)) {}
+    Element(Type type, int id, int physicalEntityId, int geomUnitId, std::vector<int> partitions, const std::vector<int>& nodeIds)
+    : _type(type), _id(id), _physicalEntityId(physicalEntityId), _geomUnitId(geomUnitId), _partitions(std::move(partitions)), _nodeIds(nodeIds) {}
 
-    void init(const std::unordered_map<int, Node*>& allNodesMap) {
+    void init(const std::unordered_map<int, Node*>& allNodesMap, bool isSideElementsRequired) {
         std::vector<Node*> nodes;
         for (auto nodeId : _nodeIds) {
             nodes.push_back(allNodesMap.at(nodeId));
         }
 
-        createSideElements(nodes);
+        innerInit(nodes, isSideElementsRequired);
 
-        for (const auto& sideElement : _sideElements) {
-            sideElement->getElement()->init(allNodesMap);
+        if (isSideElementsRequired == true) {
+            for (const auto& sideElement : _sideElements) {
+                sideElement->getElement()->init(allNodesMap, false);
+            }
         }
     }
 
@@ -97,6 +101,10 @@ public:
         return _volume;
     }
 
+    void setVolume(double volume) {
+        _volume = volume;
+    }
+
     const std::vector<std::shared_ptr<SideElement>>& getSideElements() const {
         return _sideElements;
     }
@@ -115,7 +123,7 @@ private:
         ar & _sideElements;
     }
 
-    virtual void createSideElements(const std::vector<Node*>& nodes) = 0;
+    virtual void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) = 0;
 
 };
 

@@ -20,7 +20,7 @@ private:
         ar & boost::serialization::base_object<Element>(*this);
     }
 
-    void createSideElements(const std::vector<Node*>& nodes) override {
+    void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) override {
         _volume = 1.0;
     }
 };

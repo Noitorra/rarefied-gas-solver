@@ -11,7 +11,7 @@ Config::Config() : m_pNormalizer(new Normalizer()), m_pImpulse(new Impulse()) {}
 void Config::init() {
     m_sOutputFolder = "../../output/";
 
-    m_iMaxIteration = 10;
+    m_iMaxIteration = 0;
     m_iOutEach = 1;
 
     m_bUseIntegral = false;

@@ -3,39 +3,40 @@
 #include "Line.h"
 #include "Triangle.h"
 #include "Quadrangle.h"
+#include "Tetrahedron.h"
+#include "utilities/Utils.h"
+#include "utilities/Config.h"
+#include "utilities/Normalizer.h"
 
 #include <iostream>
-#include <utilities/Utils.h>
-#include <bits/unordered_map.h>
 
 void Mesh::init() {
     for (const auto& element : _elements) {
-        element->init(_nodesMap);
+        element->init(_nodesMap, true);
     }
 
     // preprocess mesh (find all neighbors)
     for (const auto& element : _elements) {
+        if (element->getType() != Element::Type::LINE) {
+            continue;
+        }
 
         // find all neighbors (common nodes)
         for (const auto& sideElement : element->getSideElements()) {
 
             // each side element can have neighbor or don't have one
-            auto result = std::find_if(std::begin(_elements), std::end(_elements), [&element, &sideElement](const std::shared_ptr<Element>& otherElement) {
+            auto predicate = [&element, &sideElement](const std::shared_ptr<Element>& otherElement) {
                 return otherElement->getId() != element->getId() && otherElement->containsSide(sideElement.get());
-            });
+            };
+            auto result = std::find_if(std::begin(_elements), std::end(_elements), predicate);
             if (result != std::end(_elements)) {
                 const auto& otherElement = *result;
-                if (otherElement->getProcessId() >= 0) {
-                    if (element->getProcessId() == otherElement->getProcessId()) {
-                        sideElement->setNeighborId(otherElement->getId());
-                    } else {
-                        sideElement->setNeighborId(-otherElement->getId());
-                    }
-                    sideElement->setNeighborProcessId(otherElement->getProcessId());
-                } else {
+                if (element->getProcessId() == otherElement->getProcessId()) {
                     sideElement->setNeighborId(otherElement->getId());
-                    sideElement->setNeighborProcessId(-1);
+                } else {
+                    sideElement->setNeighborId(-otherElement->getId());
                 }
+                sideElement->setNeighborProcessId(otherElement->getProcessId());
             } else {
                 sideElement->setNeighborId(0);
                 sideElement->setNeighborProcessId(-1);
@@ -43,15 +44,43 @@ void Mesh::init() {
         }
     }
 
-//    for (const auto& element : _elements) {
-//        if (element->getType() == Element::Type::TRIANGLE) {
-//            for (const auto& sideElement : element->getSideElements()) {
-//                if (sideElement->getNeighborId() < 0) {
-//                    std::cout << sideElement->getNeighborProcessId() << " : " << sideElement->getNeighborId() << " : " << element->getId() << std::endl;
-//                }
-//            }
-//        }
-//    }
+    std::vector<std::pair<int, int>> ids, neighborIds;
+    for (const auto& element : _elements) {
+        for (const auto& sideElement : element->getSideElements()) {
+            if (sideElement->getNeighborId() < 0) {
+                ids.emplace_back(element->getProcessId(), element->getId());
+                neighborIds.emplace_back(sideElement->getNeighborProcessId(), -sideElement->getNeighborId());
+            }
+        }
+    }
+    std::sort(ids.begin(), ids.end(), [](const std::pair<int, int>& left, const std::pair<int, int>& right) -> bool {
+        return left.first < right.first || (left.first == right.first && left.second < right.second);
+    });
+    std::sort(neighborIds.begin(), neighborIds.end(), [](const std::pair<int, int>& left, const std::pair<int, int>& right) -> bool {
+        return left.first < right.first || (left.first == right.first && left.second < right.second);
+    });
+
+    for (auto i = 0; i < ids.size() || i < neighborIds.size(); i++) {
+        int process = -1, id = 0;
+        if (i < ids.size()) {
+            process = ids[i].first;
+            id = ids[i].second;
+            std::cout << process << " : " << id;
+        }
+        std::cout << " <=> ";
+        int neighborProcess = -1, neighborId = 0;
+        if (i < neighborIds.size()) {
+            neighborProcess = neighborIds[i].first;
+            neighborId = neighborIds[i].second;
+            std::cout << neighborIds[i].first << " : " << neighborIds[i].second;
+        }
+        std::cout << std::endl;
+
+        if (process != neighborProcess || id != neighborId) {
+            throw std::runtime_error("Wrong partitioning!!!");
+        }
+    }
+    std::cout << std::endl;
 }
 
 std::unordered_map<int, Mesh*> Mesh::split() {
@@ -89,7 +118,7 @@ void Mesh::addNode(int id, Vector3d position) {
 void Mesh::addNode(Node* node) {
     if (_nodesMap[node->getId()] == nullptr) {
         _nodes.emplace_back(node);
-        _nodesMap[node->getId()] = _nodes.back().get();
+        _nodesMap[_nodes.back()->getId()] = _nodes.back().get();
     }
 }
 
@@ -123,6 +152,9 @@ void Mesh::addElement(int id, int type, int physicalEntityId, int geomUnitId, co
             break;
         case Element::Type::QUADRANGLE:
             element = new Quadrangle(id, physicalEntityId, geomUnitId, partitions, nodeIds);
+            break;
+        case Element::Type::TETRAHEDRON:
+            element = new Tetrahedron(id, physicalEntityId, geomUnitId, partitions, nodeIds);
             break;
     }
     _elements.emplace_back(element);

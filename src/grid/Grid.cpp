@@ -17,56 +17,63 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
 
     // element -> cell
     for (const auto& element : _mesh->getElements()) {
-        if (element->getType() == Element::Type::TRIANGLE) {
-            auto cell = new NormalCell(element->getId(), element->getVolume());
-            cell->getParams().set(0, 1.0, 1.0, 1.0);
-            addCell(cell);
+        if (element->getType() != Element::Type::LINE) {
+            continue;
         }
+        auto cell = new NormalCell(element->getId(), element->getVolume());
+        cell->getParams().set(0, 1.0, 1.0, 1.0);
+        addCell(cell);
     }
 
     bool isUsingParallel = Parallel::isUsingMPI() == true && Parallel::getSize() > 1;
 
+    bool isFirst = true;
+
     // side elements -> cell connections
     for (const auto& element : _mesh->getElements()) {
-        if (element->getType() == Element::Type::TRIANGLE) {
-            auto cell = getCellById(element->getId());
+        auto cell = getCellById(element->getId());
+        if (cell == nullptr) {
+            continue;
+        }
 
-            for (const auto& sideElement : element->getSideElements()) {
-                BaseCell* otherCell = nullptr;
+        for (const auto& sideElement : element->getSideElements()) {
+            BaseCell* otherCell = nullptr;
 
-                auto neighborId = sideElement->getNeighborId();
-                if (isUsingParallel == false) {
-                    if (neighborId < 0) {
-                        neighborId = -neighborId;
-                    }
+            auto neighborId = sideElement->getNeighborId();
+            if (isUsingParallel == false) {
+                if (neighborId < 0) {
+                    neighborId = -neighborId;
                 }
-                if (neighborId > 0) {
-                    otherCell = getCellById(neighborId);
-                } else if (neighborId < 0) {
-                    otherCell = getCellById(neighborId);
-                    if (otherCell == nullptr) {
-                        auto parallelCell = new ParallelCell(-neighborId, sideElement->getNeighborProcessId());
-                        addCell(parallelCell);
+            }
+            if (neighborId > 0) {
+                otherCell = getCellById(neighborId);
+            } else if (neighborId < 0) {
+                otherCell = getCellById(neighborId);
+                if (otherCell == nullptr) {
+                    auto parallelCell = new ParallelCell(-neighborId, sideElement->getNeighborProcessId());
+                    addCell(parallelCell);
 
-                        otherCell = parallelCell;
-                    }
-                    auto parallelConnection = new CellConnection(otherCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
-                    otherCell->addConnection(parallelConnection);
-                } else {
-                    auto borderCell = new BorderCell(BorderCell::BorderType::DIFFUSE);
-                    borderCell->getBoundaryParams().set(0, 1.0, 1.0, 0.5);
-                    addCell(borderCell);
-
-                    auto borderConnection = new CellConnection(borderCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
-                    borderCell->addConnection(borderConnection);
-
-                    otherCell = borderCell;
+                    otherCell = parallelCell;
                 }
 
-                if (otherCell != nullptr) {
-                    auto connection = new CellConnection(cell, otherCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
-                    cell->addConnection(connection);
-                }
+                auto parallelConnection = new CellConnection(otherCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
+                otherCell->addConnection(parallelConnection);
+            } else {
+                auto borderCell = new BorderCell(BorderCell::BorderType::DIFFUSE);
+                borderCell->getBoundaryParams().set(0, 1.0, 1.0, isFirst ? 0.5 : 1.5);
+                addCell(borderCell);
+                otherCell = borderCell;
+                isFirst = false;
+
+                auto borderConnection = new CellConnection(otherCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
+                otherCell->addConnection(borderConnection);
+            }
+
+            if (otherCell != nullptr) {
+                auto connection = new CellConnection(cell, otherCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                cell->addConnection(connection);
+            } else {
+                throw std::runtime_error("Wrong cell linking!!!");
             }
         }
     }
@@ -80,7 +87,7 @@ void Grid::addCell(BaseCell* cell) {
     if (cell->getId() != 0) {
         if (_cellsMap[cell->getId()] == nullptr) {
             _cells.emplace_back(cell);
-            _cellsMap[cell->getId()] = _cells.back().get();
+            _cellsMap[_cells.back()->getId()] = _cells.back().get();
         }
     } else {
         _cells.emplace_back(cell);
@@ -115,7 +122,7 @@ void Grid::init() {
     }
 
     auto config = Config::getInstance();
-    double timestep = 0.9 * minStep / config->getImpulse()->getMaxImpulse();
+    double timestep = 0.95 * minStep / config->getImpulse()->getMaxImpulse();
 
     if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
         if (Parallel::isMaster()) {
@@ -225,12 +232,14 @@ void Grid::sync() {
 
     // sort all
     for (const auto& pair : sendSyncIdsMap) {
-        auto& sendSyncIds = sendSyncIdsMap.at(pair.first);
+        std::vector<int>& sendSyncIds = sendSyncIdsMap.at(pair.first);
         std::sort(sendSyncIds.begin(), sendSyncIds.end());
+        sendSyncIds.erase(std::unique(sendSyncIds.begin(), sendSyncIds.end()), sendSyncIds.end());
     }
     for (const auto& pair : recvSyncIdsMap) {
-        auto& recvSyncIds = recvSyncIdsMap.at(pair.first);
+        std::vector<int>& recvSyncIds = recvSyncIdsMap.at(pair.first);
         std::sort(recvSyncIds.begin(), recvSyncIds.end());
+        recvSyncIds.erase(std::unique(recvSyncIds.begin(), recvSyncIds.end()), recvSyncIds.end());
     }
 
 //    for (const auto& pair : sendSyncIdsMap) {

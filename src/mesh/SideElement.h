@@ -19,7 +19,7 @@ private:
 public:
     SideElement() = default;
 
-    SideElement(Element* element, Vector3d normal) : _element(element), _normal(std::move(normal)) {}
+    SideElement(Element* element, Vector3d normal) : _element(element), _normal(std::move(normal)), _neighborId(0), _neighborProcessId(-1) {}
 
     const std::shared_ptr<Element>& getElement() const {
         return _element;
