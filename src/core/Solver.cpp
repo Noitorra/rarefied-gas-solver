@@ -4,54 +4,47 @@
 #include "integral/ci.hpp"
 #include "utilities/Parallel.h"
 #include "utilities/Utils.h"
+#include "utilities/SerializationUtils.h"
 #include "mesh/MeshParser.h"
 #include "ResultsFormatter.h"
 
 #include <chrono>
 
-Solver::Solver(const std::string& meshfile) {
-    _meshfile = meshfile;
+Solver::Solver() {
     _config = Config::getInstance();
     _formatter = new ResultsFormatter();
-    _wholeMesh = nullptr;
 }
 
 void Solver::init() {
     Mesh* mesh = nullptr;
 
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+    if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
 
             // load mesh
-            _wholeMesh = MeshParser::getInstance().loadMesh(_meshfile);
-            _wholeMesh->init();
-
-            // split mesh
-            auto meshes = _wholeMesh->split();
-
-            // select self mesh
-            mesh = meshes[0];
+            mesh = MeshParser::getInstance().loadMesh(_config->getMeshFilename());
+            mesh->init();
 
             // send to other processes
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                Parallel::send(Utils::serialize(meshes[processor]), processor, Parallel::COMMAND_MESH);
-//                delete(meshes[processor]);
+                Parallel::send(SerializationUtils::serialize(mesh), processor, Parallel::COMMAND_MESH);
             }
         } else {
+
             // get mesh from master process
-            Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_MESH), mesh);
+            SerializationUtils::deserialize(Parallel::recv(0, Parallel::COMMAND_MESH), mesh);
+            mesh->resetMaps();
         }
     } else {
 
         // load mesh
-        _wholeMesh = MeshParser::getInstance().loadMesh(_meshfile);
-        _wholeMesh->init();
-        mesh = _wholeMesh;
+        mesh = MeshParser::getInstance().loadMesh(_config->getMeshFilename());
+        mesh->init();
     }
 
     // write details on generated mesh
     if (Parallel::isMaster() == true) {
-        _formatter->writeMeshDetails(_wholeMesh);
+        _formatter->writeMeshDetails(mesh);
     }
 
     // init all
@@ -60,7 +53,7 @@ void Solver::init() {
 }
 
 void Solver::run() {
-    if (_config->isUseIntegral()) {
+    if (_config->isUsingIntegral()) {
         ci::Potential* potential = new ci::HSPotential;
         ci::init(potential, ci::NO_SYMM);
     }
@@ -68,11 +61,11 @@ void Solver::run() {
     if (Parallel::isMaster() == true) {
         std::cout << std::endl;
     }
-    unsigned int maxIteration = _config->getMaxIteration();
-    for (unsigned int iteration = 0; iteration < maxIteration; iteration++) {
+    unsigned int maxIterations = _config->getMaxIterations();
+    for (unsigned int iteration = 0; iteration < maxIterations; iteration++) {
 
         // sync grid
-        if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+        if (Parallel::isSingle() == false) {
             _grid->sync();
         }
 
@@ -80,7 +73,7 @@ void Solver::run() {
         _grid->computeTransfer();
 
         // integral
-        if (_config->isUseIntegral()) {
+        if (_config->isUsingIntegral()) {
             int gasesSize = _config->getGases().size();
             if (gasesSize == 1) {
                 _grid->computeIntegral(0, 0);
@@ -95,7 +88,7 @@ void Solver::run() {
         }
 
         // beta decay
-        if (_config->isUseBetaChains()) {
+        if (_config->isUsingBetaDecay()) {
             const auto& betaChains = _config->getBetaChains();
             for (const auto& betaChain : betaChains) {
                 _grid->computeBetaDecay(betaChain.getGasIndex1(), betaChain.getGasIndex2(), betaChain.getLambda1());
@@ -106,7 +99,7 @@ void Solver::run() {
         // check grid
         _grid->check();
 
-        if (iteration % _config->getOutEach() == 0) {
+        if (iteration % _config->getOutEachIteration() == 0) {
             std::vector<CellResults*> results;
             for (const auto& cell : _grid->getCells()) {
                 if (cell->getType() == NormalCell::Type::NORMAL) {
@@ -115,35 +108,35 @@ void Solver::run() {
                 }
             }
 
-            if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
+            if (Parallel::isSingle() == false) {
                 if (Parallel::isMaster() == true) {
 
                     // receive params from master, then unite grids
                     for (int processor = 1; processor < Parallel::getSize(); processor++) {
                         std::vector<CellResults*> resultsBuffer;
-                        Utils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), resultsBuffer);
+                        SerializationUtils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), resultsBuffer);
                         for (auto tempResults : resultsBuffer) {
                             results.push_back(tempResults);
                         }
                     }
 
-                    _formatter->writeAll(_wholeMesh, results, iteration);
+                    _formatter->writeAll(_grid->getMesh(), results, iteration);
                 } else {
 
                     // send params to master
-                    Parallel::send(Utils::serialize(results), 0, Parallel::COMMAND_RESULT_PARAMS);
+                    Parallel::send(SerializationUtils::serialize(results), 0, Parallel::COMMAND_RESULT_PARAMS);
                 }
             } else {
-                _formatter->writeAll(_wholeMesh, results, iteration);
+                _formatter->writeAll(_grid->getMesh(), results, iteration);
             }
         }
 
         if (Parallel::isMaster() == true) {
-            auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIteration * 100);
+            auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIterations * 100);
 
             std::cout << '\r';
             std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
-            std::cout << "[" << iteration << "/" << maxIteration << "] ";
+            std::cout << "[" << iteration << "/" << maxIterations << "] ";
             std::cout << percent << "%";
             std::cout.flush();
         }

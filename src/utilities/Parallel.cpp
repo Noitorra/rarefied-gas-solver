@@ -4,15 +4,22 @@
 #include <cstring>
 
 bool Parallel::_isUsingMPI = false;
+bool Parallel::_isSingle = true;
 
 void Parallel::init() {
     MPI::Init();
     _isUsingMPI = true;
+    _isSingle = getSize() == 1;
 }
 
 void Parallel::finalize() {
     MPI::Finalize();
     _isUsingMPI = false;
+    _isSingle = true;
+}
+
+bool Parallel::isUsingMPI() {
+    return _isUsingMPI;
 }
 
 bool Parallel::isMaster() {
@@ -21,6 +28,10 @@ bool Parallel::isMaster() {
 
 bool Parallel::isSlave() {
     return getRank() != 0;
+}
+
+bool Parallel::isSingle() {
+    return _isSingle;
 }
 
 int Parallel::getSize() {
@@ -36,10 +47,6 @@ std::string Parallel::getProcessorName() {
     int name_len;
     MPI::Get_processor_name(processor_name, name_len);
     return std::string(processor_name, static_cast<unsigned long>(name_len));
-}
-
-bool Parallel::isUsingMPI() {
-    return _isUsingMPI;
 }
 
 void Parallel::send(const std::string& buffer, int dest, int tag) {
@@ -72,4 +79,3 @@ std::string Parallel::recv(int source, int tag) {
 void Parallel::abort() {
     MPI::COMM_WORLD.Abort(-1);
 }
-

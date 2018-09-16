@@ -1,6 +1,9 @@
+#include <utility>
+
 #ifndef RGS_ELEMENT_H
 #define RGS_ELEMENT_H
 
+#include "PhysicalEntity.h"
 #include "Node.h"
 #include "SideElement.h"
 
@@ -8,6 +11,7 @@
 #include <memory>
 #include <unordered_map>
 #include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/string.hpp>
 #include <iostream>
 
 class Element {
@@ -30,42 +34,58 @@ protected:
     std::vector<int> _partitions;
     std::vector<int> _nodeIds;
 
+    std::string _group;
+    bool _isProcessing;
+    bool _isMain;
+    bool _isBorder;
+
     double _volume;
     std::vector<std::shared_ptr<SideElement>> _sideElements;
 
 public:
     Element() = default;
 
-    Element(Type type, int id, int physicalEntityId, int geomUnitId, std::vector<int> partitions, const std::vector<int>& nodeIds)
-    : _type(type), _id(id), _physicalEntityId(physicalEntityId), _geomUnitId(geomUnitId), _partitions(std::move(partitions)), _nodeIds(nodeIds) {}
+    Element(Type type, int id, int physicalEntityId, int geomUnitId, std::vector<int> partitions, std::vector<int> nodeIds)
+    : _type(type), _id(id), _physicalEntityId(physicalEntityId), _geomUnitId(geomUnitId), _partitions(std::move(partitions)),
+    _nodeIds(std::move(nodeIds)), _group(""), _isProcessing(false), _isMain(false), _isBorder(false), _volume(0.0) {}
 
-    void init(const std::unordered_map<int, Node*>& allNodesMap, bool isSideElementsRequired) {
+    void init(const std::unordered_map<int, Node*>& allNodesMap, bool isOriginalElement) {
         std::vector<Node*> nodes;
         for (auto nodeId : _nodeIds) {
             nodes.push_back(allNodesMap.at(nodeId));
         }
 
-        innerInit(nodes, isSideElementsRequired);
+        innerInit(nodes, isOriginalElement);
 
-        if (isSideElementsRequired == true) {
+        if (isOriginalElement == true) {
             for (const auto& sideElement : _sideElements) {
                 sideElement->getElement()->init(allNodesMap, false);
             }
         }
     }
 
-    bool containsSide(SideElement* otherSideElement) const {
+    bool isSideOrContainsSide(SideElement* otherSideElement) const {
+        std::vector<int> otherNodeIds = otherSideElement->getElement()->getNodeIds();
+        std::sort(otherNodeIds.begin(), otherNodeIds.end());
+
+        // check if this element is exactly side
+        std::vector<int> nodeIds = _nodeIds;
+        std::sort(nodeIds.begin(), nodeIds.end());
+        if (nodeIds == otherNodeIds) {
+            return true;
+        }
+
+        // check if this element has side with the same nodes
         if (_sideElements.empty() == false) {
-            std::vector<int> otherNodeIds = otherSideElement->getElement()->getNodeIds();
-            std::sort(otherNodeIds.begin(), otherNodeIds.end());
             for (const auto& sideElement : _sideElements) {
-                std::vector<int> nodeIds = sideElement->getElement()->getNodeIds();
-                std::sort(nodeIds.begin(), nodeIds.end());
-                if (nodeIds == otherNodeIds) {
+                std::vector<int> sideNodeIds = sideElement->getElement()->getNodeIds();
+                std::sort(sideNodeIds.begin(), sideNodeIds.end());
+                if (sideNodeIds == otherNodeIds) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -97,12 +117,31 @@ public:
         return _nodeIds;
     }
 
-    double getVolume() const {
-        return _volume;
+    const std::string& getGroup() const {
+        return _group;
     }
 
-    void setVolume(double volume) {
-        _volume = volume;
+    void setGroup(const std::string& group) {
+        _group = group;
+        _isMain = _group.find("Main") == 0;
+        _isBorder = _group.find("Border") == 0;
+        _isProcessing = _isMain || _isBorder;
+    }
+
+    bool isProcessing() const {
+        return _isProcessing;
+    }
+
+    bool isMain() const {
+        return _isMain;
+    }
+
+    bool isBorder() const {
+        return _isBorder;
+    }
+
+    double getVolume() const {
+        return _volume;
     }
 
     const std::vector<std::shared_ptr<SideElement>>& getSideElements() const {
@@ -118,6 +157,11 @@ private:
         ar & _geomUnitId;
         ar & _partitions;
         ar & _nodeIds;
+
+        ar & _group;
+        ar & _isProcessing;
+        ar & _isMain;
+        ar & _isBorder;
 
         ar & _volume;
         ar & _sideElements;

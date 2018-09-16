@@ -1,8 +1,8 @@
 #include "BaseCell.h"
 #include "CellConnection.h"
-#include "parameters/Impulse.h"
+#include "parameters/ImpulseSphere.h"
 #include "parameters/Gas.h"
-#include "utilities/Config.h"
+#include "core/Config.h"
 #include "utilities/Utils.h"
 
 #include <cmath>
@@ -33,7 +33,7 @@ void BaseCell::addConnection(CellConnection* connection) {
 void BaseCell::check() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    const auto& impulses = config->getImpulse()->getVector();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {

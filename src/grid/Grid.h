@@ -19,14 +19,6 @@ private:
 public:
     explicit Grid(Mesh* mesh);
 
-    Mesh* getMesh() const;
-
-    void addCell(BaseCell* cell);
-
-    const std::vector<std::shared_ptr<BaseCell>>& getCells() const;
-
-    BaseCell* getCellById(int id);
-
     void init();
 
     void computeTransfer();
@@ -39,6 +31,13 @@ public:
 
     void sync();
 
+    Mesh* getMesh() const;
+
+    void addCell(BaseCell* cell);
+
+    BaseCell* getCellById(int id);
+
+    const std::vector<std::shared_ptr<BaseCell>>& getCells() const;
 };
 
 

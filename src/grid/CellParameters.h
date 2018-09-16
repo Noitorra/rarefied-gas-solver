@@ -2,9 +2,9 @@
 #define RGS_PARAMETERS_H
 
 #include "utilities/Types.h"
-#include "utilities/Config.h"
+#include "core/Config.h"
 #include "parameters/Gas.h"
-#include "parameters/Impulse.h"
+#include "parameters/ImpulseSphere.h"
 
 class CellParameters {
     friend class boost::serialization::access;

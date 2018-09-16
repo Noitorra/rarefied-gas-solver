@@ -1,9 +1,13 @@
-#ifndef BETA_CHAIN_H
-#define BETA_CHAIN_H
+#ifndef RGS_BETA_CHAIN_H
+#define RGS_BETA_CHAIN_H
 
 #include <ostream>
 
+#include <boost/serialization/access.hpp>
+
 class BetaChain {
+    friend class boost::serialization::access;
+
 private:
     unsigned int _gasIndex1;
     unsigned int _gasIndex2;
@@ -12,6 +16,8 @@ private:
     double _lambda2;
 
 public:
+    BetaChain() = default;
+
     BetaChain(unsigned int gasIndex1, unsigned int gasIndex2, unsigned int gasIndex3, double lambda1, double lambda2) {
         _gasIndex1 = gasIndex1;
         _gasIndex2 = gasIndex2;
@@ -42,13 +48,25 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const BetaChain& chain) {
-        os << "gasIndex1: " << chain._gasIndex1
-           << " gasIndex2: " << chain._gasIndex2
-           << " gasIndex3: " << chain._gasIndex3
-           << " lambda1: " << chain._lambda1
-           << " lambda2: " << chain._lambda2;
+        os << "gi1 = " << chain._gasIndex1 << " "
+           << "gi2 = " << chain._gasIndex2 << " "
+           << "gi3 = " << chain._gasIndex3 << " "
+           << "lambda1 = " << chain._lambda1 << " | "
+           << "lambda2 = " << chain._lambda2;
         return os;
     }
+
+private:
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & _gasIndex1;
+        ar & _gasIndex2;
+        ar & _gasIndex3;
+
+        ar & _lambda1;
+        ar & _lambda2;
+    }
+
 };
 
-#endif // BETA_CHAIN_H
+#endif // RGS_BETA_CHAIN_H

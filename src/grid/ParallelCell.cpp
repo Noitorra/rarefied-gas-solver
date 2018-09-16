@@ -1,10 +1,10 @@
 #include "ParallelCell.h"
 #include "CellConnection.h"
-#include "parameters/Impulse.h"
+#include "parameters/ImpulseSphere.h"
 #include "parameters/Gas.h"
-#include "utilities/Config.h"
+#include "core/Config.h"
 
-ParallelCell::ParallelCell(int recvSyncId, int syncProcessId) : BaseCell(Type::PARALLEL, -recvSyncId) {
+ParallelCell::ParallelCell(int id, int recvSyncId, int syncProcessId) : BaseCell(Type::PARALLEL, id) {
     _recvSyncId = recvSyncId;
     _syncProcessId = syncProcessId;
 }
@@ -12,7 +12,7 @@ ParallelCell::ParallelCell(int recvSyncId, int syncProcessId) : BaseCell(Type::P
 void ParallelCell::init() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    const auto& impulses = config->getImpulse()->getVector();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
     // Allocating space for values and new values
     _values.resize(gases.size());

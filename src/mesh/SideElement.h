@@ -14,12 +14,11 @@ private:
     std::shared_ptr<Element> _element;
     Vector3d _normal;
     int _neighborId;
-    int _neighborProcessId;
 
 public:
     SideElement() = default;
 
-    SideElement(Element* element, Vector3d normal) : _element(element), _normal(std::move(normal)), _neighborId(0), _neighborProcessId(-1) {}
+    SideElement(Element* element, Vector3d normal) : _element(element), _normal(std::move(normal)), _neighborId(0) {}
 
     const std::shared_ptr<Element>& getElement() const {
         return _element;
@@ -37,21 +36,12 @@ public:
         _neighborId = neighborId;
     }
 
-    int getNeighborProcessId() const {
-        return _neighborProcessId;
-    }
-
-    void setNeighborProcessId(int neighborProcessId) {
-        _neighborProcessId = neighborProcessId;
-    }
-
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
         ar & _element;
         ar & _normal;
         ar & _neighborId;
-        ar & _neighborProcessId;
     }
 
 };

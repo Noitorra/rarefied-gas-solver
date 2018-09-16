@@ -3,7 +3,12 @@
 
 #include <ostream>
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/vector.hpp>
+
 class Normalizer {
+    friend class boost::serialization::access;
+
 public:
     enum class Type {
         TEMPERATURE,
@@ -25,7 +30,7 @@ private:
     double m_dLength; // the mean free path of a molecule
 
 public:
-    Normalizer();
+    Normalizer() = default;
 
     void init();
 
@@ -38,6 +43,18 @@ public:
     void restore(double& value, const Type& type) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Normalizer& normalizer);
+
+private:
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & m_dDensity;
+        ar & m_dTemperature;
+        ar & m_dPressure;
+        ar & m_dTime;
+        ar & m_dMass;
+        ar & m_dVelocity;
+        ar & m_dLength;
+    }
 
 };
 

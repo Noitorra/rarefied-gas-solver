@@ -9,7 +9,7 @@ NormalCell::NormalCell(int id, double volume) : BaseCell(Type::NORMAL, id) {
 void NormalCell::init() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    const auto& impulses = config->getImpulse()->getVector();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
     // Allocating space for values and new values
     _values.resize(gases.size());
@@ -24,7 +24,7 @@ void NormalCell::init() {
             dDensity += fast_exp(gases[gi].getMass(), _params.getTemp(gi), impulse);
         }
 
-        dDensity *= config->getImpulse()->getDeltaImpulseQube();
+        dDensity *= config->getImpulseSphere()->getDeltaImpulseQube();
         dDensity = _params.getPressure(gi) / _params.getTemp(gi) / dDensity;
 
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
@@ -40,7 +40,7 @@ void NormalCell::init() {
 void NormalCell::computeTransfer() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    const auto& impulses = config->getImpulse()->getVector();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
@@ -58,11 +58,11 @@ void NormalCell::computeIntegral(unsigned int gi0, unsigned int gi1) {
 }
 
 void NormalCell::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
-    Config* config = Config::getInstance();
-    const std::vector<Vector3d>& vImpulse = config->getImpulse()->getVector();
+    auto config = Config::getInstance();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
-    for (unsigned int ii = 0; ii < vImpulse.size(); ii++) {
-        double impact = _values[gi0][ii] * lambda * config->getTimestep(); // TODO: check lambda * Config::m_dTimestep < 1 !!!
+    for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+        double impact = _values[gi0][ii] * lambda * config->getTimestep(); // TODO: check lambda * Config::_timestep < 1 !!!
         _values[gi0][ii] -= impact;
         _values[gi1][ii] += impact;
     }
@@ -79,7 +79,7 @@ CellParameters& NormalCell::getParams() {
 void NormalCell::swapValues() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    const auto& impulses = config->getImpulse()->getVector();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
@@ -123,36 +123,34 @@ CellResults* NormalCell::getResults() {
 double NormalCell::compute_density(unsigned int gi) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    auto impulse = config->getImpulse();
-    const auto& impulses = config->getImpulse()->getVector();
+    auto impulseSphere = config->getImpulseSphere();
+    const auto& impulses = config->getImpulseSphere()->getImpulses();
 
-    double concentration = 0.0;
+    double density = 0.0;
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-        concentration += _values[gi][ii];
+        density += _values[gi][ii];
     }
-    concentration *= impulse->getDeltaImpulseQube();
-    return concentration;
+    density *= impulseSphere->getDeltaImpulseQube();
+    return density;
 }
 
 double NormalCell::compute_temperature(unsigned int gi, double density, const Vector3d& stream) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    auto impulse = config->getImpulse();
-    const auto& impulses = impulse->getVector();
+    auto impulseSphere = config->getImpulseSphere();
+    const auto& impulses = impulseSphere->getImpulses();
+
+    Vector3d averageSpeed = stream / density;
 
     double temperature = 0.0;
-    Vector3d vAverageSpeed = stream;
-    vAverageSpeed /= density;
-
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
         Vector3d vTemp;
-        for (unsigned int vi = 0; vi < vAverageSpeed.getArray().size(); vi++) {
-            vTemp[vi] = impulses[ii].get(vi) / gases[gi].getMass() - vAverageSpeed[vi];
+        for (unsigned int vi = 0; vi < averageSpeed.getArray().size(); vi++) {
+            vTemp[vi] = impulses[ii].get(vi) / gases[gi].getMass() - averageSpeed[vi];
         }
         temperature += gases[gi].getMass() * vTemp.moduleSquare() * _values[gi][ii];
     }
-    temperature *= impulse->getDeltaImpulseQube() / density / 3;
-
+    temperature *= impulseSphere->getDeltaImpulseQube() / density / 3;
     return temperature;
 }
 
@@ -163,18 +161,17 @@ double NormalCell::compute_pressure(unsigned int gi, double density, double temp
 Vector3d NormalCell::compute_stream(unsigned int gi) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
-    auto impulse = config->getImpulse();
-    const auto& impulses = impulse->getVector();
+    auto impulseSphere = config->getImpulseSphere();
+    const auto& impulses = impulseSphere->getImpulses();
 
-    Vector3d vStream;
+    Vector3d stream;
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-        for (unsigned int vi = 0; vi < vStream.getArray().size(); vi++) {
-            vStream[vi] += impulses[ii].get(vi) * _values[gi][ii];
+        for (unsigned int vi = 0; vi < stream.getArray().size(); vi++) {
+            stream[vi] += impulses[ii].get(vi) * _values[gi][ii];
         }
     }
-    vStream *= impulse->getDeltaImpulseQube() / gases[gi].getMass();
-
-    return vStream;
+    stream *= impulseSphere->getDeltaImpulseQube() / gases[gi].getMass();
+    return stream;
 }
 
 Vector3d NormalCell::compute_heatstream(unsigned int gi) {

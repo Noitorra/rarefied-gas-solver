@@ -7,6 +7,7 @@
 class BorderCell : public BaseCell {
 public:
     enum class BorderType {
+        UNDEFINED,
         DIFFUSE,
         PRESSURE,
         FLOW,
@@ -18,7 +19,7 @@ private:
     CellParameters _boundaryParams;
 
 public:
-    explicit BorderCell(BorderType borderType);
+    explicit BorderCell(int id);
 
     void init() override;
 
@@ -28,7 +29,13 @@ public:
 
     void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) override;
 
+    void setBorderType(BorderType borderType);
+
     CellParameters& getBoundaryParams();
+
+private:
+    void computeTransferDiffuse();
+    void computeTransferMirror();
 
 };
 

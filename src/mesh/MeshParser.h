@@ -10,11 +10,13 @@ private:
     enum class Type {
         UNDEFINED,
         MESH_FORMAT,
+        PHYSICAL_NAMES,
         NODES,
         ELEMENTS
     };
     std::map<Type, std::string> _keywords;
     Type _type;
+    bool _isPhysicalEntitiesSizeLine;
     bool _isNodesSizeLine;
     bool _isElementsSizeLine;
 

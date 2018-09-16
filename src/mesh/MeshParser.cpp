@@ -10,11 +10,13 @@ MeshParser::MeshParser() {
     _type = Type::UNDEFINED;
 
     _keywords.emplace(Type::MESH_FORMAT, "MeshFormat");
+    _keywords.emplace(Type::PHYSICAL_NAMES, "PhysicalNames");
     _keywords.emplace(Type::NODES, "Nodes");
     _keywords.emplace(Type::ELEMENTS, "Elements");
 
     _mesh = nullptr;
 
+    _isPhysicalEntitiesSizeLine = true;
     _isNodesSizeLine = true;
     _isElementsSizeLine = true;
 }
@@ -37,7 +39,7 @@ Mesh *MeshParser::loadMesh(const string &filename) {
             delete _mesh;
             _mesh = nullptr;
 
-            cout << "Errors during mesh parsing - " << e.what() << endl;
+            throw std::runtime_error(std::string("parsing error: ") + e.what());
         }
     }
     return _mesh;
@@ -67,6 +69,24 @@ void MeshParser::parse(const string& line) {
                     throw runtime_error("missing directive");
                 case Type::MESH_FORMAT:
                     is >> _version >> _dataType >> _fileSize;
+                    break;
+                case Type::PHYSICAL_NAMES:
+                    if (_isPhysicalEntitiesSizeLine) {
+                        _isPhysicalEntitiesSizeLine = false;
+
+                        size_t capacity;
+                        is >> capacity;
+                        _mesh->reservePhysicalEntities(capacity);
+                    } else {
+                        int dimension, tag;
+                        std::string name;
+                        is >> dimension >> tag >> name;
+                        if (name.front() == '\"') {
+                            name.erase(0, 1);
+                            name.erase(name.size() - 1);
+                        }
+                        _mesh->addPhysicalEntity(dimension, tag, name);
+                    }
                     break;
                 case Type::NODES:
                     if (_isNodesSizeLine) {

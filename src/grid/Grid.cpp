@@ -5,101 +5,119 @@
 #include "CellConnection.h"
 #include "mesh/Mesh.h"
 #include "parameters/Gas.h"
-#include "parameters/Impulse.h"
+#include "parameters/ImpulseSphere.h"
+#include "parameters/InitialParameters.h"
+#include "parameters/BoundaryParameters.h"
 #include "utilities/Parallel.h"
+#include "utilities/SerializationUtils.h"
+#include "utilities/Normalizer.h"
 #include "integral/ci.hpp"
-#include "utilities/Utils.h"
 
 #include <unordered_map>
 #include <map>
 
 Grid::Grid(Mesh* mesh) : _mesh(mesh) {
+    auto config = Config::getInstance();
+    auto normalizer = config->getNormalizer();
+    const auto& initialParameters = config->getInitialParameters();
+    const auto& boundaryParameters = config->getBoundaryParameters();
 
-    // element -> cell
+    // create normal cell for "Main" elements for current process
     for (const auto& element : _mesh->getElements()) {
-        if (element->getType() != Element::Type::LINE) {
-            continue;
+        if (element->isMain() == true) {
+            if (Parallel::isSingle() == false && element->getProcessId() != Parallel::getRank()) {
+                continue;
+            }
+
+            // create normal cell
+            auto cell = new NormalCell(element->getId(), element->getVolume());
+            addCell(cell);
+
+            // set initial params by physical group
+            for (const auto& param : initialParameters) {
+                if (param.getGroup() == element->getGroup()) {
+                    for (auto i = 0; i < param.getPressure().size(); i++) {
+                        auto pressure = normalizer->normalize(param.getPressure()[i], Normalizer::Type::PRESSURE);
+                        cell->getParams().setPressure(i, pressure);
+                    }
+                    for (auto i = 0; i < param.getTemperature().size(); i++) {
+                        auto temperature = normalizer->normalize(param.getTemperature()[i], Normalizer::Type::TEMPERATURE);
+                        cell->getParams().setTemp(i, temperature);
+                    }
+                }
+            }
         }
-        auto cell = new NormalCell(element->getId(), element->getVolume());
-        cell->getParams().set(0, 1.0, 1.0, 1.0);
-        addCell(cell);
     }
 
-    bool isUsingParallel = Parallel::isUsingMPI() == true && Parallel::getSize() > 1;
+    std::vector<BaseCell*> cells;
+    for (const auto& cell : _cells) {
+        cells.push_back(cell.get());
+    }
 
-    bool isFirst = true;
-
-    // side elements -> cell connections
-    for (const auto& element : _mesh->getElements()) {
-        auto cell = getCellById(element->getId());
-        if (cell == nullptr) {
-            continue;
-        }
-
+    // create cell connections
+    for (const auto& cell : cells) {
+        auto element = _mesh->getElement(cell->getId());
         for (const auto& sideElement : element->getSideElements()) {
-            BaseCell* otherCell = nullptr;
+            auto neighborElement = _mesh->getElement(sideElement->getNeighborId());
 
-            auto neighborId = sideElement->getNeighborId();
-            if (isUsingParallel == false) {
-                if (neighborId < 0) {
-                    neighborId = -neighborId;
+            if (neighborElement->isMain()) {
+                if (Parallel::isSingle() || neighborElement->getProcessId() == Parallel::getRank()) {
+
+                    // create connection for cell with other normal cell
+                    auto neighborCell = getCellById(neighborElement->getId());
+                    auto connection = new CellConnection(cell, neighborCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                    cell->addConnection(connection);
+                } else {
+
+                    // create or get parallel cell
+                    BaseCell* parallelCell = getCellById(-neighborElement->getId());
+                    if (parallelCell == nullptr) {
+                        parallelCell = new ParallelCell(-neighborElement->getId(), neighborElement->getId(), neighborElement->getProcessId());
+                        addCell(parallelCell);
+                    }
+
+                    // create connection for parallel cell
+                    auto parallelConnection = new CellConnection(parallelCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
+                    parallelCell->addConnection(parallelConnection);
+
+                    // create connection for cell
+                    auto connection = new CellConnection(cell, parallelCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                    cell->addConnection(connection);
                 }
-            }
-            if (neighborId > 0) {
-                otherCell = getCellById(neighborId);
-            } else if (neighborId < 0) {
-                otherCell = getCellById(neighborId);
-                if (otherCell == nullptr) {
-                    auto parallelCell = new ParallelCell(-neighborId, sideElement->getNeighborProcessId());
-                    addCell(parallelCell);
+            } else if (neighborElement->isBorder()) {
 
-                    otherCell = parallelCell;
-                }
-
-                auto parallelConnection = new CellConnection(otherCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
-                otherCell->addConnection(parallelConnection);
-            } else {
-                auto borderCell = new BorderCell(BorderCell::BorderType::DIFFUSE);
-                borderCell->getBoundaryParams().set(0, 1.0, 1.0, isFirst ? 0.5 : 1.5);
+                // create border cell
+                auto borderCell = new BorderCell(neighborElement->getId());
                 addCell(borderCell);
-                otherCell = borderCell;
-                isFirst = false;
 
-                auto borderConnection = new CellConnection(otherCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
-                otherCell->addConnection(borderConnection);
-            }
+                // set boundary params by physical group
+                for (const auto& param : boundaryParameters) {
+                    if (param.getGroup() == neighborElement->getGroup()) {
+                        const auto& type = param.getType();
+                        if (type == "Diffuse") {
+                            borderCell->setBorderType(BorderCell::BorderType::DIFFUSE);
+                        } else if (type == "Mirror") {
+                            borderCell->setBorderType(BorderCell::BorderType::MIRROR);
+                        }
+                        for (auto i = 0; i < param.getTemperature().size(); i++) {
+                            auto temperature = normalizer->normalize(param.getTemperature()[i], Normalizer::Type::TEMPERATURE);
+                            borderCell->getBoundaryParams().setTemp(i, temperature);
+                        }
+                    }
+                }
 
-            if (otherCell != nullptr) {
-                auto connection = new CellConnection(cell, otherCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                // create connection for border cell
+                auto borderConnection = new CellConnection(borderCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
+                borderCell->addConnection(borderConnection);
+
+                // create connection for cell
+                auto connection = new CellConnection(cell, borderCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
                 cell->addConnection(connection);
             } else {
-                throw std::runtime_error("Wrong cell linking!!!");
+                throw std::runtime_error("wrong neighbor element");
             }
         }
     }
-}
-
-Mesh* Grid::getMesh() const {
-    return _mesh;
-}
-
-void Grid::addCell(BaseCell* cell) {
-    if (cell->getId() != 0) {
-        if (_cellsMap[cell->getId()] == nullptr) {
-            _cells.emplace_back(cell);
-            _cellsMap[_cells.back()->getId()] = _cells.back().get();
-        }
-    } else {
-        _cells.emplace_back(cell);
-    }
-}
-
-const std::vector<std::shared_ptr<BaseCell>>& Grid::getCells() const {
-    return _cells;
-}
-
-BaseCell* Grid::getCellById(int id) {
-    return _cellsMap[id];
 }
 
 void Grid::init() {
@@ -122,22 +140,22 @@ void Grid::init() {
     }
 
     auto config = Config::getInstance();
-    double timestep = 0.95 * minStep / config->getImpulse()->getMaxImpulse();
+    double timestep = 0.95 * minStep / config->getImpulseSphere()->getMaxImpulse();
 
-    if (Parallel::isUsingMPI() == true && Parallel::getSize() > 1) {
-        if (Parallel::isMaster()) {
+    if (Parallel::isSingle() == false) {
+        if (Parallel::isMaster() == true) {
             for (auto rank = 1; rank < Parallel::getSize(); rank++) {
                 double otherTimestep = 0.0;
-                Utils::deserialize(Parallel::recv(rank, Parallel::COMMAND_TIMESTEP), otherTimestep);
+                SerializationUtils::deserialize(Parallel::recv(rank, Parallel::COMMAND_TIMESTEP), otherTimestep);
                 timestep = std::min(timestep, otherTimestep);
             }
 
             for (auto rank = 1; rank < Parallel::getSize(); rank++) {
-                Parallel::send(Utils::serialize(timestep), rank, Parallel::COMMAND_TIMESTEP);
+                Parallel::send(SerializationUtils::serialize(timestep), rank, Parallel::COMMAND_TIMESTEP);
             }
         } else {
-            Parallel::send(Utils::serialize(timestep), 0, Parallel::COMMAND_TIMESTEP);
-            Utils::deserialize(Parallel::recv(0, Parallel::COMMAND_TIMESTEP), timestep);
+            Parallel::send(SerializationUtils::serialize(timestep), 0, Parallel::COMMAND_TIMESTEP);
+            SerializationUtils::deserialize(Parallel::recv(0, Parallel::COMMAND_TIMESTEP), timestep);
         }
     }
 
@@ -170,7 +188,7 @@ void Grid::computeTransfer() {
 }
 
 void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
-    auto impulse = Config::getInstance()->getImpulse();
+    auto impulse = Config::getInstance()->getImpulseSphere();
     const auto& gases = Config::getInstance()->getGases();
     double timestep = Config::getInstance()->getTimestep();
 
@@ -268,7 +286,7 @@ void Grid::sync() {
                         const auto& recvSyncIds = recvSyncIdsMap[otherRank];
                         for (auto recvSyncId : recvSyncIds) {
                             auto cell = getCellById(-recvSyncId);
-                            Utils::deserialize(Parallel::recv(otherRank, Parallel::COMMAND_SYNC_VALUES), cell->getValues());
+                            SerializationUtils::deserialize(Parallel::recv(otherRank, Parallel::COMMAND_SYNC_VALUES), cell->getValues());
                         }
                     }
                 }
@@ -279,9 +297,30 @@ void Grid::sync() {
                 const auto& sendSyncIds = sendSyncIdsMap[rank];
                 for (auto sendSyncId : sendSyncIds) {
                     auto cell = getCellById(sendSyncId);
-                    Parallel::send(Utils::serialize(cell->getValues()), rank, Parallel::COMMAND_SYNC_VALUES);
+                    Parallel::send(SerializationUtils::serialize(cell->getValues()), rank, Parallel::COMMAND_SYNC_VALUES);
                 }
             }
         }
     }
 }
+
+Mesh* Grid::getMesh() const {
+    return _mesh;
+}
+
+void Grid::addCell(BaseCell* cell) {
+    if (_cellsMap[cell->getId()] == nullptr) {
+        _cellsMap[cell->getId()] = cell;
+        _cells.emplace_back(cell);
+    }
+}
+
+BaseCell* Grid::getCellById(int id) {
+    return _cellsMap[id];
+}
+
+const std::vector<std::shared_ptr<BaseCell>>& Grid::getCells() const {
+    return _cells;
+}
+
+

@@ -9,7 +9,7 @@ private:
     int _syncProcessId;
 
 public:
-    ParallelCell(int recvSyncId, int syncProcessId);
+    ParallelCell(int id, int recvSyncId, int syncProcessId);
 
     void init() override;
 
