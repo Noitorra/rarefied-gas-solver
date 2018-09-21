@@ -1,6 +1,7 @@
 #include "Normalizer.h"
 
 #include <iostream>
+#include <cmath>
 
 static const double BOLTZMANN_CONSTANT = 1.38e-23; // Boltzmann const // TODO: Make more precise
 
@@ -15,7 +16,7 @@ void Normalizer::init() {
     m_dPressure = 150.0; // Pressure of Cs gas
     m_dDensity = m_dPressure / (BOLTZMANN_CONSTANT * m_dTemperature); // Just density
     m_dMass = 133 * 1.66e-27; // kg (Cs I guess)
-    m_dVelocity = sqrt(BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s (This is how we define V1)
+    m_dVelocity = std::sqrt(BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s (This is how we define V1)
     m_dLength = 6.07e-5; // calculated and used to understand size of the system
     m_dTime = m_dLength / m_dVelocity; // s (just timestep)
 }

@@ -6,14 +6,14 @@
 bool Parallel::_isUsingMPI = false;
 bool Parallel::_isSingle = true;
 
-void Parallel::init() {
-    MPI::Init();
+void Parallel::init(int *argc, char ***argv) {
+    MPI_Init(argc, argv);
     _isUsingMPI = true;
     _isSingle = getSize() == 1;
 }
 
 void Parallel::finalize() {
-    MPI::Finalize();
+    MPI_Finalize();
     _isUsingMPI = false;
     _isSingle = true;
 }
@@ -35,47 +35,46 @@ bool Parallel::isSingle() {
 }
 
 int Parallel::getSize() {
-    return MPI::COMM_WORLD.Get_size();
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    return size;
 }
 
 int Parallel::getRank() {
-    return MPI::COMM_WORLD.Get_rank();
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    return rank;
 }
 
 std::string Parallel::getProcessorName() {
-    char processor_name[MPI::MAX_PROCESSOR_NAME];
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
     int name_len;
-    MPI::Get_processor_name(processor_name, name_len);
+    MPI_Get_processor_name(processor_name, &name_len);
     return std::string(processor_name, static_cast<unsigned long>(name_len));
 }
 
 void Parallel::send(const std::string& buffer, int dest, int tag) {
-//    std::cout << "Send from " << getRank() << " to " << dest
-//              << " buffer = [" << buffer.size() << "b][" << "..." << "]" << std::endl;
-
-    MPI::COMM_WORLD.Send(buffer.c_str(), static_cast<int>(buffer.size()), MPI::BYTE, dest, tag);
+    MPI_Send(buffer.c_str(), static_cast<int>(buffer.size()), MPI_BYTE, dest, tag, MPI_COMM_WORLD);
 }
 
 std::string Parallel::recv(int source, int tag) {
-    MPI::Status status;
-    MPI::COMM_WORLD.Probe(source, tag, status);
+    MPI_Status status;
+    MPI_Probe(source, tag, MPI_COMM_WORLD, &status);
 
-    int len = status.Get_count(MPI::BYTE);
+    int len;
+    MPI_Get_count(&status, MPI_BYTE, &len);
 
     char* rawBuffer = new char[len];
 
-    MPI::COMM_WORLD.Recv(rawBuffer, len, MPI::BYTE, source, tag);
+    MPI_Recv(rawBuffer, len, MPI_BYTE, source, tag, MPI_COMM_WORLD, &status);
 
     std::string buffer{rawBuffer, static_cast<unsigned long>(len)};
 
     delete[] rawBuffer;
 
-//    std::cout << "Recv from " << source << " to " << getRank()
-//              << " buffer = [" << buffer.size() << "b][" << "..." << "]" << std::endl;
-
     return buffer;
 }
 
 void Parallel::abort() {
-    MPI::COMM_WORLD.Abort(-1);
+    MPI_Abort(MPI_COMM_WORLD, 1);
 }

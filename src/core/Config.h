@@ -45,6 +45,7 @@ private:
     static Config* _instance;
 
 public:
+    Config() = default;
 
     static Config* getInstance() {
         if (_instance == nullptr) {
@@ -56,8 +57,6 @@ public:
     static void setInstance(Config* config) {
         _instance = config;
     }
-
-    Config();
 
     void init();
 

@@ -19,9 +19,9 @@
 // 2, 5, 6, 6.78e-5, 6.49e-4
 
 int main(int argc, char* argv[]) {
-    Parallel::init();
+    Parallel::init(&argc, &argv);
 
-    std::string configFilename = "../../config3D.json";
+    std::string configFilename = "../../configGPRT.json";
 
     std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> startTime;
     if (Parallel::isMaster()) {

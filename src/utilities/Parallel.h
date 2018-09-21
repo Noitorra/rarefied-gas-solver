@@ -18,7 +18,7 @@ private:
     static bool _isSingle;
 
 public:
-    static void init();
+    static void init(int *argc, char ***argv);
 
     static void finalize();
 

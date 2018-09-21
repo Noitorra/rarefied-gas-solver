@@ -7,6 +7,7 @@
 #include "utilities/SerializationUtils.h"
 #include "mesh/MeshParser.h"
 #include "ResultsFormatter.h"
+#include "KeyboardManager.h"
 
 #include <chrono>
 
@@ -59,6 +60,7 @@ void Solver::run() {
     }
 
     if (Parallel::isMaster() == true) {
+        KeyboardManager::getInstance()->start();
         std::cout << std::endl;
     }
     unsigned int maxIterations = _config->getMaxIterations();
@@ -97,7 +99,7 @@ void Solver::run() {
         }
 
         // check grid
-        _grid->check();
+//        _grid->check();
 
         if (iteration % _config->getOutEachIteration() == 0) {
             std::vector<CellResults*> results;
@@ -132,13 +134,19 @@ void Solver::run() {
         }
 
         if (Parallel::isMaster() == true) {
-            auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIterations * 100);
+            if (KeyboardManager::getInstance()->isWaitingCommand() == false) {
+                auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIterations * 100);
 
-            std::cout << '\r';
-            std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
-            std::cout << "[" << iteration << "/" << maxIterations << "] ";
-            std::cout << percent << "%";
-            std::cout.flush();
+                std::cout << '\r';
+                std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
+                std::cout << "[" << iteration << "/" << maxIterations << "] ";
+                std::cout << percent << "%";
+                std::cout.flush();
+            }
+
+            if (KeyboardManager::getInstance()->isStop()) {
+                throw std::runtime_error("stop signal");
+            }
         }
     }
     if (Parallel::isMaster() == true) {

@@ -6,12 +6,15 @@
 
 Config* Config::_instance = nullptr;
 
-Config::Config() : _normalizer(new Normalizer()), _impulseSphere(new ImpulseSphere(4.8, 20)) {
-    _timestep = 0.0;
-}
-
 void Config::init() {
+    if (_normalizer == nullptr) {
+        _normalizer.reset(new Normalizer());
+    }
     _normalizer->init();
+
+    if (_impulseSphere == nullptr) {
+        _impulseSphere.reset(new ImpulseSphere(4.8, 20));
+    }
     _impulseSphere->init();
 }
 
