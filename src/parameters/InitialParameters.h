@@ -33,8 +33,24 @@ public:
         return _pressure;
     }
 
+    double getPressure(int gi) const {
+        return _pressure[gi];
+    }
+
+    void setPressure(int gi, double pressure) {
+        _pressure[gi] = pressure;
+    }
+
     const std::vector<double>& getTemperature() const {
         return _temperature;
+    }
+
+    double getTemperature(int gi) const {
+        return _temperature[gi];
+    }
+
+    void setTemperature(int gi, double temperature) {
+        _temperature[gi] = temperature;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const InitialParameters& parameters) {

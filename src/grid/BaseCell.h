@@ -39,8 +39,8 @@ public:
 
     virtual void init() = 0;
     virtual void computeTransfer() = 0;
-    virtual void computeIntegral(unsigned int gi0, unsigned int gi1) = 0;
-    virtual void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) = 0;
+    virtual void computeIntegral(int gi0, int gi1) = 0;
+    virtual void computeBetaDecay(int gi0, int gi1, double lambda) = 0;
 
 protected:
     double fast_exp(double mass, double temp, const Vector3d& impulse);

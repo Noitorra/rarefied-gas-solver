@@ -27,16 +27,16 @@ public:
         _heatFlow.resize(gasesSize);
     };
 
-    void set(unsigned int gas, double pressure, double density, double temp) {
-        _pressure[gas] = pressure;
-        _density[gas] = density;
-        _temp[gas] = temp;
+    void set(int gi, double pressure, double density, double temp) {
+        _pressure[gi] = pressure;
+        _density[gi] = density;
+        _temp[gi] = temp;
     }
 
-    void set(unsigned int gas, double pressure, double density, double temp, Vector3d flow, Vector3d heatFlow) {
-        set(gas, pressure, density, temp);
-        _flow[gas] = std::move(flow);
-        _heatFlow[gas] = std::move(heatFlow);
+    void set(int gi, double pressure, double density, double temp, Vector3d flow, Vector3d heatFlow) {
+        set(gi, pressure, density, temp);
+        _flow[gi] = std::move(flow);
+        _heatFlow[gi] = std::move(heatFlow);
     }
 
     void reset() {
@@ -47,44 +47,44 @@ public:
         std::fill(_heatFlow.begin(), _heatFlow.end(), Vector3d());
     }
 
-    double getPressure(unsigned int gas) const {
-        return _pressure[gas];
+    double getPressure(int gi) const {
+        return _pressure[gi];
     }
 
-    void setPressure(unsigned int gas, double pressure) {
-        _pressure[gas] = pressure;
+    void setPressure(int gi, double pressure) {
+        _pressure[gi] = pressure;
     }
 
-    double getDensity(unsigned int gas) const {
-        return _density[gas];
+    double getDensity(int gi) const {
+        return _density[gi];
     }
 
-    void setDensity(unsigned int gas, double density) {
-        _density[gas] = density;
+    void setDensity(int gi, double density) {
+        _density[gi] = density;
     }
 
-    double getTemp(unsigned int gas) const {
-        return _temp[gas];
+    double getTemp(int gi) const {
+        return _temp[gi];
     }
 
-    void setTemp(unsigned int gas, double temp) {
-        _temp[gas] = temp;
+    void setTemp(int gi, double temp) {
+        _temp[gi] = temp;
     }
 
-    const Vector3d& getFlow(unsigned int gas) const {
-        return _flow[gas];
+    const Vector3d& getFlow(int gi) const {
+        return _flow[gi];
     }
 
-    void setFlow(unsigned int gas, const Vector3d& flow) {
-        _flow[gas] = flow;
+    void setFlow(int gi, const Vector3d& flow) {
+        _flow[gi] = flow;
     }
 
-    const Vector3d& getHeatFlow(unsigned int gas) const {
-        return _heatFlow[gas];
+    const Vector3d& getHeatFlow(int gi) const {
+        return _heatFlow[gi];
     }
 
-    void setHeatFlow(unsigned int gas, const Vector3d& heatFlow) {
-        _heatFlow[gas] = heatFlow;
+    void setHeatFlow(int gi, const Vector3d& heatFlow) {
+        _heatFlow[gi] = heatFlow;
     }
 
 private:

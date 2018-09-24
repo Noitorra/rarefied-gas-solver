@@ -15,7 +15,7 @@ public:
     };
 
 private:
-    BorderType _borderType;
+    std::vector<BorderType> _borderTypes;
     CellParameters _boundaryParams;
 
 public:
@@ -25,17 +25,19 @@ public:
 
     void computeTransfer() override;
 
-    void computeIntegral(unsigned int gi0, unsigned int gi1) override;
+    void computeIntegral(int gi0, int gi1) override;
 
-    void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) override;
+    void computeBetaDecay(int gi0, int gi1, double lambda) override;
 
-    void setBorderType(BorderType borderType);
+    void setBorderType(int id, BorderType borderType);
 
     CellParameters& getBoundaryParams();
 
 private:
-    void computeTransferDiffuse();
-    void computeTransferMirror();
+    void computeTransferDiffuse(unsigned int gi);
+    void computeTransferMirror(unsigned int gi);
+    void computeTransferPressure(unsigned int gi);
+    void computeTransferFlow(unsigned int gi);
 
 };
 

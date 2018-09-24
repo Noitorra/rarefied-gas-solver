@@ -39,7 +39,7 @@ public:
 
     int*** getXYZ2I() const;
 
-//    int reverseIndex(int ii, unsigned int axis);
+    int reverseIndex(int ii, Vector3d normal);
 
     friend std::ostream& operator<<(std::ostream& os, const ImpulseSphere& impulse);
 

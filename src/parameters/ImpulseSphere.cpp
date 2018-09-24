@@ -26,19 +26,19 @@ void ImpulseSphere::init() {
     _deltaImpulseQube = std::pow(_deltaImpulse, 3);
 
     // calc line impulse vector
-    std::vector<double> lineImpulse;
+    std::vector<double> lineImpulses;
     for (unsigned int i = 0; i < _resolution; i++) {
-        lineImpulse.push_back(_deltaImpulse * (i + 0.5) - _maxImpulse);
+        lineImpulses.push_back(_deltaImpulse * (i + 0.5) - _maxImpulse);
     }
 
     // creating impulse sphere
     _xyz2i = new int**[_resolution];
-    for (auto x = 0; x < lineImpulse.size(); x++) {
+    for (auto x = 0; x < lineImpulses.size(); x++) {
         _xyz2i[x] = new int*[_resolution];
-        for (auto y = 0; y < lineImpulse.size(); y++) {
+        for (auto y = 0; y < lineImpulses.size(); y++) {
             _xyz2i[x][y] = new int[_resolution];
-            for (auto z = 0; z < lineImpulse.size(); z++) {
-                Vector3d impulse = {lineImpulse[x], lineImpulse[y], lineImpulse[z]};
+            for (auto z = 0; z < lineImpulses.size(); z++) {
+                Vector3d impulse = {lineImpulses[x], lineImpulses[y], lineImpulses[z]};
                 if (impulse.module() < _maxImpulse) {
                     _impulses.push_back(impulse);
                     _i2xyz.emplace_back(x, y, z);
@@ -75,6 +75,21 @@ const std::vector<Vector3d>& ImpulseSphere::getImpulses() const {
     return _impulses;
 }
 
+int ImpulseSphere::reverseIndex(int ii, Vector3d normal) {
+    Vector3d impulse = _impulses[ii];
+    Vector3d reverseImpulse = impulse - normal * impulse.scalar(normal) * 2;
+
+    int x = int((reverseImpulse.x() + _maxImpulse) / _deltaImpulse);
+    int y = int((reverseImpulse.y() + _maxImpulse) / _deltaImpulse);
+    int z = int((reverseImpulse.z() + _maxImpulse) / _deltaImpulse);
+
+    if (x < 0 || x > _resolution - 1 || y < 0 || y > _resolution - 1 || z < 0 || z > _resolution - 1) {
+        throw std::runtime_error("impulse index couldn't be reversed");
+    }
+
+    return _xyz2i[x][y][z];
+}
+
 std::ostream& operator<<(std::ostream& os, const ImpulseSphere& impulse) {
     os << "{";
     os << "MaxImpulse = " << impulse._maxImpulse << "; "
@@ -84,29 +99,3 @@ std::ostream& operator<<(std::ostream& os, const ImpulseSphere& impulse) {
     os << "}";
     return os;
 }
-
-//int ImpulseSphere::reverseIndex(int ii, unsigned int axis) {
-//    // ii -> xyz
-//    // xyz -> reverse xyz -> rii
-//    Vector3i v3i = _i2xyz[ii];
-//    int ri = 0;
-//    switch (static_cast<Config::Axis>(axis)) {
-//        case Config::Axis::X:
-//            ri = _xyz2i[_resolution - 1 - v3i.x()][v3i.y()][v3i.z()];
-//            break;
-//
-//        case Config::Axis::Y:
-//            ri = _xyz2i[v3i.x()][_resolution - 1 - v3i.y()][v3i.z()];
-//            break;
-//
-//        case Config::Axis::Z:
-//            ri = _xyz2i[v3i.x()][v3i.y()][_resolution - 1 - v3i.z()];
-//            break;
-//    }
-//    if (ri == -1) {
-//        std::cout << "ImpulseSphere::reverseIndex() bad reverse, index = -1." << std::endl;
-//        return ii;
-//    }
-//    //std::cout << "In: " << ii << " Reverse: " << ri << std::endl;
-//    return ri;
-//}

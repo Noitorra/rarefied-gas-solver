@@ -26,11 +26,11 @@ void ParallelCell::computeTransfer() {
     // nothing
 }
 
-void ParallelCell::computeIntegral(unsigned int gi0, unsigned int gi1) {
+void ParallelCell::computeIntegral(int gi0, int gi1) {
     // nothing
 }
 
-void ParallelCell::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
+void ParallelCell::computeBetaDecay(int gi0, int gi1, double lambda) {
     // nothing
 }
 

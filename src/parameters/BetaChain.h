@@ -43,8 +43,16 @@ public:
         return _lambda1;
     }
 
+    void setLambda1(double lambda1) {
+        _lambda1 = lambda1;
+    }
+
     double getLambda2() const {
         return _lambda2;
+    }
+
+    void setLambda2(double lambda2) {
+        _lambda2 = lambda2;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const BetaChain& chain) {

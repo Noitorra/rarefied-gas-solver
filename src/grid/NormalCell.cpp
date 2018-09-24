@@ -53,11 +53,11 @@ void NormalCell::computeTransfer() {
     }
 }
 
-void NormalCell::computeIntegral(unsigned int gi0, unsigned int gi1) {
+void NormalCell::computeIntegral(int gi0, int gi1) {
     ci::iter(_values[gi0], _values[gi1]);
 }
 
-void NormalCell::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
+void NormalCell::computeBetaDecay(int gi0, int gi1, double lambda) {
     auto config = Config::getInstance();
     const auto& impulses = config->getImpulseSphere()->getImpulses();
 
@@ -120,7 +120,7 @@ CellResults* NormalCell::getResults() {
     return _results.get();
 }
 
-double NormalCell::compute_density(unsigned int gi) {
+double NormalCell::compute_density(int gi) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
     auto impulseSphere = config->getImpulseSphere();
@@ -134,7 +134,7 @@ double NormalCell::compute_density(unsigned int gi) {
     return density;
 }
 
-double NormalCell::compute_temperature(unsigned int gi, double density, const Vector3d& stream) {
+double NormalCell::compute_temperature(int gi, double density, const Vector3d& stream) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
     auto impulseSphere = config->getImpulseSphere();
@@ -154,11 +154,11 @@ double NormalCell::compute_temperature(unsigned int gi, double density, const Ve
     return temperature;
 }
 
-double NormalCell::compute_pressure(unsigned int gi, double density, double temperature) {
+double NormalCell::compute_pressure(int gi, double density, double temperature) {
     return density * temperature;
 }
 
-Vector3d NormalCell::compute_stream(unsigned int gi) {
+Vector3d NormalCell::compute_stream(int gi) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
     auto impulseSphere = config->getImpulseSphere();
@@ -174,6 +174,6 @@ Vector3d NormalCell::compute_stream(unsigned int gi) {
     return stream;
 }
 
-Vector3d NormalCell::compute_heatstream(unsigned int gi) {
+Vector3d NormalCell::compute_heatstream(int gi) {
     return Vector3d();
 }

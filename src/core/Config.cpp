@@ -10,7 +10,32 @@ void Config::init() {
     if (_normalizer == nullptr) {
         _normalizer.reset(new Normalizer());
     }
-    _normalizer->init();
+
+    double maxMass = 0.0;
+    for (const auto& gas : _gases) {
+        maxMass = std::max(maxMass, gas.getMass());
+    }
+    _normalizer->init(maxMass);
+
+    for (auto& gas : _gases) {
+        gas.setMass(_normalizer->normalize(gas.getMass(), Normalizer::Type::MASS));
+    }
+    for (auto& betaChain : _betaChains) {
+        betaChain.setLambda1(_normalizer->normalize(betaChain.getLambda1(), Normalizer::Type::LAMBDA));
+        betaChain.setLambda2(_normalizer->normalize(betaChain.getLambda2(), Normalizer::Type::LAMBDA));
+    }
+    for (auto& initialParam : _initialParameters) {
+        for (auto gi = 0; gi < _gases.size(); gi++) {
+            initialParam.setPressure(gi, _normalizer->normalize(initialParam.getPressure(gi), Normalizer::Type::PRESSURE));
+            initialParam.setTemperature(gi, _normalizer->normalize(initialParam.getTemperature(gi), Normalizer::Type::TEMPERATURE));
+        }
+    }
+    for (auto& boundaryParam : _boundaryParameters) {
+        for (auto gi = 0; gi < _gases.size(); gi++) {
+            boundaryParam.setPressure(gi, _normalizer->normalize(boundaryParam.getPressure(gi), Normalizer::Type::PRESSURE));
+            boundaryParam.setTemperature(gi, _normalizer->normalize(boundaryParam.getTemperature(gi), Normalizer::Type::TEMPERATURE));
+        }
+    }
 
     if (_impulseSphere == nullptr) {
         _impulseSphere.reset(new ImpulseSphere(4.8, 20));
@@ -61,11 +86,13 @@ void Config::load(const std::string& filename) {
             for (const boost::property_tree::ptree::value_type& value : param.second.get_child("pressure")) {
                 pressure.emplace_back(value.second.get_value<double>());
             }
+            pressure.resize(_gases.size(), 0.0);
 
             std::vector<double> temperature;
             for (const boost::property_tree::ptree::value_type& value : param.second.get_child("temperature")) {
                 temperature.emplace_back(value.second.get_value<double>());
             }
+            temperature.resize(_gases.size(), 0.0);
 
             _initialParameters.emplace_back(group, pressure, temperature);
         }
@@ -76,7 +103,23 @@ void Config::load(const std::string& filename) {
     if (boundaryNode) {
         for (const boost::property_tree::ptree::value_type& param : *boundaryNode) {
             auto group = param.second.get<std::string>("group");
-            auto type = param.second.get<std::string>("type");
+
+            std::vector<std::string> type;
+            auto typeNode = param.second.get_child_optional("type");
+            if (typeNode) {
+                for (const boost::property_tree::ptree::value_type& value : *typeNode) {
+                    type.emplace_back(value.second.get_value<std::string>());
+                }
+            }
+
+            std::vector<double> pressure;
+            auto pressureNode = param.second.get_child_optional("pressure");
+            if (pressureNode) {
+                for (const boost::property_tree::ptree::value_type& value : *pressureNode) {
+                    pressure.emplace_back(value.second.get_value<double>());
+                }
+            }
+            pressure.resize(_gases.size(), 0.0);
 
             std::vector<double> temperature;
             auto temperatureNode = param.second.get_child_optional("temperature");
@@ -85,8 +128,9 @@ void Config::load(const std::string& filename) {
                     temperature.emplace_back(value.second.get_value<double>());
                 }
             }
+            temperature.resize(_gases.size(), 0.0);
 
-            _boundaryParameters.emplace_back(group, type, temperature);
+            _boundaryParameters.emplace_back(group, type, temperature, pressure);
         }
     }
 }

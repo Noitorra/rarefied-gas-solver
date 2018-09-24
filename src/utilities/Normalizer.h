@@ -17,22 +17,23 @@ public:
         FLOW,
         LAMBDA,
         LENGTH,
-        TIME
+        TIME,
+        MASS
     };
 
 private:
-    double m_dDensity; // density
-    double m_dTemperature; // temperature
-    double m_dPressure; // real normilize operation
-    double m_dTime; // time
-    double m_dMass; // mass
-    double m_dVelocity; // speed cut
-    double m_dLength; // the mean free path of a molecule
+    double _density;
+    double _temperature;
+    double _pressure;
+    double _time;
+    double _mass;
+    double _velocity;
+    double _length;
 
 public:
     Normalizer() = default;
 
-    void init();
+    void init(double maxMass);
 
     double normalize(const double& value, const Type& type) const;
 
@@ -47,13 +48,13 @@ public:
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
-        ar & m_dDensity;
-        ar & m_dTemperature;
-        ar & m_dPressure;
-        ar & m_dTime;
-        ar & m_dMass;
-        ar & m_dVelocity;
-        ar & m_dLength;
+        ar & _density;
+        ar & _temperature;
+        ar & _pressure;
+        ar & _time;
+        ar & _mass;
+        ar & _velocity;
+        ar & _length;
     }
 
 };

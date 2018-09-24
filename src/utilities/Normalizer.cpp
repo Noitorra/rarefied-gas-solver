@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cmath>
 
-static const double BOLTZMANN_CONSTANT = 1.38e-23; // Boltzmann const // TODO: Make more precise
+static const double BOLTZMANN_CONSTANT = 1.38064852e-23; // Boltzmann const
 
 /*
 	How we normalize variables:
@@ -11,32 +11,36 @@ static const double BOLTZMANN_CONSTANT = 1.38e-23; // Boltzmann const // TODO: M
 	2) In programm we use blank variables.
 */
 
-void Normalizer::init() {
-    m_dTemperature = 1500.0; // K // Maximum temperature in system
-    m_dPressure = 150.0; // Pressure of Cs gas
-    m_dDensity = m_dPressure / (BOLTZMANN_CONSTANT * m_dTemperature); // Just density
-    m_dMass = 133 * 1.66e-27; // kg (Cs I guess)
-    m_dVelocity = std::sqrt(BOLTZMANN_CONSTANT * m_dTemperature / m_dMass); // m / s (This is how we define V1)
-    m_dLength = 6.07e-5; // calculated and used to understand size of the system
-    m_dTime = m_dLength / m_dVelocity; // s (just timestep)
+void Normalizer::init(double maxMass) {
+    _temperature = 1500.0; // K // Maximum temperature in system
+    _pressure = 150.0; // Pressure of Cs gas
+    _density = _pressure / (BOLTZMANN_CONSTANT * _temperature); // Just density
+    _velocity = std::sqrt(BOLTZMANN_CONSTANT * _temperature / _mass); // m / s (This is how we define V1)
+
+    _length = 1.0; // time is calculated through system length, so no point in length normalization
+    _time = _length / _velocity; // s (just timestep)
+
+    _mass = maxMass;
 }
 
 double Normalizer::normalize(const double& value, const Normalizer::Type& type) const {
     switch (type) {
         case Type::TEMPERATURE:
-            return value / m_dTemperature;
+            return value / _temperature;
         case Type::PRESSURE:
-            return value / m_dPressure;
+            return value / _pressure;
         case Type::DENSITY:
-            return value / m_dDensity;
+            return value / _density;
         case Type::FLOW:
-            return value / (m_dDensity * m_dVelocity);
+            return value / (_density * _velocity);
         case Type::LAMBDA:
-            return value * m_dTime;
+            return value * _time;
         case Type::LENGTH:
-            return value / m_dLength;
+            return value / _length;
         case Type::TIME:
-            return value / m_dTime;
+            return value / _time;
+        case Type::MASS:
+            return value / _mass;
     }
 }
 
@@ -47,19 +51,21 @@ void Normalizer::normalize(double& value, const Normalizer::Type& type) const {
 double Normalizer::restore(const double& value, const Normalizer::Type& type) const {
     switch (type) {
         case Type::TEMPERATURE:
-            return value * m_dTemperature;
+            return value * _temperature;
         case Type::PRESSURE:
-            return value * m_dPressure;
+            return value * _pressure;
         case Type::DENSITY:
-            return value * m_dDensity;
+            return value * _density;
         case Type::FLOW:
-            return value * (m_dDensity * m_dVelocity);
+            return value * (_density * _velocity);
         case Type::LAMBDA:
-            return value / m_dTime;
+            return value / _time;
         case Type::LENGTH:
-            return value * m_dLength;
+            return value * _length;
         case Type::TIME:
-            return value * m_dTime;
+            return value * _time;
+        case Type::MASS:
+            return value * _mass;
     }
 }
 
@@ -69,13 +75,13 @@ void Normalizer::restore(double& value, const Normalizer::Type& type) const {
 
 std::ostream& operator<<(std::ostream& os, const Normalizer& normalizer) {
     os << "{";
-    os << "Temp =  "  << normalizer.m_dTemperature << " K" << "; "
-       << "Pres = "   << normalizer.m_dPressure    << " Pa" << "; "
-       << "Den = "    << normalizer.m_dDensity     << " 1/m^3" << "; "
-       << "Mass = "   << normalizer.m_dMass        << " Kg" << "; "
-       << "Vel = "    << normalizer.m_dVelocity    << " m/s" << "; "
-       << "Length = " << normalizer.m_dLength      << " m" << "; "
-       << "Time = "   << normalizer.m_dTime        << " s";
+    os << "Temp =  "  << normalizer._temperature << " K" << "; "
+       << "Pres = "   << normalizer._pressure    << " Pa" << "; "
+       << "Den = "    << normalizer._density     << " 1/m^3" << "; "
+       << "Mass = "   << normalizer._mass        << " Kg" << "; "
+       << "Vel = "    << normalizer._velocity    << " m/s" << "; "
+       << "Length = " << normalizer._length      << " m" << "; "
+       << "Time = "   << normalizer._time        << " s";
     os << "}";
     return os;
 }

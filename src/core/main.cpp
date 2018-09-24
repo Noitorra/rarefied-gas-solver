@@ -21,7 +21,7 @@
 int main(int argc, char* argv[]) {
     Parallel::init(&argc, &argv);
 
-    std::string configFilename = "../../configGPRT.json";
+    std::string configFilename = "../../config3D.json";
 
     std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> startTime;
     if (Parallel::isMaster()) {

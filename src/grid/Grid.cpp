@@ -37,12 +37,10 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
             for (const auto& param : initialParameters) {
                 if (param.getGroup() == element->getGroup()) {
                     for (auto i = 0; i < param.getPressure().size(); i++) {
-                        auto pressure = normalizer->normalize(param.getPressure()[i], Normalizer::Type::PRESSURE);
-                        cell->getParams().setPressure(i, pressure);
+                        cell->getParams().setPressure(i, param.getPressure(i));
                     }
                     for (auto i = 0; i < param.getTemperature().size(); i++) {
-                        auto temperature = normalizer->normalize(param.getTemperature()[i], Normalizer::Type::TEMPERATURE);
-                        cell->getParams().setTemp(i, temperature);
+                        cell->getParams().setTemp(i, param.getTemperature(i));
                     }
                 }
             }
@@ -93,15 +91,27 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
                 // set boundary params by physical group
                 for (const auto& param : boundaryParameters) {
                     if (param.getGroup() == neighborElement->getGroup()) {
-                        const auto& type = param.getType();
-                        if (type == "Diffuse") {
-                            borderCell->setBorderType(BorderCell::BorderType::DIFFUSE);
-                        } else if (type == "Mirror") {
-                            borderCell->setBorderType(BorderCell::BorderType::MIRROR);
+                        for (auto i = 0; i < param.getType().size(); i++) {
+                            BorderCell::BorderType borderType;
+                            auto type = param.getType()[i];
+                            if (type == "Diffuse") {
+                                borderType = BorderCell::BorderType::DIFFUSE;
+                            } else if (type == "Pressure") {
+                                borderType = BorderCell::BorderType::PRESSURE;
+                            } else if (type == "Flow") {
+                                borderType = BorderCell::BorderType::FLOW;
+                            } else if (type == "Mirror") {
+                                borderType = BorderCell::BorderType::MIRROR;
+                            } else {
+                                borderType = BorderCell::BorderType::UNDEFINED;
+                            }
+                            borderCell->setBorderType(i, borderType);
                         }
-                        for (auto i = 0; i < param.getTemperature().size(); i++) {
-                            auto temperature = normalizer->normalize(param.getTemperature()[i], Normalizer::Type::TEMPERATURE);
-                            borderCell->getBoundaryParams().setTemp(i, temperature);
+                        for (auto gi = 0; gi < config->getGases().size(); gi++) {
+                            borderCell->getBoundaryParams().setTemp(gi, param.getTemperature(gi));
+                        }
+                        for (auto gi = 0; gi < config->getGases().size(); gi++) {
+                            borderCell->getBoundaryParams().setPressure(gi, param.getPressure(gi));
                         }
                     }
                 }
@@ -140,7 +150,13 @@ void Grid::init() {
     }
 
     auto config = Config::getInstance();
-    double timestep = 0.95 * minStep / config->getImpulseSphere()->getMaxImpulse();
+
+    double minMass = std::numeric_limits<double>::max();
+    for (const auto& gas : config->getGases()) {
+        minMass = std::min(minMass, gas.getMass());
+    }
+
+    double timestep = 0.95 * minStep / (config->getImpulseSphere()->getMaxImpulse() / minMass);
 
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {

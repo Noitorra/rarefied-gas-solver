@@ -22,6 +22,10 @@ public:
         return _mass;
     }
 
+    void setMass(double mass) {
+        _mass = mass;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Gas& gas) {
         os << "Mass = " << gas._mass;
         return os;

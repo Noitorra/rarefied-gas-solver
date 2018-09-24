@@ -15,9 +15,9 @@ public:
 
     void computeTransfer() override;
 
-    void computeIntegral(unsigned int gi0, unsigned int gi1) override;
+    void computeIntegral(int gi0, int gi1) override;
 
-    void computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) override;
+    void computeBetaDecay(int gi0, int gi1, double lambda) override;
 
     int getRecvSyncId() const;
 
