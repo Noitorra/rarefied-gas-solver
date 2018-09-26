@@ -26,54 +26,23 @@ private:
     }
 
     void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) override {
+        if (isSideElementsRequired) {
+            _sideElements.clear();
 
-        // find all sides and diagonals
-        _sideElements.clear();
-        _diagonalElements.clear();
-        for (auto i = 0; i < nodes.size(); i++) {
-            for (auto j = i + 1; j < nodes.size(); j++) {
-                Line* line = new Line({nodes[i]->getId(), nodes[j]->getId()});
+            Vector3d a = nodes[1]->getPosition() - nodes[0]->getPosition();
+            Vector3d b = nodes[2]->getPosition() - nodes[1]->getPosition();
+            Vector3d c = nodes[3]->getPosition() - nodes[2]->getPosition();
+            Vector3d d = nodes[0]->getPosition() - nodes[3]->getPosition();
 
-                bool isSide = true;
-                Vector3d* direction = nullptr;
-                for (auto k = 0; k < nodes.size(); k++) {
-                    if (k != i && k != j) {
-                        Line* kLine = new Line({nodes[i]->getId(), nodes[k]->getId()});
-                        Vector3d kDirection = line->getVector().vector(kLine->getVector());
-                        if (direction == nullptr) {
-                            direction = new Vector3d(kDirection);
-                        } else {
-                            if (direction->scalar(kDirection) < 0) {
-                                isSide = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (isSide == true) {
-                    if (isSideElementsRequired) {
-                        Vector3d v1 = nodes[j]->getPosition() - nodes[i]->getPosition();
-                        int p = 0;
-                        for (auto k = 0; k < nodes.size(); k++) {
-                            if (k != i && k != j) {
-                                p = k;
-                                break;
-                            }
-                        }
-                        Vector3d v2 = nodes[p]->getPosition() - nodes[i]->getPosition();
-
-                        _sideElements.emplace_back(new SideElement(line, -v1.vector(v2).vector(v1).normalize()));
-                    }
-                } else {
-                    _diagonalElements.emplace_back(line);
-                }
-            }
+            _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -a.vector(b).vector(a)));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), -b.vector(c).vector(b)));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[3]->getId()}), -c.vector(d).vector(c)));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[3]->getId(), nodes[0]->getId()}), -d.vector(a).vector(d)));
         }
 
         // volume is easy: d1d2sin(1,2) / 2
-        Vector3d diag1 = _diagonalElements[0].get()->getVector();
-        Vector3d diag2 = _diagonalElements[1].get()->getVector();
+        Vector3d diag1 = nodes[2]->getPosition() - nodes[0]->getPosition();
+        Vector3d diag2 = nodes[3]->getPosition() - nodes[1]->getPosition();
         _volume = diag1.vector(diag2).module() / 2;
     }
 };

@@ -1,3 +1,0 @@
-path="d:\Development\GitHub\rarefied-gas-solver\launches\launch#01-450-150\out\"
-path="d:\Development\GitHub\rarefied-gas-solver\launches\launch#02-300-150\out\"
-path="d:\Development\GitHub\rarefied-gas-solver\launches\launch#03-150-150\out\"

@@ -24,18 +24,18 @@ private:
     }
 
     void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) override {
-        Vector3d v1 = nodes[1]->getPosition() - nodes[0]->getPosition();
-        Vector3d v2 = nodes[2]->getPosition() - nodes[0]->getPosition();
-        Vector3d v3 = nodes[2]->getPosition() - nodes[1]->getPosition();
+        Vector3d a = nodes[1]->getPosition() - nodes[0]->getPosition();
+        Vector3d b = nodes[2]->getPosition() - nodes[1]->getPosition();
+        Vector3d c = nodes[0]->getPosition() - nodes[2]->getPosition();
 
         if (isSideElementsRequired) {
             _sideElements.clear();
-            _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -v1.vector(v2).vector(v1).normalize()));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), v3.vector(v1).vector(v3).normalize()));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[0]->getId()}), v2.vector(v3).vector(v2).normalize()));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -a.vector(b).vector(a).normalize()));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), -b.vector(c).vector(b).normalize()));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[0]->getId()}), -c.vector(a).vector(c).normalize()));
         }
 
-        _volume = v1.vector(v2).module() / 2;
+        _volume = a.vector(b).module() / 2;
     }
 };
 

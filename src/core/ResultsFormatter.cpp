@@ -13,12 +13,14 @@ using namespace boost::filesystem;
 ResultsFormatter::ResultsFormatter() {
     _root = Config::getInstance()->getOutputFolder();
     _main = Utils::getCurrentDateAndTime();
-    _params = {"pressure", "density", "temp", "flow", "heatflow"};
-    _types = {"data", "pic"};
-    _gas = "gas";
+//    _params = {"pressure", "density", "temp", "flow", "heatflow"};
+//    _types = {"data", "pic"};
+//    _gas = "gas";
+    _scalarParams = {Param::PRESSURE, Param::DENSITY, Param::TEMPERATURE};
+    _vectorParams = {Param::FLOW, Param::HEATFLOW};
 }
 
-void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& results, unsigned int iteration) {
+void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::vector<CellResults*>& results) {
     if (exists(_root) == false) {
         std::cout << "No such folder: " << _root << std::endl;
         return;
@@ -30,7 +32,7 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& res
     }
 
 //    for (const auto& type : _types) {
-//        path typePath{mainPath / type};
+//        path typePath{mainPath / type};ёёё
 //        if (exists(typePath) == false) {
 //            create_directory(typePath);
 //        }
@@ -107,31 +109,84 @@ void ResultsFormatter::writeAll(Mesh* mesh, const std::vector<CellResults*>& res
 
     // scalar field (density, temperature, pressure) - lookup table "default"
     fs << "CELL_DATA " << elements.size() << std::endl;
-    fs << "SCALARS " << "temperature" << " " << "double" << " " << 1 << std::endl;
-    fs << "LOOKUP_TABLE " << "default" << std::endl;
-    auto normalizer = Config::getInstance()->getNormalizer();
-    for (auto element : elements) {
-        double value = 0.0;
-        auto pos = std::find_if(results.begin(), results.end(), [&element](CellResults* res) {
-            return element->getId() == res->getId();
-        });
-        if (pos != results.end()) {
-            value = normalizer->restore((*pos)->getTemp(0), Normalizer::Type::TEMPERATURE);
+
+    auto config = Config::getInstance();
+    auto normalizer = config->getNormalizer();
+
+    for (auto gi = 0; gi < config->getGases().size(); gi++) {
+        for (auto param : _scalarParams) {
+            std::string paramName;
+            switch (param) {
+                case Param::PRESSURE:
+                    paramName = "Pressure";
+                    break;
+                case Param::DENSITY:
+                    paramName = "Density";
+                    break;
+                case Param::TEMPERATURE:
+                    paramName = "Temperature";
+                    break;
+            }
+            paramName += "_" + std::to_string(gi);
+
+            fs << "SCALARS " << paramName << " " << "double" << " " << 1 << std::endl;
+            fs << "LOOKUP_TABLE " << "default" << std::endl;
+            for (auto element : elements) {
+                double value = 0.0;
+                auto pos = std::find_if(results.begin(), results.end(), [&element](CellResults* res) {
+                    return element->getId() == res->getId();
+                });
+                if (pos != results.end()) {
+                    switch (param) {
+                        case Param::PRESSURE:
+                            value = normalizer->restore((*pos)->getPressure(gi), Normalizer::Type::PRESSURE);
+                            break;
+                        case Param::DENSITY:
+                            value = normalizer->restore((*pos)->getDensity(gi), Normalizer::Type::DENSITY);
+                            break;
+                        case Param::TEMPERATURE:
+                            value = normalizer->restore((*pos)->getTemp(gi), Normalizer::Type::TEMPERATURE);
+                            break;
+                    }
+                }
+                fs << value << std::endl;
+            }
         }
-        fs << value << std::endl;
+
+        for (auto param : _vectorParams) {
+            std::string paramName;
+            switch (param) {
+                case Param::FLOW:
+                    paramName = "Flow";
+                    break;
+                case Param::HEATFLOW:
+                    paramName = "HeatFlow";
+                    break;
+            }
+            paramName += "_" + std::to_string(gi);
+
+            fs << "VECTORS " << paramName << " " << "double" << std::endl;
+            for (auto element : elements) {
+                Vector3d value;
+                auto pos = std::find_if(results.begin(), results.end(), [&element](CellResults* res) {
+                    return element->getId() == res->getId();
+                });
+                if (pos != results.end()) {
+                    switch (param) {
+                        case Param::FLOW:
+                            value = (*pos)->getFlow(gi);
+                            break;
+                        case Param::HEATFLOW:
+                            value = (*pos)->getHeatFlow(gi);
+                            break;
+                    }
+                }
+                fs << value.x() << " " << value.y() << " " << value.z() << std::endl;
+            }
+        }
     }
 
-    fs << "VECTORS " << "flow" << " " << "double" << std::endl;
-    for (auto element : elements) {
-        Vector3d value;
-        auto pos = std::find_if(results.begin(), results.end(), [&element](CellResults* res) {
-            return element->getId() == res->getId();
-        });
-        if (pos != results.end()) {
-            value = (*pos)->getFlow(0);
-        }
-        fs << value.x() << " " << value.y() << " " << value.z() << std::endl;
-    }
+    fs.close();
 }
 
 void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
@@ -166,7 +221,7 @@ void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
     // cells
     std::vector<Element*> elements;
     for (const auto& element : mesh->getElements()) {
-        if (element->getType() == Element::Type::TETRAHEDRON) {
+        if (element->isMain()) {
             elements.push_back(element.get());
         }
     }
@@ -218,7 +273,9 @@ void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
     for (auto element : elements) {
         double value = 0.0;
         for (const auto& sideElement : element->getSideElements()) {
-            if (sideElement->getNeighborId() == 0) {
+            auto neighborId = sideElement->getNeighborId();
+            auto neighborElement = mesh->getElement(neighborId);
+            if (neighborElement->isBorder()) {
                 value += 1.0;
             }
         }
@@ -230,7 +287,9 @@ void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
         bool hasBorderSide = false;
         Vector3d value;
         for (const auto& sideElement : element->getSideElements()) {
-            if (sideElement->getNeighborId() == 0) {
+            auto neighborId = sideElement->getNeighborId();
+            auto neighborElement = mesh->getElement(neighborId);
+            if (neighborElement->isBorder()) {
                 hasBorderSide = true;
                 value += sideElement->getNormal();
             }
@@ -240,4 +299,33 @@ void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
         }
         fs << value.x() << " " << value.y() << " " << value.z() << std::endl;
     }
+
+    fs.close();
+}
+
+void ResultsFormatter::writeProgression(unsigned int iteration, const std::vector<CellResults*>& results) {
+    if (exists(_root) == false) {
+        std::cout << "No such folder: " << _root << std::endl;
+        return;
+    }
+
+    path mainPath{_root / _main};
+    if (exists(mainPath) == false) {
+        create_directory(mainPath);
+    }
+
+    path filePath = mainPath / ("progression.txt"); // _types[Type::DATA] /
+    std::ofstream fs(filePath.generic_string(), std::ios::out | std::ios::app); //  | std::ios::binary
+
+
+    double wholeDensity = 0.0;
+    Vector3d wholeFlow;
+    for (const auto& result : results) {
+        wholeDensity += result->getDensity(0);
+        wholeFlow += result->getFlow(0);
+    }
+
+    fs << iteration << " " << wholeDensity << " " << wholeFlow.module() << std::endl;
+
+    fs.close();
 }

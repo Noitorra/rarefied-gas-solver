@@ -18,7 +18,6 @@
 
 Grid::Grid(Mesh* mesh) : _mesh(mesh) {
     auto config = Config::getInstance();
-    auto normalizer = config->getNormalizer();
     const auto& initialParameters = config->getInitialParameters();
     const auto& boundaryParameters = config->getBoundaryParameters();
 
@@ -128,6 +127,8 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
             }
         }
     }
+
+    std::cout << "Successful grid creation: number of cells = " << _cells.size() << std::endl;
 }
 
 void Grid::init() {

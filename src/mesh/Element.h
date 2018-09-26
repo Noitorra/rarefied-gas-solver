@@ -23,7 +23,9 @@ public:
         LINE = 1,
         TRIANGLE = 2,
         QUADRANGLE = 3,
-        TETRAHEDRON = 4
+        TETRAHEDRON = 4,
+        HEXAHEDRON = 5,
+        PRISM = 6
     };
 
 protected:

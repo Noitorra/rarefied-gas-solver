@@ -9,7 +9,7 @@ class CellResults;
 
 class ResultsFormatter {
 private:
-    enum Param {
+    enum class Param {
         PRESSURE,
         DENSITY,
         TEMPERATURE,
@@ -17,22 +17,21 @@ private:
         HEATFLOW
     };
 
-    enum Type {
-        DATA,
-        PIC
-    };
-
     std::string _root;
     std::string _main;
-    std::vector<std::string> _params;
-    std::vector<std::string> _types;
-    std::string _gas;
+//    std::vector<std::string> _params;
+//    std::vector<std::string> _types;
+//    std::string _gas;
+
+    std::vector<Param> _scalarParams;
+    std::vector<Param> _vectorParams;
 
 public:
     ResultsFormatter();
 
-    void writeAll(Mesh* mesh, const std::vector<CellResults*>& results, unsigned int iteration);
+    void writeAll(unsigned int iteration, Mesh* mesh, const std::vector<CellResults*>& results);
     void writeMeshDetails(Mesh* mesh);
+    void writeProgression(unsigned int iteration, const std::vector<CellResults*>& results);
 
 };
 

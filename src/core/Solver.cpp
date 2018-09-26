@@ -99,7 +99,7 @@ void Solver::run() {
         }
 
         // check grid
-//        _grid->check();
+        _grid->check();
 
         if (iteration % _config->getOutEachIteration() == 0) {
             std::vector<CellResults*> results;
@@ -122,14 +122,16 @@ void Solver::run() {
                         }
                     }
 
-                    _formatter->writeAll(_grid->getMesh(), results, iteration);
+                    _formatter->writeAll(iteration, _grid->getMesh(), results);
+                    _formatter->writeProgression(iteration, results);
                 } else {
 
                     // send params to master
                     Parallel::send(SerializationUtils::serialize(results), 0, Parallel::COMMAND_RESULT_PARAMS);
                 }
             } else {
-                _formatter->writeAll(_grid->getMesh(), results, iteration);
+                _formatter->writeAll(iteration, _grid->getMesh(), results);
+                _formatter->writeProgression(iteration, results);
             }
         }
 

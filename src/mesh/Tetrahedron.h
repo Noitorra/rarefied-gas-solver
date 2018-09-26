@@ -22,36 +22,21 @@ private:
     }
 
     void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) override {
+        Vector3d a = nodes[1]->getPosition() - nodes[0]->getPosition();
+        Vector3d b = nodes[2]->getPosition() - nodes[1]->getPosition();
+        Vector3d c = nodes[0]->getPosition() - nodes[2]->getPosition();
+        Vector3d d = nodes[3]->getPosition() - nodes[1]->getPosition();
+        Vector3d e = nodes[0]->getPosition() - nodes[3]->getPosition();
+
         if (isSideElementsRequired) {
             _sideElements.clear();
-            for (auto i = 0; i < nodes.size(); i++) {
-                for (auto j = i + 1; j < nodes.size(); j++) {
-                    for (auto k = j + 1; k < nodes.size(); k++) {
-                        Element* triangle = new Triangle({nodes[i]->getId(), nodes[j]->getId(), nodes[k]->getId()});
-                        Vector3d v1 = nodes[j]->getPosition() - nodes[i]->getPosition();
-                        Vector3d v2 = nodes[k]->getPosition() - nodes[i]->getPosition();
-                        Vector3d v3;
-                        for (auto l = 0; l < nodes.size(); l++) {
-                            if (l != i && l != j && l != k) {
-                                v3 = nodes[l]->getPosition() - nodes[i]->getPosition();
-                                break;
-                            }
-                        }
-                        Vector3d normal = v1.vector(v2).normalize();
-                        if (normal.scalar(v3) > 0) {
-                            normal = -normal;
-                        }
-                        _sideElements.emplace_back(new SideElement(triangle, normal));
-                    }
-                }
-            }
+            _sideElements.emplace_back(new SideElement(new Triangle({nodes[0]->getId(), nodes[1]->getId(), nodes[2]->getId()}), -a.vector(b).normalize()));
+            _sideElements.emplace_back(new SideElement(new Triangle({nodes[0]->getId(), nodes[1]->getId(), nodes[3]->getId()}), a.vector(d).normalize()));
+            _sideElements.emplace_back(new SideElement(new Triangle({nodes[0]->getId(), nodes[2]->getId(), nodes[3]->getId()}), -c.vector(e).normalize()));
+            _sideElements.emplace_back(new SideElement(new Triangle({nodes[1]->getId(), nodes[2]->getId(), nodes[3]->getId()}), b.vector(d).normalize()));
         }
 
-        Vector3d a = nodes[0]->getPosition();
-        Vector3d b = nodes[1]->getPosition();
-        Vector3d c = nodes[2]->getPosition();
-        Vector3d d = nodes[3]->getPosition();
-        _volume = std::abs((a - d).scalar((b - d).vector(c - d))) / 6;
+        _volume = std::abs((a).scalar(c.vector(e))) / 6;
     }
 
 };

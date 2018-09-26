@@ -50,6 +50,15 @@ public:
         return _array[i];
     }
 
+    bool isNull() const {
+        for (const auto& item : _array) {
+            if (item != T(0)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const VectorBase &base) {
         os << "[";
         for (std::size_t i = 0; i < base._array.size(); i++) {
