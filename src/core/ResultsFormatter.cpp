@@ -102,6 +102,12 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
             case Element::Type::TETRAHEDRON:
                 cellType = 10;
                 break;
+            case Element::Type::HEXAHEDRON:
+                cellType = 12;
+                break;
+            case Element::Type::PRISM:
+                cellType = 13;
+                break;
         }
         fs << cellType << std::endl;
     }
@@ -260,6 +266,12 @@ void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
                 break;
             case Element::Type::TETRAHEDRON:
                 cellType = 10;
+                break;
+            case Element::Type::HEXAHEDRON:
+                cellType = 12;
+                break;
+            case Element::Type::PRISM:
+                cellType = 13;
                 break;
         }
         fs << cellType << std::endl;

@@ -4,9 +4,11 @@
 #include "Triangle.h"
 #include "Quadrangle.h"
 #include "Tetrahedron.h"
+#include "Hexahedron.h"
+#include "Prism.h"
 #include "utilities/Utils.h"
-#include "core/Config.h"
 #include "utilities/Normalizer.h"
+#include "core/Config.h"
 
 #include <iostream>
 
@@ -141,6 +143,12 @@ void Mesh::addElement(int id, int type, int physicalEntityId, int geomUnitId, co
             break;
         case Element::Type::TETRAHEDRON:
             element = new Tetrahedron(id, physicalEntityId, geomUnitId, partitions, nodeIds);
+            break;
+        case Element::Type::HEXAHEDRON:
+            element = new Hexahedron(id, physicalEntityId, geomUnitId, partitions, nodeIds);
+            break;
+        case Element::Type::PRISM:
+            element = new Prism(id, physicalEntityId, geomUnitId, partitions, nodeIds);
             break;
     }
     addElement(element);

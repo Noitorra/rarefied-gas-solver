@@ -69,20 +69,20 @@ private:
         Vector3d v47 = nodes[4]->getPosition() - nodes[7]->getPosition();
         Vector3d v37 = nodes[3]->getPosition() - nodes[7]->getPosition();
         Vector3d v10 = nodes[1]->getPosition() - nodes[0]->getPosition();
-        volume += (v40.vector(v30).module() + v47.vector(v37).module()) * v10.scalar(v30.vector(v40).normalize()) / 6;
+        volume += std::abs((v40.vector(v30).module() + v47.vector(v37).module()) * v10.scalar(v30.vector(v40).normalize()) / 6);
 
         // second pyramid
         Vector3d v32 = nodes[3]->getPosition() - nodes[2]->getPosition();
         Vector3d v62 = nodes[6]->getPosition() - nodes[2]->getPosition();
         Vector3d v67 = nodes[6]->getPosition() - nodes[7]->getPosition();
         Vector3d v12 = nodes[1]->getPosition() - nodes[2]->getPosition();
-        volume += (v32.vector(v62).module() + v37.vector(v67).module()) * v12.scalar(v32.vector(v62).normalize()) / 6;
+        volume += std::abs((v32.vector(v62).module() + v37.vector(v67).module()) * v12.scalar(v32.vector(v62).normalize()) / 6);
 
         // third pyramid
         Vector3d v65 = nodes[6]->getPosition() - nodes[5]->getPosition();
         Vector3d v45 = nodes[4]->getPosition() - nodes[5]->getPosition();
         Vector3d v15 = nodes[1]->getPosition() - nodes[5]->getPosition();
-        volume += (v65.vector(v45).module() + v67.vector(v47).module()) * v15.scalar(v65.vector(v45).normalize()) / 6;
+        volume += std::abs((v65.vector(v45).module() + v67.vector(v47).module()) * v15.scalar(v65.vector(v45).normalize()) / 6);
 
         _volume = volume;
     }

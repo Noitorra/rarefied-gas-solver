@@ -21,7 +21,10 @@
 int main(int argc, char* argv[]) {
     Parallel::init(&argc, &argv);
 
-    std::string configFilename = "../../config3D.json";
+    if (Parallel::isMaster() && argc < 2) {
+        std::cout << "filename argument required" << std::endl;
+        Parallel::abort();
+    }
 
     std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> startTime;
     if (Parallel::isMaster()) {
@@ -38,7 +41,7 @@ int main(int argc, char* argv[]) {
         if (Parallel::isMaster() == true) {
 
             // load config
-            Config::getInstance()->load(configFilename);
+            Config::getInstance()->load(argv[1]);
             Config::getInstance()->init();
 
             // send to other processes
@@ -56,7 +59,7 @@ int main(int argc, char* argv[]) {
     } else {
 
         // load mesh
-        Config::getInstance()->load(configFilename);
+        Config::getInstance()->load(argv[1]);
         Config::getInstance()->init();
     }
 
