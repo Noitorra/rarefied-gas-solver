@@ -29,7 +29,9 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
             }
 
             // create normal cell
-            auto cell = new NormalCell(element->getId(), element->getVolume());
+            double volume = element->getVolume();
+            normalizeVolume(element.get(), volume);
+            auto cell = new NormalCell(element->getId(), volume);
             addCell(cell);
 
             // set initial params by physical group
@@ -60,9 +62,13 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
             if (neighborElement->isMain()) {
                 if (Parallel::isSingle() || neighborElement->getProcessId() == Parallel::getRank()) {
 
+                    // get square
+                    double square = sideElement->getElement()->getVolume();
+                    normalizeVolume(sideElement->getElement().get(), square);
+
                     // create connection for cell with other normal cell
                     auto neighborCell = getCellById(neighborElement->getId());
-                    auto connection = new CellConnection(cell, neighborCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                    auto connection = new CellConnection(cell, neighborCell, square, sideElement->getNormal());
                     cell->addConnection(connection);
                 } else {
 
@@ -73,12 +79,16 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
                         addCell(parallelCell);
                     }
 
+                    // get square
+                    double square = sideElement->getElement()->getVolume();
+                    normalizeVolume(sideElement->getElement().get(), square);
+
                     // create connection for parallel cell
-                    auto parallelConnection = new CellConnection(parallelCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
+                    auto parallelConnection = new CellConnection(parallelCell, cell, square, -sideElement->getNormal());
                     parallelCell->addConnection(parallelConnection);
 
                     // create connection for cell
-                    auto connection = new CellConnection(cell, parallelCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                    auto connection = new CellConnection(cell, parallelCell, square, sideElement->getNormal());
                     cell->addConnection(connection);
                 }
             } else if (neighborElement->isBorder()) {
@@ -115,12 +125,16 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
                     }
                 }
 
+                // get square
+                double square = sideElement->getElement()->getVolume();
+                normalizeVolume(sideElement->getElement().get(), square);
+
                 // create connection for border cell
-                auto borderConnection = new CellConnection(borderCell, cell, sideElement->getElement()->getVolume(), -sideElement->getNormal());
+                auto borderConnection = new CellConnection(borderCell, cell, square, -sideElement->getNormal());
                 borderCell->addConnection(borderConnection);
 
                 // create connection for cell
-                auto connection = new CellConnection(cell, borderCell, sideElement->getElement()->getVolume(), sideElement->getNormal());
+                auto connection = new CellConnection(cell, borderCell, square, sideElement->getNormal());
                 cell->addConnection(connection);
             } else {
                 throw std::runtime_error("wrong neighbor element");
@@ -157,7 +171,7 @@ void Grid::init() {
         minMass = std::min(minMass, gas.getMass());
     }
 
-    double timestep = 0.95 * minStep / (config->getImpulseSphere()->getMaxImpulse() / minMass);
+    double timestep = 0.8 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
 
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
@@ -177,6 +191,13 @@ void Grid::init() {
     }
 
     config->setTimestep(timestep);
+
+    std::cout << "MinMass = " << minMass << std::endl;
+    std::cout << "MinStep = " << minStep << std::endl;
+    std::cout << "Timestep = " << timestep << std::endl;
+
+    config->getNormalizer()->restore(timestep, Normalizer::Type::TIME);
+    std::cout << "Timestep (Normalized) = " << timestep << std::endl;
 }
 
 void Grid::computeTransfer() {
@@ -209,15 +230,17 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
     const auto& gases = Config::getInstance()->getGases();
     double timestep = Config::getInstance()->getTimestep();
 
-    ci::Particle cParticle{};
-    cParticle.d = 1.;
+    // b is normalized on lambda, d here should always be 1.0
+    ci::Particle particle1{}, particle2{};
+    particle1.d = 1.0;
+    particle2.d = 1.0;
 
     ci::gen(timestep, 50000,
             impulse->getResolution() / 2, impulse->getResolution() / 2,
             impulse->getXYZ2I(), impulse->getXYZ2I(),
-            impulse->getMaxImpulse() / impulse->getResolution() * 2,
+            impulse->getDeltaImpulse(),
             gases[gi1].getMass(), gases[gi2].getMass(),
-            cParticle, cParticle);
+            particle1, particle2);
 
     for (const auto& cell : _cells) {
         cell->computeIntegral(gi1, gi2);
@@ -338,6 +361,17 @@ BaseCell* Grid::getCellById(int id) {
 
 const std::vector<std::shared_ptr<BaseCell>>& Grid::getCells() const {
     return _cells;
+}
+
+void Grid::normalizeVolume(Element* element, double& volume) {
+    auto normalizer = Config::getInstance()->getNormalizer();
+    if (element->is1D()) {
+        normalizer->normalize(volume, Normalizer::Type::LENGTH);
+    } else if (element->is2D()) {
+        normalizer->normalize(volume, Normalizer::Type::SQUARE);
+    } else if (element->is3D()) {
+        normalizer->normalize(volume, Normalizer::Type::VOLUME);
+    }
 }
 
 

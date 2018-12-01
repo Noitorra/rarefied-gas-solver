@@ -19,12 +19,11 @@ private:
 
     std::string _root;
     std::string _main;
-//    std::vector<std::string> _params;
-//    std::vector<std::string> _types;
-//    std::string _gas;
 
     std::vector<Param> _scalarParams;
     std::vector<Param> _vectorParams;
+
+    std::vector<CellResults*> _lastResults;
 
 public:
     ResultsFormatter();

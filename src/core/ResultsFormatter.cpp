@@ -13,11 +13,9 @@ using namespace boost::filesystem;
 ResultsFormatter::ResultsFormatter() {
     _root = Config::getInstance()->getOutputFolder();
     _main = Utils::getCurrentDateAndTime();
-//    _params = {"pressure", "density", "temp", "flow", "heatflow"};
-//    _types = {"data", "pic"};
-//    _gas = "gas";
     _scalarParams = {Param::PRESSURE, Param::DENSITY, Param::TEMPERATURE};
     _vectorParams = {Param::FLOW, Param::HEATFLOW};
+    _lastResults = {};
 }
 
 void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::vector<CellResults*>& results) {
@@ -31,13 +29,6 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
         create_directory(mainPath);
     }
 
-//    for (const auto& type : _types) {
-//        path typePath{mainPath / type};ёёё
-//        if (exists(typePath) == false) {
-//            create_directory(typePath);
-//        }
-//    }
-
     path filePath = mainPath / (std::to_string(iteration) + ".vtk"); // _types[Type::DATA] /
     std::ofstream fs(filePath.generic_string(), std::ios::out); //  | std::ios::binary
 
@@ -50,9 +41,13 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
 
     // points
     fs << "POINTS " << mesh->getNodes().size() << " " << "double" << std::endl;
+    double units = Config::getInstance()->getMeshUnits();
     for (const auto& node : mesh->getNodes()) {
         auto point = node->getPosition();
-        fs << point.x() << " " << point.y() << " " << point.z() << std::endl;
+        double x = point.x() / units;
+        double y = point.y() / units;
+        double z = point.z() / units;
+        fs << x << " " << y << " " << z << std::endl;
     }
     fs << std::endl;
 
@@ -218,9 +213,13 @@ void ResultsFormatter::writeMeshDetails(Mesh* mesh) {
 
     // points
     fs << "POINTS " << mesh->getNodes().size() << " " << "double" << std::endl;
+    double units = Config::getInstance()->getMeshUnits();
     for (const auto& node : mesh->getNodes()) {
         auto point = node->getPosition();
-        fs << point.x() << " " << point.y() << " " << point.z() << std::endl;
+        double x = point.x() / units;
+        double y = point.y() / units;
+        double z = point.z() / units;
+        fs << x << " " << y << " " << z << std::endl;
     }
     fs << std::endl;
 
@@ -329,7 +328,6 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
     path filePath = mainPath / ("progression.txt"); // _types[Type::DATA] /
     std::ofstream fs(filePath.generic_string(), std::ios::out | std::ios::app); //  | std::ios::binary
 
-
     double wholeDensity = 0.0;
     Vector3d wholeFlow;
     for (const auto& result : results) {
@@ -337,7 +335,27 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
         wholeFlow += result->getFlow(0);
     }
 
-    fs << iteration << " " << wholeDensity << " " << wholeFlow.module() << std::endl;
+    fs << iteration << " " << wholeDensity << " " << wholeFlow.module();
+
+    if (_lastResults.empty()) {
+        _lastResults.resize(results.size(), new CellResults());
+        fs << " " << 0.0;
+    } else {
+        double averageTempDiff = 0.0, averageTemp = 0.0, averageDenDiff = 0.0, averageDen = 0.0;
+        for (auto i = 0; i < results.size(); i++) {
+            averageDen += results[i]->getDensity(0);
+            averageDenDiff += results[i]->getDensity(0) - _lastResults[i]->getDensity(0);
+            averageTemp += results[i]->getTemp(0);
+            averageTempDiff += results[i]->getTemp(0) - _lastResults[i]->getTemp(0);
+        }
+        double delta = std::max(std::abs(averageDenDiff / averageDen), std::abs(averageTempDiff / averageTemp));
+        fs << " " << delta;
+    }
+    for (auto i = 0; i < results.size(); i++) {
+        _lastResults[i]->setFromResults(*results[i]);
+    }
+
+    fs << std::endl;
 
     fs.close();
 }

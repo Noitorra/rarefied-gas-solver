@@ -21,7 +21,7 @@ MeshParser::MeshParser() {
     _isElementsSizeLine = true;
 }
 
-Mesh *MeshParser::loadMesh(const string &filename) {
+Mesh *MeshParser::loadMesh(const string &filename, double units) {
     std::ifstream fs(filename);
     if (fs.is_open() == true) {
         _mesh = new Mesh();
@@ -30,7 +30,7 @@ Mesh *MeshParser::loadMesh(const string &filename) {
             string line;
             while (getline(fs, line)) {
                 line = line.substr(0, line.size() - 1);
-                parse(line);
+                parse(line, units);
             }
             fs.close();
 
@@ -45,7 +45,7 @@ Mesh *MeshParser::loadMesh(const string &filename) {
     return _mesh;
 }
 
-void MeshParser::parse(const string& line) {
+void MeshParser::parse(const string& line, double units) {
     if (line.empty() == false) {
         if (line[0] == '$') { // it is directive
             if (_type == Type::UNDEFINED) {
@@ -99,6 +99,9 @@ void MeshParser::parse(const string& line) {
                         int id;
                         double x, y, z;
                         is >> id >> x >> y >> z;
+                        x *= units;
+                        y *= units;
+                        z *= units;
                         _mesh->addNode(id, Vector3d(x, y, z));
                     }
                     break;

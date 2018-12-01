@@ -22,6 +22,11 @@ public:
         _id = id;
     }
 
+    void setFromResults(const CellResults& results) {
+        setId(results.getId());
+        CellParameters::setFromParameters(results);
+    }
+
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {

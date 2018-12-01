@@ -19,20 +19,15 @@ void NormalCell::init() {
         _values[gi].resize(impulses.size(), 0.0);
         _newValues[gi].resize(impulses.size(), 0.0);
 
-        double dDensity = 0.0;
+        double C = 0.0;
         for (const auto& impulse : impulses) {
-            dDensity += fast_exp(gases[gi].getMass(), _params.getTemp(gi), impulse);
+            C += fast_exp(gases[gi].getMass(), _params.getTemp(gi), impulse);
         }
-
-        dDensity *= config->getImpulseSphere()->getDeltaImpulseQube();
-        dDensity = _params.getPressure(gi) / _params.getTemp(gi) / dDensity;
+        C = 1.0 / C;
+        C *= _params.getPressure(gi) / _params.getTemp(gi) / config->getImpulseSphere()->getDeltaImpulseQube();
 
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-            _values[gi][ii] = dDensity * fast_exp(
-                    gases[gi].getMass(),
-                    _params.getTemp(gi),
-                    impulses[ii]
-            );
+            _values[gi][ii] = C * fast_exp(gases[gi].getMass(), _params.getTemp(gi), impulses[ii]);
         }
     }
 }
@@ -144,13 +139,10 @@ double NormalCell::compute_temperature(int gi, double density, const Vector3d& s
 
     double temperature = 0.0;
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-        Vector3d vTemp;
-        for (unsigned int vi = 0; vi < averageSpeed.getArray().size(); vi++) {
-            vTemp[vi] = impulses[ii].get(vi) / gases[gi].getMass() - averageSpeed[vi];
-        }
-        temperature += gases[gi].getMass() * vTemp.moduleSquare() * _values[gi][ii];
+        Vector3d vTemp = impulses[ii] / gases[gi].getMass() - averageSpeed;
+        temperature += vTemp.moduleSquare() * _values[gi][ii];
     }
-    temperature *= impulseSphere->getDeltaImpulseQube() / density / 3;
+    temperature *= gases[gi].getMass() * impulseSphere->getDeltaImpulseQube() / density / 3;
     return temperature;
 }
 
@@ -166,9 +158,7 @@ Vector3d NormalCell::compute_stream(int gi) {
 
     Vector3d stream;
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-        for (unsigned int vi = 0; vi < stream.getArray().size(); vi++) {
-            stream[vi] += impulses[ii].get(vi) * _values[gi][ii];
-        }
+        stream += impulses[ii] * _values[gi][ii];
     }
     stream *= impulseSphere->getDeltaImpulseQube() / gases[gi].getMass();
     return stream;

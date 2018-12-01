@@ -23,7 +23,7 @@ void Solver::init() {
         if (Parallel::isMaster() == true) {
 
             // load mesh
-            mesh = MeshParser::getInstance().loadMesh(_config->getMeshFilename());
+            mesh = MeshParser::getInstance().loadMesh(_config->getMeshFilename(), _config->getMeshUnits());
             mesh->init();
 
             // send to other processes
@@ -39,7 +39,7 @@ void Solver::init() {
     } else {
 
         // load mesh
-        mesh = MeshParser::getInstance().loadMesh(_config->getMeshFilename());
+        mesh = MeshParser::getInstance().loadMesh(_config->getMeshFilename(), _config->getMeshUnits());
         mesh->init();
     }
 

@@ -9,6 +9,7 @@
 class BaseCell;
 class CellConnection;
 class Mesh;
+class Element;
 
 class Grid {
 private:
@@ -38,6 +39,10 @@ public:
     BaseCell* getCellById(int id);
 
     const std::vector<std::shared_ptr<BaseCell>>& getCells() const;
+
+private:
+    void normalizeVolume(Element* element, double& volume);
+
 };
 
 

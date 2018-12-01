@@ -11,11 +11,19 @@ void Config::init() {
         _normalizer.reset(new Normalizer());
     }
 
-    double maxMass = 0.0;
+    double maxMass = 0.0, maxRadius = 0.0;
     for (const auto& gas : _gases) {
         maxMass = std::max(maxMass, gas.getMass());
+        maxRadius = std::max(maxRadius, gas.getRadius());
     }
-    _normalizer->init(maxMass);
+    double maxPressure = 0.0, maxTemperature = 0.0;
+    for (auto& initialParam : _initialParameters) {
+        for (auto gi = 0; gi < _gases.size(); gi++) {
+            maxPressure = std::max(maxPressure, initialParam.getPressure(gi));
+            maxTemperature = std::max(maxTemperature, initialParam.getTemperature(gi));
+        }
+    }
+    _normalizer->init(maxMass, maxRadius, maxPressure, maxTemperature);
 
     for (auto& gas : _gases) {
         gas.setMass(_normalizer->normalize(gas.getMass(), Normalizer::Type::MASS));
@@ -48,6 +56,8 @@ void Config::load(const std::string& filename) {
     boost::property_tree::read_json(filename, root);
 
     _meshFilename = root.get<std::string>("mesh", "");
+    _meshUnits = root.get<double>("mesh_units", 1.0);
+
     _outputFolder = root.get<std::string>("output_folder", "./");
     _maxIterations = root.get<unsigned int>("max_iterations", 0);
     _outEachIteration = root.get<unsigned int>("out_each_iteration", 1);
@@ -58,8 +68,9 @@ void Config::load(const std::string& filename) {
     auto gasesNode = root.get_child_optional("gases");
     if (gasesNode) {
         for (const boost::property_tree::ptree::value_type& gas : *gasesNode) {
-            auto mass = gas.second.get_value<double>();
-            _gases.emplace_back(mass);
+            auto mass = gas.second.get<double>("mass") * 1.66e-27; // aem to kg
+            auto radius = gas.second.get<double>("radius") * 1e-12; // rad
+            _gases.emplace_back(mass, radius);
         }
     }
 
@@ -137,6 +148,10 @@ void Config::load(const std::string& filename) {
 
 const std::string& Config::getMeshFilename() const {
     return _meshFilename;
+}
+
+double Config::getMeshUnits() const {
+    return _meshUnits;
 }
 
 const std::string& Config::getOutputFolder() const {

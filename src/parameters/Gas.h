@@ -10,12 +10,14 @@ class Gas {
 
 private:
     double _mass;
+    double _radius;
 
 public:
     Gas() = default;
 
-    explicit Gas(double mass) {
+    explicit Gas(double mass, double radius) {
         _mass = mass;
+        _radius = radius;
     }
 
     double getMass() const {
@@ -26,8 +28,12 @@ public:
         _mass = mass;
     }
 
+    double getRadius() const {
+        return _radius;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Gas& gas) {
-        os << "Mass = " << gas._mass;
+        os << "Mass = " << gas._mass << " Radius = " << gas._radius;
         return os;
     }
 
@@ -35,6 +41,7 @@ private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
         ar & _mass;
+        ar & _radius;
     }
 
 };

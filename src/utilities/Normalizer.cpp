@@ -11,16 +11,19 @@ static const double BOLTZMANN_CONSTANT = 1.38064852e-23; // Boltzmann const
 	2) In programm we use blank variables.
 */
 
-void Normalizer::init(double maxMass) {
-    _temperature = 1500.0; // K // Maximum temperature in system
-    _pressure = 150.0; // Pressure of Cs gas
-    _density = _pressure / (BOLTZMANN_CONSTANT * _temperature); // Just density
-    _velocity = std::sqrt(BOLTZMANN_CONSTANT * _temperature / _mass); // m / s (This is how we define V1)
+void Normalizer::init(double maxMass, double maxRadius, double maxPressure, double maxTemperature) {
+    _mass = maxMass; // max mass
 
-    _length = 1.0; // time is calculated through system length, so no point in length normalization
+    _pressure = maxPressure;
+    _temperature = maxTemperature;
+    _density = maxPressure / (BOLTZMANN_CONSTANT * maxTemperature);
+    _velocity = std::sqrt(BOLTZMANN_CONSTANT * maxTemperature / maxMass);
+
+    _length = BOLTZMANN_CONSTANT * maxTemperature / (std::sqrt(2.0) * M_PI * maxPressure * std::pow(maxRadius * 2, 2)); // mean free path
+    _square = _length * _length;
+    _volume = _length * _length * _length;
+
     _time = _length / _velocity; // s (just timestep)
-
-    _mass = maxMass;
 }
 
 double Normalizer::normalize(const double& value, const Normalizer::Type& type) const {
@@ -37,6 +40,10 @@ double Normalizer::normalize(const double& value, const Normalizer::Type& type) 
             return value * _time;
         case Type::LENGTH:
             return value / _length;
+        case Type::SQUARE:
+            return value / _square;
+        case Type::VOLUME:
+            return value / _volume;
         case Type::TIME:
             return value / _time;
         case Type::MASS:
@@ -62,6 +69,10 @@ double Normalizer::restore(const double& value, const Normalizer::Type& type) co
             return value / _time;
         case Type::LENGTH:
             return value * _length;
+        case Type::SQUARE:
+            return value * _square;
+        case Type::VOLUME:
+            return value * _volume;
         case Type::TIME:
             return value * _time;
         case Type::MASS:

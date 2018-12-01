@@ -14,6 +14,7 @@ private:
         NODES,
         ELEMENTS
     };
+
     std::map<Type, std::string> _keywords;
     Type _type;
     bool _isPhysicalEntitiesSizeLine;
@@ -33,13 +34,13 @@ public:
     MeshParser(MeshParser const&) = delete;
     MeshParser& operator=(MeshParser const&) = delete;
 
-    Mesh *loadMesh(const std::string& filename);
+    Mesh *loadMesh(const std::string& filename, double units);
 
 private:
     MeshParser();
     ~MeshParser() = default;
 
-    void parse(const std::string& line);
+    void parse(const std::string& line, double units);
 
 };
 

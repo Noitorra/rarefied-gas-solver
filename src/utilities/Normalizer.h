@@ -17,6 +17,8 @@ public:
         FLOW,
         LAMBDA,
         LENGTH,
+        SQUARE,
+        VOLUME,
         TIME,
         MASS
     };
@@ -29,11 +31,13 @@ private:
     double _mass;
     double _velocity;
     double _length;
+    double _square;
+    double _volume;
 
 public:
     Normalizer() = default;
 
-    void init(double maxMass);
+    void init(double maxMass, double maxRadius, double maxPressure, double maxTemperature);
 
     double normalize(const double& value, const Type& type) const;
 
@@ -55,6 +59,8 @@ private:
         ar & _mass;
         ar & _velocity;
         ar & _length;
+        ar & _square;
+        ar & _volume;
     }
 
 };

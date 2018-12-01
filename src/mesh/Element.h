@@ -95,6 +95,18 @@ public:
         return _type;
     }
 
+    bool is1D() {
+        return _type == Type::LINE;
+    }
+
+    bool is2D() {
+        return _type == Type::TRIANGLE || _type == Type::QUADRANGLE;
+    }
+
+    bool is3D() {
+        return _type == Type::TETRAHEDRON || _type == Type::HEXAHEDRON || _type == Type::PRISM;
+    }
+
     int getId() const {
         return _id;
     }

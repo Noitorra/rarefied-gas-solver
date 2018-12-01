@@ -39,6 +39,13 @@ public:
         _heatFlow[gi] = std::move(heatFlow);
     }
 
+    void setFromParameters(const CellParameters& parameters) {
+        auto gases = Config::getInstance()->getGases();
+        for (auto gi = 0; gi < gases.size(); gi++) {
+            set(gi, parameters.getPressure(gi), parameters.getDensity(gi), parameters.getTemp(gi), parameters.getFlow(gi), parameters.getHeatFlow(gi));
+        }
+    }
+
     void reset() {
         std::fill(_pressure.begin(), _pressure.end(), 0.0);
         std::fill(_density.begin(), _density.end(), 0.0);

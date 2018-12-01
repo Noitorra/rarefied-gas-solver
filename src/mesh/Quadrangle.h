@@ -34,10 +34,10 @@ private:
             Vector3d c = nodes[3]->getPosition() - nodes[2]->getPosition();
             Vector3d d = nodes[0]->getPosition() - nodes[3]->getPosition();
 
-            _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -a.vector(b).vector(a)));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), -b.vector(c).vector(b)));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[3]->getId()}), -c.vector(d).vector(c)));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[3]->getId(), nodes[0]->getId()}), -d.vector(a).vector(d)));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -a.vector(b).vector(a).normalize()));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), -b.vector(c).vector(b).normalize()));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[3]->getId()}), -c.vector(d).vector(c).normalize()));
+            _sideElements.emplace_back(new SideElement(new Line({nodes[3]->getId(), nodes[0]->getId()}), -d.vector(a).vector(d).normalize()));
         }
 
         // volume is easy: d1d2sin(1,2) / 2

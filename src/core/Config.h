@@ -22,6 +22,7 @@ class Config {
 
 private:
     std::string _meshFilename;
+    double _meshUnits;
 
     std::string _outputFolder;
 
@@ -64,6 +65,8 @@ public:
 
     const std::string& getMeshFilename() const;
 
+    double getMeshUnits() const;
+
     const std::string& getOutputFolder() const;
 
     unsigned int getMaxIterations() const;
@@ -96,6 +99,7 @@ private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
         ar & _meshFilename;
+        ar & _meshUnits;
         ar & _outputFolder;
 
         ar & _maxIterations;
