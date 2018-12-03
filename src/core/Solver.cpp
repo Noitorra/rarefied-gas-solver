@@ -98,9 +98,18 @@ void Solver::run() {
             }
         }
 
+        // sync grid
+        if (Parallel::isSingle() == false) {
+            _grid->sync();
+        }
+
+        // transfer
+        _grid->computeTransfer();
+
         // check grid
         _grid->check();
 
+        // print out results
         if (iteration % _config->getOutEachIteration() == 0) {
             std::vector<CellResults*> results;
             for (const auto& cell : _grid->getCells()) {

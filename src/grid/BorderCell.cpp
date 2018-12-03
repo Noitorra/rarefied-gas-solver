@@ -45,6 +45,7 @@ void BorderCell::computeTransfer() {
                 break;
 
             case BorderType::FLOW:
+                computeTransferFlow(gi);
                 break;
         }
     }

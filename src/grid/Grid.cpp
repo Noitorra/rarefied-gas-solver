@@ -118,9 +118,8 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
                         }
                         for (auto gi = 0; gi < config->getGases().size(); gi++) {
                             borderCell->getBoundaryParams().setTemp(gi, param.getTemperature(gi));
-                        }
-                        for (auto gi = 0; gi < config->getGases().size(); gi++) {
                             borderCell->getBoundaryParams().setPressure(gi, param.getPressure(gi));
+                            borderCell->getBoundaryParams().setFlow(gi, param.getFlow(gi));
                         }
                     }
                 }
@@ -142,7 +141,9 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
         }
     }
 
-    std::cout << "Successful grid creation: number of cells = " << _cells.size() << std::endl;
+    if (Parallel::isMaster()) {
+        std::cout << "Successful grid creation: number of cells = " << _cells.size() << std::endl;
+    }
 }
 
 void Grid::init() {
@@ -171,7 +172,7 @@ void Grid::init() {
         minMass = std::min(minMass, gas.getMass());
     }
 
-    double timestep = 0.8 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
+    double timestep = 0.95 * 2 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
 
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
@@ -192,12 +193,14 @@ void Grid::init() {
 
     config->setTimestep(timestep);
 
-    std::cout << "MinMass = " << minMass << std::endl;
-    std::cout << "MinStep = " << minStep << std::endl;
-    std::cout << "Timestep = " << timestep << std::endl;
+    if (Parallel::isMaster()) {
+        std::cout << "MinMass = " << minMass << std::endl;
+        std::cout << "MinStep = " << minStep << std::endl;
+        std::cout << "Timestep = " << timestep << std::endl;
 
-    config->getNormalizer()->restore(timestep, Normalizer::Type::TIME);
-    std::cout << "Timestep (Normalized) = " << timestep << std::endl;
+        config->getNormalizer()->restore(timestep, Normalizer::Type::TIME);
+        std::cout << "Timestep (Normalized) = " << timestep << std::endl;
+    }
 }
 
 void Grid::computeTransfer() {

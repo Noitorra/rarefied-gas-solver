@@ -176,9 +176,15 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
                     switch (param) {
                         case Param::FLOW:
                             value = (*pos)->getFlow(gi);
+                            normalizer->restore(value.x(), Normalizer::Type::FLOW);
+                            normalizer->restore(value.y(), Normalizer::Type::FLOW);
+                            normalizer->restore(value.z(), Normalizer::Type::FLOW);
                             break;
                         case Param::HEATFLOW:
                             value = (*pos)->getHeatFlow(gi);
+                            normalizer->restore(value.x(), Normalizer::Type::HEATFLOW);
+                            normalizer->restore(value.y(), Normalizer::Type::HEATFLOW);
+                            normalizer->restore(value.z(), Normalizer::Type::HEATFLOW);
                             break;
                     }
                 }
@@ -328,32 +334,83 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
     path filePath = mainPath / ("progression.txt"); // _types[Type::DATA] /
     std::ofstream fs(filePath.generic_string(), std::ios::out | std::ios::app); //  | std::ios::binary
 
-    double wholeDensity = 0.0;
-    Vector3d wholeFlow;
+    fs << iteration;
+
+    auto config = Config::getInstance();
+    const auto& gases = config->getGases();
+
+    CellResults* rightResult = nullptr;
+    auto pos = std::find_if(results.begin(), results.end(), [](CellResults* item) {
+        return item->getId() == 104;
+    });
+    if (pos != std::end(results)) {
+        rightResult = (*pos);
+    }
+
+    std::vector<double> wholeDensity(gases.size(), 0.0);
+    std::vector<Vector3d> wholeFlow(gases.size(), Vector3d());
     for (const auto& result : results) {
-        wholeDensity += result->getDensity(0);
-        wholeFlow += result->getFlow(0);
-    }
-
-    fs << iteration << " " << wholeDensity << " " << wholeFlow.module();
-
-    if (_lastResults.empty()) {
-        _lastResults.resize(results.size(), new CellResults());
-        fs << " " << 0.0;
-    } else {
-        double averageTempDiff = 0.0, averageTemp = 0.0, averageDenDiff = 0.0, averageDen = 0.0;
-        for (auto i = 0; i < results.size(); i++) {
-            averageDen += results[i]->getDensity(0);
-            averageDenDiff += results[i]->getDensity(0) - _lastResults[i]->getDensity(0);
-            averageTemp += results[i]->getTemp(0);
-            averageTempDiff += results[i]->getTemp(0) - _lastResults[i]->getTemp(0);
+        for (auto gi = 0; gi < gases.size(); gi++) {
+            wholeDensity[gi] += result->getDensity(gi);
+            wholeFlow[gi] += result->getFlow(gi);
         }
-        double delta = std::max(std::abs(averageDenDiff / averageDen), std::abs(averageTempDiff / averageTemp));
-        fs << " " << delta;
     }
-    for (auto i = 0; i < results.size(); i++) {
-        _lastResults[i]->setFromResults(*results[i]);
+    for (auto gi = 0; gi < gases.size(); gi++) {
+        fs << " " << wholeDensity[gi] << " " << wholeFlow[gi].module();
+
+        if (rightResult != nullptr) {
+            fs << " " << rightResult->getFlow(gi).x();
+        }
     }
+
+
+//    // middle cell
+//    int middleCellId = 50;
+//    Vector3d heatflow;
+//    double tempLeft = 0, tempRight = 0, temp = 0;
+//    double hLeft = 0, hMiddle = 0, hRight = 0;
+//    for (const auto& result : results) {
+//        if (result->getId() == middleCellId - 1) {
+//            hLeft = result->getVolume();
+//            tempLeft = result->getTemp(0);
+//        }
+//        if (result->getId() == middleCellId + 1) {
+//            hRight = result->getVolume();
+//            tempRight = result->getTemp(0);
+//        }
+//        if (result->getId() == middleCellId) {
+//            hMiddle = result->getVolume();
+//            temp = result->getTemp(0);
+//            heatflow = result->getHeatFlow(0);
+//        }
+//    }
+//
+//    if (iteration >= 500) {
+//        double h = hLeft / 2 + hRight / 2 + hMiddle;
+//        double grad = (tempRight - tempLeft) / h;
+//        double coef = - 1.0 / std::sqrt(2) / M_PI / std::sqrt(temp) / grad * heatflow.x() / Config::getInstance()->getGases()[0].getMass();
+//        fs << " " << coef;
+//    } else {
+//        fs << " " << 0.0;
+//    }
+
+//    if (_lastResults.empty()) {
+//        _lastResults.resize(results.size(), new CellResults());
+//        fs << " " << 0.0;
+//    } else {
+//        double averageTempDiff = 0.0, averageTemp = 0.0, averageDenDiff = 0.0, averageDen = 0.0;
+//        for (auto i = 0; i < results.size(); i++) {
+//            averageDen += results[i]->getDensity(0);
+//            averageDenDiff += results[i]->getDensity(0) - _lastResults[i]->getDensity(0);
+//            averageTemp += results[i]->getTemp(0);
+//            averageTempDiff += results[i]->getTemp(0) - _lastResults[i]->getTemp(0);
+//        }
+//        double delta = std::max(std::abs(averageDenDiff / averageDen), std::abs(averageTempDiff / averageTemp));
+//        fs << " " << delta;
+//    }
+//    for (auto i = 0; i < results.size(); i++) {
+//        _lastResults[i]->setFromResults(*results[i]);
+//    }
 
     fs << std::endl;
 

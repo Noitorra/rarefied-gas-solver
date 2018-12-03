@@ -15,6 +15,7 @@ public:
         PRESSURE,
         DENSITY,
         FLOW,
+        HEATFLOW,
         LAMBDA,
         LENGTH,
         SQUARE,

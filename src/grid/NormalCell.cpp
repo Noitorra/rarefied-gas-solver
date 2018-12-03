@@ -36,6 +36,7 @@ void NormalCell::computeTransfer() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
     const auto& impulses = config->getImpulseSphere()->getImpulses();
+    auto timestep = config->getTimestep() / 2;
 
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
@@ -43,7 +44,7 @@ void NormalCell::computeTransfer() {
             for (const auto& connection : _connections) {
                 sum += connection->getValue(gi, ii, impulses[ii]);
             }
-            _newValues[gi][ii] = _values[gi][ii] + sum * config->getTimestep() / _volume / gases[gi].getMass();
+            _newValues[gi][ii] = _values[gi][ii] + sum * timestep / _volume / gases[gi].getMass();
         }
     }
 }
@@ -111,6 +112,7 @@ CellResults* NormalCell::getResults() {
         }
         _results->set(gi, pressure, density, temp, flow, heatFlow);
     }
+    _results->setVolume(getVolume());
 
     return _results.get();
 }
@@ -165,5 +167,15 @@ Vector3d NormalCell::compute_stream(int gi) {
 }
 
 Vector3d NormalCell::compute_heatstream(int gi) {
-    return Vector3d();
+    auto config = Config::getInstance();
+    const auto& gases = config->getGases();
+    auto impulseSphere = config->getImpulseSphere();
+    const auto& impulses = impulseSphere->getImpulses();
+
+    Vector3d heatstream;
+    for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+        heatstream += impulses[ii] * impulses[ii].moduleSquare() * _values[gi][ii];
+    }
+    heatstream *= impulseSphere->getDeltaImpulseQube() / 2 / std::pow(gases[gi].getMass(), 2);
+    return heatstream;
 }

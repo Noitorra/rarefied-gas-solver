@@ -36,6 +36,8 @@ double Normalizer::normalize(const double& value, const Normalizer::Type& type) 
             return value / _density;
         case Type::FLOW:
             return value / (_density * _velocity);
+        case Type::HEATFLOW:
+            return value / (_density * std::pow(_velocity, 3) * _mass);
         case Type::LAMBDA:
             return value * _time;
         case Type::LENGTH:
@@ -65,6 +67,8 @@ double Normalizer::restore(const double& value, const Normalizer::Type& type) co
             return value * _density;
         case Type::FLOW:
             return value * (_density * _velocity);
+        case Type::HEATFLOW:
+            return value * (_density * std::pow(_velocity, 3) * _mass);
         case Type::LAMBDA:
             return value / _time;
         case Type::LENGTH:

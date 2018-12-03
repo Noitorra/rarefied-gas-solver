@@ -42,6 +42,12 @@ void Config::init() {
         for (auto gi = 0; gi < _gases.size(); gi++) {
             boundaryParam.setPressure(gi, _normalizer->normalize(boundaryParam.getPressure(gi), Normalizer::Type::PRESSURE));
             boundaryParam.setTemperature(gi, _normalizer->normalize(boundaryParam.getTemperature(gi), Normalizer::Type::TEMPERATURE));
+
+            Vector3d flow = boundaryParam.getFlow(gi);
+            _normalizer->normalize(flow.x(), Normalizer::Type::FLOW);
+            _normalizer->normalize(flow.y(), Normalizer::Type::FLOW);
+            _normalizer->normalize(flow.z(), Normalizer::Type::FLOW);
+            boundaryParam.setFlow(gi, flow);
         }
     }
 
@@ -141,7 +147,19 @@ void Config::load(const std::string& filename) {
             }
             temperature.resize(_gases.size(), 0.0);
 
-            _boundaryParameters.emplace_back(group, type, temperature, pressure);
+            std::vector<Vector3d> flow;
+            auto flowNode = param.second.get_child_optional("flow");
+            if (flowNode) {
+                for (const boost::property_tree::ptree::value_type& value : *flowNode) {
+                    double flowX = value.second.get<double>("x", 0);
+                    double flowY = value.second.get<double>("y", 0);
+                    double flowZ = value.second.get<double>("z", 0);
+                    flow.emplace_back(flowX, flowY, flowZ);
+                }
+            }
+            flow.resize(_gases.size(), Vector3d());
+
+            _boundaryParameters.emplace_back(group, type, temperature, pressure, flow);
         }
     }
 }

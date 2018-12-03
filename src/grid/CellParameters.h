@@ -15,6 +15,7 @@ private:
     std::vector<double> _temp;
     std::vector<Vector3d> _flow;
     std::vector<Vector3d> _heatFlow;
+    double _volume;
 
 public:
     CellParameters() {
@@ -25,6 +26,7 @@ public:
         _temp.resize(gasesSize);
         _flow.resize(gasesSize);
         _heatFlow.resize(gasesSize);
+        _volume = 0.0;
     };
 
     void set(int gi, double pressure, double density, double temp) {
@@ -44,6 +46,7 @@ public:
         for (auto gi = 0; gi < gases.size(); gi++) {
             set(gi, parameters.getPressure(gi), parameters.getDensity(gi), parameters.getTemp(gi), parameters.getFlow(gi), parameters.getHeatFlow(gi));
         }
+        setVolume(parameters.getVolume());
     }
 
     void reset() {
@@ -52,6 +55,7 @@ public:
         std::fill(_temp.begin(), _temp.end(), 0.0);
         std::fill(_flow.begin(), _flow.end(), Vector3d());
         std::fill(_heatFlow.begin(), _heatFlow.end(), Vector3d());
+        _volume = 0.0;
     }
 
     double getPressure(int gi) const {
@@ -94,6 +98,14 @@ public:
         _heatFlow[gi] = heatFlow;
     }
 
+    double getVolume() const {
+        return _volume;
+    }
+
+    void setVolume(double volume) {
+        _volume = volume;
+    }
+
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
@@ -102,6 +114,7 @@ private:
         ar & _temp;
         ar & _flow;
         ar & _heatFlow;
+        ar & _volume;
     }
 
 };

@@ -19,12 +19,13 @@ private:
     std::vector<std::string> _type;
     std::vector<double> _temperature;
     std::vector<double> _pressure;
+    std::vector<Vector3d> _flow;
 
 public:
     BoundaryParameters() = default;
 
-    BoundaryParameters(std::string group, std::vector<std::string> type, std::vector<double> temperature, std::vector<double> pressure)
-    : _group(std::move(group)), _type(std::move(type)), _temperature(std::move(temperature)), _pressure(std::move(pressure)) {}
+    BoundaryParameters(std::string group, std::vector<std::string> type, std::vector<double> temperature, std::vector<double> pressure, std::vector<Vector3d> flow)
+    : _group(std::move(group)), _type(std::move(type)), _temperature(std::move(temperature)), _pressure(std::move(pressure)), _flow(std::move(flow)) {}
 
     const std::string& getGroup() const {
         return _group;
@@ -58,6 +59,14 @@ public:
         _pressure[gi] = pressure;
     }
 
+    Vector3d getFlow(int gi) const {
+        return _flow[gi];
+    }
+
+    void setFlow(int gi, Vector3d flow) {
+        _flow[gi] = flow;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const BoundaryParameters& parameters) {
         os << "{";
         os << "Group = " << parameters._group;
@@ -73,6 +82,10 @@ public:
             os << "; ";
             os << "Pressure = " << Utils::toString(parameters._pressure);
         }
+        if (parameters._flow.empty() == false) {
+            os << "; ";
+            os << "Flow = " << Utils::toString(parameters._flow);
+        }
         os << "}";
         return os;
     }
@@ -84,6 +97,7 @@ private:
         ar & _type;
         ar & _temperature;
         ar & _pressure;
+        ar & _flow;
     }
 
 };
