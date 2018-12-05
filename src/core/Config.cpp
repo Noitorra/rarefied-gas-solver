@@ -27,6 +27,7 @@ void Config::init() {
 
     for (auto& gas : _gases) {
         gas.setMass(_normalizer->normalize(gas.getMass(), Normalizer::Type::MASS));
+        gas.setRadius(_normalizer->normalize(gas.getRadius(), Normalizer::Type::RADIUS));
     }
     for (auto& betaChain : _betaChains) {
         betaChain.setLambda1(_normalizer->normalize(betaChain.getLambda1(), Normalizer::Type::LAMBDA));

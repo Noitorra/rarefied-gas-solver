@@ -13,6 +13,7 @@ static const double BOLTZMANN_CONSTANT = 1.38064852e-23; // Boltzmann const
 
 void Normalizer::init(double maxMass, double maxRadius, double maxPressure, double maxTemperature) {
     _mass = maxMass; // max mass
+    _radius = maxRadius; // max radius of molecule
 
     _pressure = maxPressure;
     _temperature = maxTemperature;
@@ -50,6 +51,8 @@ double Normalizer::normalize(const double& value, const Normalizer::Type& type) 
             return value / _time;
         case Type::MASS:
             return value / _mass;
+        case Type::RADIUS:
+            return value / _radius;
     }
 }
 
@@ -81,6 +84,8 @@ double Normalizer::restore(const double& value, const Normalizer::Type& type) co
             return value * _time;
         case Type::MASS:
             return value * _mass;
+        case Type::RADIUS:
+            return value * _radius;
     }
 }
 
@@ -94,6 +99,7 @@ std::ostream& operator<<(std::ostream& os, const Normalizer& normalizer) {
        << "Pres = "   << normalizer._pressure    << " Pa" << "; "
        << "Den = "    << normalizer._density     << " 1/m^3" << "; "
        << "Mass = "   << normalizer._mass        << " Kg" << "; "
+       << "Radius = " << normalizer._radius    << " m" << "; "
        << "Vel = "    << normalizer._velocity    << " m/s" << "; "
        << "Length = " << normalizer._length      << " m" << "; "
        << "Time = "   << normalizer._time        << " s";

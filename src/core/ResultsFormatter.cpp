@@ -337,6 +337,7 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
     fs << iteration;
 
     auto config = Config::getInstance();
+    auto normalizer = config->getNormalizer();
     const auto& gases = config->getGases();
 
     CellResults* rightResult = nullptr;
@@ -359,7 +360,11 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
         fs << " " << wholeDensity[gi] << " " << wholeFlow[gi].module();
 
         if (rightResult != nullptr) {
-            fs << " " << rightResult->getFlow(gi).x();
+            Vector3d rightFlow = rightResult->getFlow(gi);
+            normalizer->restore(rightFlow.x(), Normalizer::Type::FLOW);
+            normalizer->restore(rightFlow.y(), Normalizer::Type::FLOW);
+            normalizer->restore(rightFlow.z(), Normalizer::Type::FLOW);
+            fs << " " << rightFlow.x();
         }
     }
 

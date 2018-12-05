@@ -233,10 +233,12 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
     const auto& gases = Config::getInstance()->getGases();
     double timestep = Config::getInstance()->getTimestep();
 
-    // b is normalized on lambda, d here should always be 1.0
+    // diameter is normalized onto effective diameter of molecula
+    // time, impulse, etc is nomalized on lambda, but labmda and effective diameter is linked through equation
+    // so here d is normalized to d/d(eff) meaning that here we can use normalized on maximum radius instead
     ci::Particle particle1{}, particle2{};
-    particle1.d = 1.0;
-    particle2.d = 1.0;
+    particle1.d = gases[gi1].getRadius();
+    particle2.d = gases[gi2].getRadius();
 
     ci::gen(timestep, 50000,
             impulse->getResolution() / 2, impulse->getResolution() / 2,

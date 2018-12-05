@@ -21,7 +21,8 @@ public:
         SQUARE,
         VOLUME,
         TIME,
-        MASS
+        MASS,
+        RADIUS
     };
 
 private:
@@ -34,6 +35,7 @@ private:
     double _length;
     double _square;
     double _volume;
+    double _radius;
 
 public:
     Normalizer() = default;
@@ -62,6 +64,7 @@ private:
         ar & _length;
         ar & _square;
         ar & _volume;
+        ar & _radius;
     }
 
 };
