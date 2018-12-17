@@ -365,6 +365,10 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
             normalizer->restore(rightFlow.y(), Normalizer::Type::FLOW);
             normalizer->restore(rightFlow.z(), Normalizer::Type::FLOW);
             fs << " " << rightFlow.x();
+
+            double pressure = rightResult->getPressure(gi);
+            normalizer->restore(pressure, Normalizer::Type::PRESSURE);
+            fs << " " << pressure;
         }
     }
 

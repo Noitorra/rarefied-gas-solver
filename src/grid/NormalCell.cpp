@@ -58,7 +58,7 @@ void NormalCell::computeBetaDecay(int gi0, int gi1, double lambda) {
     const auto& impulses = config->getImpulseSphere()->getImpulses();
 
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-        double impact = _values[gi0][ii] * lambda * config->getTimestep(); // TODO: check lambda * Config::_timestep < 1 !!!
+        double impact = _values[gi0][ii] * lambda * config->getTimestep();
         _values[gi0][ii] -= impact;
         _values[gi1][ii] += impact;
     }

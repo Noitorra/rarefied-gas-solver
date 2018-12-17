@@ -15,45 +15,48 @@ fi = int(input())
 folder = root + os.sep + files[fi]
 file = open(folder + os.sep + 'progression.txt', 'r')
 
-gases_num = 3
+gases_count = 7
 
 
 def move_index(gi, i):
-    return 1 + gi * gases_num + i
+    return 1 + gi * 4 + i
 
 
 iterations = []
-flows0 = []
-flows1 = []
-flows2 = []
-# coefs = []
+flows = [[] for i in range(gases_count)]
+pressures = [[] for i in range(gases_count)]
 
 for row in file:
     data = row.strip().split(' ')
     iterations.append(int(data[0]))
+    for gi in range(gases_count):
+        flows[gi].append(float(data[move_index(gi, 2)]))
+        pressures[gi].append(float(data[move_index(gi, 3)]))
 
-    flows0.append(float(data[move_index(0, 2)]))
-    flows1.append(float(data[move_index(1, 2)]))
-    # flows2.append(float(data[move_index(2, 2)]))
-# coefs.append(float(data[3]))
+average_flow = [[] for i in range(gases_count)]
+average_pressure = [[] for i in range(gases_count)]
+for gi in range(gases_count):
+    average_flow[gi] = np.average(flows[gi][-100:])
+    average_pressure[gi] = np.average(pressures[gi][-100:])
 
-# average_coef = np.average(coefs[-100:])
-# print('Average coef = {}'.format(average_coef))
+for gi in range(gases_count):
+    print('Average flow (gas {}) = {}'.format(gi, average_flow[gi]))
 
-average_flow0 = np.average(flows0[-100:])
-average_flow1 = np.average(flows1[-100:])
-# average_flow2 = np.average(flows2[-2000:])
-print('Average flow (gas 0) = {}'.format(average_flow0))
-print('Average flow (gas 1) = {}'.format(average_flow1))
-# print('Average flow (gas 2) = {}'.format(average_flow2))
+for gi in range(gases_count):
+    print('Average pressure (gas {}) = {}'.format(gi, average_pressure[gi]))
 
-plt.subplot(211)
-plt.plot(iterations, flows0)
-plt.plot(iterations, [average_flow0 for i in range(len(iterations))])
+plt.figure(figsize=(12, 8))
 
-plt.subplot(212)
-plt.plot(iterations, flows1)
-plt.plot(iterations, [average_flow1 for i in range(len(iterations))])
+for gi in range(gases_count):
+    plt.subplot(2, gases_count, 1 + gi)
+    plt.plot(iterations, flows[gi])
+    plt.plot(iterations, [average_flow[gi] for i in range(len(iterations))])
+
+for gi in range(gases_count):
+    plt.subplot(2, gases_count, 1 + gases_count + gi)
+    plt.plot(iterations, pressures[gi])
+    plt.plot(iterations, [average_pressure[gi] for i in range(len(iterations))])
+
 
 # plt.subplot(313)
 # plt.plot(iterations, flows2)

@@ -32,6 +32,10 @@ public:
         return _radius;
     }
 
+    void setRadius(double radius) {
+        _radius = radius;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Gas& gas) {
         os << "Mass = " << gas._mass << " Radius = " << gas._radius;
         return os;

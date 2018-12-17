@@ -15,6 +15,10 @@ void Normalizer::init(double maxMass, double maxRadius, double maxPressure, doub
     _mass = maxMass; // max mass
     _radius = maxRadius; // max radius of molecule
 
+    if (std::abs(maxPressure) < 1e-16) {
+        maxPressure = 1.0; // 1 Pa
+    }
+
     _pressure = maxPressure;
     _temperature = maxTemperature;
     _density = maxPressure / (BOLTZMANN_CONSTANT * maxTemperature);
