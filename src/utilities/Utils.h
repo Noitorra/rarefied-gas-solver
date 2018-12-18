@@ -36,15 +36,15 @@ public:
     }
 
     template<typename Enumeration>
-    static inline auto asNumber(const Enumeration value) -> typename std::underlying_type<Enumeration>::type {
-        return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+    static inline int asNumber(const Enumeration value) {
+        return static_cast<int>(value);
     }
 
     template<typename Enumeration>
-    static inline auto asNumberVector(const std::vector<Enumeration>& values) -> std::vector<typename std::underlying_type<Enumeration>::type> {
-        std::vector<typename std::underlying_type<Enumeration>::type> basicValues;
+    static inline std::vector<int> asNumberVector(const std::vector<Enumeration>& values) {
+        std::vector<int> basicValues;
         for (unsigned int i = 0; i < values.size(); i++) {
-            basicValues.push_back(static_cast<typename std::underlying_type<Enumeration>::type>(values[i]));
+            basicValues.push_back(static_cast<int>(values[i]));
         }
         return basicValues;
     }

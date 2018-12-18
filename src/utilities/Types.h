@@ -178,7 +178,7 @@ public:
         return *this;
     }
 
-    const bool operator==(const Vector2& rhs) const {
+    bool operator==(const Vector2& rhs) const {
         bool isEqual = true;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             if (this->_array[i] != rhs._array[i]) {
@@ -331,7 +331,7 @@ public:
         return *this;
     }
 
-    const bool operator==(const Vector3& rhs) const {
+    bool operator==(const Vector3& rhs) const {
         bool isEqual = true;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             if (this->_array[i] != rhs._array[i]) {
