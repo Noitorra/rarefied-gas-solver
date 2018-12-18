@@ -6,22 +6,21 @@
 #include "Element.h"
 
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <memory>
 #include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/unordered_map.hpp>
-#include <bits/unordered_map.h>
+#include <boost/serialization/map.hpp>
 
 class Mesh {
     friend class boost::serialization::access;
 
 private:
     std::vector<std::shared_ptr<PhysicalEntity>> _physicalEntities;
-    std::unordered_map<int, PhysicalEntity*> _physicalEntitiesMap;
+    std::map<int, PhysicalEntity*> _physicalEntitiesMap;
     std::vector<std::shared_ptr<Node>> _nodes;
-    std::unordered_map<int, Node*> _nodesMap;
+    std::map<int, Node*> _nodesMap;
     std::vector<std::shared_ptr<Element>> _elements;
-    std::unordered_map<int, Element*> _elementsMap;
+    std::map<int, Element*> _elementsMap;
 
 public:
     Mesh() = default;

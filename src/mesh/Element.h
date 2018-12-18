@@ -9,7 +9,7 @@
 
 #include <vector>
 #include <memory>
-#include <unordered_map>
+#include <map>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/string.hpp>
 #include <iostream>
@@ -51,7 +51,7 @@ public:
     : _type(type), _id(id), _physicalEntityId(physicalEntityId), _geomUnitId(geomUnitId), _partitions(std::move(partitions)),
     _nodeIds(std::move(nodeIds)), _group(""), _isProcessing(false), _isMain(false), _isBorder(false), _volume(0.0) {}
 
-    void init(const std::unordered_map<int, Node*>& allNodesMap, bool isOriginalElement) {
+    void init(const std::map<int, Node*>& allNodesMap, bool isOriginalElement) {
         std::vector<Node*> nodes;
         for (auto nodeId : _nodeIds) {
             nodes.push_back(allNodesMap.at(nodeId));

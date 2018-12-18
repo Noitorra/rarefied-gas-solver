@@ -1,6 +1,8 @@
 #include "BorderCell.h"
 #include "CellConnection.h"
 
+#include <stdexcept>
+
 BorderCell::BorderCell(int id) : BaseCell(Type::BORDER, id) {
     const auto& gases = Config::getInstance()->getGases();
     _borderTypes.resize(gases.size(), BorderType::UNDEFINED);

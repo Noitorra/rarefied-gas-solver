@@ -4,7 +4,7 @@
 #include "utilities/Types.h"
 
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 class BaseCell;
 class CellConnection;
@@ -15,7 +15,7 @@ class Grid {
 private:
     Mesh* _mesh;
     std::vector<std::shared_ptr<BaseCell>> _cells;
-    std::unordered_map<int, BaseCell*> _cellsMap;
+    std::map<int, BaseCell*> _cellsMap;
 
 public:
     explicit Grid(Mesh* mesh);

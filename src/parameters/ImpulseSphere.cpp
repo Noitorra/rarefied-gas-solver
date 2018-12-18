@@ -1,6 +1,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 #include "ImpulseSphere.h"
 #include "core/Config.h"

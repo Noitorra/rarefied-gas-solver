@@ -3,16 +3,17 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
 MeshParser::MeshParser() {
     _type = Type::UNDEFINED;
 
-    _keywords.emplace(Type::MESH_FORMAT, "MeshFormat");
-    _keywords.emplace(Type::PHYSICAL_NAMES, "PhysicalNames");
-    _keywords.emplace(Type::NODES, "Nodes");
-    _keywords.emplace(Type::ELEMENTS, "Elements");
+    _keywords[Type::MESH_FORMAT] = "MeshFormat";
+    _keywords[Type::PHYSICAL_NAMES] = "PhysicalNames";
+    _keywords[Type::NODES] =  "Nodes";
+    _keywords[Type::ELEMENTS] = "Elements";
 
     _mesh = nullptr;
 
@@ -81,7 +82,7 @@ void MeshParser::parse(const string& line, double units) {
                         int dimension, tag;
                         std::string name;
                         is >> dimension >> tag >> name;
-                        if (name.front() == '\"') {
+                        if (name[0] == '\"') {
                             name.erase(0, 1);
                             name.erase(name.size() - 1);
                         }

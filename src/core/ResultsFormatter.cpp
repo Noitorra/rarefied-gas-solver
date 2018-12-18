@@ -29,7 +29,7 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
         create_directory(mainPath);
     }
 
-    path filePath = mainPath / (std::to_string(iteration) + ".vtk"); // _types[Type::DATA] /
+    path filePath = mainPath / (Utils::toString(iteration) + ".vtk"); // _types[Type::DATA] /
     std::ofstream fs(filePath.generic_string(), std::ios::out); //  | std::ios::binary
 
     // writing file
@@ -128,7 +128,7 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
                     paramName = "Temperature";
                     break;
             }
-            paramName += "_" + std::to_string(gi);
+            paramName += "_" + Utils::toString(gi);
 
             fs << "SCALARS " << paramName << " " << "double" << " " << 1 << std::endl;
             fs << "LOOKUP_TABLE " << "default" << std::endl;
@@ -164,7 +164,7 @@ void ResultsFormatter::writeAll(unsigned int iteration, Mesh* mesh, const std::v
                     paramName = "HeatFlow";
                     break;
             }
-            paramName += "_" + std::to_string(gi);
+            paramName += "_" + Utils::toString(gi);
 
             fs << "VECTORS " << paramName << " " << "double" << std::endl;
             for (auto element : elements) {
@@ -344,7 +344,7 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
     auto pos = std::find_if(results.begin(), results.end(), [](CellResults* item) {
         return item->getId() == 104;
     });
-    if (pos != std::end(results)) {
+    if (pos != results.end()) {
         rightResult = (*pos);
     }
 

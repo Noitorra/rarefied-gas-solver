@@ -7,6 +7,7 @@
 
 class NormalCell;
 class ResultsFormatter;
+class KeyboardManager;
 
 class Solver {
 public:
@@ -20,6 +21,7 @@ private:
     Config* _config;
     Grid* _grid;
     ResultsFormatter* _formatter;
+    KeyboardManager* _keyboard;
 };
 
 #endif //RGS_SOLVER_H

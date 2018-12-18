@@ -10,10 +10,12 @@
 #include "KeyboardManager.h"
 
 #include <chrono>
+#include <stdexcept>
 
 Solver::Solver() {
     _config = Config::getInstance();
     _formatter = new ResultsFormatter();
+    _keyboard = KeyboardManager::getInstance();
 }
 
 void Solver::init() {
@@ -60,7 +62,9 @@ void Solver::run() {
     }
 
     if (Parallel::isMaster() == true) {
-        KeyboardManager::getInstance()->start();
+        if (_keyboard->isAvailable()) {
+            _keyboard->start();
+        }
         std::cout << std::endl;
     }
     unsigned int maxIterations = _config->getMaxIterations();
@@ -145,7 +149,11 @@ void Solver::run() {
         }
 
         if (Parallel::isMaster() == true) {
-            if (KeyboardManager::getInstance()->isWaitingCommand() == false) {
+            bool isPrintingProgress = true;
+            if (_keyboard->isAvailable()) {
+                isPrintingProgress = _keyboard->isWaitingCommand() == false;
+            }
+            if (isPrintingProgress) {
                 auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIterations * 100);
 
                 std::cout << '\r';
@@ -154,8 +162,7 @@ void Solver::run() {
                 std::cout << percent << "%";
                 std::cout.flush();
             }
-
-            if (KeyboardManager::getInstance()->isStop()) {
+            if (_keyboard->isAvailable() && _keyboard->isStop()) {
                 throw std::runtime_error("stop signal");
             }
         }

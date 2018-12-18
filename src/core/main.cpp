@@ -1,9 +1,11 @@
 #include "utilities/Parallel.h"
 #include "Solver.h"
+#include "KeyboardManager.h"
 
 #include <iostream>
 #include <thread>
 #include <utilities/SerializationUtils.h>
+#include <chrono>
 
 // Gases masses
 // 133 - 133 Cs
@@ -26,14 +28,21 @@ int main(int argc, char* argv[]) {
         Parallel::abort();
     }
 
-    std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> startTime;
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> startTime;
     if (Parallel::isMaster()) {
-        startTime = std::chrono::steady_clock::now();
+        startTime = std::chrono::system_clock::now();
     }
 
     // Print off a hello world message
     if (Parallel::isMaster()) {
         std::cout << "Starting solver with " << Parallel::getSize() << " nodes" << std::endl << std::endl;
+
+        if (argc > 2) {
+            std::string param = argv[1];
+            if (param == "--with-commands") {
+                KeyboardManager::getInstance()->setAvailable(true);
+            }
+        }
     }
 
     // Create config
@@ -41,7 +50,7 @@ int main(int argc, char* argv[]) {
         if (Parallel::isMaster() == true) {
 
             // load config
-            Config::getInstance()->load(argv[1]);
+            Config::getInstance()->load(argv[argc - 1]);
             Config::getInstance()->init();
 
             // send to other processes
@@ -59,7 +68,7 @@ int main(int argc, char* argv[]) {
     } else {
 
         // load mesh
-        Config::getInstance()->load(argv[1]);
+        Config::getInstance()->load(argv[argc - 1]);
         Config::getInstance()->init();
     }
 
@@ -85,7 +94,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (Parallel::isMaster()) {
-        auto now = std::chrono::steady_clock::now();
+        auto now = std::chrono::system_clock::now();
         auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
         std::cout << "It took - " << wholeTime << " seconds" << std::endl;
     }

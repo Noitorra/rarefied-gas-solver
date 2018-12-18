@@ -4,7 +4,15 @@
 #include <iostream>
 #include <limits>
 
-KeyboardManager::KeyboardManager() : _state(State::DISABLED), _command(Command::NONE) {}
+KeyboardManager::KeyboardManager() : _isAvailable(false), _state(State::DISABLED), _command(Command::NONE) {}
+
+bool KeyboardManager::isAvailable() const {
+    return _isAvailable;
+}
+
+void KeyboardManager::setAvailable(bool isAvailable) {
+    _isAvailable = isAvailable;
+}
 
 void KeyboardManager::start() {
     std::thread thread([this] {

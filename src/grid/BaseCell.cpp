@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <boost/format.hpp>
+#include <stdexcept>
 
 BaseCell::BaseCell(Type type, int id) : _type(type), _id(id) {}
 

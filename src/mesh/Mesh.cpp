@@ -11,6 +11,7 @@
 #include "core/Config.h"
 
 #include <iostream>
+#include <stdexcept>
 
 void Mesh::init() {
 
@@ -47,8 +48,8 @@ void Mesh::init() {
             auto predicate = [&element, &sideElement](const std::shared_ptr<Element>& otherElement) {
                 return otherElement->getId() != element->getId() && otherElement->isSideOrContainsSide(sideElement.get());
             };
-            auto result = std::find_if(std::begin(_elements), std::end(_elements), predicate);
-            if (result != std::end(_elements)) {
+            auto result = std::find_if(_elements.begin(), _elements.end(), predicate);
+            if (result != _elements.end()) {
                 const auto& otherElement = *result;
                 sideElement->setNeighborId(otherElement->getId());
             } else {
@@ -100,7 +101,6 @@ const std::vector<std::shared_ptr<PhysicalEntity>>& Mesh::getPhysicalEntities() 
 
 void Mesh::reserveNodes(std::size_t capacity) {
     _nodes.reserve(capacity);
-    _nodesMap.reserve(capacity);
 }
 
 void Mesh::addNode(int id, Vector3d position) {

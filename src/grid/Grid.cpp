@@ -13,8 +13,8 @@
 #include "utilities/Normalizer.h"
 #include "integral/ci.hpp"
 
-#include <unordered_map>
 #include <map>
+#include <stdexcept>
 
 Grid::Grid(Mesh* mesh) : _mesh(mesh) {
     auto config = Config::getInstance();
@@ -265,8 +265,8 @@ void Grid::check() {
 }
 
 void Grid::sync() {
-    std::unordered_map<int, std::vector<int>> sendSyncIdsMap;
-    std::unordered_map<int, std::vector<int>> recvSyncIdsMap;
+    std::map<int, std::vector<int>> sendSyncIdsMap;
+    std::map<int, std::vector<int>> recvSyncIdsMap;
 
     // fill map
     for (const auto& cell : _cells) {
@@ -276,10 +276,10 @@ void Grid::sync() {
             // create vectors for data
             auto syncProcessId = parallelCell->getSyncProcessId();
             if (sendSyncIdsMap.count(syncProcessId) == 0) {
-                sendSyncIdsMap.emplace(syncProcessId, std::vector<int>());
+                sendSyncIdsMap[syncProcessId] = std::vector<int>();
             }
             if (recvSyncIdsMap.count(syncProcessId) == 0) {
-                recvSyncIdsMap.emplace(syncProcessId, std::vector<int>());
+                recvSyncIdsMap[syncProcessId] = std::vector<int>();
             }
 
             // add send elements

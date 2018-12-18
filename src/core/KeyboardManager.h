@@ -1,8 +1,6 @@
 #ifndef RGS_KEYBOARDMANAGER_H
 #define RGS_KEYBOARDMANAGER_H
 
-#include <atomic>
-
 class KeyboardManager {
 public:
     enum class State {
@@ -17,14 +15,19 @@ public:
     };
 
 private:
-    std::atomic<State> _state;
-    std::atomic<Command> _command;
+    bool _isAvailable;
+    State _state;
+    Command _command;
 
 public:
     static KeyboardManager* getInstance() {
         static auto instance = new KeyboardManager();
         return instance;
     }
+
+    bool isAvailable() const;
+
+    void setAvailable(bool isAvailable);
 
     void start();
 
