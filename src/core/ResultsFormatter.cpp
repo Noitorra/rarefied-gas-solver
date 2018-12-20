@@ -340,36 +340,37 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
     auto normalizer = config->getNormalizer();
     const auto& gases = config->getGases();
 
-    CellResults* rightResult = nullptr;
-    auto pos = std::find_if(results.begin(), results.end(), [](CellResults* item) {
-        return item->getId() == 104;
-    });
-    if (pos != results.end()) {
-        rightResult = (*pos);
-    }
+//    CellResults* rightResult = nullptr;
+//    auto pos = std::find_if(results.begin(), results.end(), [](CellResults* item) {
+//        return item->getId() == 104;
+//    });
+//    if (pos != results.end()) {
+//        rightResult = (*pos);
+//    }
 
-    std::vector<double> wholeDensity(gases.size(), 0.0);
+    std::vector<double> wholeNumber(gases.size(), 0.0);
     std::vector<Vector3d> wholeFlow(gases.size(), Vector3d());
     for (const auto& result : results) {
         for (auto gi = 0; gi < gases.size(); gi++) {
-            wholeDensity[gi] += result->getDensity(gi);
+            double density = normalizer->restore(result->getDensity(gi), Normalizer::Type::DENSITY);
+            wholeNumber[gi] += density * result->getVolume();
             wholeFlow[gi] += result->getFlow(gi);
         }
     }
     for (auto gi = 0; gi < gases.size(); gi++) {
-        fs << " " << wholeDensity[gi] << " " << wholeFlow[gi].module();
+        fs << " " << wholeNumber[gi] / 6.022e23 << " " << wholeFlow[gi].module();
 
-        if (rightResult != nullptr) {
-            Vector3d rightFlow = rightResult->getFlow(gi);
-            normalizer->restore(rightFlow.x(), Normalizer::Type::FLOW);
-            normalizer->restore(rightFlow.y(), Normalizer::Type::FLOW);
-            normalizer->restore(rightFlow.z(), Normalizer::Type::FLOW);
-            fs << " " << rightFlow.x();
-
-            double pressure = rightResult->getPressure(gi);
-            normalizer->restore(pressure, Normalizer::Type::PRESSURE);
-            fs << " " << pressure;
-        }
+//        if (rightResult != nullptr) {
+//            Vector3d rightFlow = rightResult->getFlow(gi);
+//            normalizer->restore(rightFlow.x(), Normalizer::Type::FLOW);
+//            normalizer->restore(rightFlow.y(), Normalizer::Type::FLOW);
+//            normalizer->restore(rightFlow.z(), Normalizer::Type::FLOW);
+//            fs << " " << rightFlow.x();
+//
+//            double pressure = rightResult->getPressure(gi);
+//            normalizer->restore(pressure, Normalizer::Type::PRESSURE);
+//            fs << " " << pressure;
+//        }
     }
 
 
