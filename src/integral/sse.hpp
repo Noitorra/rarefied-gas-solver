@@ -1,9 +1,7 @@
 #ifndef _SSE_H_
 #define _SSE_H_
 
-#include "emmintrin.h"
-
-//#include <xmmintrin.h>
+#include <xmmintrin.h>
 
 namespace sse {
 

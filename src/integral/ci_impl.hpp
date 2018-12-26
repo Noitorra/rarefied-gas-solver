@@ -14,8 +14,10 @@
 #include <limits>
 
 #include "ci.hpp"
+
 #include "sse.hpp"
 #include "sse_impl.hpp"
+
 #include "v.hpp"
 #include "korobov.hpp"
 
@@ -184,7 +186,7 @@ namespace ci {
         if (std::abs(r - 1) < 1e-12)
             ss[8]++;
 
-        node_calc node;
+        node_calc node{};
         node.r = r;
 
         node.i1 = xyz2i1[xi1[0]][xi1[1]][xi1[2]];
@@ -272,6 +274,12 @@ namespace ci {
         return korobov_grid.size();
     }
 
+//    union d2 {
+//        double d[2];
+//    };
+//
+//    typedef union d2 d2_t;
+
     template<typename F>
     void iter(F& f1, F& f2) {
         for (std::vector<node_calc>::iterator p = nc.begin(); p != nc.end(); ++p) {
@@ -284,12 +292,17 @@ namespace ci {
                 z.d[0] = f2[p->i2l];
                 z.d[1] = f2[p->i2m];
 
-                w = sse::mul(x, z);
+//                w = sse::mul(x, z);
+
+                w.d[0] = x.d[0] * z.d[0];
+                w.d[1] = x.d[1] * z.d[1];
 
                 y.d[0] = 1. - p->r;
                 y.d[1] = p->r;
 
-                v = sse::pow(w, y);
+//                v = sse::pow(w, y);
+                v.d[0] = std::pow(w.d[0], y.d[0]);
+                v.d[1] = std::pow(w.d[1], y.d[1]);
 
                 double rr5 = f1[p->i1];
                 double rr6 = f2[p->i2];
