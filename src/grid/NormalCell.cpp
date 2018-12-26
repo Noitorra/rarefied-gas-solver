@@ -1,6 +1,7 @@
 #include "NormalCell.h"
 #include "CellConnection.h"
 #include "integral/ci.hpp"
+#include "integral/ci_impl.hpp"
 
 NormalCell::NormalCell(int id, double volume) : BaseCell(Type::NORMAL, id) {
     _volume = volume;

@@ -74,6 +74,4 @@ namespace ci {
 
 }
 
-#include "ci_impl.hpp"
-
 #endif

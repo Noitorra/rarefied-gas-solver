@@ -1,4 +1,5 @@
 #include "ci.hpp"
+#include "ci_impl.hpp"
 
 namespace ci {
 

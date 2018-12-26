@@ -45,6 +45,4 @@ namespace sse {
 
 }
 
-#include "sse_impl.hpp"
-
 #endif

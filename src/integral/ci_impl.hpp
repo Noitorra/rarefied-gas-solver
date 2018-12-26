@@ -12,10 +12,10 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
-#include <math.h>
 
 #include "ci.hpp"
 #include "sse.hpp"
+#include "sse_impl.hpp"
 #include "v.hpp"
 #include "korobov.hpp"
 

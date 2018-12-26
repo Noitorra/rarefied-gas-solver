@@ -12,6 +12,7 @@
 #include "utilities/SerializationUtils.h"
 #include "utilities/Normalizer.h"
 #include "integral/ci.hpp"
+#include "integral/ci_impl.hpp"
 
 #include <map>
 #include <stdexcept>
@@ -236,7 +237,7 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
     // diameter is normalized onto effective diameter of molecula
     // time, impulse, etc is nomalized on lambda, but labmda and effective diameter is linked through equation
     // so here d is normalized to d/d(eff) meaning that here we can use normalized on maximum radius instead
-    ci::Particle particle1{}, particle2{};
+    ci::Particle particle1, particle2;
     particle1.d = gases[gi1].getRadius();
     particle2.d = gases[gi2].getRadius();
 
