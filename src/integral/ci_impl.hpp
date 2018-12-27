@@ -1,10 +1,6 @@
 ﻿#ifndef _CI_IMPL_
 #define _CI_IMPL_
 
-#ifndef M_PI
-#define M_PI       3.14159265358979323846
-#endif
-
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -124,12 +120,9 @@ namespace ci {
         V3d w = wxi2 - m2 * u;
         V3i xi2l, xi2m;
         //double s = std::numeric_limits<double>::max;
-        //double El = std::numeric_limits<double>::max();
-        //double Em = std::numeric_limits<double>::min();
-        //double q = std::numeric_limits<double>::max();
-        double El = LONG_MAX;
-        double Em = LONG_MIN;
-        double q = LONG_MAX;
+        double El = std::numeric_limits<double>::max();
+        double Em = std::numeric_limits<double>::min();
+        double q = std::numeric_limits<double>::max();
         bool boo = false;
 
         std::vector<V3i> stencil;
@@ -228,10 +221,7 @@ namespace ci {
 
         nc.clear();
 
-        for (korobov::Grid::iterator iter = korobov_grid.begin();
-             iter != korobov_grid.end(); ++iter) {
-            const korobov::Point& point = *iter;
-
+        for (auto& point : korobov_grid) {
             V3i xi1(toInt(point[2] * nk_rad1 * 2),
                     toInt(point[3] * nk_rad1 * 2),
                     toInt(point[4] * nk_rad1 * 2));
@@ -246,18 +236,20 @@ namespace ci {
             calc_int_node(xi1, xi2, b2, e, nk_rad1, nk_rad2, xyz2i1, xyz2i2, m1, m2, a, p1, p2);
         }
 
-        //		std::cout << "n_calc = " << nc.size() << " N_nu = " << N_nu << std::endl;
-        //		for (int j = 0; j < 9; j++)
-        //			std::cout << ss[j] << ' ';
-        //		std::cout << std::endl;
+        std::cout << "n_calc = " << nc.size() << " N_nu = " << N_nu << std::endl;
+
+        for (int j = 0; j < 9; j++) {
+            std::cout << ss[j] << ' ';
+        }
+        std::cout << std::endl;
 
         double B = (1 / sqrt(2.) / M_PI) * 2 * M_PI * 0.5 * sqr(potential->bMax(p1, p2)) * nk1 * nk2 * std::pow(a, 3) * a / N_nu / 4 * tt;
-        /*
-                std::cout << "m = " << m1 << ' ' << m2 << " d = " << p1.d << ' ' << p2.d <<
-                            " nk = " << nk1 << ' ' << nk2 <<
-                            " rad = " << nk_rad1 << ' ' << nk_rad2 <<
-                            " B = " << B << std::endl;
-        */
+
+        std::cout << "m = " << m1 << ' ' << m2 << " d = " << p1.d << ' ' << p2.d <<
+                    " nk = " << nk1 << ' ' << nk2 <<
+                    " rad = " << nk_rad1 << ' ' << nk_rad2 <<
+                    " B = " << B << std::endl;
+
         double r;
         if (symm == YZ_SYMM)
             r = 4.0;
@@ -266,94 +258,88 @@ namespace ci {
         else
             r = 1.0;
 
-        for (std::vector<node_calc>::iterator p = nc.begin(); p != nc.end(); ++p)
-            p->c *= B / r;
+        for (auto& p : nc) {
+            p.c *= B / r;
+        }
 
         std::random_shuffle(nc.begin(), nc.end());
 
         return korobov_grid.size();
     }
 
-//    union d2 {
-//        double d[2];
-//    };
-//
-//    typedef union d2 d2_t;
-
     template<typename F>
     void iter(F& f1, F& f2) {
-        for (std::vector<node_calc>::iterator p = nc.begin(); p != nc.end(); ++p) {
-            if (std::abs(p->r - 1) > 1e-10) {
+        for (auto& p : nc) {
+            if (std::abs(p.r - 1) > 1e-10) {
                 sse::d2_t x, y, z, w, v;
 
-                x.d[0] = f1[p->i1l];
-                x.d[1] = f1[p->i1m];
+                x.d[0] = f1[p.i1l];
+                x.d[1] = f1[p.i1m];
 
-                z.d[0] = f2[p->i2l];
-                z.d[1] = f2[p->i2m];
+                z.d[0] = f2[p.i2l];
+                z.d[1] = f2[p.i2m];
 
 //                w = sse::mul(x, z);
-
                 w.d[0] = x.d[0] * z.d[0];
                 w.d[1] = x.d[1] * z.d[1];
 
-                y.d[0] = 1. - p->r;
-                y.d[1] = p->r;
+                y.d[0] = 1. - p.r;
+                y.d[1] = p.r;
 
 //                v = sse::pow(w, y);
                 v.d[0] = std::pow(w.d[0], y.d[0]);
                 v.d[1] = std::pow(w.d[1], y.d[1]);
 
-                double rr5 = f1[p->i1];
-                double rr6 = f2[p->i2];
-                double d = (-v.d[0] * v.d[1] + rr5 * rr6) * p->c;
+                double rr5 = f1[p.i1];
+                double rr6 = f2[p.i2];
+                double d = (-v.d[0] * v.d[1] + rr5 * rr6) * p.c;
 
-                double dl = (1. - p->r) * d;
-                double dm = p->r * d;
+                double dl = (1. - p.r) * d;
+                double dm = p.r * d;
 
-                f1[p->i1l] += dl;
-                f2[p->i2l] += dl;
-                f1[p->i1m] += dm;
-                f2[p->i2m] += dm;
-                f1[p->i1] -= d;
-                f2[p->i2] -= d;
+                f1[p.i1l] += dl;
+                f2[p.i2l] += dl;
+                f1[p.i1m] += dm;
+                f2[p.i2m] += dm;
+                f1[p.i1] -= d;
+                f2[p.i2] -= d;
 
-                if ((f1[p->i1l] < 0) ||
-                    (f1[p->i1m] < 0) ||
-                    (f2[p->i2l] < 0) ||
-                    (f2[p->i2m] < 0) ||
-                    (f1[p->i1] < 0) ||
-                    (f2[p->i2] < 0)) {
+                if ((f1[p.i1l] < 0) ||
+                    (f1[p.i1m] < 0) ||
+                    (f2[p.i2l] < 0) ||
+                    (f2[p.i2m] < 0) ||
+                    (f1[p.i1] < 0) ||
+                    (f2[p.i2] < 0)) {
 
-                    f1[p->i1l] = x.d[0];
-                    f1[p->i1m] = x.d[1];
-                    f2[p->i2l] = z.d[0];
-                    f2[p->i2m] = z.d[1];
-                    f1[p->i1] = rr5;
-                    f2[p->i2] = rr6;
+                    f1[p.i1l] = x.d[0];
+                    f1[p.i1m] = x.d[1];
+                    f2[p.i2l] = z.d[0];
+                    f2[p.i2m] = z.d[1];
+                    f1[p.i1] = rr5;
+                    f2[p.i2] = rr6;
                 }
             } else {
-                double g1 = f1[p->i1];
-                double g2 = f2[p->i2];
-                double g3 = f1[p->i1m];
-                double g4 = f2[p->i2m];
+                double g1 = f1[p.i1];
+                double g2 = f2[p.i2];
+                double g3 = f1[p.i1m];
+                double g4 = f2[p.i2m];
 
-                double d = (-g3 * g4 + g1 * g2) * p->c;
+                double d = (-g3 * g4 + g1 * g2) * p.c;
 
-                f1[p->i1] -= d;
-                f2[p->i2] -= d;
-                f1[p->i1m] += d;
-                f2[p->i2m] += d;
+                f1[p.i1] -= d;
+                f2[p.i2] -= d;
+                f1[p.i1m] += d;
+                f2[p.i2m] += d;
 
-                if ((f1[p->i1m] < 0) ||
-                    (f2[p->i2m] < 0) ||
-                    (f1[p->i1] < 0) ||
-                    (f2[p->i2] < 0)) {
+                if ((f1[p.i1m] < 0) ||
+                    (f2[p.i2m] < 0) ||
+                    (f1[p.i1] < 0) ||
+                    (f2[p.i2] < 0)) {
 
-                    f1[p->i1] = g1;
-                    f2[p->i2] = g2;
-                    f1[p->i1m] = g3;
-                    f2[p->i2m] = g4;
+                    f1[p.i1] = g1;
+                    f2[p.i2] = g2;
+                    f1[p.i1m] = g3;
+                    f2[p.i2m] = g4;
                 }
             }
         }

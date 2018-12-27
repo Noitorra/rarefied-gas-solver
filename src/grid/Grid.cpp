@@ -173,7 +173,7 @@ void Grid::init() {
         minMass = std::min(minMass, gas.getMass());
     }
 
-    double timestep = 0.95 * 2 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
+    double timestep = 0.8 * 2 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
 
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
@@ -237,7 +237,7 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
     // diameter is normalized onto effective diameter of molecula
     // time, impulse, etc is nomalized on lambda, but labmda and effective diameter is linked through equation
     // so here d is normalized to d/d(eff) meaning that here we can use normalized on maximum radius instead
-    ci::Particle particle1, particle2;
+    ci::Particle particle1{}, particle2{};
     particle1.d = gases[gi1].getRadius();
     particle2.d = gases[gi2].getRadius();
 
