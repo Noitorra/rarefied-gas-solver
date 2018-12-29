@@ -5,7 +5,8 @@
 #include <iostream>
 #include <thread>
 #include <utilities/SerializationUtils.h>
-#include <chrono>
+
+#include <boost/chrono/chrono.hpp>
 
 // Gases masses
 // 133 - 133 Cs
@@ -26,11 +27,6 @@ int main(int argc, char* argv[]) {
     if (Parallel::isMaster() && argc < 2) {
         std::cout << "filename argument required" << std::endl;
         Parallel::abort();
-    }
-
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> startTime;
-    if (Parallel::isMaster()) {
-        startTime = std::chrono::system_clock::now();
     }
 
     // Print off a hello world message
@@ -82,7 +78,19 @@ int main(int argc, char* argv[]) {
     try {
         Solver solver;
         solver.init();
+
+        boost::chrono::steady_clock::time_point start;
+        if (Parallel::isMaster()) {
+            start = boost::chrono::steady_clock::now();
+        }
+
         solver.run();
+
+        if (Parallel::isMaster()) {
+            auto now = boost::chrono::steady_clock::now();
+            auto whole = boost::chrono::duration_cast<boost::chrono::seconds>(now - start).count();
+            std::cout << "Run took - " << whole << " seconds" << std::endl;
+        }
     } catch (const std::exception& e) {
         std::cout << std::endl;
         std::cout << "Exception ----------------------------------------------------------------" << std::endl;
@@ -91,12 +99,6 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
 
         Parallel::abort();
-    }
-
-    if (Parallel::isMaster()) {
-        auto now = std::chrono::system_clock::now();
-        auto wholeTime = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
-        std::cout << "It took - " << wholeTime << " seconds" << std::endl;
     }
 
     Parallel::finalize();

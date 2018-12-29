@@ -24,7 +24,7 @@ const Vector3d& CellConnection::getNormal21() const {
     return _normal21;
 }
 
-const double CellConnection::getValue(unsigned int gi, unsigned int ii, Vector3d impulse) const {
+double CellConnection::getValue(unsigned int gi, unsigned int ii, Vector3d impulse) const {
     double projection = _normal21.scalar(impulse);
     if (projection != 0) {
         double value;

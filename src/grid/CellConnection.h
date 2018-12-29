@@ -27,7 +27,7 @@ public:
 
     const Vector3d& getNormal21() const;
 
-    const double getValue(unsigned int gi, unsigned int ii, Vector3d impulse) const;
+    double getValue(unsigned int gi, unsigned int ii, Vector3d impulse) const;
 
 };
 

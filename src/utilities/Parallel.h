@@ -7,11 +7,12 @@ class Parallel {
 public:
     static const int COMMAND_MESH             = 100;
     static const int COMMAND_TIMESTEP         = 110;
+    static const int COMMAND_CONFIG           = 120;
+    static const int COMMAND_MESSAGE          = 130;
     static const int COMMAND_SYNC_IDS         = 200;
     static const int COMMAND_SYNC_VALUES      = 210;
     static const int COMMAND_SYNC_HALF_VALUES = 220;
     static const int COMMAND_RESULT_PARAMS    = 300;
-    static const int COMMAND_CONFIG           = 120;
 
 private:
     static bool _isUsingMPI;

@@ -350,17 +350,22 @@ void ResultsFormatter::writeProgression(unsigned int iteration, const std::vecto
 
     std::vector<double> wholeNumber(gases.size(), 0.0);
     std::vector<double> wholeTemperature(gases.size(), 0.0);
+    std::vector<double> wholePressure(gases.size(), 0.0);
     std::vector<Vector3d> wholeFlow(gases.size(), Vector3d());
     for (const auto& result : results) {
         for (auto gi = 0; gi < gases.size(); gi++) {
             double density = normalizer->restore(result->getDensity(gi), Normalizer::Type::DENSITY);
             wholeNumber[gi] += density * result->getVolume();
             wholeTemperature[gi] += normalizer->restore(result->getTemp(gi), Normalizer::Type::TEMPERATURE);
+            wholePressure[gi] += normalizer->restore(result->getPressure(gi), Normalizer::Type::PRESSURE);
             wholeFlow[gi] += result->getFlow(gi);
         }
     }
     for (auto gi = 0; gi < gases.size(); gi++) {
-        fs << " " << wholeNumber[gi] / 6.022e23 << " " << wholeTemperature[gi] / results.size() << " " << wholeFlow[gi].module();
+        fs << " " << wholeNumber[gi] / 6.022e23
+           << " " << wholeTemperature[gi] / results.size()
+           << " " << wholePressure[gi] / results.size()
+           << " " << wholeFlow[gi].module();
 
 //        if (rightResult != nullptr) {
 //            Vector3d rightFlow = rightResult->getFlow(gi);

@@ -3,18 +3,17 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <cstring>
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <limits>
-
-#include "ci.hpp"
-
-#include "sse.hpp"
-#include "sse_impl.hpp"
+#include <random>
 
 #include "v.hpp"
+#include "ci.hpp"
+#include "sse.hpp"
+#include "sse_impl.hpp"
 #include "korobov.hpp"
 
 namespace ci {
@@ -193,7 +192,6 @@ namespace ci {
         node.c = std::sqrt(sqr(rxi1 / m1 - rxi2 / m2));
 
         nc.push_back(node);
-
     }
 
     template<typename Map>
@@ -213,7 +211,10 @@ namespace ci {
                         ++nk2;
 
         N_nu = 0;
-        memset(ss, 0, sizeof(int) * 9);
+
+        for (int i = 0; i < 9; i++) {
+            ss[i] = 0;
+        }
 
         korobov_grid.resize(k);
 
@@ -236,19 +237,19 @@ namespace ci {
             calc_int_node(xi1, xi2, b2, e, nk_rad1, nk_rad2, xyz2i1, xyz2i2, m1, m2, a, p1, p2);
         }
 
-        std::cout << "n_calc = " << nc.size() << " N_nu = " << N_nu << std::endl;
+//        std::cout << "n_calc = " << nc.size() << " N_nu = " << N_nu << std::endl;
 
-        for (int j = 0; j < 9; j++) {
-            std::cout << ss[j] << ' ';
-        }
-        std::cout << std::endl;
+//        for (int j = 0; j < 9; j++) {
+//            std::cout << ss[j] << ' ';
+//        }
+//        std::cout << std::endl;
 
-        double B = (1 / sqrt(2.) / M_PI) * 2 * M_PI * 0.5 * sqr(potential->bMax(p1, p2)) * nk1 * nk2 * std::pow(a, 3) * a / N_nu / 4 * tt;
+        double B = (1 / sqrt(2.) / M_PI) * 2 * M_PI * 0.5 * sqr(potential->bMax(p1, p2)) * nk1 * nk2 * std::pow(a, 3) * a / N_nu / 4. * tt;
 
-        std::cout << "m = " << m1 << ' ' << m2 << " d = " << p1.d << ' ' << p2.d <<
-                    " nk = " << nk1 << ' ' << nk2 <<
-                    " rad = " << nk_rad1 << ' ' << nk_rad2 <<
-                    " B = " << B << std::endl;
+//        std::cout << "m = " << m1 << ' ' << m2 << " d = " << p1.d << ' ' << p2.d <<
+//                    " nk = " << nk1 << ' ' << nk2 <<
+//                    " rad = " << nk_rad1 << ' ' << nk_rad2 <<
+//                    " B = " << B << std::endl;
 
         double r;
         if (symm == YZ_SYMM)
@@ -262,6 +263,9 @@ namespace ci {
             p.c *= B / r;
         }
 
+//        std::random_device rd;
+//        std::mt19937 gen(rd());
+//        std::shuffle(nc.begin(), nc.end(), gen);
         std::random_shuffle(nc.begin(), nc.end());
 
         return korobov_grid.size();
@@ -279,16 +283,12 @@ namespace ci {
                 z.d[0] = f2[p.i2l];
                 z.d[1] = f2[p.i2m];
 
-//                w = sse::mul(x, z);
-                w.d[0] = x.d[0] * z.d[0];
-                w.d[1] = x.d[1] * z.d[1];
+                w = sse::mul(x, z);
 
                 y.d[0] = 1. - p.r;
                 y.d[1] = p.r;
 
-//                v = sse::pow(w, y);
-                v.d[0] = std::pow(w.d[0], y.d[0]);
-                v.d[1] = std::pow(w.d[1], y.d[1]);
+                v = sse::pow(w, y);
 
                 double rr5 = f1[p.i1];
                 double rr6 = f2[p.i2];

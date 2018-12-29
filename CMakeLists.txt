@@ -17,7 +17,7 @@ set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_CXX_LINK_FLAGS})
 
 # Require Boost
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system filesystem serialization REQUIRED)
+find_package(Boost COMPONENTS system filesystem serialization chrono REQUIRED)
 
 set(output_dir "${CMAKE_BINARY_DIR}/bin/")
 

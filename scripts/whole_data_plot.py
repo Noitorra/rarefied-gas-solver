@@ -54,5 +54,6 @@ plt.plot(x, PBa, ls='--', c='black', label='Ba')
 plt.legend()
 
 plt.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1)
-plt.savefig(root + os.sep + 'wholeData.png', dpi=144)
-plt.close()
+plt.show()
+# plt.savefig(root + os.sep + 'wholeData.png', dpi=144)
+# plt.close()

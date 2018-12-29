@@ -36,5 +36,6 @@ for i in range(len(filenames)):
     plt.plot(x, f(x), '-')
 
 plt.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1)
-plt.savefig(root + os.sep + 'flows.png', dpi=144)
-plt.close()
+plt.show()
+# plt.savefig(root + os.sep + 'flows.png', dpi=144)
+# plt.close()

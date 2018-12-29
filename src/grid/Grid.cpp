@@ -142,8 +142,40 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
         }
     }
 
+    // get size of grid for each node
+    std::ostringstream os;
+    os << "Grid creation: ";
+
+    int normalSize = 0, borderSize = 0, parallelSize = 0;
+    for (const auto& cell : _cells) {
+        switch (cell->getType()) {
+            case BaseCell::Type::NORMAL:
+                normalSize++;
+                break;
+            case BaseCell::Type::BORDER:
+                borderSize++;
+                break;
+            case BaseCell::Type::PARALLEL:
+                parallelSize++;
+                break;
+        }
+    }
+
+    os << "all = " << _cells.size()
+       << "; normal = " << normalSize
+       << "; border = " << borderSize
+       << "; parallel = " << parallelSize;
+    std::string message = os.str();
+
     if (Parallel::isMaster()) {
-        std::cout << "Successful grid creation: number of cells = " << _cells.size() << std::endl;
+        std::cout << "[Rank 0] " << message << std::endl;
+
+        for (int rank = 1; rank < Parallel::getSize(); rank++) {
+            message = Parallel::recv(rank, Parallel::COMMAND_MESSAGE);
+            std::cout << "[Rank " << rank << "] " << message << std::endl;
+        }
+    } else {
+        Parallel::send(message, 0, Parallel::COMMAND_MESSAGE);
     }
 }
 

@@ -31,7 +31,7 @@ namespace ci {
         double ct = std::cos(theta);
 
         V3d y;
-        if (std::fabs(rxy) > 1E-12) {
+        if (std::fabs(rxy) > 1e-12) {
             y[0] = x[0] * ct - x[0] * x[2] / rxy * ce * st + x[1] / rxy * r * se * st;
             y[1] = x[1] * ct - x[1] * x[2] / rxy * ce * st - x[0] / rxy * r * se * st;
             y[2] = x[2] * ct + rxy * ce * st;

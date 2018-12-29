@@ -2,7 +2,7 @@
 #define _KOROBOV_H_
 
 #include <cstdlib>
-#include <climits>
+#include <random>
 
 namespace korobov {
 
@@ -38,13 +38,10 @@ namespace korobov {
 
     class Point {
     public:
-        Point(const int* line, const double* shift, int s) :
-                line(line), shift(shift), s(s) {}
+        Point(const int* line, const double* shift, int s) : line(line), shift(shift), s(s) {}
 
         double operator[](size_t i) const {
-            return frac(shift[i] +
-                        static_cast<double>(line[i + 1]) /
-                        line[0] * (s + 1));
+            return frac(shift[i] + static_cast<double>(line[i + 1]) / line[0] * (s + 1));
         }
 
     private:
@@ -57,8 +54,7 @@ namespace korobov {
 
     class Iterator {
     public:
-        Iterator(const int* line, const double* shift, int s = 0) :
-                point(line, shift, s) {}
+        Iterator(const int* line, const double* shift, int s = 0) : point(line, shift, s) {}
 
         void operator++() {
             ++point.s;
@@ -78,9 +74,8 @@ namespace korobov {
 
     class Grid {
     public:
-        Grid(int size = 0) {
+        explicit Grid(int size = 0) noexcept {
             resize(size);
-            update();
         }
 
         void resize(int size);
@@ -89,24 +84,27 @@ namespace korobov {
             return sz;
         }
 
-        typedef Iterator iterator;
-
-        iterator begin() {
-            return iterator(coefficients[line], random_shift);
+        Iterator begin() {
+            return {coefficients[line], random_shift};
         }
 
-        iterator end() {
-            return iterator(coefficients[line], random_shift, coefficients[line][0]);
+        Iterator end() {
+            return {coefficients[line], random_shift, coefficients[line][0]};
         }
 
         void update() {
-            for (int i = 0; i < dimension; ++i)
+//            std::random_device rd;
+//            std::mt19937 gen(rd());
+//            std::uniform_real_distribution<double> urd(0, 1);
+            for (int i = 0; i < dimension; ++i) {
+//                random_shift[i] = urd(gen);
                 random_shift[i] = static_cast<double>(std::rand()) / RAND_MAX;
+            }
         }
 
     private:
-        int sz, line;
-        double random_shift[dimension];
+        int sz = 0, line = 0;
+        double random_shift[dimension] {};
     };
 
     inline void Grid::resize(int size) {
