@@ -3,10 +3,6 @@
 #include "integral/ci.hpp"
 #include "integral/ci_impl.hpp"
 
-NormalCell::NormalCell(int id, double volume) : BaseCell(Type::NORMAL, id) {
-    _volume = volume;
-}
-
 void NormalCell::init() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
@@ -22,13 +18,13 @@ void NormalCell::init() {
 
         double C = 0.0;
         for (const auto& impulse : impulses) {
-            C += fast_exp(gases[gi].getMass(), _params.getTemp(gi), impulse);
+            C += std::exp(-impulse.moduleSquare() / gases[gi].getMass() / 2 / _params.getTemp(gi));
         }
         C = 1.0 / C;
         C *= _params.getPressure(gi) / _params.getTemp(gi) / config->getImpulseSphere()->getDeltaImpulseQube();
 
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-            _values[gi][ii] = C * fast_exp(gases[gi].getMass(), _params.getTemp(gi), impulses[ii]);
+            _values[gi][ii] = C * std::exp(-impulses[ii].moduleSquare() / gases[gi].getMass() / 2 / _params.getTemp(gi));
         }
     }
 }
@@ -40,12 +36,23 @@ void NormalCell::computeTransfer() {
     auto timestep = config->getTimestep() / 2;
 
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
+        double y = timestep / _volume / gases[gi].getMass();
+
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
             double sum = 0.0;
-            for (const auto& connection : _connections) {
-                sum += connection->getValue(gi, ii, impulses[ii]);
+            for (auto& connection : _connections) {
+                double projection = connection->getNormal21().scalar(impulses[ii]);
+                if (projection != 0) {
+                    double value;
+                    if (projection < 0) {
+                        value = connection->getFirst()->getValues()[gi][ii];
+                    } else {
+                        value = connection->getSecond()->getValues()[gi][ii];
+                    }
+                    sum += value * projection * connection->getSquare();
+                }
             }
-            _newValues[gi][ii] = _values[gi][ii] + sum * timestep / _volume / gases[gi].getMass();
+            _newValues[gi][ii] = _values[gi][ii] + sum * y;
         }
     }
 }
@@ -65,14 +72,6 @@ void NormalCell::computeBetaDecay(int gi0, int gi1, double lambda) {
     }
 }
 
-double NormalCell::getVolume() const {
-    return _volume;
-}
-
-CellParameters& NormalCell::getParams() {
-    return _params;
-}
-
 void NormalCell::swapValues() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
@@ -81,7 +80,7 @@ void NormalCell::swapValues() {
     for (unsigned int gi = 0; gi < gases.size(); gi++) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
             _values[gi][ii] = _newValues[gi][ii];
-            _newValues[gi][ii] = 0.0;
+//            _newValues[gi][ii] = 0.0;
         }
     }
 }

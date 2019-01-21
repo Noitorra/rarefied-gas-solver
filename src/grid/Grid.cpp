@@ -17,6 +17,8 @@
 #include <map>
 #include <stdexcept>
 
+#include <unistd.h>
+
 Grid::Grid(Mesh* mesh) : _mesh(mesh) {
     auto config = Config::getInstance();
     const auto& initialParameters = config->getInitialParameters();
@@ -161,18 +163,20 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
         }
     }
 
-    os << "all = " << _cells.size()
+    os << "[Rank " << Parallel::getRank() << "]"
+       << "[" << Parallel::getName() << "] "
+       << "all = " << _cells.size()
        << "; normal = " << normalSize
        << "; border = " << borderSize
        << "; parallel = " << parallelSize;
     std::string message = os.str();
 
     if (Parallel::isMaster()) {
-        std::cout << "[Rank 0] " << message << std::endl;
+        std::cout << message << std::endl;
 
         for (int rank = 1; rank < Parallel::getSize(); rank++) {
             message = Parallel::recv(rank, Parallel::COMMAND_MESSAGE);
-            std::cout << "[Rank " << rank << "] " << message << std::endl;
+            std::cout << message << std::endl;
         }
     } else {
         Parallel::send(message, 0, Parallel::COMMAND_MESSAGE);
@@ -205,7 +209,7 @@ void Grid::init() {
         minMass = std::min(minMass, gas.getMass());
     }
 
-    double timestep = 0.8 * 2 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
+    double timestep = 0.95 * 2 * minStep * minMass / config->getImpulseSphere()->getMaxImpulse();
 
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
@@ -281,13 +285,17 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
             particle1, particle2);
 
     for (const auto& cell : _cells) {
-        cell->computeIntegral(gi1, gi2);
+        if (cell->getType() == BaseCell::Type::NORMAL) {
+            cell->computeIntegral(gi1, gi2);
+        }
     }
 }
 
 void Grid::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
     for (const auto& cell : _cells) {
-        cell->computeBetaDecay(gi0, gi1, lambda);
+        if (cell->getType() == BaseCell::Type::NORMAL) {
+            cell->computeBetaDecay(gi0, gi1, lambda);
+        }
     }
 }
 

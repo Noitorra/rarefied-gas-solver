@@ -6,20 +6,6 @@
 #include "ImpulseSphere.h"
 #include "core/Config.h"
 
-ImpulseSphere::ImpulseSphere(double maxImpulse, unsigned int resolution) : _maxImpulse(maxImpulse), _resolution(resolution) {}
-
-ImpulseSphere::~ImpulseSphere() {
-    if (_xyz2i != nullptr) {
-        for (unsigned int x = 0; x < _resolution; x++) {
-            for (unsigned int y = 0; y < _resolution; y++) {
-                delete[] _xyz2i[x][y];
-            }
-            delete[] _xyz2i[x];
-        }
-        delete[] _xyz2i;
-    }
-}
-
 void ImpulseSphere::init() {
 
     // calc delta impulse
@@ -50,30 +36,6 @@ void ImpulseSphere::init() {
             }
         }
     }
-}
-
-double ImpulseSphere::getMaxImpulse() const {
-    return _maxImpulse;
-}
-
-unsigned int ImpulseSphere::getResolution() const {
-    return _resolution;
-}
-
-int*** ImpulseSphere::getXYZ2I() const {
-    return _xyz2i;
-}
-
-double ImpulseSphere::getDeltaImpulse() const {
-    return _deltaImpulse;
-}
-
-double ImpulseSphere::getDeltaImpulseQube() const {
-    return _deltaImpulseQube;
-}
-
-const std::vector<Vector3d>& ImpulseSphere::getImpulses() const {
-    return _impulses;
 }
 
 int ImpulseSphere::reverseIndex(int ii, Vector3d normal) {

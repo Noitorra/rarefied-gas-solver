@@ -17,9 +17,21 @@ public:
 private:
     std::vector<BorderType> _borderTypes;
     CellParameters _boundaryParams;
+    std::vector<std::vector<double>> _cacheExp;
 
 public:
-    explicit BorderCell(int id);
+    explicit BorderCell(int id) : BaseCell(Type::BORDER, id) {
+        const auto& gases = Config::getInstance()->getGases();
+        _borderTypes.resize(gases.size(), BorderType::UNDEFINED);
+    }
+
+    void setBorderType(int gi, BorderCell::BorderType borderType) {
+        _borderTypes[gi] = borderType;
+    }
+
+    CellParameters& getBoundaryParams() {
+        return _boundaryParams;
+    }
 
     void init() override;
 
@@ -28,10 +40,6 @@ public:
     void computeIntegral(int gi0, int gi1) override;
 
     void computeBetaDecay(int gi0, int gi1, double lambda) override;
-
-    void setBorderType(int id, BorderType borderType);
-
-    CellParameters& getBoundaryParams();
 
 private:
     void computeTransferDiffuse(unsigned int gi);

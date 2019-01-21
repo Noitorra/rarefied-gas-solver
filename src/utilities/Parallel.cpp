@@ -5,52 +5,29 @@
 
 bool Parallel::_isUsingMPI = false;
 bool Parallel::_isSingle = true;
+int Parallel::_size = 1;
+int Parallel::_rank = 0;
+std::string Parallel::_name{};
 
 void Parallel::init(int *argc, char ***argv) {
     MPI_Init(argc, argv);
     _isUsingMPI = true;
-    _isSingle = getSize() == 1;
-}
 
-void Parallel::finalize() {
-    MPI_Finalize();
-    _isUsingMPI = false;
-    _isSingle = true;
-}
+    MPI_Comm_size(MPI_COMM_WORLD, &_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &_rank);
 
-bool Parallel::isUsingMPI() {
-    return _isUsingMPI;
-}
-
-bool Parallel::isMaster() {
-    return getRank() == 0;
-}
-
-bool Parallel::isSlave() {
-    return getRank() != 0;
-}
-
-bool Parallel::isSingle() {
-    return _isSingle;
-}
-
-int Parallel::getSize() {
-    int size;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    return size;
-}
-
-int Parallel::getRank() {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    return rank;
-}
-
-std::string Parallel::getProcessorName() {
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     int name_len;
     MPI_Get_processor_name(processor_name, &name_len);
-    return std::string(processor_name, static_cast<unsigned long>(name_len));
+    _name = std::string(processor_name, static_cast<unsigned long>(name_len));
+
+    _isSingle = _size == 1;
+}
+
+void Parallel::finalize() {
+    _isUsingMPI = false;
+    _isSingle = true;
+    MPI_Finalize();
 }
 
 void Parallel::send(const std::string& buffer, int dest, int tag) {
@@ -77,4 +54,8 @@ std::string Parallel::recv(int source, int tag) {
 
 void Parallel::abort() {
     MPI_Abort(MPI_COMM_WORLD, 1);
+}
+
+void Parallel::barrier() {
+    MPI_Barrier(MPI_COMM_WORLD);
 }

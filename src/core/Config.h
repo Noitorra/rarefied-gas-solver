@@ -63,35 +63,65 @@ public:
 
     void load(const std::string& filename);
 
-    const std::string& getMeshFilename() const;
+    const std::string& getMeshFilename() const {
+        return _meshFilename;
+    }
 
-    double getMeshUnits() const;
+    double getMeshUnits() const {
+        return _meshUnits;
+    }
 
-    const std::string& getOutputFolder() const;
+    const std::string& getOutputFolder() const {
+        return _outputFolder;
+    }
 
-    unsigned int getMaxIterations() const;
+    unsigned int getMaxIterations() const {
+        return _maxIterations;
+    }
 
-    unsigned int getOutEachIteration() const;
+    unsigned int getOutEachIteration() const {
+        return _outEachIteration;
+    }
 
-    bool isUsingIntegral() const;
+    bool isUsingIntegral() const {
+        return _isUsingIntegral;
+    }
 
-    bool isUsingBetaDecay() const;
+    bool isUsingBetaDecay() const {
+        return _isUsingBetaDecay;
+    }
 
-    const std::vector<Gas>& getGases() const;
+    const std::vector<Gas>& getGases() const {
+        return _gases;
+    }
 
-    const std::vector<BetaChain>& getBetaChains() const;
+    const std::vector<BetaChain>& getBetaChains() const {
+        return _betaChains;
+    }
 
-    const std::vector<InitialParameters>& getInitialParameters() const;
+    const std::vector<InitialParameters>& getInitialParameters() const {
+        return _initialParameters;
+    }
 
-    const std::vector<BoundaryParameters>& getBoundaryParameters() const;
+    const std::vector<BoundaryParameters>& getBoundaryParameters() const {
+        return _boundaryParameters;
+    }
 
-    Normalizer* getNormalizer() const;
+    Normalizer* getNormalizer() const {
+        return _normalizer.get();
+    }
 
-    ImpulseSphere* getImpulseSphere() const;
+    ImpulseSphere* getImpulseSphere() const {
+        return _impulseSphere.get();
+    }
 
-    void setTimestep(double timestep);
+    void setTimestep(double timestep) {
+        _timestep = timestep;
+    }
 
-    double getTimestep() const;
+    double getTimestep() const {
+        return _timestep;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Config& config);
 

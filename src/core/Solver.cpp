@@ -53,22 +53,29 @@ void Solver::init() {
     // init all
     _grid = new Grid(mesh);
     _grid->init();
-}
 
-void Solver::run() {
+    // initiate integral
     if (_config->isUsingIntegral()) {
         ci::Potential* potential = new ci::HSPotential;
         ci::init(potential, ci::NO_SYMM);
     }
+}
 
+void Solver::run() {
+
+    // start keyboard listener
     if (Parallel::isMaster() == true) {
         if (_keyboard->isAvailable()) {
             _keyboard->start();
         }
         std::cout << std::endl;
     }
+
+    // write initial results
+    writeResults(0);
+
     unsigned int maxIterations = _config->getMaxIterations();
-    for (unsigned int iteration = 0; iteration < maxIterations; iteration++) {
+    for (unsigned int iteration = 1; iteration <= maxIterations; iteration++) {
 
         // sync grid
         if (Parallel::isSingle() == false) {
@@ -115,37 +122,7 @@ void Solver::run() {
 
         // print out results
         if (iteration % _config->getOutEachIteration() == 0) {
-            std::vector<CellResults*> results;
-            for (const auto& cell : _grid->getCells()) {
-                if (cell->getType() == NormalCell::Type::NORMAL) {
-                    auto normalCell = dynamic_cast<NormalCell*>(cell.get());
-                    results.push_back(normalCell->getResults());
-                }
-            }
-
-            if (Parallel::isSingle() == false) {
-                if (Parallel::isMaster() == true) {
-
-                    // receive params from master, then unite grids
-                    for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                        std::vector<CellResults*> resultsBuffer;
-                        SerializationUtils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), resultsBuffer);
-                        for (auto tempResults : resultsBuffer) {
-                            results.push_back(tempResults);
-                        }
-                    }
-
-                    _formatter->writeAll(iteration, _grid->getMesh(), results);
-                    _formatter->writeProgression(iteration, results);
-                } else {
-
-                    // send params to master
-                    Parallel::send(SerializationUtils::serialize(results), 0, Parallel::COMMAND_RESULT_PARAMS);
-                }
-            } else {
-                _formatter->writeAll(iteration, _grid->getMesh(), results);
-                _formatter->writeProgression(iteration, results);
-            }
+            writeResults(iteration);
         }
 
         if (Parallel::isMaster() == true) {
@@ -154,7 +131,7 @@ void Solver::run() {
                 isPrintingProgress = _keyboard->isWaitingCommand() == false;
             }
             if (isPrintingProgress) {
-                auto percent = (unsigned int) (1.0 * (iteration + 1) / maxIterations * 100);
+                auto percent = (unsigned int) (1.0 * iteration / maxIterations * 100);
 
                 std::cout << '\r';
                 std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
@@ -169,5 +146,39 @@ void Solver::run() {
     }
     if (Parallel::isMaster() == true) {
         std::cout << std::endl << "Done" << std::endl;
+    }
+}
+
+void Solver::writeResults(int iteration) {
+    std::vector<CellResults*> results;
+    for (const auto& cell : _grid->getCells()) {
+        if (cell->getType() == NormalCell::Type::NORMAL) {
+            auto normalCell = dynamic_cast<NormalCell*>(cell.get());
+            results.push_back(normalCell->getResults());
+        }
+    }
+
+    if (Parallel::isSingle() == false) {
+        if (Parallel::isMaster() == true) {
+
+            // receive params from master, then unite grids
+            for (int processor = 1; processor < Parallel::getSize(); processor++) {
+                std::vector<CellResults*> resultsBuffer;
+                SerializationUtils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), resultsBuffer);
+                for (auto tempResults : resultsBuffer) {
+                    results.push_back(tempResults);
+                }
+            }
+
+            _formatter->writeAll(iteration, _grid->getMesh(), results);
+            _formatter->writeProgression(iteration, results);
+        } else {
+
+            // send params to master
+            Parallel::send(SerializationUtils::serialize(results), 0, Parallel::COMMAND_RESULT_PARAMS);
+        }
+    } else {
+        _formatter->writeAll(iteration, _grid->getMesh(), results);
+        _formatter->writeProgression(iteration, results);
     }
 }

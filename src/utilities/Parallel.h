@@ -17,32 +17,51 @@ public:
 private:
     static bool _isUsingMPI;
     static bool _isSingle;
+    static int _size;
+    static int _rank;
+    static std::string _name;
 
 public:
     static void init(int *argc, char ***argv);
 
     static void finalize();
 
-    static bool isUsingMPI();
-
-    static bool isMaster();
-
-    static bool isSlave();
-
-    static bool isSingle();
-
-    static int getSize();
-
-    static int getRank();
-
-    static std::string getProcessorName();
-
-
     static void send(const std::string& buffer, int dest, int tag);
 
     static std::string recv(int source, int tag);
 
     static void abort();
+
+    static void barrier();
+
+    static bool isUsingMPI() {
+        return _isUsingMPI;
+    }
+
+    static bool isMaster() {
+        return getRank() == 0;
+    }
+
+    static bool isSlave() {
+        return getRank() != 0;
+    }
+
+    static bool isSingle() {
+        return _isSingle;
+    }
+
+    static int getSize() {
+        return _size;
+    }
+
+    static int getRank() {
+        return _rank;
+    }
+
+    static std::string getName() {
+        return _name;
+    }
+
 };
 
 #endif // PARALLEL_H

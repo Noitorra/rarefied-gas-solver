@@ -13,7 +13,17 @@ private:
     std::shared_ptr<CellResults> _results;
 
 public:
-    NormalCell(int id, double volume);
+    NormalCell(int id, double volume) : BaseCell(Type::NORMAL, id) {
+        _volume = volume;
+    }
+
+    double getVolume() const {
+        return _volume;
+    }
+
+    CellParameters& getParams() {
+        return _params;
+    }
 
     void init() override;
 
@@ -22,10 +32,6 @@ public:
     void computeIntegral(int gi0, int gi1) override;
 
     void computeBetaDecay(int gi0, int gi1, double lambda) override;
-
-    double getVolume() const;
-
-    CellParameters& getParams();
 
     void swapValues();
 

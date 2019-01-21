@@ -79,7 +79,9 @@ int main(int argc, char* argv[]) {
         Solver solver;
         solver.init();
 
-        boost::chrono::steady_clock::time_point start;
+        Parallel::barrier();
+
+        boost::chrono::steady_clock::time_point start;// = boost::chrono::steady_clock::now();
         if (Parallel::isMaster()) {
             start = boost::chrono::steady_clock::now();
         }
@@ -88,8 +90,8 @@ int main(int argc, char* argv[]) {
 
         if (Parallel::isMaster()) {
             auto now = boost::chrono::steady_clock::now();
-            auto whole = boost::chrono::duration_cast<boost::chrono::seconds>(now - start).count();
-            std::cout << "Run took - " << whole << " seconds" << std::endl;
+            auto whole = boost::chrono::duration_cast<boost::chrono::milliseconds>(now - start).count();
+            std::cout << "[Rank " << Parallel::getRank() << "] Run took - " << whole << " milliseconds" << std::endl;
         }
     } catch (const std::exception& e) {
         std::cout << std::endl;

@@ -17,6 +17,8 @@ public:
 
     void run();
 
+    void writeResults(int iteration);
+
 private:
     Config* _config;
     Grid* _grid;

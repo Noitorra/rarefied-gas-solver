@@ -23,15 +23,24 @@ protected:
     std::vector<std::shared_ptr<CellConnection>> _connections;
 
 public:
-    BaseCell(Type type, int id);
+    BaseCell(Type type, int id) : _type(type), _id(id) {}
 
-    int getId() const;
+    int getId() const {
+        return _id;
+    }
 
-    Type getType() const;
+    Type getType() const {
+        return _type;
+    }
 
-    std::vector<std::vector<double>>& getValues();
+    std::vector<std::vector<double>>& getValues() {
+        return _values;
+    }
 
-    const std::vector<std::shared_ptr<CellConnection>>& getConnections() const;
+
+    const std::vector<std::shared_ptr<CellConnection>>& getConnections() const {
+        return _connections;
+    }
 
     void addConnection(CellConnection* connection);
 
@@ -42,8 +51,6 @@ public:
     virtual void computeIntegral(int gi0, int gi1) = 0;
     virtual void computeBetaDecay(int gi0, int gi1, double lambda) = 0;
 
-protected:
-    double fast_exp(double mass, double temp, const Vector3d& impulse);
 };
 
 

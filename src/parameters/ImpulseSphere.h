@@ -21,23 +21,45 @@ private:
 public:
     ImpulseSphere() = default;
 
-    ImpulseSphere(double maxImpulse, unsigned int resolution);
+    ImpulseSphere(double maxImpulse, unsigned int resolution) : _maxImpulse(maxImpulse), _resolution(resolution) {}
 
-    virtual ~ImpulseSphere();
+    virtual ~ImpulseSphere() {
+        if (_xyz2i != nullptr) {
+            for (unsigned int x = 0; x < _resolution; x++) {
+                for (unsigned int y = 0; y < _resolution; y++) {
+                    delete[] _xyz2i[x][y];
+                }
+                delete[] _xyz2i[x];
+            }
+            delete[] _xyz2i;
+        }
+    }
 
     void init();
 
-    double getMaxImpulse() const;
+    double getMaxImpulse() const {
+        return _maxImpulse;
+    }
 
-    unsigned int getResolution() const;
+    unsigned int getResolution() const {
+        return _resolution;
+    }
 
-    double getDeltaImpulse() const;
+    int*** getXYZ2I() const {
+        return _xyz2i;
+    }
 
-    double getDeltaImpulseQube() const;
+    double getDeltaImpulse() const {
+        return _deltaImpulse;
+    }
 
-    const std::vector<Vector3d>& getImpulses() const;
+    double getDeltaImpulseQube() const {
+        return _deltaImpulseQube;
+    }
 
-    int*** getXYZ2I() const;
+    const std::vector<Vector3d>& getImpulses() const {
+        return _impulses;
+    }
 
     int reverseIndex(int ii, Vector3d normal);
 

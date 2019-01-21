@@ -15,17 +15,28 @@ private:
     Vector3d _normal21;
 
 public:
-    CellConnection(BaseCell* first, BaseCell* second, double square, const Vector3d& normal12);
+    CellConnection(BaseCell* first, BaseCell* second, double square, const Vector3d& normal12)
+    : _first(first), _second(second), _square(square), _normal12(normal12), _normal21(-normal12) {}
 
-    BaseCell* getFirst() const;
+    BaseCell* getFirst() const {
+        return _first;
+    }
 
-    BaseCell* getSecond() const;
+    BaseCell* getSecond() const {
+        return _second;
+    }
 
-    double getSquare() const;
+    double getSquare() const {
+        return _square;
+    }
 
-    const Vector3d& getNormal12() const;
+    const Vector3d& getNormal12() const {
+        return _normal12;
+    }
 
-    const Vector3d& getNormal21() const;
+    const Vector3d& getNormal21() const {
+        return _normal21;
+    }
 
     double getValue(unsigned int gi, unsigned int ii, Vector3d impulse) const;
 

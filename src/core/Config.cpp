@@ -165,66 +165,6 @@ void Config::load(const std::string& filename) {
     }
 }
 
-const std::string& Config::getMeshFilename() const {
-    return _meshFilename;
-}
-
-double Config::getMeshUnits() const {
-    return _meshUnits;
-}
-
-const std::string& Config::getOutputFolder() const {
-    return _outputFolder;
-}
-
-unsigned int Config::getMaxIterations() const {
-    return _maxIterations;
-}
-
-unsigned int Config::getOutEachIteration() const {
-    return _outEachIteration;
-}
-
-bool Config::isUsingIntegral() const {
-    return _isUsingIntegral;
-}
-
-bool Config::isUsingBetaDecay() const {
-    return _isUsingBetaDecay;
-}
-
-const std::vector<Gas>& Config::getGases() const {
-    return _gases;
-}
-
-const std::vector<BetaChain>& Config::getBetaChains() const {
-    return _betaChains;
-}
-
-const std::vector<InitialParameters>& Config::getInitialParameters() const {
-    return _initialParameters;
-}
-
-const std::vector<BoundaryParameters>& Config::getBoundaryParameters() const {
-    return _boundaryParameters;
-}
-
-Normalizer* Config::getNormalizer() const {
-    return _normalizer.get();
-}
-
-ImpulseSphere* Config::getImpulseSphere() const {
-    return _impulseSphere.get();
-}
-
-void Config::setTimestep(double timestep) {
-    _timestep = timestep;
-}
-
-double Config::getTimestep() const {
-    return _timestep;
-}
-
 std::ostream& operator<<(std::ostream& os, const Config& config) {
     os << "MeshFilename = "     << config._meshFilename                        << std::endl
        << "OutputFolder = "     << config._outputFolder                        << std::endl
