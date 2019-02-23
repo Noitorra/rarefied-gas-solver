@@ -7,6 +7,9 @@
 #include <map>
 
 class BaseCell;
+class NormalCell;
+class BorderCell;
+class ParallelCell;
 class CellConnection;
 class Mesh;
 class Element;
@@ -16,6 +19,9 @@ private:
     Mesh* _mesh;
     std::vector<std::shared_ptr<BaseCell>> _cells;
     std::map<int, BaseCell*> _cellsMap;
+    std::vector<NormalCell*> _normalCells;
+    std::vector<BorderCell*> _borderCells;
+    std::vector<ParallelCell*> _parallelCells;
 
 public:
     explicit Grid(Mesh* mesh);
@@ -32,13 +38,19 @@ public:
 
     void sync();
 
-    Mesh* getMesh() const;
+    Mesh* getMesh() const {
+        return _mesh;
+    }
+
+    BaseCell* getCellById(int id) {
+        return _cellsMap[id];
+    }
+
+    const std::vector<std::shared_ptr<BaseCell>>& getCells() const {
+        return _cells;
+    }
 
     void addCell(BaseCell* cell);
-
-    BaseCell* getCellById(int id);
-
-    const std::vector<std::shared_ptr<BaseCell>>& getCells() const;
 
 private:
     void normalizeVolume(Element* element, double& volume);

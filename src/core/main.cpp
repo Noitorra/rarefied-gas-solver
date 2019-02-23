@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 
         Parallel::barrier();
 
-        boost::chrono::steady_clock::time_point start;// = boost::chrono::steady_clock::now();
+        boost::chrono::steady_clock::time_point start;
         if (Parallel::isMaster()) {
             start = boost::chrono::steady_clock::now();
         }

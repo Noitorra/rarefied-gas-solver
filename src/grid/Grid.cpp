@@ -243,25 +243,18 @@ void Grid::init() {
 void Grid::computeTransfer() {
 
     // first go for border cells
-    for (const auto& cell : _cells) {
-        if (cell->getType() == BaseCell::Type::BORDER) {
-            cell->computeTransfer();
-        }
+    for (const auto& cell : _borderCells) {
+        cell->computeTransfer();
     }
 
     // then go for normal cells
-    for (const auto& cell : _cells) {
-        if (cell->getType() == BaseCell::Type::NORMAL) {
-            cell->computeTransfer();
-        }
+    for (const auto& cell : _normalCells) {
+        cell->computeTransfer();
     }
 
     // move changes from next step to current step
-    for (const auto& cell : _cells) {
-        if (cell->getType() == BaseCell::Type::NORMAL) {
-            auto normalCell = dynamic_cast<NormalCell*>(cell.get());
-            normalCell->swapValues();
-        }
+    for (const auto& cell : _normalCells) {
+        cell->swapValues();
     }
 }
 
@@ -284,18 +277,14 @@ void Grid::computeIntegral(unsigned int gi1, unsigned int gi2) {
             gases[gi1].getMass(), gases[gi2].getMass(),
             particle1, particle2);
 
-    for (const auto& cell : _cells) {
-        if (cell->getType() == BaseCell::Type::NORMAL) {
-            cell->computeIntegral(gi1, gi2);
-        }
+    for (const auto& cell : _normalCells) {
+        cell->computeIntegral(gi1, gi2);
     }
 }
 
 void Grid::computeBetaDecay(unsigned int gi0, unsigned int gi1, double lambda) {
-    for (const auto& cell : _cells) {
-        if (cell->getType() == BaseCell::Type::NORMAL) {
-            cell->computeBetaDecay(gi0, gi1, lambda);
-        }
+    for (const auto& cell : _normalCells) {
+        cell->computeBetaDecay(gi0, gi1, lambda);
     }
 }
 
@@ -310,28 +299,25 @@ void Grid::sync() {
     std::map<int, std::vector<int>> recvSyncIdsMap;
 
     // fill map
-    for (const auto& cell : _cells) {
-        if (cell->getType() == BaseCell::Type::PARALLEL) {
-            auto parallelCell = dynamic_cast<ParallelCell*>(cell.get());
+    for (const auto& cell : _parallelCells) {
 
-            // create vectors for data
-            auto syncProcessId = parallelCell->getSyncProcessId();
-            if (sendSyncIdsMap.count(syncProcessId) == 0) {
-                sendSyncIdsMap[syncProcessId] = std::vector<int>();
-            }
-            if (recvSyncIdsMap.count(syncProcessId) == 0) {
-                recvSyncIdsMap[syncProcessId] = std::vector<int>();
-            }
-
-            // add send elements
-            auto& sendSyncIds = sendSyncIdsMap[syncProcessId];
-            const auto& cellSendSyncIds = parallelCell->getSendSyncIds();
-            sendSyncIds.insert(sendSyncIds.end(), cellSendSyncIds.begin(), cellSendSyncIds.end());
-
-            // add recv element
-            auto& recvSyncIds = recvSyncIdsMap[syncProcessId];
-            recvSyncIds.insert(recvSyncIds.end(), parallelCell->getRecvSyncId());
+        // create vectors for data
+        auto syncProcessId = cell->getSyncProcessId();
+        if (sendSyncIdsMap.count(syncProcessId) == 0) {
+            sendSyncIdsMap[syncProcessId] = std::vector<int>();
         }
+        if (recvSyncIdsMap.count(syncProcessId) == 0) {
+            recvSyncIdsMap[syncProcessId] = std::vector<int>();
+        }
+
+        // add send elements
+        auto& sendSyncIds = sendSyncIdsMap[syncProcessId];
+        const auto& cellSendSyncIds = cell->getSendSyncIds();
+        sendSyncIds.insert(sendSyncIds.end(), cellSendSyncIds.begin(), cellSendSyncIds.end());
+
+        // add recv element
+        auto& recvSyncIds = recvSyncIdsMap[syncProcessId];
+        recvSyncIds.insert(recvSyncIds.end(), cell->getRecvSyncId());
     }
 
     // sort all
@@ -390,23 +376,23 @@ void Grid::sync() {
     }
 }
 
-Mesh* Grid::getMesh() const {
-    return _mesh;
-}
-
 void Grid::addCell(BaseCell* cell) {
     if (_cellsMap[cell->getId()] == nullptr) {
         _cellsMap[cell->getId()] = cell;
         _cells.emplace_back(cell);
+
+        switch (cell->getType()) {
+            case BaseCell::Type::NORMAL:
+                _normalCells.push_back(dynamic_cast<NormalCell*>(cell));
+                break;
+            case BaseCell::Type::BORDER:
+                _borderCells.push_back(dynamic_cast<BorderCell*>(cell));
+                break;
+            case BaseCell::Type::PARALLEL:
+                _parallelCells.push_back(dynamic_cast<ParallelCell*>(cell));
+                break;
+        }
     }
-}
-
-BaseCell* Grid::getCellById(int id) {
-    return _cellsMap[id];
-}
-
-const std::vector<std::shared_ptr<BaseCell>>& Grid::getCells() const {
-    return _cells;
 }
 
 void Grid::normalizeVolume(Element* element, double& volume) {
