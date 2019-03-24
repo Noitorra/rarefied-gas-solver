@@ -1,8 +1,6 @@
 #ifndef RGS_BORDERPARAMETERS_H
 #define RGS_BORDERPARAMETERS_H
 
-#include "utilities/Utils.h"
-
 #include <string>
 #include <vector>
 #include <ostream>
@@ -10,6 +8,10 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
+
+#include "utilities/Types.h"
+#include "utilities/Utils.h"
+#include "GradientParameter.h"
 
 class BoundaryParameters {
     friend class boost::serialization::access;
@@ -21,11 +23,22 @@ private:
     std::vector<double> _pressure;
     std::vector<Vector3d> _flow;
 
+    std::vector<GradientParameter> _gradientTemperature;
+
 public:
     BoundaryParameters() = default;
 
-    BoundaryParameters(std::string group, std::vector<std::string> type, std::vector<double> temperature, std::vector<double> pressure, std::vector<Vector3d> flow)
-    : _group(std::move(group)), _type(std::move(type)), _temperature(std::move(temperature)), _pressure(std::move(pressure)), _flow(std::move(flow)) {}
+    BoundaryParameters(std::string group,
+                       std::vector<std::string> type,
+                       std::vector<double> temperature,
+                       std::vector<double> pressure,
+                       std::vector<Vector3d> flow,
+                       std::vector<GradientParameter> gradientTemperature) : _group(std::move(group)),
+                                                                             _type(std::move(type)),
+                                                                             _temperature(std::move(temperature)),
+                                                                             _pressure(std::move(pressure)),
+                                                                             _flow(std::move(flow)),
+                                                                             _gradientTemperature(std::move(gradientTemperature)) {}
 
     const std::string& getGroup() const {
         return _group;
@@ -33,10 +46,6 @@ public:
 
     const std::vector<std::string>& getType() const {
         return _type;
-    }
-
-    const std::vector<double>& getTemperature() const {
-        return _temperature;
     }
 
     double getTemperature(int gi) const {
@@ -47,10 +56,6 @@ public:
         _temperature[gi] = temperature;
     }
 
-    const std::vector<double>& getPressure() const {
-        return _pressure;
-    }
-
     double getPressure(int gi) const {
         return _pressure[gi];
     }
@@ -59,12 +64,24 @@ public:
         _pressure[gi] = pressure;
     }
 
-    Vector3d getFlow(int gi) const {
+    const Vector3d& getFlow(int gi) const {
         return _flow[gi];
     }
 
     void setFlow(int gi, Vector3d flow) {
-        _flow[gi] = flow;
+        _flow[gi] = std::move(flow);
+    }
+
+    const GradientParameter& getGradientTemperature(int gi) const {
+        return _gradientTemperature[gi];
+    }
+
+    void setGradientTemperature(int gi, GradientParameter gradientTemperature) {
+        _gradientTemperature[gi] = std::move(gradientTemperature);
+    }
+
+    bool hasGradientTemperature(int gi) const {
+        return _gradientTemperature.size() > gi;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const BoundaryParameters& parameters) {
@@ -98,6 +115,7 @@ private:
         ar & _temperature;
         ar & _pressure;
         ar & _flow;
+        ar & _gradientTemperature;
     }
 
 };

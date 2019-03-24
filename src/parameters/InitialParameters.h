@@ -1,8 +1,6 @@
 #ifndef RGS_INITIALPARAMETERS_H
 #define RGS_INITIALPARAMETERS_H
 
-#include "utilities/Utils.h"
-
 #include <string>
 #include <vector>
 #include <ostream>
@@ -10,6 +8,10 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
+
+#include "utilities/Types.h"
+#include "utilities/Utils.h"
+#include "GradientParameter.h"
 
 class InitialParameters {
     friend class boost::serialization::access;
@@ -19,18 +21,24 @@ private:
     std::vector<double> _pressure;
     std::vector<double> _temperature;
 
+    std::vector<GradientParameter> _gradientTemperature;
+    std::vector<GradientParameter> _gradientPressure;
+
 public:
     InitialParameters() = default;
 
-    InitialParameters(std::string group, std::vector<double> pressure, std::vector<double> temperature)
-    : _group(std::move(group)), _pressure(std::move(pressure)), _temperature(std::move(temperature)) {}
+    InitialParameters(std::string group,
+                      std::vector<double> pressure,
+                      std::vector<double> temperature,
+                      std::vector<GradientParameter> gradientTemperature,
+                      std::vector<GradientParameter> gradientPressure) : _group(std::move(group)),
+                                                                         _pressure(std::move(pressure)),
+                                                                         _temperature(std::move(temperature)),
+                                                                         _gradientTemperature(std::move(gradientTemperature)),
+                                                                         _gradientPressure(std::move(gradientPressure)) {}
 
     const std::string& getGroup() const {
         return _group;
-    }
-
-    const std::vector<double>& getPressure() const {
-        return _pressure;
     }
 
     double getPressure(int gi) const {
@@ -41,16 +49,36 @@ public:
         _pressure[gi] = pressure;
     }
 
-    const std::vector<double>& getTemperature() const {
-        return _temperature;
-    }
-
     double getTemperature(int gi) const {
         return _temperature[gi];
     }
 
     void setTemperature(int gi, double temperature) {
         _temperature[gi] = temperature;
+    }
+
+    const GradientParameter& getGradientTemperature(int gi) const {
+        return _gradientTemperature[gi];
+    }
+
+    void setGradientTemperature(int gi, GradientParameter gradientTemperature) {
+        _gradientTemperature[gi] = std::move(gradientTemperature);
+    }
+
+    bool hasGradientTemperature(int gi) const {
+        return _gradientTemperature.size() > gi;
+    }
+
+    const GradientParameter& getGradientPressure(int gi) const {
+        return _gradientPressure[gi];
+    }
+
+    void setGradientPressure(int gi, GradientParameter gradientPressure) {
+        _gradientPressure[gi] = std::move(gradientPressure);
+    }
+
+    bool hasGradientPressure(int gi) const {
+        return _gradientPressure.size() > gi;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const InitialParameters& parameters) {
@@ -68,6 +96,7 @@ private:
         ar & _group;
         ar & _pressure;
         ar & _temperature;
+        ar & _gradientTemperature;
     }
 
 };

@@ -1,5 +1,3 @@
-#include <utility>
-
 #ifndef RGS_ELEMENT_H
 #define RGS_ELEMENT_H
 
@@ -44,12 +42,14 @@ protected:
     double _volume;
     std::vector<std::shared_ptr<SideElement>> _sideElements;
 
+    Vector3d _center;
+
 public:
     Element() = default;
 
     Element(Type type, int id, int physicalEntityId, int geomUnitId, std::vector<int> partitions, std::vector<int> nodeIds)
     : _type(type), _id(id), _physicalEntityId(physicalEntityId), _geomUnitId(geomUnitId), _partitions(std::move(partitions)),
-    _nodeIds(std::move(nodeIds)), _group(""), _isProcessing(false), _isMain(false), _isBorder(false), _volume(0.0) {}
+    _nodeIds(std::move(nodeIds)), _group(""), _isProcessing(false), _isMain(false), _isBorder(false), _volume(0.0), _center(0, 0, 0) {}
 
     void init(const std::map<int, Node*>& allNodesMap, bool isOriginalElement) {
         std::vector<Node*> nodes;
@@ -63,6 +63,14 @@ public:
             for (const auto& sideElement : _sideElements) {
                 sideElement->getElement()->init(allNodesMap, false);
             }
+        }
+
+        _center.set(0, 0, 0);
+        for (const auto& node : nodes) {
+            _center += node->getPosition();
+        }
+        if (nodes.empty() == false) {
+            _center /= nodes.size();
         }
     }
 
@@ -162,6 +170,10 @@ public:
         return _sideElements;
     }
 
+    const Vector3d& getCenter() const {
+        return _center;
+    }
+
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
@@ -179,6 +191,8 @@ private:
 
         ar & _volume;
         ar & _sideElements;
+
+        ar & _center;
     }
 
     virtual void innerInit(const std::vector<Node*>& nodes, bool isSideElementsRequired) = 0;

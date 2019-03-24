@@ -17,10 +17,14 @@ void Config::init() {
         maxRadius = std::max(maxRadius, gas.getRadius());
     }
     double maxPressure = 0.0, maxTemperature = 0.0;
-    for (auto& initialParam : _initialParameters) {
+    for (auto& param : _initialParameters) {
         for (auto gi = 0; gi < _gases.size(); gi++) {
-            maxPressure = std::max(maxPressure, initialParam.getPressure(gi));
-            maxTemperature = std::max(maxTemperature, initialParam.getTemperature(gi));
+            maxPressure = std::max(maxPressure, param.getPressure(gi));
+            maxTemperature = std::max(maxTemperature, param.getTemperature(gi));
+            if (param.hasGradientTemperature(gi)) {
+                maxTemperature = std::max(maxTemperature, param.getGradientTemperature(gi).getValueStart());
+                maxTemperature = std::max(maxTemperature, param.getGradientTemperature(gi).getValueEnd());
+            }
         }
     }
     _normalizer->init(maxMass, maxRadius, maxPressure, maxTemperature);
@@ -33,22 +37,82 @@ void Config::init() {
         betaChain.setLambda1(_normalizer->normalize(betaChain.getLambda1(), Normalizer::Type::LAMBDA));
         betaChain.setLambda2(_normalizer->normalize(betaChain.getLambda2(), Normalizer::Type::LAMBDA));
     }
-    for (auto& initialParam : _initialParameters) {
+    for (auto& param : _initialParameters) {
         for (auto gi = 0; gi < _gases.size(); gi++) {
-            initialParam.setPressure(gi, _normalizer->normalize(initialParam.getPressure(gi), Normalizer::Type::PRESSURE));
-            initialParam.setTemperature(gi, _normalizer->normalize(initialParam.getTemperature(gi), Normalizer::Type::TEMPERATURE));
+            param.setPressure(gi, _normalizer->normalize(param.getPressure(gi), Normalizer::Type::PRESSURE));
+            param.setTemperature(gi, _normalizer->normalize(param.getTemperature(gi), Normalizer::Type::TEMPERATURE));
+
+            if (param.hasGradientTemperature(gi)) {
+                GradientParameter gradientTemperature = param.getGradientTemperature(gi);
+                gradientTemperature.setValueStart(_normalizer->normalize(gradientTemperature.getValueStart(), Normalizer::Type::TEMPERATURE));
+                gradientTemperature.setValueEnd(_normalizer->normalize(gradientTemperature.getValueEnd(), Normalizer::Type::TEMPERATURE));
+
+                Vector3d pointStart = gradientTemperature.getPointStart();
+                pointStart.x() = pointStart.x() * _meshUnits;
+                pointStart.y() = pointStart.y() * _meshUnits;
+                pointStart.z() = pointStart.z() * _meshUnits;
+                gradientTemperature.setPointStart(pointStart);
+
+                Vector3d pointEnd = gradientTemperature.getPointEnd();
+                pointEnd.x() = pointEnd.x() * _meshUnits;
+                pointEnd.y() = pointEnd.y() * _meshUnits;
+                pointEnd.z() = pointEnd.z() * _meshUnits;
+                gradientTemperature.setPointEnd(pointEnd);
+
+                param.setGradientTemperature(gi, gradientTemperature);
+            }
+
+            if (param.hasGradientPressure(gi)) {
+                GradientParameter gradientPressure = param.getGradientPressure(gi);
+                gradientPressure.setValueStart(_normalizer->normalize(gradientPressure.getValueStart(), Normalizer::Type::PRESSURE));
+                gradientPressure.setValueEnd(_normalizer->normalize(gradientPressure.getValueEnd(), Normalizer::Type::PRESSURE));
+
+                Vector3d pointStart = gradientPressure.getPointStart();
+                pointStart.x() = pointStart.x() * _meshUnits;
+                pointStart.y() = pointStart.y() * _meshUnits;
+                pointStart.z() = pointStart.z() * _meshUnits;
+                gradientPressure.setPointStart(pointStart);
+
+                Vector3d pointEnd = gradientPressure.getPointEnd();
+                pointEnd.x() = pointEnd.x() * _meshUnits;
+                pointEnd.y() = pointEnd.y() * _meshUnits;
+                pointEnd.z() = pointEnd.z() * _meshUnits;
+                gradientPressure.setPointEnd(pointEnd);
+
+                param.setGradientPressure(gi, gradientPressure);
+            }
         }
     }
-    for (auto& boundaryParam : _boundaryParameters) {
+    for (auto& param : _boundaryParameters) {
         for (auto gi = 0; gi < _gases.size(); gi++) {
-            boundaryParam.setPressure(gi, _normalizer->normalize(boundaryParam.getPressure(gi), Normalizer::Type::PRESSURE));
-            boundaryParam.setTemperature(gi, _normalizer->normalize(boundaryParam.getTemperature(gi), Normalizer::Type::TEMPERATURE));
+            param.setPressure(gi, _normalizer->normalize(param.getPressure(gi), Normalizer::Type::PRESSURE));
+            param.setTemperature(gi, _normalizer->normalize(param.getTemperature(gi), Normalizer::Type::TEMPERATURE));
 
-            Vector3d flow = boundaryParam.getFlow(gi);
+            Vector3d flow = param.getFlow(gi);
             _normalizer->normalize(flow.x(), Normalizer::Type::FLOW);
             _normalizer->normalize(flow.y(), Normalizer::Type::FLOW);
             _normalizer->normalize(flow.z(), Normalizer::Type::FLOW);
-            boundaryParam.setFlow(gi, flow);
+            param.setFlow(gi, flow);
+
+            if (param.hasGradientTemperature(gi)) {
+                GradientParameter gradientTemperature = param.getGradientTemperature(gi);
+                gradientTemperature.setValueStart(_normalizer->normalize(gradientTemperature.getValueStart(), Normalizer::Type::TEMPERATURE));
+                gradientTemperature.setValueEnd(_normalizer->normalize(gradientTemperature.getValueEnd(), Normalizer::Type::TEMPERATURE));
+
+                Vector3d pointStart = gradientTemperature.getPointStart();
+                pointStart.x() = pointStart.x() * _meshUnits;
+                pointStart.y() = pointStart.y() * _meshUnits;
+                pointStart.z() = pointStart.z() * _meshUnits;
+                gradientTemperature.setPointStart(pointStart);
+
+                Vector3d pointEnd = gradientTemperature.getPointEnd();
+                pointEnd.x() = pointEnd.x() * _meshUnits;
+                pointEnd.y() = pointEnd.y() * _meshUnits;
+                pointEnd.z() = pointEnd.z() * _meshUnits;
+                gradientTemperature.setPointEnd(pointEnd);
+
+                param.setGradientTemperature(gi, gradientTemperature);
+            }
         }
     }
 
@@ -101,18 +165,82 @@ void Config::load(const std::string& filename) {
             auto group = param.second.get<std::string>("group");
 
             std::vector<double> pressure;
-            for (const boost::property_tree::ptree::value_type& value : param.second.get_child("pressure")) {
-                pressure.emplace_back(value.second.get_value<double>());
+            auto pressureNode = param.second.get_child_optional("pressure");
+            if (pressureNode) {
+                for (const boost::property_tree::ptree::value_type& value : *pressureNode) {
+                    pressure.emplace_back(value.second.get_value<double>());
+                }
             }
             pressure.resize(_gases.size(), 0.0);
 
             std::vector<double> temperature;
-            for (const boost::property_tree::ptree::value_type& value : param.second.get_child("temperature")) {
-                temperature.emplace_back(value.second.get_value<double>());
+            auto temperatureNode = param.second.get_child_optional("temperature");
+            if (temperatureNode) {
+                for (const boost::property_tree::ptree::value_type& value : *temperatureNode) {
+                    temperature.emplace_back(value.second.get_value<double>());
+                }
             }
             temperature.resize(_gases.size(), 0.0);
 
-            _initialParameters.emplace_back(group, pressure, temperature);
+            std::vector<GradientParameter> gradientTemperature;
+            auto gradientTemperatureNode = param.second.get_child_optional("temperature_gradient");
+            if (gradientTemperatureNode) {
+                for (const boost::property_tree::ptree::value_type& value : *gradientTemperatureNode) {
+                    double valueStart = value.second.get<double>("value_start", 0);
+                    double valueEnd = value.second.get<double>("value_end", 0);
+
+                    Vector3d pointStart(0, 0, 0);
+                    auto pointStartNode = value.second.get_child_optional("point_start");
+                    if (pointStartNode) {
+                        double x = pointStartNode->get<double>("x", 0);
+                        double y = pointStartNode->get<double>("y", 0);
+                        double z = pointStartNode->get<double>("z", 0);
+                        pointStart.set(x, y, z);
+                    }
+
+                    Vector3d pointEnd(0, 0, 0);
+                    auto pointEndNode = value.second.get_child_optional("point_end");
+                    if (pointEndNode) {
+                        double x = pointEndNode->get<double>("x", 0);
+                        double y = pointEndNode->get<double>("y", 0);
+                        double z = pointEndNode->get<double>("z", 0);
+                        pointEnd.set(x, y, z);
+                    }
+
+                    gradientTemperature.emplace_back(valueStart, valueEnd, pointStart, pointEnd);
+                }
+            }
+
+            std::vector<GradientParameter> gradientPressure;
+            auto gradientPressureNode = param.second.get_child_optional("pressure_gradient");
+            if (gradientPressureNode) {
+                for (const boost::property_tree::ptree::value_type& value : *gradientPressureNode) {
+                    double valueStart = value.second.get<double>("value_start", 0);
+                    double valueEnd = value.second.get<double>("value_end", 0);
+
+                    Vector3d pointStart(0, 0, 0);
+                    auto pointStartNode = value.second.get_child_optional("point_start");
+                    if (pointStartNode) {
+                        double x = pointStartNode->get<double>("x", 0);
+                        double y = pointStartNode->get<double>("y", 0);
+                        double z = pointStartNode->get<double>("z", 0);
+                        pointStart.set(x, y, z);
+                    }
+
+                    Vector3d pointEnd(0, 0, 0);
+                    auto pointEndNode = value.second.get_child_optional("point_end");
+                    if (pointEndNode) {
+                        double x = pointEndNode->get<double>("x", 0);
+                        double y = pointEndNode->get<double>("y", 0);
+                        double z = pointEndNode->get<double>("z", 0);
+                        pointEnd.set(x, y, z);
+                    }
+
+                    gradientPressure.emplace_back(valueStart, valueEnd, pointStart, pointEnd);
+                }
+            }
+
+            _initialParameters.emplace_back(group, pressure, temperature, gradientTemperature, gradientPressure);
         }
     }
 
@@ -152,15 +280,44 @@ void Config::load(const std::string& filename) {
             auto flowNode = param.second.get_child_optional("flow");
             if (flowNode) {
                 for (const boost::property_tree::ptree::value_type& value : *flowNode) {
-                    double flowX = value.second.get<double>("x", 0);
-                    double flowY = value.second.get<double>("y", 0);
-                    double flowZ = value.second.get<double>("z", 0);
-                    flow.emplace_back(flowX, flowY, flowZ);
+                    double x = value.second.get<double>("x", 0);
+                    double y = value.second.get<double>("y", 0);
+                    double z = value.second.get<double>("z", 0);
+                    flow.emplace_back(x, y, z);
                 }
             }
             flow.resize(_gases.size(), Vector3d());
 
-            _boundaryParameters.emplace_back(group, type, temperature, pressure, flow);
+            std::vector<GradientParameter> gradientTemperature;
+            auto gradientTemperatureNode = param.second.get_child_optional("temperature_gradient");
+            if (gradientTemperatureNode) {
+                for (const boost::property_tree::ptree::value_type& value : *gradientTemperatureNode) {
+                    double valueStart = value.second.get<double>("value_start", 0);
+                    double valueEnd = value.second.get<double>("value_end", 0);
+
+                    Vector3d pointStart(0, 0, 0);
+                    auto pointStartNode = value.second.get_child_optional("point_start");
+                    if (pointStartNode) {
+                        double x = pointStartNode->get<double>("x", 0);
+                        double y = pointStartNode->get<double>("y", 0);
+                        double z = pointStartNode->get<double>("z", 0);
+                        pointStart.set(x, y, z);
+                    }
+
+                    Vector3d pointEnd(0, 0, 0);
+                    auto pointEndNode = value.second.get_child_optional("point_end");
+                    if (pointEndNode) {
+                        double x = pointEndNode->get<double>("x", 0);
+                        double y = pointEndNode->get<double>("y", 0);
+                        double z = pointEndNode->get<double>("z", 0);
+                        pointEnd.set(x, y, z);
+                    }
+
+                    gradientTemperature.emplace_back(valueStart, valueEnd, pointStart, pointEnd);
+                }
+            }
+
+            _boundaryParameters.emplace_back(group, type, temperature, pressure, flow, gradientTemperature);
         }
     }
 }

@@ -40,11 +40,22 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
             // set initial params by physical group
             for (const auto& param : initialParameters) {
                 if (param.getGroup() == element->getGroup()) {
-                    for (auto i = 0; i < param.getPressure().size(); i++) {
-                        cell->getParams().setPressure(i, param.getPressure(i));
-                    }
-                    for (auto i = 0; i < param.getTemperature().size(); i++) {
-                        cell->getParams().setTemp(i, param.getTemperature(i));
+                    for (auto gi = 0; gi < config->getGases().size(); gi++) {
+                        double pressure = 0.0;
+                        if (param.hasGradientPressure(gi)) {
+                            pressure = param.getGradientPressure(gi).getValue(element->getCenter());
+                        } else {
+                            pressure = param.getPressure(gi);
+                        }
+                        cell->getParams().setPressure(gi, pressure);
+
+                        double temperature = 0.0;
+                        if (param.hasGradientTemperature(gi)) {
+                            temperature = param.getGradientTemperature(gi).getValue(element->getCenter());
+                        } else {
+                            temperature = param.getTemperature(gi);
+                        }
+                        cell->getParams().setTemp(gi, temperature);
                     }
                 }
             }
@@ -120,7 +131,13 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
                             borderCell->setBorderType(i, borderType);
                         }
                         for (auto gi = 0; gi < config->getGases().size(); gi++) {
-                            borderCell->getBoundaryParams().setTemp(gi, param.getTemperature(gi));
+                            double temperature = 0.0;
+                            if (param.hasGradientTemperature(gi)) {
+                                temperature = param.getGradientTemperature(gi).getValue(sideElement->getElement()->getCenter());
+                            } else {
+                                temperature = param.getTemperature(gi);
+                            }
+                            borderCell->getBoundaryParams().setTemp(gi, temperature);
                             borderCell->getBoundaryParams().setPressure(gi, param.getPressure(gi));
                             borderCell->getBoundaryParams().setFlow(gi, param.getFlow(gi));
                         }

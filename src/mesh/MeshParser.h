@@ -17,12 +17,11 @@ private:
 
     std::map<Type, std::string> _keywords;
     Type _type;
-    bool _isPhysicalEntitiesSizeLine;
-    bool _isNodesSizeLine;
-    bool _isElementsSizeLine;
+    int _level;
 
     Mesh* _mesh;
-    float _version;
+    std::string _version;
+    int _majorVersion;
     int _dataType;
     int _fileSize;
 
@@ -41,6 +40,8 @@ private:
     ~MeshParser() = default;
 
     void parse(const std::string& line, double units);
+    void parseVersion(const std::string& line);
+    void parseDataV2(const std::string& line, double units);
 
 };
 

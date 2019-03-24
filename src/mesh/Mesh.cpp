@@ -53,7 +53,10 @@ void Mesh::init() {
                 const auto& otherElement = *result;
                 sideElement->setNeighborId(otherElement->getId());
             } else {
-                throw std::runtime_error("main element doesn't have any neighbors");
+                std::ostringstream os;
+                os << "main element doesn't have any neighbors" << ", id = " << element->getId();
+                std::string message = os.str();
+                throw std::runtime_error(message);
             }
         }
     }
