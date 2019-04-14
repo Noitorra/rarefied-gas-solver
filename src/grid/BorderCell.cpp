@@ -161,7 +161,7 @@ void BorderCell::computeTransferFlow(unsigned int gi) {
         if (projection < 0.0) {
             cUp += -projection * _connections[0]->getSecond()->getValues()[gi][ii];
         } else {
-            cDown += projection * _cacheExp[gi][ii];;
+            cDown += projection * _cacheExp[gi][ii];
         }
     }
 

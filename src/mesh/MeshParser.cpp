@@ -36,7 +36,9 @@ Mesh *MeshParser::loadMesh(const string &filename, double units) {
         try {
             string line;
             while (getline(fs, line)) {
-                line = line.substr(0, line.size() - 1);
+                if (line.empty() == false && *line.rbegin() == '\r') {
+                    line = line.substr(0, line.size() - 1);
+                }
                 parse(line, units);
             }
             fs.close();
