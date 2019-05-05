@@ -3,6 +3,7 @@
 
 #include "BaseCell.h"
 #include "CellParameters.h"
+#include "GridBuffer.h"
 
 class BorderCell : public BaseCell {
 public:
@@ -10,17 +11,20 @@ public:
         UNDEFINED,
         DIFFUSE,
         PRESSURE,
+        MIRROR,
         FLOW,
-        MIRROR
+        PRESSURE_FROM,
+        PRESSURE_TO
     };
 
 private:
     std::vector<BorderType> _borderTypes;
     CellParameters _boundaryParams;
     std::vector<std::vector<double>> _cacheExp;
+    GridBuffer* _gridBuffer;
 
 public:
-    explicit BorderCell(int id) : BaseCell(Type::BORDER, id) {
+    explicit BorderCell(int id, GridBuffer* gridBuffer) : BaseCell(Type::BORDER, id), _gridBuffer(gridBuffer) {
         const auto& gases = Config::getInstance()->getGases();
         _borderTypes.resize(gases.size(), BorderType::UNDEFINED);
     }
@@ -41,11 +45,15 @@ public:
 
     void computeBetaDecay(int gi0, int gi1, double lambda) override;
 
+    void storeResults();
+
 private:
     void computeTransferDiffuse(unsigned int gi);
     void computeTransferMirror(unsigned int gi);
-    void computeTransferPressure(unsigned int gi);
-    void computeTransferFlow(unsigned int gi);
+    void computeTransferPressure(unsigned int gi, double borderPressure);
+    void computeTransferFlow(unsigned int gi, const Vector3d& borderFlow);
+
+    void storeResults(unsigned int gi);
 
 };
 

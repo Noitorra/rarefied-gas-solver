@@ -19,7 +19,7 @@
 
 #include <unistd.h>
 
-Grid::Grid(Mesh* mesh) : _mesh(mesh) {
+Grid::Grid(Mesh* mesh) : _mesh(mesh), _buffer(new GridBuffer()) {
     auto config = Config::getInstance();
     const auto& initialParameters = config->getInitialParameters();
     const auto& boundaryParameters = config->getBoundaryParameters();
@@ -108,7 +108,7 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
             } else if (neighborElement->isBorder()) {
 
                 // create border cell
-                auto borderCell = new BorderCell(neighborElement->getId());
+                auto borderCell = new BorderCell(neighborElement->getId(), _buffer.get());
                 addCell(borderCell);
 
                 // set boundary params by physical group
@@ -121,10 +121,14 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh) {
                                 borderType = BorderCell::BorderType::DIFFUSE;
                             } else if (type == "Pressure") {
                                 borderType = BorderCell::BorderType::PRESSURE;
-                            } else if (type == "Flow") {
-                                borderType = BorderCell::BorderType::FLOW;
                             } else if (type == "Mirror") {
                                 borderType = BorderCell::BorderType::MIRROR;
+                            } else if (type == "Flow") {
+                                borderType = BorderCell::BorderType::FLOW;
+                            } else if (type == "PressureFrom") {
+                                borderType = BorderCell::BorderType::PRESSURE_FROM;
+                            } else if (type == "PressureTo") {
+                                borderType = BorderCell::BorderType::PRESSURE_TO;
                             } else {
                                 borderType = BorderCell::BorderType::UNDEFINED;
                             }
@@ -258,6 +262,22 @@ void Grid::init() {
 }
 
 void Grid::computeTransfer() {
+
+    // sync grid
+    if (Parallel::isSingle() == false) {
+        sync();
+    }
+
+    // clear average values from buffer
+    _buffer->clearAllResults();
+
+    // put results to buffer
+    for (const auto& cell : _borderCells) {
+        cell->storeResults();
+    }
+
+    // calculate average values in buffer (with sync if needed)
+    _buffer->calculateAverage();
 
     // first go for border cells
     for (const auto& cell : _borderCells) {

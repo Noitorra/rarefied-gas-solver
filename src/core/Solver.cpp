@@ -77,11 +77,6 @@ void Solver::run() {
     unsigned int maxIterations = _config->getMaxIterations();
     for (unsigned int iteration = 1; iteration <= maxIterations; iteration++) {
 
-        // sync grid
-        if (Parallel::isSingle() == false) {
-            _grid->sync();
-        }
-
         // transfer
         _grid->computeTransfer();
 
@@ -107,11 +102,6 @@ void Solver::run() {
                 _grid->computeBetaDecay(betaChain.getGasIndex1(), betaChain.getGasIndex2(), betaChain.getLambda1());
                 _grid->computeBetaDecay(betaChain.getGasIndex2(), betaChain.getGasIndex3(), betaChain.getLambda2());
             }
-        }
-
-        // sync grid
-        if (Parallel::isSingle() == false) {
-            _grid->sync();
         }
 
         // transfer
@@ -161,7 +151,7 @@ void Solver::writeResults(int iteration) {
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
 
-            // receive params from master, then unite grids
+            // receive params from slaves, then unite grids
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
                 std::vector<CellResults*> resultsBuffer;
                 SerializationUtils::deserialize(Parallel::recv(processor, Parallel::COMMAND_RESULT_PARAMS), resultsBuffer);

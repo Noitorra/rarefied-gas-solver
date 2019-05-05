@@ -2,7 +2,9 @@
 #define RGS_GRID_H
 
 #include "utilities/Types.h"
+#include "GridBuffer.h"
 
+#include <memory>
 #include <vector>
 #include <map>
 
@@ -22,6 +24,7 @@ private:
     std::vector<NormalCell*> _normalCells;
     std::vector<BorderCell*> _borderCells;
     std::vector<ParallelCell*> _parallelCells;
+    std::shared_ptr<GridBuffer> _buffer;
 
 public:
     explicit Grid(Mesh* mesh);

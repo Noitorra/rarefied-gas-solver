@@ -16,15 +16,15 @@ void NormalCell::init() {
         _values[gi].resize(impulses.size(), 0.0);
         _newValues[gi].resize(impulses.size(), 0.0);
 
-        double C = 0.0;
+        double coeff = 0.0;
         for (const auto& impulse : impulses) {
-            C += std::exp(-impulse.moduleSquare() / gases[gi].getMass() / 2 / _params.getTemp(gi));
+            coeff += std::exp(-impulse.moduleSquare() / gases[gi].getMass() / 2 / _params.getTemp(gi));
         }
-        C = 1.0 / C;
-        C *= _params.getPressure(gi) / _params.getTemp(gi) / config->getImpulseSphere()->getDeltaImpulseQube();
+        coeff = 1.0 / coeff;
+        coeff *= _params.getPressure(gi) / _params.getTemp(gi) / config->getImpulseSphere()->getDeltaImpulseQube();
 
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
-            _values[gi][ii] = C * std::exp(-impulses[ii].moduleSquare() / gases[gi].getMass() / 2 / _params.getTemp(gi));
+            _values[gi][ii] = coeff * std::exp(-impulses[ii].moduleSquare() / gases[gi].getMass() / 2 / _params.getTemp(gi));
         }
     }
 }

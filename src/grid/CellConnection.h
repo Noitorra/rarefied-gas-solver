@@ -38,8 +38,6 @@ public:
         return _normal21;
     }
 
-    double getValue(unsigned int gi, unsigned int ii, Vector3d impulse) const;
-
 };
 
 
