@@ -19,6 +19,8 @@ public:
 
     void computeBetaDecay(int gi0, int gi1, double lambda) override;
 
+    void computeImplicitTransfer(int ii) override;
+
     int getRecvSyncId() const;
 
     int getSyncProcessId() const;

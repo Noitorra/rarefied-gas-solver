@@ -85,6 +85,37 @@ void NormalCell::swapValues() {
     }
 }
 
+void NormalCell::computeImplicitTransfer(int ii) {
+    if (_isImplicitTransferComputed == false) {
+        auto config = Config::getInstance();
+        const auto& gases = config->getGases();
+        const auto& impulses = config->getImpulseSphere()->getImpulses();
+        auto timestep = config->getTimestep() / 2;
+
+        for (unsigned int gi = 0; gi < gases.size(); gi++) {
+            double y = timestep / _volume / gases[gi].getMass();
+
+            double sumUp = 0.0, sumDown = 0.0;
+            for (auto& connection : _connections) {
+                double projection = connection->getNormal12().scalar(impulses[ii]);
+                if (projection != 0) {
+                    if (projection < 0) {
+
+                        // need to find value first, go recursive here
+                        connection->getSecond()->computeImplicitTransfer(ii);
+                        sumUp += connection->getSecond()->getValues()[gi][ii] * projection * connection->getSquare();
+                    } else {
+                        sumDown += projection * connection->getSquare();
+                    }
+                }
+            }
+            _values[gi][ii] = (_values[gi][ii] - sumUp * y) / (1 + sumDown * y);
+        }
+
+        _isImplicitTransferComputed = true;
+    }
+}
+
 CellResults* NormalCell::getResults() {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();

@@ -134,6 +134,7 @@ void Config::load(const std::string& filename) {
     _outEachIteration = root.get<unsigned int>("out_each_iteration", 1);
     _isUsingIntegral = root.get<bool>("use_integral", false);
     _isUsingBetaDecay = root.get<bool>("use_beta_decay", false);
+    _isImplicitScheme = root.get<bool>("use_implicit_scheme", false);
 
     _gases.clear();
     auto gasesNode = root.get_child_optional("gases");
@@ -317,7 +318,16 @@ void Config::load(const std::string& filename) {
                 }
             }
 
-            _boundaryParameters.emplace_back(group, type, temperature, pressure, flow, gradientTemperature);
+            std::vector<std::string> connectGroups;
+            auto connectGroupNode = param.second.get_child_optional("connect_group");
+            if (connectGroupNode) {
+                for (const boost::property_tree::ptree::value_type& value : *connectGroupNode) {
+                    connectGroups.emplace_back(value.second.get_value<std::string>());
+                }
+            }
+            connectGroups.resize(_gases.size(), "");
+
+            _boundaryParameters.emplace_back(group, type, temperature, pressure, flow, gradientTemperature, connectGroups);
         }
     }
 }

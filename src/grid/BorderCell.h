@@ -1,3 +1,7 @@
+#include <utility>
+
+#include <utility>
+
 #ifndef RGS_BORDERCELL_H
 #define RGS_BORDERCELL_H
 
@@ -13,15 +17,20 @@ public:
         PRESSURE,
         MIRROR,
         FLOW,
-        PRESSURE_FROM,
-        PRESSURE_TO
+        FLOW_CONNECT
     };
 
 private:
     std::vector<BorderType> _borderTypes;
     CellParameters _boundaryParams;
-    std::vector<std::vector<double>> _cacheExp;
+
     GridBuffer* _gridBuffer;
+
+    // needed for flow connect condition
+    std::string _group;
+    std::vector<std::string> _connectGroups;
+
+    std::vector<std::vector<double>> _cacheExp;
 
 public:
     explicit BorderCell(int id, GridBuffer* gridBuffer) : BaseCell(Type::BORDER, id), _gridBuffer(gridBuffer) {
@@ -37,6 +46,11 @@ public:
         return _boundaryParams;
     }
 
+    void setConnectParams(std::string group, std::vector<std::string> connectGroups) {
+        _group = group;
+        _connectGroups = connectGroups;
+    }
+
     void init() override;
 
     void computeTransfer() override;
@@ -45,15 +59,14 @@ public:
 
     void computeBetaDecay(int gi0, int gi1, double lambda) override;
 
-    void storeResults();
+    void computeImplicitTransfer(int ii) override;
 
 private:
     void computeTransferDiffuse(unsigned int gi);
     void computeTransferMirror(unsigned int gi);
     void computeTransferPressure(unsigned int gi, double borderPressure);
-    void computeTransferFlow(unsigned int gi, const Vector3d& borderFlow);
-
-    void storeResults(unsigned int gi);
+    void computeTransferFlow(unsigned int gi, double borderFlow);
+    double computeTransferFlowConnect(unsigned int gi, double borderFlow);
 
 };
 

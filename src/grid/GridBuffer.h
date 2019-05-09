@@ -1,34 +1,45 @@
 #ifndef RGS_GRIDBUFFER_H
 #define RGS_GRIDBUFFER_H
 
-#include "CellResults.h"
+#include "core/Config.h"
 
 #include <vector>
+#include <map>
+#include <iostream>
 
 class GridBuffer {
 private:
-    CellResults _averageResults;
-    std::vector<CellResults*> _allResults;
+    std::map<std::string, std::vector<double>> _averageFlow;
+    std::map<std::string, std::vector<std::vector<double>>> _allFlows;
 
 public:
     GridBuffer() = default;
 
-    void clearAllResults() {
-        _allResults.clear();
+    void clearAllFlows() {
+        _allFlows.clear();
     }
 
-    void addResults(CellResults* results) {
-        _allResults.push_back(results);
+    void addFlow(const std::string& group, unsigned int gi, double flow) {
+        if (_allFlows.count(group) == 0) {
+            const auto& gases = Config::getInstance()->getGases();
+
+            std::vector<std::vector<double>> flows(gases.size());
+            _allFlows[group] = flows;
+        }
+        _allFlows[group][gi].push_back(flow);
     }
 
-    const CellResults& getAverageResults() const {
-        return _averageResults;
+    double getAverageFlow(const std::string& group, unsigned int gi) {
+        if (_averageFlow.count(group) == 0) {
+            return 0.0;
+        }
+        return _averageFlow[group][gi];
     }
 
-    void calculateAverage();
+    void calculateAverageFlow();
 
 private:
-    void calculateAverageSingle();
+    void calculateAverageFlowSingle();
 
 };
 

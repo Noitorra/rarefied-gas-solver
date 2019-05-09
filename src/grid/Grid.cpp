@@ -114,9 +114,9 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh), _buffer(new GridBuffer()) {
                 // set boundary params by physical group
                 for (const auto& param : boundaryParameters) {
                     if (param.getGroup() == neighborElement->getGroup()) {
-                        for (auto i = 0; i < param.getType().size(); i++) {
+                        for (auto gi = 0; gi <  config->getGases().size(); gi++) {
                             BorderCell::BorderType borderType;
-                            auto type = param.getType()[i];
+                            auto type = param.getType()[gi];
                             if (type == "Diffuse") {
                                 borderType = BorderCell::BorderType::DIFFUSE;
                             } else if (type == "Pressure") {
@@ -125,14 +125,12 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh), _buffer(new GridBuffer()) {
                                 borderType = BorderCell::BorderType::MIRROR;
                             } else if (type == "Flow") {
                                 borderType = BorderCell::BorderType::FLOW;
-                            } else if (type == "PressureFrom") {
-                                borderType = BorderCell::BorderType::PRESSURE_FROM;
-                            } else if (type == "PressureTo") {
-                                borderType = BorderCell::BorderType::PRESSURE_TO;
+                            } else if (type == "FlowConnect") {
+                                borderType = BorderCell::BorderType::FLOW_CONNECT;
                             } else {
                                 borderType = BorderCell::BorderType::UNDEFINED;
                             }
-                            borderCell->setBorderType(i, borderType);
+                            borderCell->setBorderType(gi, borderType);
                         }
                         for (auto gi = 0; gi < config->getGases().size(); gi++) {
                             double temperature = 0.0;
@@ -145,6 +143,7 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh), _buffer(new GridBuffer()) {
                             borderCell->getBoundaryParams().setPressure(gi, param.getPressure(gi));
                             borderCell->getBoundaryParams().setFlow(gi, param.getFlow(gi));
                         }
+                        borderCell->setConnectParams(neighborElement->getGroup(), param.getConnectGroups());
                     }
                 }
 
@@ -262,36 +261,51 @@ void Grid::init() {
 }
 
 void Grid::computeTransfer() {
+    auto config = Config::getInstance();
+    if (config->isImplicitScheme() == false) {
 
-    // sync grid
-    if (Parallel::isSingle() == false) {
-        sync();
-    }
+        // sync grid
+        if (Parallel::isSingle() == false) {
+            sync();
+        }
 
-    // clear average values from buffer
-    _buffer->clearAllResults();
+        // clear flows
+        _buffer->clearAllFlows();
 
-    // put results to buffer
-    for (const auto& cell : _borderCells) {
-        cell->storeResults();
-    }
+        // first go for border cells
+        for (const auto& cell : _borderCells) {
+            cell->computeTransfer();
+        }
 
-    // calculate average values in buffer (with sync if needed)
-    _buffer->calculateAverage();
+        // calculate average flow
+        _buffer->calculateAverageFlow();
 
-    // first go for border cells
-    for (const auto& cell : _borderCells) {
-        cell->computeTransfer();
-    }
+        // then go for normal cells
+        for (const auto& cell : _normalCells) {
+            cell->computeTransfer();
+        }
 
-    // then go for normal cells
-    for (const auto& cell : _normalCells) {
-        cell->computeTransfer();
-    }
+        // move changes from next step to current step
+        for (const auto& cell : _normalCells) {
+            cell->swapValues();
+        }
+    } else {
 
-    // move changes from next step to current step
-    for (const auto& cell : _normalCells) {
-        cell->swapValues();
+        // first go for border cells
+        for (const auto& cell : _borderCells) {
+            cell->computeTransfer();
+        }
+
+        // implicitly recursive iterate over all cells
+        const auto& impulses = config->getImpulseSphere()->getImpulses();
+        for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+            for (const auto& cell : _normalCells) {
+                cell->clearImplicitTransferFlag();
+            }
+            for (const auto& cell : _normalCells) {
+                cell->computeImplicitTransfer(ii);
+            }
+        }
     }
 }
 

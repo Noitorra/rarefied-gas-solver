@@ -45,11 +45,6 @@ void Solver::init() {
         mesh->init();
     }
 
-    // write details on generated mesh
-    if (Parallel::isMaster() == true) {
-        _formatter->writeMeshDetails(mesh);
-    }
-
     // init all
     _grid = new Grid(mesh);
     _grid->init();
@@ -161,7 +156,6 @@ void Solver::writeResults(int iteration) {
             }
 
             _formatter->writeAll(iteration, _grid->getMesh(), results);
-            _formatter->writeProgression(iteration, results);
         } else {
 
             // send params to master
@@ -169,6 +163,5 @@ void Solver::writeResults(int iteration) {
         }
     } else {
         _formatter->writeAll(iteration, _grid->getMesh(), results);
-        _formatter->writeProgression(iteration, results);
     }
 }

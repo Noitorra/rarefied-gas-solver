@@ -34,6 +34,10 @@ void ParallelCell::computeBetaDecay(int gi0, int gi1, double lambda) {
     // nothing
 }
 
+void ParallelCell::computeImplicitTransfer(int ii) {
+    // nothing
+}
+
 int ParallelCell::getRecvSyncId() const {
     return _recvSyncId;
 }

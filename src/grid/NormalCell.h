@@ -35,6 +35,8 @@ public:
 
     void swapValues();
 
+    void computeImplicitTransfer(int ii) override;
+
     CellResults* getResults();
 
 private:

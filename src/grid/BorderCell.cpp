@@ -51,15 +51,11 @@ void BorderCell::computeTransfer() {
                 break;
 
             case BorderType::FLOW:
-                computeTransferFlow(gi, _boundaryParams.getFlow(gi));
+                computeTransferFlow(gi, _boundaryParams.getFlow(gi).scalar(_connections[0]->getNormal12()));
                 break;
 
-            case BorderType::PRESSURE_FROM:
-                computeTransferPressure(gi, _gridBuffer->getAverageResults().getPressure(gi));
-                break;
-
-            case BorderType::PRESSURE_TO:
-                computeTransferPressure(gi, _gridBuffer->getAverageResults().getPressure(gi));
+            case BorderType::FLOW_CONNECT:
+                _gridBuffer->addFlow(_group, gi, computeTransferFlowConnect(gi, _gridBuffer->getAverageFlow(_connectGroups[gi], gi)));
                 break;
         }
     }
@@ -71,6 +67,10 @@ void BorderCell::computeIntegral(int gi0, int gi1) {
 
 void BorderCell::computeBetaDecay(int gi0, int gi1, double lambda) {
     // nothing
+}
+
+void BorderCell::computeImplicitTransfer(int ii) {
+    // nothing, all must be calculated before
 }
 
 void BorderCell::computeTransferDiffuse(unsigned int gi) {
@@ -166,17 +166,13 @@ void BorderCell::computeTransferPressure(unsigned int gi, double borderPressure)
 //    }
 }
 
-void BorderCell::computeTransferFlow(unsigned int gi, const Vector3d& borderFlow) {
+void BorderCell::computeTransferFlow(unsigned int gi, double borderFlow) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
     const auto& impulseSphere = config->getImpulseSphere();
     const auto& impulses = impulseSphere->getImpulses();
 
-    double borderFlowProjection = borderFlow.scalar(_connections[0]->getNormal12());
-    if (borderFlowProjection > 0) {
-        borderFlowProjection /= impulseSphere->getDeltaImpulseQube();
-    }
-    double cUp = borderFlowProjection, cDown = 0.0;
+    double cUp = 0.0, cDown = 0.0;
     for (unsigned int ii = 0; ii < impulses.size(); ii++) {
         double projection = impulses[ii].scalar(_connections[0]->getNormal12());
         if (projection < 0.0) {
@@ -186,7 +182,8 @@ void BorderCell::computeTransferFlow(unsigned int gi, const Vector3d& borderFlow
         }
     }
 
-    double h = cUp / cDown;
+    // add flow from border to output
+    double h = (cUp + borderFlow / impulseSphere->getDeltaImpulseQube()) / cDown;
     if (h > 0) {
         for (unsigned int ii = 0; ii < impulses.size(); ii++) {
             double projection = impulses[ii].scalar(_connections[0]->getNormal12());
@@ -204,32 +201,39 @@ void BorderCell::computeTransferFlow(unsigned int gi, const Vector3d& borderFlow
     }
 }
 
-void BorderCell::storeResults() {
-    if (_connections.size() != 1) {
-        throw std::runtime_error("wrong border connection");
-    }
-
+double BorderCell::computeTransferFlowConnect(unsigned int gi, double borderFlow) {
     auto config = Config::getInstance();
     const auto& gases = config->getGases();
+    const auto& impulseSphere = config->getImpulseSphere();
+    const auto& impulses = impulseSphere->getImpulses();
 
-    for (unsigned int gi = 0; gi < gases.size(); gi++) {
-        switch (_borderTypes[gi]) {
-            case BorderType::UNDEFINED:
-                throw std::runtime_error("undefined border type");
-
-            case BorderType::PRESSURE_FROM:
-                storeResults(gi);
-                break;
-
-            default:
-                break;
+    double cUp = 0.0, cDown = 0.0;
+    for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+        double projection = impulses[ii].scalar(_connections[0]->getNormal12());
+        if (projection < 0.0) {
+            cUp += -projection * _connections[0]->getSecond()->getValues()[gi][ii];
+        } else {
+            cDown += projection * _cacheExp[gi][ii];
         }
     }
-}
 
-void BorderCell::storeResults(unsigned int gi) {
-    if (gi == 0) {
-        auto neighborCell = dynamic_cast<NormalCell*>(_connections[0]->getSecond());
-        _gridBuffer->addResults(neighborCell->getResults());
+    // add flow from border to output
+    double h = (borderFlow / impulseSphere->getDeltaImpulseQube()) / cDown;
+    if (h > 0) {
+        for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+            double projection = impulses[ii].scalar(_connections[0]->getNormal12());
+            if (projection >= 0.0) {
+                _values[gi][ii] = h * _cacheExp[gi][ii];
+            }
+        }
+    } else {
+        for (unsigned int ii = 0; ii < impulses.size(); ii++) {
+            double projection = impulses[ii].scalar(_connections[0]->getNormal12());
+            if (projection >= 0.0) {
+                _values[gi][ii] = 0.0;
+            }
+        }
     }
+
+    return cUp * impulseSphere->getDeltaImpulseQube();
 }

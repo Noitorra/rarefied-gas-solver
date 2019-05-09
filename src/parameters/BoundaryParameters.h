@@ -1,3 +1,5 @@
+#include <utility>
+
 #ifndef RGS_BORDERPARAMETERS_H
 #define RGS_BORDERPARAMETERS_H
 
@@ -25,6 +27,8 @@ private:
 
     std::vector<GradientParameter> _gradientTemperature;
 
+    std::vector<std::string> _connectGroups;
+
 public:
     BoundaryParameters() = default;
 
@@ -33,12 +37,14 @@ public:
                        std::vector<double> temperature,
                        std::vector<double> pressure,
                        std::vector<Vector3d> flow,
-                       std::vector<GradientParameter> gradientTemperature) : _group(std::move(group)),
-                                                                             _type(std::move(type)),
-                                                                             _temperature(std::move(temperature)),
-                                                                             _pressure(std::move(pressure)),
-                                                                             _flow(std::move(flow)),
-                                                                             _gradientTemperature(std::move(gradientTemperature)) {}
+                       std::vector<GradientParameter> gradientTemperature,
+                       std::vector<std::string> connectGroups) : _group(std::move(group)),
+                                                                 _type(std::move(type)),
+                                                                 _temperature(std::move(temperature)),
+                                                                 _pressure(std::move(pressure)),
+                                                                 _flow(std::move(flow)),
+                                                                 _gradientTemperature(std::move(gradientTemperature)),
+                                                                 _connectGroups(std::move(connectGroups)) {}
 
     const std::string& getGroup() const {
         return _group;
@@ -84,6 +90,14 @@ public:
         return _gradientTemperature.size() > gi;
     }
 
+    const std::string getConnectGroup(int gi) const {
+        return _connectGroups[gi];
+    }
+
+    const std::vector<std::string>& getConnectGroups() const {
+        return _connectGroups;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const BoundaryParameters& parameters) {
         os << "{";
         os << "Group = " << parameters._group;
@@ -116,6 +130,7 @@ private:
         ar & _pressure;
         ar & _flow;
         ar & _gradientTemperature;
+        ar & _connectGroups;
     }
 
 };

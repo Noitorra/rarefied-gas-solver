@@ -43,6 +43,8 @@ private:
 
     double _timestep;
 
+    bool _isImplicitScheme;
+
     static Config* _instance;
 
 public:
@@ -121,6 +123,10 @@ public:
 
     double getTimestep() const {
         return _timestep;
+    }
+
+    bool isImplicitScheme() const {
+        return _isImplicitScheme;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Config& config);

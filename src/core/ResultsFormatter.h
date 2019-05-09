@@ -23,14 +23,10 @@ private:
     std::vector<Param> _scalarParams;
     std::vector<Param> _vectorParams;
 
-    std::vector<CellResults*> _lastResults;
-
 public:
     ResultsFormatter();
 
     void writeAll(unsigned int iteration, Mesh* mesh, const std::vector<CellResults*>& results);
-    void writeMeshDetails(Mesh* mesh);
-    void writeProgression(unsigned int iteration, const std::vector<CellResults*>& results);
 
 };
 

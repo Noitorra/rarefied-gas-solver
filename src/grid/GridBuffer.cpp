@@ -3,61 +3,63 @@
 #include "utilities/Parallel.h"
 #include "utilities/SerializationUtils.h"
 
-void GridBuffer::calculateAverage() {
+void GridBuffer::calculateAverageFlow() {
     if (Parallel::isSingle() == false) {
         if (Parallel::isMaster() == true) {
 
             // gather all values
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                std::vector<CellResults*> results;
-                SerializationUtils::deserialize(Parallel::recv(processor, Parallel::COMMAND_BUFFER_RESULTS), results);
+                std::map<std::string, std::vector<std::vector<double>>> flows;
+                SerializationUtils::deserialize(Parallel::recv(processor, Parallel::COMMAND_BUFFER_RESULTS), flows);
 
-                _allResults.insert(_allResults.end(), results.begin(), results.end());
+                for (const auto& item : flows) {
+                    const auto& gases = Config::getInstance()->getGases();
+                    if (_allFlows.count(item.first) == 0) {
+                        std::vector<std::vector<double>> newFlows(gases.size());
+                        _allFlows[item.first] = newFlows;
+                    }
+                    for (unsigned int gi = 0; gi < gases.size(); gi++) {
+                        _allFlows[item.first][gi].insert(_allFlows[item.first][gi].end(), item.second[gi].begin(), item.second[gi].end());
+                    }
+                }
             }
 
             // get average
-            calculateAverageSingle();
+            calculateAverageFlowSingle();
 
             // send average to other nodes
             for (int processor = 1; processor < Parallel::getSize(); processor++) {
-                Parallel::send(SerializationUtils::serialize(_averageResults), processor, Parallel::COMMAND_BUFFER_AVERAGE_RESULTS);
+                Parallel::send(SerializationUtils::serialize(_averageFlow), processor, Parallel::COMMAND_BUFFER_AVERAGE_RESULTS);
             }
         } else {
-            Parallel::send(SerializationUtils::serialize(_allResults), 0, Parallel::COMMAND_BUFFER_RESULTS);
-            SerializationUtils::deserialize(Parallel::recv(0, Parallel::COMMAND_BUFFER_AVERAGE_RESULTS), _averageResults);
+            Parallel::send(SerializationUtils::serialize(_allFlows), 0, Parallel::COMMAND_BUFFER_RESULTS);
+            SerializationUtils::deserialize(Parallel::recv(0, Parallel::COMMAND_BUFFER_AVERAGE_RESULTS), _averageFlow);
         }
     } else {
-        calculateAverageSingle();
+        calculateAverageFlowSingle();
     }
 }
 
-void GridBuffer::calculateAverageSingle() {
-    auto config = Config::getInstance();
-    const auto& gases = config->getGases();
+void GridBuffer::calculateAverageFlowSingle() {
+    const auto& gases = Config::getInstance()->getGases();
 
-    for (unsigned int gi = 0; gi < gases.size(); gi++) {
-        _averageResults.set(gi, 0, 0, 0, Vector3d(), Vector3d());
-    }
+    for (auto& flows : _allFlows) {
+        std::vector<double> newFlows(gases.size());
 
-    auto n = _allResults.size();
-    if (n > 0) {
-        for (auto results : _allResults) {
-            for (unsigned int gi = 0; gi < gases.size(); gi++) {
-                _averageResults.setPressure(gi, _averageResults.getPressure(gi) + results->getPressure(gi));
-                _averageResults.setDensity(gi, _averageResults.getDensity(gi) + results->getDensity(gi));
-                _averageResults.setTemp(gi, _averageResults.getTemp(gi) + results->getTemp(gi));
-                _averageResults.setFlow(gi, _averageResults.getFlow(gi) + results->getFlow(gi));
-                _averageResults.setHeatFlow(gi, _averageResults.getHeatFlow(gi) + results->getHeatFlow(gi));
-            }
-        }
         for (unsigned int gi = 0; gi < gases.size(); gi++) {
-            _averageResults.setPressure(gi, _averageResults.getPressure(gi) / n);
-            _averageResults.setDensity(gi, _averageResults.getDensity(gi) / n);
-            _averageResults.setTemp(gi, _averageResults.getTemp(gi) / n);
-            _averageResults.setFlow(gi, _averageResults.getFlow(gi) / n);
-            _averageResults.setHeatFlow(gi, _averageResults.getHeatFlow(gi) / n);
+            newFlows[gi] = 0.0;
+
+            for (auto flow : flows.second[gi]) {
+                newFlows[gi] += flow;
+            }
+
+            newFlows[gi] /= flows.second[gi].size();
         }
+
+        _averageFlow[flows.first] = newFlows;
     }
 }
+
+
 
 
