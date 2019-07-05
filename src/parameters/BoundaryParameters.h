@@ -23,7 +23,7 @@ private:
     std::vector<std::string> _type;
     std::vector<double> _temperature;
     std::vector<double> _pressure;
-    std::vector<Vector3d> _flow;
+    std::vector<double> _flow;
 
     std::vector<GradientParameter> _gradientTemperature;
 
@@ -36,7 +36,7 @@ public:
                        std::vector<std::string> type,
                        std::vector<double> temperature,
                        std::vector<double> pressure,
-                       std::vector<Vector3d> flow,
+                       std::vector<double> flow,
                        std::vector<GradientParameter> gradientTemperature,
                        std::vector<std::string> connectGroups) : _group(std::move(group)),
                                                                  _type(std::move(type)),
@@ -70,12 +70,12 @@ public:
         _pressure[gi] = pressure;
     }
 
-    const Vector3d& getFlow(int gi) const {
+    double getFlow(int gi) const {
         return _flow[gi];
     }
 
-    void setFlow(int gi, Vector3d flow) {
-        _flow[gi] = std::move(flow);
+    void setFlow(int gi, double flow) {
+        _flow[gi] = flow;
     }
 
     const GradientParameter& getGradientTemperature(int gi) const {

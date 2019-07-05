@@ -37,7 +37,10 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Gas& gas) {
-        os << "Mass = " << gas._mass << " Radius = " << gas._radius;
+        os << "{";
+        os << "Mass = " << gas._mass << "; "
+           << "Radius = " << gas._radius;
+        os << "}";
         return os;
     }
 

@@ -35,7 +35,7 @@ void Mesh::init() {
         }
     }
 
-    // preprocess mesh (find all neighbors)
+    // pre-process mesh (find all neighbors) (very slow)
     for (const auto& element : _elements) {
         if (element->isMain() == false) {
             continue;

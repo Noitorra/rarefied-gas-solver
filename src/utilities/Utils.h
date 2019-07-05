@@ -26,13 +26,30 @@ public:
         std::stringstream ss;
         ss << "[";
         for (unsigned int i = 0; i < vector.size(); i++) {
-            if (i != 0) {
+            ss << vector[i];
+            if (i != vector.size() - 1) {
                 ss << ", ";
             }
-            ss << vector[i];
         }
         ss << "]";
-        return ss.str();
+        std::string str = ss.str();
+        if (str.length() > 100) {
+            ss.str("");
+            ss << "[";
+            for (unsigned int i = 0; i < vector.size(); i++) {
+                if (i == 0) {
+                    ss << std::endl;
+                }
+                ss << "    " << vector[i];
+                if (i != vector.size() - 1) {
+                    ss << ", ";
+                }
+                ss << std::endl;
+            }
+            ss << "]";
+            str = ss.str();
+        }
+        return str;
     }
 
     template<typename Enumeration>

@@ -69,9 +69,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (Parallel::isMaster()) {
-        std::cout << "Configuration ------------------------------------------------------------" << std::endl;
+        std::cout << "Configuration: " << std::endl;
         std::cout << *Config::getInstance() << std::endl;
-        std::cout << "--------------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
     }
 
@@ -94,10 +93,7 @@ int main(int argc, char* argv[]) {
             std::cout << "[Rank " << Parallel::getRank() << "] Run took - " << whole << " milliseconds" << std::endl;
         }
     } catch (const std::exception& e) {
-        std::cout << std::endl;
-        std::cout << "Exception ----------------------------------------------------------------" << std::endl;
-        std::cout << e.what() << std::endl;
-        std::cout << "--------------------------------------------------------------------------" << std::endl;
+        std::cout << "Exception: " << e.what() << std::endl;
         std::cout << std::endl;
 
         Parallel::abort();

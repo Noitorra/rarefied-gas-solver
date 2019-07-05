@@ -43,13 +43,19 @@ Mesh *MeshParser::loadMesh(const string &filename, double units) {
             }
             fs.close();
 
-            cout << "Successful mesh parsing: version = " << _version << "; type = " << _dataType << "; size = " << _fileSize << endl;
+            cout << "Successful mesh parsing: "
+                 << "version = " << _version << "; "
+                 << "type = " << _dataType << "; "
+                 << "size = " << _fileSize << "; "
+                 << "number_of_elements = " << _mesh->getElements().size() << endl << endl;
         } catch (std::exception& e) {
             delete _mesh;
             _mesh = nullptr;
 
-            throw std::runtime_error(std::string("parsing error: ") + e.what());
+            throw std::runtime_error(std::string("mesh parsing error: ") + e.what());
         }
+    } else {
+        throw std::runtime_error(std::string("mesh file not found"));
     }
     return _mesh;
 }

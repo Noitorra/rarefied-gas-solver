@@ -69,6 +69,7 @@ void Solver::run() {
     // write initial results
     writeResults(0);
 
+    unsigned int prevPercent = 0;
     unsigned int maxIterations = _config->getMaxIterations();
     for (unsigned int iteration = 1; iteration <= maxIterations; iteration++) {
 
@@ -117,12 +118,15 @@ void Solver::run() {
             }
             if (isPrintingProgress) {
                 auto percent = (unsigned int) (1.0 * iteration / maxIterations * 100);
+                if (prevPercent != percent) {
+                    prevPercent = percent;
 
-                std::cout << '\r';
-                std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
-                std::cout << "[" << iteration << "/" << maxIterations << "] ";
-                std::cout << percent << "%";
-                std::cout.flush();
+                    std::cout << '\r';
+                    std::cout << "[" << std::string(percent, '#') << std::string(100 - percent, '-') << "] ";
+                    std::cout << "[" << iteration << "/" << maxIterations << "] ";
+                    std::cout << percent << "%";
+                    std::cout.flush();
+                }
             }
             if (_keyboard->isAvailable() && _keyboard->isStop()) {
                 throw std::runtime_error("stop signal");

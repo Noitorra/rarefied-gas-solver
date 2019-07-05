@@ -88,10 +88,8 @@ void Config::init() {
             param.setPressure(gi, _normalizer->normalize(param.getPressure(gi), Normalizer::Type::PRESSURE));
             param.setTemperature(gi, _normalizer->normalize(param.getTemperature(gi), Normalizer::Type::TEMPERATURE));
 
-            Vector3d flow = param.getFlow(gi);
-            _normalizer->normalize(flow.x(), Normalizer::Type::FLOW);
-            _normalizer->normalize(flow.y(), Normalizer::Type::FLOW);
-            _normalizer->normalize(flow.z(), Normalizer::Type::FLOW);
+            double flow = param.getFlow(gi);
+            _normalizer->normalize(flow, Normalizer::Type::FLOW);
             param.setFlow(gi, flow);
 
             if (param.hasGradientTemperature(gi)) {
@@ -277,17 +275,14 @@ void Config::load(const std::string& filename) {
             }
             temperature.resize(_gases.size(), 0.0);
 
-            std::vector<Vector3d> flow;
+            std::vector<double> flow;
             auto flowNode = param.second.get_child_optional("flow");
             if (flowNode) {
                 for (const boost::property_tree::ptree::value_type& value : *flowNode) {
-                    double x = value.second.get<double>("x", 0);
-                    double y = value.second.get<double>("y", 0);
-                    double z = value.second.get<double>("z", 0);
-                    flow.emplace_back(x, y, z);
+                    flow.emplace_back(value.second.get_value<double>());
                 }
             }
-            flow.resize(_gases.size(), Vector3d());
+            flow.resize(_gases.size(), 0.0);
 
             std::vector<GradientParameter> gradientTemperature;
             auto gradientTemperatureNode = param.second.get_child_optional("temperature_gradient");
@@ -333,19 +328,19 @@ void Config::load(const std::string& filename) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Config& config) {
-    os << "MeshFilename = "     << config._meshFilename                        << std::endl
-       << "OutputFolder = "     << config._outputFolder                        << std::endl
-       << "MaxIteration = "     << config._maxIterations                       << std::endl
-       << "OutEachIteration = " << config._outEachIteration                    << std::endl
-       << "UseIntegral = "      << config._isUsingIntegral                     << std::endl
-       << "UseBetaDecay = "     << config._isUsingBetaDecay                    << std::endl;
+    os << "mesh_filename = "      << config._meshFilename                        << std::endl
+       << "output_folder = "      << config._outputFolder                        << std::endl
+       << "max_iteration = "      << config._maxIterations                       << std::endl
+       << "out_each_iteration = " << config._outEachIteration                    << std::endl
+       << "use_integral = "       << config._isUsingIntegral                     << std::endl
+       << "use_beta_decay = "     << config._isUsingBetaDecay                    << std::endl;
 
-    os << "Gases = "            << Utils::toString(config._gases)              << std::endl;
-    os << "BetaChains = "       << Utils::toString(config._betaChains)         << std::endl;
-    os << "Initial = "          << Utils::toString(config._initialParameters)  << std::endl;
-    os << "Boundary = "         << Utils::toString(config._boundaryParameters) << std::endl;
+    os << "gases = "              << Utils::toString(config._gases)              << std::endl;
+    os << "beta_chains = "        << Utils::toString(config._betaChains)         << std::endl;
+    os << "initial params = "     << Utils::toString(config._initialParameters)  << std::endl;
+    os << "boundary params = "    << Utils::toString(config._boundaryParameters) << std::endl;
 
-    os << "Normalizer = "       << *config._normalizer                         << std::endl
-       << "ImpulseSphere = "          << *config._impulseSphere;
+    os << "normalizer = "         << *config._normalizer                         << std::endl
+       << "impulse_phere = "      << *config._impulseSphere;
     return os;
 }

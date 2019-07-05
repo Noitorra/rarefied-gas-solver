@@ -141,7 +141,9 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh), _buffer(new GridBuffer()) {
                             }
                             borderCell->getBoundaryParams().setTemp(gi, temperature);
                             borderCell->getBoundaryParams().setPressure(gi, param.getPressure(gi));
-                            borderCell->getBoundaryParams().setFlow(gi, param.getFlow(gi));
+
+                            // flow always goes from border to normal cell, so we inverse normal
+                            borderCell->getBoundaryParams().setFlow(gi, -sideElement->getNormal() * param.getFlow(gi));
                         }
                         borderCell->setConnectParams(neighborElement->getGroup(), param.getConnectGroups());
                     }
@@ -256,7 +258,7 @@ void Grid::init() {
         std::cout << "Timestep = " << timestep << std::endl;
 
         config->getNormalizer()->restore(timestep, Normalizer::Type::TIME);
-        std::cout << "Timestep (Normalized) = " << timestep << std::endl;
+        std::cout << "Timestep (Normalized) = " << timestep  << " seconds" << std::endl;
     }
 }
 

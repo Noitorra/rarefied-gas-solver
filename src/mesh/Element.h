@@ -85,6 +85,12 @@ public:
             return true;
         }
 
+        // check if elements on same side of space
+        Vector3d direction = _center - otherSideElement->getElement()->getCenter();
+        if (direction.scalar(otherSideElement->getNormal()) < 0) {
+            return false;
+        }
+
         // check if this element has side with the same nodes
         if (_sideElements.empty() == false) {
             for (const auto& sideElement : _sideElements) {
