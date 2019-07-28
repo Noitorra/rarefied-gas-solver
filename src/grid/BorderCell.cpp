@@ -55,7 +55,7 @@ void BorderCell::computeTransfer() {
                 break;
 
             case BorderType::FLOW_CONNECT:
-                _gridBuffer->addFlow(_group, gi, computeTransferFlowConnect(gi, _gridBuffer->getAverageFlow(_connectGroups[gi], gi)));
+                _gridBuffer->addFlow(_group, gi, computeTransferFlowConnect(gi, _gridBuffer->getAverageFlow(_groupConnect, gi)));
                 break;
         }
     }

@@ -27,7 +27,7 @@ private:
 
     std::vector<GradientParameter> _gradientTemperature;
 
-    std::vector<std::string> _connectGroups;
+    std::string _groupConnect;
 
 public:
     BoundaryParameters() = default;
@@ -38,13 +38,13 @@ public:
                        std::vector<double> pressure,
                        std::vector<double> flow,
                        std::vector<GradientParameter> gradientTemperature,
-                       std::vector<std::string> connectGroups) : _group(std::move(group)),
-                                                                 _type(std::move(type)),
-                                                                 _temperature(std::move(temperature)),
-                                                                 _pressure(std::move(pressure)),
-                                                                 _flow(std::move(flow)),
-                                                                 _gradientTemperature(std::move(gradientTemperature)),
-                                                                 _connectGroups(std::move(connectGroups)) {}
+                       std::string groupConnect) : _group(std::move(group)),
+                                                   _type(std::move(type)),
+                                                   _temperature(std::move(temperature)),
+                                                   _pressure(std::move(pressure)),
+                                                   _flow(std::move(flow)),
+                                                   _gradientTemperature(std::move(gradientTemperature)),
+                                                   _groupConnect(std::move(groupConnect)) {}
 
     const std::string& getGroup() const {
         return _group;
@@ -90,12 +90,8 @@ public:
         return _gradientTemperature.size() > gi;
     }
 
-    const std::string getConnectGroup(int gi) const {
-        return _connectGroups[gi];
-    }
-
-    const std::vector<std::string>& getConnectGroups() const {
-        return _connectGroups;
+    const std::string& getGroupConnect() const {
+        return _groupConnect;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const BoundaryParameters& parameters) {
@@ -117,6 +113,10 @@ public:
             os << "; ";
             os << "Flow = " << Utils::toString(parameters._flow);
         }
+        if (parameters._groupConnect.empty() == false) {
+            os << "; ";
+            os << "GroupConnect = " << parameters._groupConnect;
+        }
         os << "}";
         return os;
     }
@@ -130,7 +130,7 @@ private:
         ar & _pressure;
         ar & _flow;
         ar & _gradientTemperature;
-        ar & _connectGroups;
+        ar & _groupConnect;
     }
 
 };

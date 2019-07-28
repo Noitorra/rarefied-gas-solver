@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include <utility>
+
 #ifndef RGS_BORDERCELL_H
 #define RGS_BORDERCELL_H
 
@@ -28,7 +30,7 @@ private:
 
     // needed for flow connect condition
     std::string _group;
-    std::vector<std::string> _connectGroups;
+    std::string _groupConnect;
 
     std::vector<std::vector<double>> _cacheExp;
 
@@ -46,9 +48,9 @@ public:
         return _boundaryParams;
     }
 
-    void setConnectParams(std::string group, std::vector<std::string> connectGroups) {
-        _group = group;
-        _connectGroups = connectGroups;
+    void setConnectParams(std::string group, std::string groupConnect) {
+        _group = std::move(group);
+        _groupConnect = std::move(groupConnect);
     }
 
     void init() override;

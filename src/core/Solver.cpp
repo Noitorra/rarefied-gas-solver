@@ -118,7 +118,7 @@ void Solver::run() {
             }
             if (isPrintingProgress) {
                 auto percent = (unsigned int) (1.0 * iteration / maxIterations * 100);
-                if (prevPercent != percent) {
+                if (percent > prevPercent) {
                     prevPercent = percent;
 
                     std::cout << '\r';

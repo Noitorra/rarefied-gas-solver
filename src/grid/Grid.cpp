@@ -145,7 +145,7 @@ Grid::Grid(Mesh* mesh) : _mesh(mesh), _buffer(new GridBuffer()) {
                             // flow always goes from border to normal cell, so we inverse normal
                             borderCell->getBoundaryParams().setFlow(gi, -sideElement->getNormal() * param.getFlow(gi));
                         }
-                        borderCell->setConnectParams(neighborElement->getGroup(), param.getConnectGroups());
+                        borderCell->setConnectParams(neighborElement->getGroup(), param.getGroupConnect());
                     }
                 }
 
