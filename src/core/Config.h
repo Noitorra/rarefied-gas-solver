@@ -152,6 +152,8 @@ private:
 
         ar & _normalizer;
         ar & _impulseSphere;
+
+        ar & _isImplicitScheme;
     }
 
 };

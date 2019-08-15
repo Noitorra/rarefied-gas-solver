@@ -1,5 +1,3 @@
-#include <utility>
-
 #ifndef RGS_BORDERPARAMETERS_H
 #define RGS_BORDERPARAMETERS_H
 

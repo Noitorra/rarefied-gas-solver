@@ -3,7 +3,6 @@
 #include "KeyboardManager.h"
 
 #include <iostream>
-#include <thread>
 #include <utilities/SerializationUtils.h>
 
 #include <boost/chrono/chrono.hpp>
@@ -92,6 +91,8 @@ int main(int argc, char* argv[]) {
             auto whole = boost::chrono::duration_cast<boost::chrono::milliseconds>(now - start).count();
             std::cout << "[Rank " << Parallel::getRank() << "] Run took - " << whole << " milliseconds" << std::endl;
         }
+
+        Parallel::barrier();
     } catch (const std::exception& e) {
         std::cout << "Exception: " << e.what() << std::endl;
         std::cout << std::endl;
