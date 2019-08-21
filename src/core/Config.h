@@ -21,6 +21,7 @@ class Config {
     friend class boost::serialization::access;
 
 private:
+    std::string _name;
     std::string _meshFilename;
     double _meshUnits;
 
@@ -64,6 +65,10 @@ public:
     void init();
 
     void load(const std::string& filename);
+
+    const std::string& getName() const {
+        return _name;
+    }
 
     const std::string& getMeshFilename() const {
         return _meshFilename;
@@ -134,6 +139,7 @@ public:
 private:
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
+        ar & _name;
         ar & _meshFilename;
         ar & _meshUnits;
         ar & _outputFolder;

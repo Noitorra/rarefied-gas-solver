@@ -3,6 +3,7 @@
 #include <sstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/filesystem/path.hpp>
 
 Config* Config::_instance = nullptr;
 
@@ -121,6 +122,9 @@ void Config::init() {
 }
 
 void Config::load(const std::string& filename) {
+    boost::filesystem::path path(filename);
+    _name = path.stem().c_str();
+
     boost::property_tree::ptree root;
     boost::property_tree::read_json(filename, root);
 

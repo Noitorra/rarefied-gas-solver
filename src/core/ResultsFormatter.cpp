@@ -11,8 +11,9 @@
 using namespace boost::filesystem;
 
 ResultsFormatter::ResultsFormatter() {
-    _root = Config::getInstance()->getOutputFolder();
-    _main = Utils::getCurrentDateAndTime();
+    auto config = Config::getInstance();
+    _root = config->getOutputFolder();
+    _main = Utils::getCurrentDateAndTime() + "_" + config->getName();
     _scalarParams = {Param::PRESSURE, Param::DENSITY, Param::TEMPERATURE};
     _vectorParams = {Param::FLOW, Param::HEATFLOW};
 }

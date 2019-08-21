@@ -247,3 +247,7 @@ RarefiedGasSolver
 # system folders
 img/
 out/
+
+# more
+cmake-build-debug/
+cmake-build-release/
