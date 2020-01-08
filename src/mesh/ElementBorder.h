@@ -1,5 +1,5 @@
-#ifndef RGS_SIDEELEMENT_H
-#define RGS_SIDEELEMENT_H
+#ifndef RGS_ELEMENTBORDER_H
+#define RGS_ELEMENTBORDER_H
 
 #include "utilities/Types.h"
 
@@ -7,7 +7,7 @@
 
 class Element;
 
-class SideElement {
+class ElementBorder {
     friend class boost::serialization::access;
 
 private:
@@ -16,9 +16,9 @@ private:
     int _neighborId;
 
 public:
-    SideElement() = default;
+    ElementBorder() = default;
 
-    SideElement(Element* element, Vector3d normal) : _element(element), _normal(std::move(normal)), _neighborId(0) {}
+    ElementBorder(Element* element, Vector3d normal) : _element(element), _normal(std::move(normal)), _neighborId(0) {}
 
     const std::shared_ptr<Element>& getElement() const {
         return _element;
@@ -46,4 +46,4 @@ private:
 
 };
 
-#endif //RGS_SIDEELEMENT_H
+#endif //RGS_ELEMENTBORDER_H

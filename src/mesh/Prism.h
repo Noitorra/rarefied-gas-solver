@@ -31,28 +31,28 @@ private:
         Vector3d v53 = nodes[5]->getPosition() - nodes[3]->getPosition();
 
         if (isSideElementsRequired) {
-            _sideElements.clear();
+            _borderElements.clear();
 
             // up and down sides
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Triangle({nodes[0]->getId(), nodes[1]->getId(), nodes[2]->getId()}),
                     v20.vector(v10).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Triangle({nodes[3]->getId(), nodes[4]->getId(), nodes[5]->getId()}),
                     v43.vector(v53).normalize()
             ));
 
             // other sides
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[0]->getId(), nodes[1]->getId(), nodes[4]->getId(), nodes[3]->getId()}),
                     v10.vector(v30).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[0]->getId(), nodes[2]->getId(), nodes[5]->getId(), nodes[3]->getId()}),
                     v30.vector(v20).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[1]->getId(), nodes[2]->getId(), nodes[5]->getId(), nodes[4]->getId()}),
                     v21.vector(v30).normalize()
             ));

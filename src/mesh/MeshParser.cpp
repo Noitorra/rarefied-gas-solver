@@ -8,28 +8,28 @@
 using namespace std;
 
 MeshParser::MeshParser() {
-    _type = Type::UNDEFINED;
+    _keywords = {
+            {Directives::MESH_FORMAT,    "MeshFormat"},
+            {Directives::PHYSICAL_NAMES, "PhysicalNames"},
+            {Directives::NODES,          "Nodes"},
+            {Directives::ELEMENTS,       "Elements"}
+    };
 
-    _keywords[Type::MESH_FORMAT] = "MeshFormat";
-    _keywords[Type::PHYSICAL_NAMES] = "PhysicalNames";
-    _keywords[Type::NODES] =  "Nodes";
-    _keywords[Type::ELEMENTS] = "Elements";
-
+    _directive = Directives::UNDEFINED;
     _level = 0;
 
     _mesh = nullptr;
-
-    _majorVersion = 0;
+    _version = 0.0;
     _dataType = 0;
     _fileSize = 0;
 }
 
 Mesh *MeshParser::loadMesh(const string &filename, double units) {
     std::ifstream fs(filename);
-    if (fs.is_open() == true) {
+    if (fs.is_open()) {
         _mesh = new Mesh();
 
-        _majorVersion = 0;
+        _version = 0.0;
         _dataType = 0;
         _fileSize = 0;
 
@@ -52,10 +52,10 @@ Mesh *MeshParser::loadMesh(const string &filename, double units) {
             delete _mesh;
             _mesh = nullptr;
 
-            throw std::runtime_error(std::string("mesh parsing error: ") + e.what());
+            throw std::runtime_error(string("mesh parsing error: ") + e.what());
         }
     } else {
-        throw std::runtime_error(std::string("mesh file not found"));
+        throw std::runtime_error("mesh file not found");
     }
     return _mesh;
 }
@@ -63,49 +63,39 @@ Mesh *MeshParser::loadMesh(const string &filename, double units) {
 void MeshParser::parse(const string& line, double units) {
     if (line.empty() == false) {
         if (line[0] == '$') { // it is directive
-            if (_type == Type::UNDEFINED) {
+            if (_directive == Directives::UNDEFINED) {
                 for (auto const& keyword : _keywords) {
                     if (line.find(keyword.second) != string::npos) {
-                        _type = keyword.first;
+                        _directive = keyword.first;
                         _level = 0;
                         break;
                     }
                 }
             } else {
-                if (line.find(_keywords[_type]) != string::npos && line.find("End") != string::npos) {
-                    _type = Type::UNDEFINED;
+                if (line.find(_keywords[_directive]) != string::npos && line.find("End") != string::npos) {
+                    _directive = Directives::UNDEFINED;
                 } else {
                     throw runtime_error("wrong directive order");
                 }
             }
         } else {
-            if (_majorVersion == 0) {
-                parseVersion(line);
-            } else if (_majorVersion == 2) {
-                parseDataV2(line, units);
+            std::istringstream is(line);
+            if (_directive == Directives::MESH_FORMAT) {
+                is >> _version >> _dataType >> _fileSize;
+            } else if (int(_version) == 2) {
+                parseDataV2(is, units);
             }
         }
     }
 }
 
-void MeshParser::parseVersion(const std::string& line) {
-    std::istringstream is(line);
-    if (_type == Type::MESH_FORMAT) {
-        is >> _version >> _dataType >> _fileSize;
-        _majorVersion = stoi(_version.substr(0, _version.find('.')));
-    }
-}
-
-void MeshParser::parseDataV2(const string& line, double units) {
-    std::istringstream is(line);
-    switch (_type) {
-        case Type::PHYSICAL_NAMES:
-            if (_level == 0) {
+void MeshParser::parseDataV2(std::istringstream& is, double units) {
+    switch (_directive) {
+        case Directives::PHYSICAL_NAMES:
+            if (_level++ == 0) {
                 size_t capacity;
                 is >> capacity;
                 _mesh->reservePhysicalEntities(capacity);
-
-                _level++;
             } else {
                 int dimension, tag;
                 std::string name;
@@ -117,14 +107,12 @@ void MeshParser::parseDataV2(const string& line, double units) {
                 _mesh->addPhysicalEntity(dimension, tag, name);
             }
             break;
-        case Type::NODES:
-            if (_level == 0) {
+        case Directives::NODES:
+            if (_level++ == 0) {
                 size_t capacity;
                 is >> capacity;
                 _mesh->reserveNodes(capacity);
-
-                _level++;
-            } else if (_level == 1) {
+            } else {
                 int id;
                 double x, y, z;
                 is >> id >> x >> y >> z;
@@ -134,13 +122,11 @@ void MeshParser::parseDataV2(const string& line, double units) {
                 _mesh->addNode(id, Vector3d(x, y, z));
             }
             break;
-        case Type::ELEMENTS:
-            if (_level == 0) {
+        case Directives::ELEMENTS:
+            if (_level++ == 0) {
                 size_t capacity;
                 is >> capacity;
                 _mesh->reserveElements(capacity);
-
-                _level++;
             } else {
                 int id, type, tagsCount;
                 is >> id >> type >> tagsCount;
@@ -153,7 +139,7 @@ void MeshParser::parseDataV2(const string& line, double units) {
                 int physicalEntityId = tags[0];
                 int geomUnitId = tags[1];
                 vector<int> partitions;
-                for (auto i = 3; i < tags.size(); i++) {
+                for (size_t i = 3; i < tags.size(); i++) {
                     partitions.push_back(tags[i]);
                 }
 
@@ -168,6 +154,49 @@ void MeshParser::parseDataV2(const string& line, double units) {
             }
             break;
         default:
+            break;
+    }
+}
+
+void MeshParser::parseDataV4(std::istringstream& is, double units) {
+    switch(_directive) {
+        case Directives::PHYSICAL_NAMES:
+            if (_level++ == 0) {
+                size_t capacity;
+                is >> capacity;
+                _mesh->reservePhysicalEntities(capacity);
+            } else {
+                int dimension, tag;
+                std::string name;
+                is >> dimension >> tag >> name;
+                if (name[0] == '\"') {
+                    name.erase(0, 1);
+                    name.erase(name.size() - 1);
+                }
+                _mesh->addPhysicalEntity(dimension, tag, name);
+            }
+            break;
+        case Directives::ENTITIES:
+            if (_level++ == 0) {
+                int numPoints, numCurves, numSurfaces, numVolumes;
+                is >> numPoints >> numCurves >> numSurfaces >> numVolumes;
+            } else {
+                // need to iterate over many points
+                // then over curves, surfaces, volumes
+
+                int tag;
+                double x, y, z;
+                size_t numPhysicalTags;
+                vector<int> physicalTags;
+                is >> tag >> x >> y >> z >> numPhysicalTags;
+                for (size_t i = 0; i < numPhysicalTags; i++) {
+                    int physicalTag;
+                    is >> physicalTag;
+                    physicalTags.push_back(physicalTag);
+                }
+            }
+            break;
+        case Directives::PARTITIONED_ENTITIES:
             break;
     }
 }

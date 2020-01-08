@@ -27,9 +27,9 @@ private:
         Vector3d a = nodes[1]->getPosition() - nodes[0]->getPosition();
 
         if (isSideElementsRequired) {
-            _sideElements.clear();
-            _sideElements.emplace_back(new SideElement(new Point({nodes[0]->getId()}), -Vector3d(a).normalize()));
-            _sideElements.emplace_back(new SideElement(new Point({nodes[1]->getId()}), Vector3d(a).normalize()));
+            _borderElements.clear();
+            _borderElements.emplace_back(new ElementBorder(new Point({nodes[0]->getId()}), -Vector3d(a).normalize()));
+            _borderElements.emplace_back(new ElementBorder(new Point({nodes[1]->getId()}), Vector3d(a).normalize()));
         }
 
         _volume = a.module();

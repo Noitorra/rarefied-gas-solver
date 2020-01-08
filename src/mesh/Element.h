@@ -3,7 +3,7 @@
 
 #include "PhysicalEntity.h"
 #include "Node.h"
-#include "SideElement.h"
+#include "ElementBorder.h"
 
 #include <vector>
 #include <memory>
@@ -40,7 +40,7 @@ protected:
     bool _isBorder;
 
     double _volume;
-    std::vector<std::shared_ptr<SideElement>> _sideElements;
+    std::vector<std::shared_ptr<ElementBorder>> _borderElements;
 
     Vector3d _center;
 
@@ -60,8 +60,8 @@ public:
         innerInit(nodes, isOriginalElement);
 
         if (isOriginalElement == true) {
-            for (const auto& sideElement : _sideElements) {
-                sideElement->getElement()->init(allNodesMap, false);
+            for (const auto& borderElement : _borderElements) {
+                borderElement->getElement()->init(allNodesMap, false);
             }
         }
 
@@ -74,7 +74,7 @@ public:
         }
     }
 
-    bool isSideOrContainsSide(SideElement* otherSideElement) const {
+    bool isSideOrContainsSide(ElementBorder* otherSideElement) const {
         std::vector<int> otherNodeIds = otherSideElement->getElement()->getNodeIds();
         std::sort(otherNodeIds.begin(), otherNodeIds.end());
 
@@ -92,8 +92,8 @@ public:
         }
 
         // check if this element has side with the same nodes
-        if (_sideElements.empty() == false) {
-            for (const auto& sideElement : _sideElements) {
+        if (_borderElements.empty() == false) {
+            for (const auto& sideElement : _borderElements) {
                 std::vector<int> sideNodeIds = sideElement->getElement()->getNodeIds();
                 std::sort(sideNodeIds.begin(), sideNodeIds.end());
                 if (sideNodeIds == otherNodeIds) {
@@ -172,8 +172,8 @@ public:
         return _volume;
     }
 
-    const std::vector<std::shared_ptr<SideElement>>& getSideElements() const {
-        return _sideElements;
+    const std::vector<std::shared_ptr<ElementBorder>>& getSideElements() const {
+        return _borderElements;
     }
 
     const Vector3d& getCenter() const {
@@ -196,7 +196,7 @@ private:
         ar & _isBorder;
 
         ar & _volume;
-        ar & _sideElements;
+        ar & _borderElements;
 
         ar & _center;
     }

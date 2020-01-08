@@ -31,30 +31,30 @@ private:
             Vector3d e = nodes[7]->getPosition() - nodes[6]->getPosition();
             Vector3d f = nodes[5]->getPosition() - nodes[6]->getPosition();
 
-            _sideElements.clear();
+            _borderElements.clear();
 
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[0]->getId(), nodes[1]->getId(), nodes[2]->getId(), nodes[3]->getId()}),
                     b.vector(a).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[0]->getId(), nodes[4]->getId(), nodes[5]->getId(), nodes[1]->getId()}),
                     a.vector(c).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[0]->getId(), nodes[4]->getId(), nodes[7]->getId(), nodes[3]->getId()}),
                     c.vector(b).normalize()
             ));
 
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[6]->getId(), nodes[2]->getId(), nodes[1]->getId(), nodes[5]->getId()}),
                     f.vector(d).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[6]->getId(), nodes[2]->getId(), nodes[3]->getId(), nodes[7]->getId()}),
                     d.vector(e).normalize()
             ));
-            _sideElements.emplace_back(new SideElement(
+            _borderElements.emplace_back(new ElementBorder(
                     new Quadrangle({nodes[6]->getId(), nodes[7]->getId(), nodes[4]->getId(), nodes[5]->getId()}),
                     e.vector(f).normalize()
             ));

@@ -29,10 +29,10 @@ private:
         Vector3d c = nodes[0]->getPosition() - nodes[2]->getPosition();
 
         if (isSideElementsRequired) {
-            _sideElements.clear();
-            _sideElements.emplace_back(new SideElement(new Line({nodes[0]->getId(), nodes[1]->getId()}), -a.vector(b).vector(a).normalize()));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[1]->getId(), nodes[2]->getId()}), -b.vector(c).vector(b).normalize()));
-            _sideElements.emplace_back(new SideElement(new Line({nodes[2]->getId(), nodes[0]->getId()}), -c.vector(a).vector(c).normalize()));
+            _borderElements.clear();
+            _borderElements.emplace_back(new ElementBorder(new Line({nodes[0]->getId(), nodes[1]->getId()}), -a.vector(b).vector(a).normalize()));
+            _borderElements.emplace_back(new ElementBorder(new Line({nodes[1]->getId(), nodes[2]->getId()}), -b.vector(c).vector(b).normalize()));
+            _borderElements.emplace_back(new ElementBorder(new Line({nodes[2]->getId(), nodes[0]->getId()}), -c.vector(a).vector(c).normalize()));
         }
 
         _volume = a.vector(b).module() / 2;
