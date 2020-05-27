@@ -55,7 +55,7 @@ Mesh *MeshParser::loadMesh(const string &filename, double units) {
             throw std::runtime_error(string("mesh parsing error: ") + e.what());
         }
     } else {
-        throw std::runtime_error("mesh file not found");
+        throw std::runtime_error("mesh file not found: " + filename);
     }
     return _mesh;
 }
