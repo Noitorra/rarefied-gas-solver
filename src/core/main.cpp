@@ -1,24 +1,10 @@
 #include "utilities/Parallel.h"
+#include "utilities/SerializationUtils.h"
 #include "Solver.h"
 #include "KeyboardManager.h"
 
 #include <iostream>
-#include <utilities/SerializationUtils.h>
-
 #include <boost/chrono/chrono.hpp>
-
-// Gases masses
-// 133 - 133 Cs
-// 88 -  88 Kr -> Rb -> Sr
-// 138 - 138 Xe -> Cs -> Ba
-// 88 - 88 Rb
-// 88 - 88 Sr
-// 138 - 138 Cs
-// 138 - 138 Ba
-
-// Beta chains setup
-// 1, 3, 4, 6.78e-5, 6.49e-4
-// 2, 5, 6, 6.78e-5, 6.49e-4
 
 int main(int argc, char* argv[]) {
     Parallel::init(&argc, &argv);

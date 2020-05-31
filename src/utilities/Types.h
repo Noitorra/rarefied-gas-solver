@@ -23,11 +23,11 @@ public:
         return _array;
     }
 
-    const T module() const {
+    T module() const {
         return std::sqrt(moduleSquare());
     }
 
-    const T moduleSquare() const {
+    T moduleSquare() const {
         T moduleSquare = T(0);
         for (const auto& item : _array) {
             moduleSquare += (item * item);
@@ -116,7 +116,7 @@ public:
         return &this;
     }
 
-    const T scalar(const Vector2& right) const {
+    T scalar(const Vector2& right) const {
         T value = 0;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             value += this->_array[i] * right._array[i];
@@ -124,7 +124,7 @@ public:
         return value;
     }
 
-    const Vector2 operator+(const Vector2& right) const {
+    Vector2 operator+(const Vector2& right) const {
         Vector2 v2;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v2._array[i] = this->_array[i] + right._array[i];
@@ -139,7 +139,7 @@ public:
         return *this;
     }
 
-    const Vector2 operator-(const Vector2& right) const {
+    Vector2 operator-(const Vector2& right) const {
         Vector2 v2;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v2._array[i] = this->_array[i] - right._array[i];
@@ -147,7 +147,7 @@ public:
         return v2;
     }
 
-    const Vector2 operator-() const {
+    Vector2 operator-() const {
         Vector2 v2;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v2._array[i] = -this->_array[i];
@@ -243,7 +243,7 @@ public:
         return *this;
     }
 
-    const T scalar(const Vector3& right) const {
+    T scalar(const Vector3& right) const {
         T value = 0;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             value += this->_array[i] * right._array[i];
@@ -259,7 +259,7 @@ public:
         );
     }
 
-    const Vector3 operator+(const Vector3& right) const {
+    Vector3 operator+(const Vector3& right) const {
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v3._array[i] = this->_array[i] + right._array[i];
@@ -274,7 +274,7 @@ public:
         return *this;
     }
 
-    const Vector3 operator-(const Vector3& right) const {
+    Vector3 operator-(const Vector3& right) const {
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v3._array[i] = this->_array[i] - right._array[i];
@@ -282,7 +282,7 @@ public:
         return v3;
     }
 
-    const Vector3 operator-() const {
+    Vector3 operator-() const {
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v3._array[i] = -this->_array[i];
@@ -298,7 +298,7 @@ public:
     }
 
     template<typename TValue>
-    const Vector3 operator/(const TValue& right) const {
+    Vector3 operator/(const TValue& right) const {
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v3._array[i] = this->_array[i] / right;
@@ -315,7 +315,7 @@ public:
     }
 
     template<typename TValue>
-    const Vector3 operator*(const TValue& right) const {
+    Vector3 operator*(const TValue& right) const {
         Vector3 v3;
         for (unsigned int i = 0; i < this->_array.size(); i++) {
             v3._array[i] = this->_array[i] * right;

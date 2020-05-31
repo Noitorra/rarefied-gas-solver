@@ -61,7 +61,7 @@ public:
         return _impulses;
     }
 
-    int reverseIndex(int ii, Vector3d normal);
+    int reverseIndex(int ii, const Vector3d& normal);
 
     friend std::ostream& operator<<(std::ostream& os, const ImpulseSphere& impulse);
 

@@ -38,7 +38,7 @@ void ImpulseSphere::init() {
     }
 }
 
-int ImpulseSphere::reverseIndex(int ii, Vector3d normal) {
+int ImpulseSphere::reverseIndex(int ii, const Vector3d& normal) {
     Vector3d impulse = _impulses[ii];
     Vector3d reverseImpulse = impulse - normal * impulse.scalar(normal) * 2;
 
