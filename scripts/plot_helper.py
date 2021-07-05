@@ -155,3 +155,54 @@ def plot_data_line(points, pressures, temperatures, save_file):
     plt.tight_layout()
     plt.savefig(save_file, dpi=144)
     plt.close()
+
+
+def plot_temp_error_1d(times, errors_0, errors_1, save_file):
+    font = {
+        'family': 'Times New Roman',
+        'size': 16
+    }
+    mpl.rc('font', **font)
+
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.ticklabel_format(style='sci', scilimits=(0, 3), axis='both', useMathText=True)
+    plt.plot(times, errors_0, '-', color='black')
+    plt.gca().set_xlabel('$L, мм$')
+    plt.gca().set_ylabel('$T, К$')
+
+    plt.subplot(1, 2, 2)
+    plt.ticklabel_format(style='sci', scilimits=(0, 3), axis='both', useMathText=True)
+    plt.plot(times, errors_1, '-', color='black')
+    plt.gca().set_xlabel('$L, мм$')
+    plt.gca().set_ylabel('$T, К$')
+
+    plt.tight_layout()
+    #plt.savefig(save_file, dpi=144)
+    plt.show()
+    plt.close()
+
+
+def plot_temp_1d(points, temps, save_file):
+    font = {
+        'family': 'Times New Roman',
+        'size': 16
+    }
+    mpl.rc('font', **font)
+
+    plt.figure(figsize=(12, 6))
+
+    plt.ticklabel_format(style='sci', scilimits=(0, 3), axis='both', useMathText=True)
+    plt.plot(points, temps, '-', color='black')
+
+    gradient = [(300.0 + (100.0) * point / 1.0) for point in points]
+
+    plt.plot(points, gradient, '--', color='black')
+    plt.gca().set_xlabel('$L, мм$')
+    plt.gca().set_ylabel('$T, К$')
+
+    plt.tight_layout()
+    #plt.savefig(save_file, dpi=144)
+    plt.show()
+    plt.close()
